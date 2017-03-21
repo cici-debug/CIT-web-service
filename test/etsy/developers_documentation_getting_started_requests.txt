@@ -1,0 +1,275 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Making Requests
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								How to Make A Request And Process The Response
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here's a step-by-step example of how to make a request to the Etsy API. This example uses the public endpoint, so no OAuth authentication is required. For an example using OAuth, see the next section.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We'll make a request to get details for the user that runs the official Etsy store, "EtsyStore" using the
+							Element:code
+								method. You can also substitute your own user name for "EtsyStore". If you consult the documentation for that method, you'll see the following:
+							Element:a
+								getUser
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:th
+								Method Name
+							Element:td
+							Element:code
+								getUser
+							Element:tr
+							Element:th
+								Synopsis
+							Element:td
+								Retrieves a User by id.
+							Element:tr
+							Element:th
+								HTTP Method
+							Element:td
+							Element:code
+								GET
+							Element:tr
+							Element:th
+								URI
+							Element:td
+							Element:code
+								/users/:user_id
+							Element:tr
+							Element:th
+								Parameters
+							Element:td
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Required
+							Element:th
+								Default
+							Element:th
+								Type
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+							Element:code
+								Y
+							Element:td
+							Element:code
+							Element:td
+							Element:code
+								array(user_id_or_name)
+							Element:tr
+							Element:th
+								Return Type
+							Element:td
+							Element:code
+								User
+							Element:tr
+							Element:th
+								Requires OAuth
+							Element:td
+							Element:code
+								N
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Every Etsy API request begins with the base URL:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								https://openapi.etsy.com/v2
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								and ends with the URI for the command. The part of the URI that reads
+							Element:code
+								:user_id
+								is an embedded parameter—you'll need to substitute either the user name "etsystore" or the ID of the user you're trying to access.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Finally, you'll add a question mark (
+							Element:code
+								?
+								) plus any optional parameters you'd like to send, and of course, your API key. The final request looks like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								https://openapi.etsy.com/v2/users/etsystore?api_key=
+							Element:em
+								your_api_key
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can test this right in your browser. You should see a long string of JSON data language. Note that the object returned is of resource type
+							Element:code
+								User
+								. See
+							Element:code
+								in the API Reference for more details.
+							Element:a
+								User
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sample Request from PHP
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is an example of a call in a PHP script. You can use any language that supports HTTP requests (JavaScript, Ruby, Perl...) which is just about every language in use on the web.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											// Make sure you define API_KEY to be your unique, registered key $url = "https://openapi.etsy.com/v2/users/etsystore?api_key=" . API_KEY; $ch = curl_init($url); curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); $response_body = curl_exec($ch); $status = curl_getinfo($ch, CURLINFO_HTTP_CODE); if (intval($status) != 200) throw new Exception("HTTP $status\n$response_body");
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Notice that in line #6 we're using the value of $response_body as an error message. In the event of an error, the response body will contain a plaintext formatted explanation of the problem. The error will not be JSON encoded.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sample Response
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here's the response from our request above (with added white space to make it easier to read.) The response is formatted using JSON, a simple data serialization language that can be used by just about any language on the web. (
+										Element:a
+											Find JSON support for your language
+											.)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "count": 1, "results": [ { "user_id": 5029420, "login_name": "EtsyStore", "creation_tsz": 1166740121, "referred_by_user_id": null, "feedback_info": { "count": 2559, "score": 100 } } ], "params": { "user_id": "etsystore", }, "type": "User" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Notice that in the response above, the user name "etsystore" that you passed in has been helpfully converted into a user ID. Since it's slightly more efficient to look up users by ID, we suggest that you use the ID for subsequent requests.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sample Response in PHP
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And here's how we'd parse and use the response in PHP:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											$response = json_decode($response_body); $user = $response->results[0]; if (!isset($user->login_name)) { throw new RuntimeException("User Resource doesn't have field login_name"); } if (!isset($user->feedback_info->score)) { throw new RuntimeException("User Resource doesn't have field feedback_info['score']"); } print "User $user->login_name has a feedback score of {$user->feedback_info->score}\n";
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Developers Home
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Discussion
+										Element:li
+										Element:a
+											API Terms of Use
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Your Developer Account
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Register as a developer
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Looking for Etsy Apps?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Check out our new
+							Element:br
+							Element:a
+								App Gallery
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It's the best way to find cool and useful tools built upon Etsy's API.
+						Node:
+						(type) c
+						(layer)2
+							Element:img

@@ -1,0 +1,492 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Pivotal Tracker (API Keys & Actions)
+				Element:a
+					#
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This example will walk you through creating a Developer App that uses an API Key and a has a single action that adds a record to a web service. To make the example real, we'll be implementing the Pivotal Tracker API.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Quick Preparation Checklist
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you plan to follow along, it is recommended you set up everything beforehand and keep these resources open and ready for quick access.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								You must have a
+							Element:a
+								Zapier account
+								.
+							Element:li
+								You must have a
+							Element:a
+								Pivotal Tracker account
+								.
+							Element:li
+								Read the
+							Element:a
+								Getting Started with the Zapier Developer Platform
+								section to familiarize yourself with some of the terminology and basic components of an App.
+							Element:li
+								Read the
+							Element:a
+								Pivotal Tracker API Documentation
+								to familiarize yourself with Pivotal Tracker.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Create the App
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, go to the
+							Element:a
+								Developer Platform
+								and click the "Create App" button. You'll be asked to give a title and a brief description.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After you submit, you should find yourself with a fresh App like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting up authentication
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We'll start by defining how Zapier should authenticate with Pivotal Tracker. From the above screen, click the "Get Started" button in the authentication section.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								On Step 1 you will want to choose API Key since that is what Pivotal Tracker uses. You also need to specify where Pivotal Tracker expects the API key to be included in the requests. Their docs tell us the HTTP headers, so select that. Later on, we'll discover the significance of this choice.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should then find yourself on Step 2 with a pre-generated authentication field. This is the field that users will be presented with when they add a Pivotal Tracker account to Zapier.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The default field is all that is needed for Pivotal Tracker, so click next to go to the final step. Here, we define how the key we collect from users should be used in the actual API calls. Pivotal Tracker's docs say the key needs to be provided as an HTTP header called "X-TrackerToken." We will define our auth mapping like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This mapping, combined with our choice of headers in Step 1, tells Zapier to take whatever value a user provides in the api_key authentication field and include it as the X-TrackerToken HTTP header. Requests we make will automatically have the header included!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+								Note: To find out more about the {{api_key}}, check out our
+							Element:a
+								variable syntax docs
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At this point, we have the authentication setup and are ready to make our test trigger.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting up a test trigger
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to verify the API keys users provide, we need to build a test trigger. The test trigger is simply an API call to an endpoint that requires authentication and is guaranteed to always return some data. This allows Zapier to verify that an API key a user provides is valid. For Pivotal Tracker, we'll use the /me endpoint as the test call.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								From your App, click the "Add your first test trigger" button.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The first form you see allows you to define some of the meta information about the trigger. Since this is a test trigger that will not be useful beyond verifying API tokens, we can put something short and leave the "Hide" checkbox checked.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click next to proceed to Step 2, Trigger Fields. Trigger fields add extra information for the trigger which you can use in the URL or in Scripting. We're actually going to skip over this step because our trigger does not require any additional info. Hit next to get to Step 3, where we define how our trigger will fetch data from Pivotal Tracker.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As mentioned before, Pivotal Tracker provides an API endpoint that returns basic information on a user's account. To configure Zapier to hit this endpoint, here is what we will fill out:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click save to proceed to Step 4. Typically in this step you would copy and paste an example JSON representation of an account into the text area. Since this test trigger will be hidden from actual use in the Zapier UI, we'll skip this step, so just click save.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At this point, we have defined our test trigger and are ready to try it out!
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Testing what we have built so far (authentication)
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now is a good time to go and see if we have the authentication field and test trigger setup properly. To test them, you can go to your
+							Element:a
+								connected accounts
+								and click the connect account dropdown.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After you select the Pivotal Tracker Example App, you will get this form:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As you can see, the form contains the authentication field we set up, plus another one that Zapier adds so the user can name the account. Fill out the form and click continue. At this point, Zapier will make an API call the /me endpoint. If everything is setup correctly, you should get a success message and the account should be added:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now that we have working authentication, we are ready to create our first action.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Creating an action
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The action we are going to build will allow users to create new projects. From your App, click the "Add your first Action" button.
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The first screen allows us to provide the user-facing details of the action.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After filling it out, click next to proceed to Step 2. Here, we define action fields. These are the fields that make up a project in Pivotal Tracker. Users fill these out to say what data should go into their new projects.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A project in Pivotal Tracker has many available fields. We are going to use three: name, description, and public. To start, click the add action Field button.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Fill it out like so:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should now see your action field.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Use the same process for description, except do not mark it as required. For public, the setup is a little different because it is a boolean field in Pivotal Tracker. You can set it up like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you are all done, you should have three action fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click next to move on to the final step. The last piece to complete our action is to tell Zapier where to POST the data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click save and we are done. At this point, we have an action that we are ready to test.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Testing the action
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now that we have built out the basics of our App, it is time to try it out and see if it works. Go to your dashboard and click the create a zap button. On Step 1 of the Zap Editor, you should now have the Pivotal Tracker Example App. The App should have a single action, Create Project.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For the trigger, you could try anything you like. An easy one to test with is the Zapier New Service trigger.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Step 2 will ask you to add your Zapier account. Step 3 should pre-populate with your Pivotal Tracker account that you added during earlier when we tested our authentication. If it is not there, you can add your Pivotal Tracker account now. You can click through on Step 4.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now in Step 5 we get to see our handy-work. You will see that there are three form fields, one for each of the action fields we made. Fill them out and continue.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In Step 6, we get a chance to send some requests and see if our action works. Load some samples and click Test on one of them.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should now be able to login to Pivotal Tracker and see the new project.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Congratulations!
+								You have a working Pivotal Tracker application that:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Uses an API key to authenticate.
+							Element:li
+								One polling trigger to test authentication credentials.
+							Element:li
+								One action.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Be sure to check out our other examples for more details on doing other interesting things with Zapier's developer platform!
+								↑ Was this documentation useful?
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								Can't find what you're looking for? We'd love to help.
+							Element:a
+								Yes
+							Element:a
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Send us a message
+								. Get Help
+						Node:
+						(type) c
+						(layer)2
+							Element:noscript
+							Element:img

@@ -1,0 +1,2560 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Events API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Events API is a streamlined, easy way to build apps and bots that respond to activities in Slack. All you need is a
+				Element:a
+					Slack app
+					and a secure place for us to send your
+				Element:a
+					events
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Don't call us, we'll call you
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Tell us where to send your carefully selected
+										Element:a
+											event types
+											and we'll deliver them with grace, security, and respect. We'll even retry when things don't work out.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Subscribe to the event types you need
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Subscribe to the
+										Element:a
+											event types
+											you want and don't worry about the events you don't need.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Governed by OAuth permission scopes
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											event types
+											sent to you are directly tied to the
+										Element:a
+											OAuth permission scopes
+											awarded as users install your Slack App.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Perspectival bot users served here
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Slack Apps including
+										Element:a
+											bot users
+											can subscribe to events related to the channels and direct message conversations they are party to. Build bots without a bothersome bevy of
+										Element:a
+											RTM API
+											websockets.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Everything is eventual
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Find the right mix of user-based and bot user-based event subscriptions for your needs. Use both the Events and RTM APIs together for more redundancy and concern separation. Choose the technical implementation that's right for you.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								The event loop
+							Element:li
+							Element:a
+								Preparing your app for the Events API
+							Element:ul
+							Element:li
+							Element:a
+								Permission model
+							Element:li
+							Element:a
+								Subscribing to event types
+							Element:li
+							Element:a
+								Handling app installation and authentication
+							Element:li
+							Element:a
+								Using the Events API
+							Element:ul
+							Element:li
+							Element:a
+								Receiving events
+							Element:li
+							Element:a
+								Rate limiting
+							Element:li
+							Element:a
+								Error conditions
+							Element:li
+							Element:a
+								Change management
+							Element:li
+							Element:a
+								Toggling presence
+							Element:li
+							Element:a
+								Event types
+							Element:li
+							Element:a
+								Tips and errata
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								The event loop
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Many apps built using the Events API will follow the same abstract event-driven sequence:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								A user creates a circumstance that triggers an event subscription to your application
+							Element:li
+								Your server receives a payload of JSON describing that event
+							Element:li
+								Your server acknowledges receipt of the event
+							Element:li
+								Your business logic decides what to do about that event
+							Element:li
+								Your server carries out that decision
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If your app is a bot listening to messages with specific trigger phrases, that event loop may play out something like:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Team members send messages in a channel the bot belongs to. The messages are about lots of things, but some of them contain today's secret word.
+							Element:li
+								Your server receives a
+							Element:a
+								event, as per its bot subscription and membership in #random.
+							Element:code
+								message.channels
+							Element:li
+								Your server responds with a swift and confident HTTP 200 OK.
+							Element:li
+								Your bot is trained to listen for today's secret word, and having found it, decides to send a message to the channel, encouraging everyone to keep that word secret.
+							Element:li
+								Your server uses
+							Element:a
+								from the Web API to post that message to #random.
+							Element:code
+								chat.postMessage
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using the Web API with the Events API empowers your app or bot to do much more than just listen and reply to messages.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Preparing to use the Events API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For many, the Events API is drastically simpler to integrate with than the
+							Element:a
+								real time messaging API
+								. If you're already familiar with HTTP and comfortable maintaining your own server, handling the request and response cycle of the Events API should be old hat. If the world of web APIs is new to you, the Events API is a great next step after mastering
+							Element:a
+								incoming webhooks
+								or the
+							Element:a
+								Web API
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Is the Events API right for your app?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Before starting, you may want to make a few early decisions about your application architecture and approach to consuming events.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								One way to use the Events API is as an alternative to opening websocket connections to the
+							Element:a
+								real time messaging API
+								. Instead of maintaining one or more long-lived connections for each team an application is connected to, you simply set up one or more endpoints on your own servers to receive events atomically in near real-time.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Some developers may want to use the Events API as a kind of redundancy for their existing websocket connections.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								And other developers will use the Events API to receive information around the teams and users they are acting on behalf, to improve their
+							Element:a
+								slash commands
+								,
+							Element:a
+								bot users
+								,
+							Element:a
+								notifications
+								, or other capabilities.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Permission model
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Events API leverages Slack's existing
+							Element:a
+								object-driven OAuth scope system
+								to control access to events. For example, if your app has access to files through the
+							Element:code
+								files:read
+								scope, you can choose to subscribe to any or none of the file-related events like
+							Element:a
+								and
+							Element:code
+								file_created
+							Element:a
+								.
+							Element:code
+								file_deleted
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You will only receive events that users who've authorized your app can "see" on their team (that is, if a user authorizes access to private channel history, you'll only see the activity in private channels they are a member of, not all private channels across the team).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								Bot users
+								may also subscribe to events on their own behalf. The
+							Element:code
+								bot
+								scope requested when teams install your bot covers events access for both the Events API and the
+							Element:a
+								Real Time Messaging API
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Subscribing to event types
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To begin working with the Events API, you'll need to create a
+							Element:a
+								Slack app
+								if you haven't already. While managing your application, find the "Event Subscriptions" configuration page and use the toggle to turn it on.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After a little more configuration, you'll be able to select all the
+							Element:a
+								event types
+								you want to subscribe to.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Events API Request URLs
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Request URLs operate similarly to
+							Element:a
+								slash command
+								invocation URLs,
+							Element:a
+								outgoing webhooks
+								, and
+							Element:a
+								message button
+								action URLs:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								They all receive a HTTP POST containing data in response to activity.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In the Events API, your Events API Request URL is the target location where all the events your application is subscribed to will be delivered, regardless of the team or event type.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Since your application will have only one Events Request URL, you'll need to do any additional dispatch or routing server-side after receiving event data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your Request URL will receive JSON-based payloads containing wrapped
+							Element:a
+								event types
+								. The volume of events will vary depending on the events you subscribe to, and the size and activity of the teams that install your application.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:i
+								Your Request URL might receive
+							Element:em
+								many
+								events and requests. Consider decoupling your ingestion of events from the processing and reaction to them. Review the section on
+							Element:a
+								rate limiting
+								to better understand the maximum event volume you may receive.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request URL Configuration & Verification
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Your Event Request URL must be confirmed before saving this form. If your server takes some time to "wake up" and your initial attempt at URL verification fails due to a timeout, use the
+													Element:em
+														retry
+														button to attempt verification again.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	URL verification handshake
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The events sent to your Request URL may contain sensitive information associated with the teams having approved your Slack app. To ensure that events are being delivered to a server under your direct control, we must verify your ownership by issuing you a challenge request.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	After you've completed typing your URL, we'll dispatch a HTTP POST to your request URL. We'll verify your SSL certificate and we'll send a
+																Element:code
+																	application/json
+																	POST body containing three fields:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	{ "token": "Jhj5dZrVaK7ZwHHjRyZWjbDl", "challenge": "3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P", "type": "url_verification" }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	This event does not require a specific OAuth scope or subscription. You'll automatically receive it whenever configuring an
+																Element:a
+																	Events API
+																	request URL. The attributes we send include:
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:code
+																	token
+																	— Use this as proof that the request is coming from Slack on behalf of your application. You'll find this value in the "App Credentials" section of your app's
+																Element:a
+																	application management interface
+																	. Verifying this value is more important when working with real events following this verification sequence.
+																Element:li
+																Element:code
+																	challenge
+																	— a randomly generated string produced by Slack. The point of this little game of cat and mouse is that you're going to respond to this request with a response body containing this value.
+																Element:li
+																Element:code
+																	type
+																	— this payload is similarly formatted to other event types you'll encounter in the Events API. To help you differentiate url verification requests form other event types, we inform you that this is of the
+																Element:code
+																	url_verification
+																	variety.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:strong
+																	Responding to the challenge
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Once you receive the event, respond in plaintext with the
+																Element:code
+																	challenge
+																	attribute value. You'll want to use a 200-series HTTP status code to indicate triumphant success. In the above example, our response might be:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	HTTP 200 OK Content-type: application/x-www-form-urlencoded 3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Alternatively, if we're feeling more formal, we can respond with
+																Element:code
+																	application/x-www-form-urlencoded
+																	:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	HTTP 200 OK Content-type: application/x-www-form-urlencoded challenge=3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Or if we're feeling like showing off, we might respond with some
+																Element:code
+																	application/json
+																	:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	HTTP 200 OK Content-type: application/json {"challenge":"3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P"}
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Once URL verification is complete, you'll see a green check mark celebrating your victory.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If we receive an error from your server, a timeout, or other exceptional condition occurs, you'll see error messages that will hopefully help you understand what's amiss and then retry when you're ready.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	With this challenging handshake complete, we're ready to open up our
+																Element:a
+																	event type catalog
+																	and decide which events to subscribe to.
+															Node:
+															(type) c
+															(layer)5
+																Element:a
+															Node:
+															(type) c
+															(layer)5
+																Element:h3
+																	Choosing event subscriptions
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	After configuring and validating your Request URL, it's time to subscribe to the
+																Element:a
+																	event types
+																	you find fascinating, useful, or necessary.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The subscription manager is split into two sections:
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:em
+																	Team Events
+																	- these are the events that require a corresponding OAuth scope, and are perspectival to a team member installing your application.
+																Element:li
+																Element:em
+																	Bot Events
+																	- subscribe to events on behalf of your application's
+																Element:a
+																	bot user
+																	, no additional scopes beyond
+																Element:code
+																	bot
+																	required. As with Team Events, you'll only receive events perspectival to your bot user.
+															Node:
+															(type) c
+															(layer)5
+																Element:hr
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:a
+															Node:
+															(type) c
+															(layer)5
+																Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Activating subscriptions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Events API is backed by the same
+							Element:a
+								OAuth permission scoping system
+								powering your
+							Element:a
+								Slack App
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If teams have already installed your application, your Request URL will soon begin receiving your configured event subscriptions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For any teams that have yet to install your application, you'll need to request the specific OAuth scopes corresponding to the
+							Element:a
+								event types
+								you're subscribing to. If you're working on behalf of a
+							Element:a
+								bot user
+								, you'll need your bot installed the typical way, using the
+							Element:code
+								bot
+								OAuth scope.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Authorize users for your Event Consumer app through the standard
+							Element:a
+								OAuth flow
+								. Be sure to include all of the necessary scopes for the events your app wants to receive.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Consult our index of the
+							Element:a
+								available event types with corresponding OAuth scopes
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								With all this due preparation out of the way, it's time to receive and handle all those event subscriptions.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Receiving Events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your Request URL will receive a request for each event matching your subscriptions. One request, one event.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You may want to consider the number of teams you serve, the number of users on those teams, and their volume of messages and other activity to evaluate how many requests your Request URL may receive and scale accordingly.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Events dispatched as JSON
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When an event in your subscription occurs in an authorized user's account, we'll send an HTTP POST request to your Request URL. The event will be in the
+							Element:code
+								Content-Type: application/json
+								format:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "token": "XXYYZZ", "team_id": "TXXXXXXXX", "api_app_id": "AXXXXXXXXX", "event": { "type": "name_of_event", "event_ts": "1234567890.123456", "user": "UXXXXXXX1", ... }, "type": "event_callback", "authed_users": [ "UXXXXXXX1", "UXXXXXXX2" ], "event_id": "Ev08MFMKH6", "event_time": 1234567890 }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								token
+								,
+							Element:code
+								team
+								, and
+							Element:code
+								api_app_id
+								fields help you identify the validity, origin, and destination of the request.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								event
+								attribute contains a JSON hash for the corresponding
+							Element:a
+								event type
+								. The event wrapper is an event envelope of sorts, and the event field represents the contents of that envelope.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Callback field overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Also referred to as the "outer event", or the JSON object containing the event that happened itself.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+								Field
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tr
+							Element:td
+							Element:code
+								token
+							Element:td
+								String
+							Element:td
+								The shared-private callback token that authenticates this callback to the application as having come from Slack. Match this against what you were given when the subscription was created. If it does not match, do not process the event and discard it.
+							Element:p
+								Example:
+							Element:code
+								JhjZd2rVax7ZwH7jRYyWjbDl
+							Element:tr
+							Element:td
+							Element:code
+								team_id
+							Element:td
+								String
+							Element:td
+								The unique identifier for the team where this event occurred.
+							Element:p
+								Example:
+							Element:code
+								T461EG9ZZ
+							Element:tr
+							Element:td
+							Element:code
+								api_app_id
+							Element:td
+								String
+							Element:td
+								The unique identifier for the application this event is intended for. Your application's ID can be found in the URL of the your application console. If your Request URL manages multiple applications, use this field along with the
+							Element:code
+								token
+								field to validate and route incoming requests.
+							Element:p
+								Example:
+							Element:code
+								A4ZFV49KK
+							Element:tr
+							Element:td
+							Element:code
+								event
+							Element:td
+							Element:a
+								Event Type
+							Element:td
+								Contains the inner set of fields representing the event that's happening.
+							Element:p
+							Element:a
+								Examples below
+								.
+							Element:tr
+							Element:td
+							Element:code
+								type
+							Element:td
+								String
+							Element:td
+								This reflects the type of callback you're receiving. Typically, that is
+							Element:code
+								event_callback
+								. You may encounter
+							Element:code
+								url_verification
+								during the configuration process. The `event` fields "inner event" will also contain a
+							Element:code
+								type
+								field indicating which
+							Element:a
+								event type
+								lurks within (
+							Element:a
+								down below
+								)
+							Element:tr
+							Element:td
+							Element:code
+								authed_users
+							Element:td
+								Array
+							Element:td
+								An array of string-based User IDs. Each member of the collection represents a user that has installed your application/bot and indicates the described event would be visible to those users. You'll receive a single event for a piece of data intended for multiple users in a team, rather than a message per user.
+							Element:tr
+							Element:td
+							Element:code
+								event_id
+							Element:td
+								String
+							Element:td
+								A unique identifier for this specific event, globally unique across all teams. Events will include this field beginning March 9, 2017.
+							Element:tr
+							Element:td
+							Element:code
+								event_time
+							Element:td
+								Integer
+							Element:td
+								The epoch timestamp in seconds indicating when this event was dispatched. Events will include this field beginning March 9, 2017.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Event type structure
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The structure of
+							Element:a
+								event types
+								vary from type to type, depending on the kind of action or
+							Element:a
+								object type
+								they represent.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you're already familiar with the
+							Element:a
+								real time messaging API
+								, you'll find that the inner
+							Element:code
+								event
+								structure is identical to corresponding events, but they are wrapped in a kind of event envelope in the callbacks we send to your Event Request URL.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+								Field
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tr
+							Element:td
+							Element:code
+								type
+							Element:td
+								String
+							Element:td
+								The specific name of the event described by its adjacent fields. This field is included with every inner event type.
+							Element:p
+								Examples:
+							Element:code
+								reaction_added
+								,
+							Element:code
+								messages.channel
+								,
+							Element:code
+								team_join
+							Element:tr
+							Element:td
+							Element:code
+								event_ts
+							Element:td
+								String
+							Element:td
+								The timestamp of the event. The combination of
+							Element:code
+								event_ts
+								,
+							Element:code
+								team_id
+								,
+							Element:code
+								user_id
+								, or
+							Element:code
+								channel_id
+								is intended to be unique. This field is included with every inner event type.
+							Element:p
+							Element:blockquote
+								"Time is the moving image of eternity" — Plato.
+							Element:p
+								Example:
+							Element:code
+								1469470591.759709
+							Element:tr
+							Element:tr
+							Element:td
+							Element:code
+								user
+							Element:td
+								String
+							Element:td
+								The user ID belonging to the
+							Element:a
+								user
+								that incited this action. Not included in all events as not all events are controlled by users. See the top-level callback object's
+							Element:code
+								authed_users
+								if you need to calculate event visibility by user.
+							Element:p
+								Example:
+							Element:code
+								U061F7AUR
+							Element:tr
+							Element:td
+							Element:code
+								ts
+							Element:td
+								String
+							Element:td
+								The timestamp of what the event describes, which may occur slightly prior to the event being dispatched as described by
+							Element:code
+								event_ts
+								. The combination of
+							Element:code
+								ts
+								,
+							Element:code
+								team_id
+								,
+							Element:code
+								user_id
+								, or
+							Element:code
+								channel_id
+								is intended to be unique.
+							Element:p
+								Example:
+							Element:code
+								1469470591.759709
+							Element:tr
+							Element:td
+							Element:code
+								item
+							Element:td
+								String
+							Element:td
+								Data specific to the underlying
+							Element:a
+								object type
+								being described. Often you'll encounter abbreviated versions of full objects. For instance, when
+							Element:a
+								file objects
+								are referenced, only the file's ID is presented. See each individual
+							Element:a
+								event type
+								for more detail.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:i
+								If multiple users on one team have installed your app and can "see" the same event, we will send
+							Element:em
+								one
+								event and include a list of users to whom this event is "visible" in the
+							Element:code
+								authed_users
+								field. For example, if a file was uploaded to a channel that two of your authorized users were party to, we would stream the
+							Element:code
+								file_uploaded
+								event once and indicate both of those users in the
+							Element:code
+								authed_users
+								array.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here's a full example of a dispatched event for
+							Element:a
+								reaction_added
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "token": "z26uFbvR1xHJEdHE1OQiO6t8", "team_id": "T061EG9RZ", "api_app_id": "A0FFV41KK", "event": { "type": "reaction_added", "user": "U061F1EUR", "item": { "type": "message", "channel": "C061EG9SL", "ts": "1464196127.000002" }, "reaction": "slightly_smiling_face" }, "event_ts": "1465244570.336841", "type": "event_callback", "authed_users": [ "U061F7AUR" ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Responding to Events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your app should respond to the event request with an HTTP 2xx
+							Element:strong
+								within three seconds
+								. If it does not, we'll consider the event delivery attempt failed. After a failure, we'll retry three times, backing off exponentially.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We recommend responding to events with a HTTP 200 OK as soon as you can. You may want to avoid processing and reacting to events within the same process handling event reception.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								What you do with the event depends on what your application or service does.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Maybe it'll trigger you to send a message using
+							Element:a
+								. Maybe you'll update a leaderboard. Maybe you'll update a piece of data you're storing. Maybe you'll change the world or just decide to do nothing at all.
+							Element:code
+								chat.postMessage
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Rate limiting
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Chances are, you won't be rate limited. But we also don't want to flood your servers with an unwanted flurry of events.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We'll send a maximum of
+							Element:strong
+								5,000 events per hour
+								on behalf of each team your application is installed on. We'll let a team burst up to 2,000 events in a brief period of time but we'll limit the number of events above that in short periods.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When rate limited, your Request URL will receive typically formatted event callbacks with three important fields to look at, in JSON:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								type
+								- this specific event type:
+							Element:code
+								app_rate_limited
+							Element:li
+							Element:code
+								minute_rate_limited
+								- a rounded epoch time value indicating the minute your application became rate limited for this team
+							Element:li
+							Element:code
+								team_id
+								- subscriptions between your app and the team with this ID are being rate limited
+							Element:li
+							Element:code
+								token
+								- the same token you're verifying for other events
+							Element:code
+								api_app_id
+								- your application's ID, especially useful if you have multiple applications working with the Events API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You'll receive these callbacks for each of the minutes you are rate limited for that team.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Error handling
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As Slack sends your request URL events, we ask that you return a HTTP 200 OK for each event you successfully receive.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You may respond with a HTTP 301 or 302 and we'll follow up to two redirects in our quest for you to provide us a HTTP 200 success code.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Failure conditions
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We consider any of these scenarios a single failure condition:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														we are unable to negotiate or validate your server's SSL certificate
+													Element:li
+														we wait longer than
+													Element:em
+														3 seconds
+														to receive a valid response from your server
+													Element:li
+														we encounter more than 2 HTTP redirects to follow
+													Element:li
+														we receive any other response than a HTTP 200-series response (besides allowed redirects mentioned above)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														While we limit the number of failure conditions we'll tolerate over time, we also gracefully retry sending your events according to an exponential backoff strategy.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Graceful retries
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We'll knock knock knock on your server's door, retrying a failed request up to
+													Element:strong
+														3 times
+														in a gradually increasing timetable:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														the first retry will be sent nearly immediately
+													Element:li
+														the second retry will be attempted after 1 minute
+													Element:li
+														the third and final retry will be sent after 5 minutes
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														With each retry attempt, you'll also be given a
+													Element:code
+														X-Slack-Retry-Num
+														HTTP header indicating the attempt number:
+													Element:code
+														1
+														,
+													Element:code
+														2
+														, or
+													Element:code
+														3
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Retries count against the
+													Element:a
+														failure limits
+														mentioned below.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We'll tell you why we're retrying the request in the
+													Element:code
+														X-Slack-Retry-Reason
+														HTTP header. These possible values describe their inciting events:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:code
+														http_timeout
+														- Your server took longer than 3 seconds to respond to the previous event delivery attempt
+													Element:li
+													Element:code
+														too_many_redirects
+														- We'll follow you down the rabbit hole of HTTP redirects only so far. If we encounter more than 2, we'll retry the request in hopes it won't be that many this time.
+													Element:li
+													Element:code
+														connection_failed
+														- we just couldn't seem to connect to your server. Maybe we couldn't find it in DNS or maybe your host is unreachable
+													Element:li
+													Element:code
+														ssl_error
+														- we couldn't verify the veracity of your SSL certificate. Find tips on producing valid SSL certificates
+													Element:a
+														here
+														.
+													Element:li
+													Element:code
+														http_error
+														- we encountered an HTTP status code that was not in the HTTP 200 OK range. Maybe the request was forbidden. Or you rate limited
+													Element:em
+														us
+														. Or the document just could not be found. So we're trying again in case that's all rectified now.
+													Element:li
+													Element:code
+														unknown_error
+														- we didn't anticipate this condition arising but prepared for it nonetheless. For some reason it didn't work and we don't know why yet.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Turning retries off
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If your server is having trouble handling our requests or you'd rather we not retry failed deliveries, provide a HTTP header in your responses indicating that you'd prefer no further attempts.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Just provide us this HTTP header and value as part of your non-200 OK response:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	X-Slack-No-Retry: 1
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	By presenting this header, We'll understand it to mean you'd rather this specific event not be redelivered. Other event deliveries will remain unaffected.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:a
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Failure limits
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you're responding with errors, we won't keep sending events to your servers forever.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When your application enters any combination of these
+													Element:a
+														failure conditions
+														more than
+													Element:strong
+														500 times
+														within 30 minutes, your application's event subscriptions will be temporarily disabled.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We'll also send you, the Slack app's creator and owner, an email alerting you to the situation. You'll have the opportunity to re-enable deliveries when you're ready.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Manually re-enable event subscriptions by visiting your
+													Element:a
+														application's settings
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Change management
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Inevitably, the status of your subscriptions will change. New teams will sign up for your application. Installing users may leave a team. Maybe you make some tweaks to your subscriptions or incite users to request a different set of OAuth scopes.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Beyond your app being disabled, there are a few different types of changes that will affect which events your app is receiving:
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														App installation
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When a user installs your app, you'll immediately begin receiving events for them based on your subscription.
+													Element:strong
+														Your application's granted OAuth scopes dictate which events in your subscription you receive
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you've configured your subscription to receive
+													Element:a
+														,
+													Element:code
+														reaction_added
+													Element:a
+														, and
+													Element:code
+														reaction_removed
+													Element:a
+														events, you won't receive all three unless you request the
+													Element:code
+														file_created
+													Element:code
+														reactions:read
+														and
+													Element:code
+														files:read
+														scopes from the user. For example, If you'd only requested
+													Element:code
+														files:read
+														, you'll only receive
+													Element:a
+														events and not
+													Element:code
+														file_created
+													Element:a
+														or
+													Element:code
+														reaction_added
+													Element:a
+														.
+													Element:code
+														reaction_removed
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														App revocation
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If a user uninstalls your app (or the tokens issued to your app are revoked), events for that user will immediately stop being sent to your app.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														You change the events in your subscription
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you modify your subscription through the application management interface, the modifications will
+													Element:strong
+														take effect.
+													Element:em
+														immediately
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Depending on the modification, the events types, and OAuth scopes you've been requesting from users, a few different things can happen:
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Adding event subscriptions you already have scopes for
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	For example, you've been requesting
+																Element:code
+																	files:read
+																	from users and decide to add the
+																Element:code
+																	file_created
+																	event. Because you already have access to this resource (files), you'll begin receiving
+																Element:code
+																	file_created
+																	events as soon as you update your subscription.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Adding event subscriptions you aren't yet scoped for
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	For example, you've been requesting
+																Element:code
+																	channels:read
+																	from users and decide to add the
+																Element:code
+																	file_created
+																	event. Because you
+																Element:em
+																	don't
+																	have access to this resource (files), you won't receive
+																Element:code
+																	file_created
+																	events immediately.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	You must send your existing users through the OAuth flow again, requesting the
+																Element:code
+																	files:read
+																	scope. You'll begin to receive
+																Element:code
+																	file_created
+																	events for each user
+																Element:em
+																	after
+																	they authorize
+																Element:code
+																	files:read
+																	for your app.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Removing event subscriptions, regardless of granted scopes
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Events will immediately stop being sent for all users who have installed your app. Their OAuth scopes and authorizations will not be affected.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If you weren't granted the permission scopes for the removed event subscription, then nothing really changes. You weren't receiving those events anyway and you won't be receiving them now either.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:a
+															Node:
+															(type) c
+															(layer)5
+																Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Toggling presence
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To toggle your bot user's presence when connected exclusively to the Events API, visit your
+							Element:a
+								app management console
+								's
+							Element:em
+								Bot Users
+								tab.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Learn more about the
+							Element:a
+								nuances of bot user presence
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Event types compatible with the Events API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You may subscribe to these events using the Events API:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+								Event
+							Element:th
+								Description
+							Element:th
+								Required Scope
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								channel_archive
+							Element:td
+							Element:p
+							Element:small
+								A channel was archived
+							Element:td
+							Element:code
+								channels:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								channel_created
+							Element:td
+							Element:p
+							Element:small
+								A channel was created
+							Element:td
+							Element:code
+								channels:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								channel_deleted
+							Element:td
+							Element:p
+							Element:small
+								A channel was deleted
+							Element:td
+							Element:code
+								channels:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								channel_history_changed
+							Element:td
+							Element:p
+							Element:small
+								Bulk updates were made to a channel's history
+							Element:td
+							Element:code
+								channels:history
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								channel_rename
+							Element:td
+							Element:p
+							Element:small
+								A channel was renamed
+							Element:td
+							Element:code
+								channels:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								channel_unarchive
+							Element:td
+							Element:p
+							Element:small
+								A channel was unarchived
+							Element:td
+							Element:code
+								channels:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								dnd_updated
+							Element:td
+							Element:p
+							Element:small
+								Do not Disturb settings changed for the current user
+							Element:td
+							Element:code
+								dnd:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								dnd_updated_user
+							Element:td
+							Element:p
+							Element:small
+								Do not Disturb settings changed for a team member
+							Element:td
+							Element:code
+								dnd:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								email_domain_changed
+							Element:td
+							Element:p
+							Element:small
+								The team email domain has changed
+							Element:td
+							Element:code
+								team:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								emoji_changed
+							Element:td
+							Element:p
+							Element:small
+								A team custom emoji has been added or changed
+							Element:td
+							Element:code
+								emoji:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								file_change
+							Element:td
+							Element:p
+							Element:small
+								A file was changed
+							Element:td
+							Element:code
+								files:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								file_comment_added
+							Element:td
+							Element:p
+							Element:small
+								A file comment was added
+							Element:td
+							Element:code
+								files:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								file_comment_deleted
+							Element:td
+							Element:p
+							Element:small
+								A file comment was deleted
+							Element:td
+							Element:code
+								files:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								file_comment_edited
+							Element:td
+							Element:p
+							Element:small
+								A file comment was edited
+							Element:td
+							Element:code
+								files:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								file_created
+							Element:td
+							Element:p
+							Element:small
+								A file was created
+							Element:td
+							Element:code
+								files:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								file_deleted
+							Element:td
+							Element:p
+							Element:small
+								A file was deleted
+							Element:td
+							Element:code
+								files:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								file_public
+							Element:td
+							Element:p
+							Element:small
+								A file was made public
+							Element:td
+							Element:code
+								files:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								file_shared
+							Element:td
+							Element:p
+							Element:small
+								A file was shared
+							Element:td
+							Element:code
+								files:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								file_unshared
+							Element:td
+							Element:p
+							Element:small
+								A file was unshared
+							Element:td
+							Element:code
+								files:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								group_archive
+							Element:td
+							Element:p
+							Element:small
+								A private channel was archived
+							Element:td
+							Element:code
+								groups:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								group_close
+							Element:td
+							Element:p
+							Element:small
+								You closed a private channel
+							Element:td
+							Element:code
+								groups:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								group_history_changed
+							Element:td
+							Element:p
+							Element:small
+								Bulk updates were made to a private channel's history
+							Element:td
+							Element:code
+								groups:history
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								group_open
+							Element:td
+							Element:p
+							Element:small
+								You opened a private channel
+							Element:td
+							Element:code
+								groups:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								group_rename
+							Element:td
+							Element:p
+							Element:small
+								A private channel was renamed
+							Element:td
+							Element:code
+								groups:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								group_unarchive
+							Element:td
+							Element:p
+							Element:small
+								A private channel was unarchived
+							Element:td
+							Element:code
+								groups:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								im_close
+							Element:td
+							Element:p
+							Element:small
+								You closed a DM
+							Element:td
+							Element:code
+								im:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								im_created
+							Element:td
+							Element:p
+							Element:small
+								A DM was created
+							Element:td
+							Element:code
+								im:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								im_history_changed
+							Element:td
+							Element:p
+							Element:small
+								Bulk updates were made to a DM's history
+							Element:td
+							Element:code
+								im:history
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								im_open
+							Element:td
+							Element:p
+							Element:small
+								You opened a DM
+							Element:td
+							Element:code
+								im:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								link_shared
+							Element:td
+							Element:p
+							Element:small
+								A message was posted containing one or more links relevant to your application
+							Element:td
+							Element:code
+								links:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								message.channels
+							Element:td
+							Element:p
+							Element:small
+								A message was posted to a channel
+							Element:td
+							Element:code
+								channels:history
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								message.groups
+							Element:td
+							Element:p
+							Element:small
+								A message was posted to a private channel
+							Element:td
+							Element:code
+								groups:history
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								message.im
+							Element:td
+							Element:p
+							Element:small
+								A message was posted in a direct message channel
+							Element:td
+							Element:code
+								im:history
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								message.mpim
+							Element:td
+							Element:p
+							Element:small
+								A message was posted in a multiparty direct message channel
+							Element:td
+							Element:code
+								mpim:history
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								pin_added
+							Element:td
+							Element:p
+							Element:small
+								A pin was added to a channel
+							Element:td
+							Element:code
+								pins:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								pin_removed
+							Element:td
+							Element:p
+							Element:small
+								A pin was removed from a channel
+							Element:td
+							Element:code
+								pins:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								reaction_added
+							Element:td
+							Element:p
+							Element:small
+								A team member has added an emoji reaction to an item
+							Element:td
+							Element:code
+								reactions:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								reaction_removed
+							Element:td
+							Element:p
+							Element:small
+								A team member removed an emoji reaction
+							Element:td
+							Element:code
+								reactions:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								star_added
+							Element:td
+							Element:p
+							Element:small
+								A team member has starred an item
+							Element:td
+							Element:code
+								stars:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								star_removed
+							Element:td
+							Element:p
+							Element:small
+								A team member removed a star
+							Element:td
+							Element:code
+								stars:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								subteam_created
+							Element:td
+							Element:p
+							Element:small
+								A User Group has been added to the team
+							Element:td
+							Element:code
+								usergroups:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								subteam_self_added
+							Element:td
+							Element:p
+							Element:small
+								You have been added to a User Group
+							Element:td
+							Element:code
+								usergroups:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								subteam_self_removed
+							Element:td
+							Element:p
+							Element:small
+								You have been removed from a User Group
+							Element:td
+							Element:code
+								usergroups:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								subteam_updated
+							Element:td
+							Element:p
+							Element:small
+								An existing User Group has been updated or its members changed
+							Element:td
+							Element:code
+								usergroups:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								team_domain_change
+							Element:td
+							Element:p
+							Element:small
+								The team domain has changed
+							Element:td
+							Element:code
+								team:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								team_join
+							Element:td
+							Element:p
+							Element:small
+								A new team member has joined
+							Element:td
+							Element:code
+								users:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								team_rename
+							Element:td
+							Element:p
+							Element:small
+								The team name has changed
+							Element:td
+							Element:code
+								team:read
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								url_verification
+							Element:td
+							Element:p
+							Element:small
+								Verifies ownership of an Events API Request URL
+							Element:td
+							Element:tr
+							Element:td
+							Element:small
+							Element:a
+								user_change
+							Element:td
+							Element:p
+							Element:small
+								A team member's data has changed
+							Element:td
+							Element:code
+								users:read
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want to bookmark that handy list,
+							Element:a
+								do so here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Tips
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Why choose the Events API over the RTM API?
+								Find out why to choose one or the other (or both!) in the
+							Element:a
+								Events API FAQ
+								.
+							Element:li
+							Element:strong
+								Tolerate minor changes in
+								Expect additional fields you haven't encountered before and fields that are only conditionally present.
+							Element:a
+								event type
+								and
+							Element:a
+								object type
+								structures.
+							Element:li
+								Bot users using the Events API exclusively must toggle their
+							Element:a
+								presence
+								status using their
+							Element:a
+								app management console
+								.
+							Element:li
+								The Events API is
+							Element:strong
+								best used in conjunction with other platform features
+								. In particular, to send messages as a bot user or on behalf of your application, use
+							Element:a
+								. Handle anything else your app does by using
+							Element:code
+								chat.postMessage
+							Element:a
+								incoming webhooks
+								and other write-based
+							Element:a
+								web API methods
+								.
+							Element:li
+							Element:strong
+								De-couple your ingestion of events from processing and reacting to them
+								. Especially when working with large teams, many teams, or subscribing to a large number of events. Quickly respond to events with HTTP 200 and add them to a queue before doing amazing things with them.
+							Element:li
+							Element:strong
+								Some event types are not available in bot user subscriptions
+								. Consult an event's documentation page for information on whether that event is supported for bot users.
+							Element:li
+								Some event types are
+							Element:strong
+								less likely to happen than others
+								. Events like
+							Element:a
+								happen frequently on typical teams.
+							Element:code
+								message.channels
+							Element:a
+								on the other hand is a rare occurrence on even the busiest of teams.
+							Element:code
+								im_history_changed
+							Element:li
+								Building an integration for Enterprise Grid teams? Consult the
+							Element:a
+								Enterprise Grid
+								docs for notes on Events API usage and shared channels.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Related Content
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								from the
+							Element:em
+								Subscribe to the Events API
+							Element:a
+								Slack Developer Blog
+								.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Related Articles
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Tutorial by Beep Boop (beepboophq.com)
+							Element:span
+								Lessons learned building Beep Boop's new Slack bot
+							Element:li
+							Element:a
+								Tutorial by Slack
+							Element:span
+								Building an onboarding bot in Ruby using Slack's Events API
+							Element:li
+							Element:a
+								Tutorial by Slack
+							Element:span
+								Building a simple bot using Slack's Events API in Python
+							Element:li
+							Element:a
+								Tutorial by Founders (medium.com)
+							Element:span
+								Scaling Slack Events in Node
+							Element:li
+							Element:a
+								Testimonial from Intro (medium.com)
+							Element:span
+								Introducing Introbot for Slack
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:ul
+							Element:li
+								Using Slack
+							Element:li
+							Element:a
+								Product
+							Element:li
+							Element:a
+								Pricing
+							Element:li
+							Element:a
+								Support
+							Element:li
+							Element:a
+								Slack Guides
+							Element:li
+							Element:a
+								Video Guides
+							Element:li
+							Element:a
+								App Directory
+							Element:li
+							Element:a
+								API
+							Element:ul
+							Element:li
+								Slack
+							Element:li
+							Element:a
+								Jobs
+							Element:li
+							Element:a
+								Customers
+							Element:li
+							Element:a
+								Developers
+							Element:li
+							Element:a
+								Events
+							Element:li
+							Element:a
+								Blog
+							Element:li
+							Element:a
+								Podcast
+							Element:li
+							Element:a
+								Slack Shop
+							Element:ul
+							Element:li
+								Legal
+							Element:li
+							Element:a
+								Privacy
+							Element:li
+							Element:a
+								Security
+							Element:li
+							Element:a
+								Terms of Service
+							Element:li
+							Element:a
+								Policies
+							Element:ul
+							Element:li
+								Handy Links
+							Element:li
+							Element:a
+								Download desktop app
+							Element:li
+							Element:a
+								Download mobile app
+							Element:li
+							Element:a
+								Brand Guidelines
+							Element:li
+							Element:a
+								Slack at Work
+							Element:li
+							Element:a
+								Status
+							Element:a
+							Element:ul
+							Element:li
+							Element:a
+								Contact Us
+							Element:li
+							Element:a
+							Element:li
+							Element:a

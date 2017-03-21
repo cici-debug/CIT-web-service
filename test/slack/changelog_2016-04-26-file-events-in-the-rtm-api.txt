@@ -1,0 +1,364 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Changes to file events in the Real-Time Messaging API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:span
+					Updated: 2016-04-26
+				Element:span
+					APIs
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If you parse events referencing
+				Element:a
+					files
+					in the
+				Element:a
+					real-time messaging API
+					, you may have noticed we send a sometimes comically large packet of information when streaming nearly anything related to a file.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					To improve performance and provide a better user experience, we're reducing the payload of most file-related events in the RTM API to include only the file's ID. You'll need to use the
+				Element:a
+					API method to retrieve additional information about files.
+				Element:code
+					files.info
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					These changes will roll out gradually beginning May 16th, 2016 — read below to understand how this change may effect you, especially if you work with bot users.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Bot users
+					will gain comparable capabilities, allowing bot user tokens to work with
+				Element:code
+					files.info
+					based on the channel memberships and related capabilities granted to them.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What's changing:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following
+							Element:a
+								Real Time Messaging events
+								will be modified:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+							Element:code
+								file_created
+							Element:li
+							Element:a
+							Element:code
+								file_shared
+							Element:li
+							Element:a
+							Element:code
+								file_unshared
+							Element:li
+							Element:a
+							Element:code
+								file_public
+							Element:li
+							Element:a
+							Element:code
+								file_change
+							Element:li
+							Element:a
+							Element:code
+								file_comment_added
+							Element:li
+							Element:a
+							Element:code
+								file_comment_edited
+							Element:li
+							Element:a
+							Element:code
+								file_comment_deleted
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When pins or stars are applied to or removed from messages containing files, you'll also find this new behavior in these associated events:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+							Element:code
+								star_added
+							Element:li
+							Element:a
+							Element:code
+								star_removed
+							Element:li
+							Element:a
+							Element:code
+								pin_added
+							Element:li
+							Element:a
+							Element:code
+								pin_removed
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How these events will change
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After release, you will receive abbreviated
+										Element:code
+											file
+											events, with only the
+										Element:code
+											id
+											attribute:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "file_id": "F2147483862", "type": "file_shared", "file": { "id": "F2147483862" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This
+										Element:code
+											id
+											value may be used with the
+										Element:a
+											API method to obtain fresh information about the file it represents. We'll also include a top-level
+										Element:code
+											files.info
+										Element:code
+											file_id
+											field, which you may want to use going forward instead.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Until now, these events would have had more verbose file details included:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "type": "file_shared", "file": { "id" : "F2147483862", "created" : 1356032811, "timestamp" : 1356032811, "name" : "file.htm", "title" : "My HTML file", "mimetype" : "text\/plain", "filetype" : "text", "pretty_type": "Text", "user" : "U2147483697", "mode" : "hosted", "editable" : true, "is_external": false, "external_type": "", "username": "", "size" : 12345, "url_private": "https:\/\/slack.com\/files-pri\/T024BE7LD-F024BERPE\/1.png", "url_private_download": "https:\/\/slack.com\/files-pri\/T024BE7LD-F024BERPE\/download\/1.png", "thumb_64": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_64.png", "thumb_80": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_80.png", "thumb_360": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_360.png", "thumb_360_gif": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_360.gif", "thumb_360_w": 100, "thumb_360_h": 100, "thumb_480": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_480.png", "thumb_480_w": 480, "thumb_480_h": 480, "thumb_160": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_160.png", "permalink" : "https:\/\/tinyspeck.slack.com\/files\/cal\/F024BERPE\/1.png", "permalink_public" : "https:\/\/tinyspeck.slack.com\/T024BE7LD-F024BERPE-3f9216b62c", "edit_link" : "https:\/\/tinyspeck.slack.com\/files\/cal\/F024BERPE\/1.png/edit", "preview" : "&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n&lt;meta charset='utf-8'&gt;", "preview_highlight" : "&lt;div class=\"sssh-code\"&gt;&lt;div class=\"sssh-line\"&gt;&lt;pre&gt;&lt;!DOCTYPE html...", "lines" : 123, "lines_more": 118, "is_public": true, "public_url_shared": false, "display_as_bot" : false, "channels": ["C024BE7LT", ...], "groups": ["G12345", ...], "ims": ["D12345", ...], "initial_comment": {...}, "num_stars": 7, "is_starred": true, "pinned_to": ["C024BE7LT", ...], "reactions": [ { "name": "astonished", "count": 3, "users": [ "U1", "U2", "U3" ] }, { "name": "facepalm", "count": 1034, "users": [ "U1", "U2", "U3", "U4", "U5" ] } ], "comments_count": 1 } }
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Bot users
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Today, some bot users may rely on the current behavior to utilize or index files referenced in the channels they belong to. To support that use case, we will improve the
+										Element:code
+											files.info
+											method to make it accessible to bot users and scoped only to the files that a bot has access to when using its bot user token.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We'll post a follow up within the next two weeks when we're ready to release these new capabilities.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								How to prepare:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Review your streaming integration to determine where and when you rely on the full file object being present in events. If you don't need the full file object, consume only the file ID. If you need the full file object, request it using
+							Element:code
+								files.info
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								When it's happening:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								May 16th, 2016
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We want to make these improvements as soon as possible, beginning a gradual roll out on May 16th, 2016. If you believe that your application, custom integration, or third party library will outright break or non-gracefully degrade as a result of this change,
+							Element:a
+								please let us know immediately
+								so we may work together to make this transition as seamless as possible.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+							Element:i
+								Review other recent updates
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:ul
+							Element:li
+								Using Slack
+							Element:li
+							Element:a
+								Product
+							Element:li
+							Element:a
+								Pricing
+							Element:li
+							Element:a
+								Support
+							Element:li
+							Element:a
+								Slack Guides
+							Element:li
+							Element:a
+								Video Guides
+							Element:li
+							Element:a
+								App Directory
+							Element:li
+							Element:a
+								API
+							Element:ul
+							Element:li
+								Slack
+							Element:li
+							Element:a
+								Jobs
+							Element:li
+							Element:a
+								Customers
+							Element:li
+							Element:a
+								Developers
+							Element:li
+							Element:a
+								Events
+							Element:li
+							Element:a
+								Blog
+							Element:li
+							Element:a
+								Podcast
+							Element:li
+							Element:a
+								Slack Shop
+							Element:ul
+							Element:li
+								Legal
+							Element:li
+							Element:a
+								Privacy
+							Element:li
+							Element:a
+								Security
+							Element:li
+							Element:a
+								Terms of Service
+							Element:li
+							Element:a
+								Policies
+							Element:ul
+							Element:li
+								Handy Links
+							Element:li
+							Element:a
+								Download desktop app
+							Element:li
+							Element:a
+								Download mobile app
+							Element:li
+							Element:a
+								Brand Guidelines
+							Element:li
+							Element:a
+								Slack at Work
+							Element:li
+							Element:a
+								Status
+							Element:a
+							Element:ul
+							Element:li
+							Element:a
+								Contact Us
+							Element:li
+							Element:a
+							Element:li
+							Element:a

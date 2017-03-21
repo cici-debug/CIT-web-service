@@ -1,0 +1,619 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Message Buttons with Node.js
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+					By Steve Hammond
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Slack apps
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Node.js
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Message buttons in Slack enable a whole new level of interaction between users and the apps they love. This tutorial will guide you through a very basic implementation of the feature. At the end, you'll have a great foundation for building an app that delights your users.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Here’s what you’ll build! 🔨
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														It’s a simple app… and that’s the point! By conquering the basics, building interesting and complex interactions suddenly becomes much more attainable.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Before you get started
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Message buttons are
+													Element:strong
+														only available to
+														and will not work with stand-alone custom integrations. For the purposes of this tutorial, you will need to have created an app and have installed it on your team using our
+													Element:a
+														Slack apps
+													Element:a
+														OAuth
+														process and have included the
+													Element:strong
+														commands
+													Element:a
+														scope
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														🚨 If you are new to Slack apps and haven’t yet worked with the OAuth process, it might be best starting
+													Element:a
+														HERE
+														and coming back to this tutorial. 🚨
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We'll use a
+													Element:strong
+														Node.js
+														app as an example. The concepts and patterns should readily transfer if your weapon of choice is Python, Ruby, or another web-friendly language.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														What you’ll need
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														Slack app (listed
+													Element:a
+														here
+														) installed on your team with the
+													Element:strong
+														commands
+														OAuth scope
+													Element:li
+														Server running
+													Element:a
+														Node.js
+													Element:li
+														Publicly accessible server with a
+													Element:strong
+														valid SSL certificate
+													Element:li
+														Following Node.js modules:
+													Element:ul
+													Element:li
+													Element:a
+														: popular HTTP framework
+													Element:strong
+														Express
+													Element:li
+													Element:a
+														: simple HTTP request client
+													Element:strong
+														Request
+													Element:li
+													Element:a
+														: parsing middleware for Express.js
+													Element:strong
+														Body-parser
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The beginning of your Node.js server file should resemble:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														var express = require('express') var request = require('request') var bodyParser = require('body-parser') var app = express() var urlencodedParser = bodyParser.urlencoded({ extended: false })
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Enable interactive messages
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														First, let’s setup a
+													Element:strong
+														Request URL
+														to handle interactive message requests:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Important:
+														The Request URL must point to a TLS-enabled HTTPS URL located on a publicly accessible server with a valid SSL certificate.
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:p
+														Select your app here:
+													Element:a
+														https://api.slack.com/apps
+													Element:li
+													Element:p
+														Click the
+													Element:strong
+														Interactive Messages
+														link in the menu.
+													Element:li
+													Element:p
+														Click
+													Element:strong
+														Enable Interactive Messages
+														, enter your
+													Element:strong
+														Request URL
+														and click
+													Element:strong
+														Enable Interactive Messages
+														again.
+													Element:p
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This URL is the endpoint on your server for all action messages triggered by users in Slack. You only need one Request URL as the data needed to decipher between users, teams, and button events is delivered with each request. You’ll see more about this later. Promise.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Send buttons from a slash command trigger
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Let’s quickly add a slash command to your app called
+													Element:code
+														/send-me-buttons
+														:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:p
+														Select your app here:
+													Element:a
+														https://api.slack.com/apps
+													Element:li
+													Element:p
+														Click the
+													Element:strong
+														Slash Commands
+														link in the menu
+													Element:li
+													Element:p
+														Click
+													Element:strong
+														Create New Command
+														, enter
+													Element:strong
+														/send-me-buttons
+														in the
+													Element:strong
+														Command
+														field and enter your endpoint to receive your slash command events in the
+													Element:strong
+														Request URL
+														field. Note that commands bundled with apps only accept a
+													Element:strong
+														POST
+														routing method.
+													Element:p
+													Element:img
+													Element:li
+													Element:p
+														Take note of the
+													Element:strong
+														Verification Token
+														found on your app’s settings page in Slack under the
+													Element:strong
+														App Credentials
+														link. This token will be passed with each execution of a slash command and can be used to verify the authenticity of the request.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Add a POST route for slash commands
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Now add the route you entered as the Request URL in the previous step. It should look something like this:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														app.post('/slack/slash-commands/send-me-buttons', (req, res) =>{ })
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Respond to slash command with message buttons
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The request sent to your slash command Request URL is
+													Element:strong
+														URL encoded
+														so you’ll have to decode this to retrieve the
+													Element:code
+														response_URL
+														. You will use this URL to post your button message to your user in Slack.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Add the
+													Element:code
+														urlencodedParser
+														variable that you defined earlier as a callback to decode the request body into JSON. The buttons are sent within the attachment of a message as an array of objects called
+													Element:code
+														actions
+														. Simply add the code below and there you have it!
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														app.post('/slack/slash-commands/send-me-buttons', urlencodedParser, (req, res) =>{ res.status(200).end() // best practice to respond with empty 200 status code var reqBody = req.body var responseURL = reqBody.response_url if (reqBody.token != YOUR_APP_VERIFICATION_TOKEN){ res.status(403).end("Access forbidden") }else{ var message = { "text": "This is your first interactive message", "attachments": [ { "text": "Building buttons is easy right?", "fallback": "Shame... buttons aren't supported in this land", "callback_id": "button_tutorial", "color": "#3AA3E3", "attachment_type": "default", "actions": [ { "name": "yes", "text": "yes", "type": "button", "value": "yes" }, { "name": "no", "text": "no", "type": "button", "value": "no" }, { "name": "maybe", "text": "maybe", "type": "button", "value": "maybe", "style": "danger" } ] } ] } sendMessageToSlackResponseURL(responseURL, message) } })
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Add the following function to send your JSON message to Slack using the
+													Element:code
+														response_url
+														that you received in the previous step. You’ll use this function again when you respond to button actions from your user.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														function sendMessageToSlackResponseURL(responseURL, JSONmessage){ var postOptions = { uri: responseURL, method: 'POST', headers: { 'Content-type': 'application/json' }, json: JSONmessage } request(postOptions, (error, response, body) => { if (error){ // handle errors as you see fit } }) }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As a fun side project, try some different formatting options with the
+													Element:a
+														Message Builder
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Receive and respond to button clicks
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Now that your Node.js app is setup to send buttons to Slack, let’s configure a POST route to accept button actions.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When a user clicks on a button, your server will be sent a
+													Element:strong
+														URL encoded
+														request containing a body parameter called
+													Element:code
+														payload
+														which will contain data you’ll need to handle the user’s action and to respond accordingly.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Pass the
+													Element:code
+														urlencodedParser
+														variable once again as a callback to retrieve the payload. The
+													Element:code
+														payload
+														is itself a URL encoded JSON string so use the
+													Element:code
+														JSON.parse()
+														method to extract the desired data.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You’ll then invoke your
+													Element:code
+														sendMessageToSlackResponseURL
+														function passing the
+													Element:code
+														response_url
+														and JSON message to respond as you did with the slash command.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Your interactive messages Request URL handler will look like this:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														app.post('/slack/actions', urlencodedParser, (req, res) =>{ res.status(200).end() // best practice to respond with 200 status var actionJSONPayload = JSON.parse(req.body.payload) // parse URL-encoded payload JSON string var message = { "text": actionJSONPayload.user.name+" clicked: "+actionJSONPayload.actions[0].name, "replace_original": false } sendMessageToSlackResponseURL(actionJSONPayload.response_url, message) })
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To better understand the above code, here’s an example of the payload you’ll receive when your user clicks the "yes" button:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "actions":[ { "name":"yes", "value":"yes" } ], "callback_id":"button_tutorial", "team":{ "id":"USERS_TEAM_ID", "domain":"TEAM_NAME" }, "channel":{ "id":"CHANNEL_ID", "name":"CHANNEL_NAME" }, "user":{ "id":"USER_ID", "name":"USER_NAME" }, "action_ts":"1471473851.000000", "message_ts":"1471473846.000000", "attachment_id":"1", "token":"TOKEN", "response_url":"UNIQUE_RESPONSE_URL" }
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Last steps
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:p
+														Save your server file
+													Element:li
+													Element:p
+														Restart your Node.js app
+													Element:li
+													Element:p
+														Execute the
+													Element:code
+														/send-me-buttons
+														slash command from your Slack client
+													Element:li
+													Element:p
+														Start clicking buttons!
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														👏
+													Element:strong
+														YOU’RE DONE!
+														👏
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														What’s next?
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Now that you’ve added message buttons to your app, here’s a list of topics and features to investigate as you enhance your app:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:p
+														Explore richer attachment formatting in your responses
+													Element:li
+													Element:p
+														Use the
+													Element:a
+														chat.update
+														Web API method and the timestamp value to replace the original message. Check our docs for hints.
+													Element:li
+													Element:p
+														Add a database to your app to manage installations
+													Element:li
+													Element:p
+														Check out the complete
+													Element:a
+														message buttons
+														documentation to see what’s available to your button-enabled app! 🎉
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Related documentation
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Making messages more interactive with buttons
+										Element:br
+										Element:em
+											Slack Platform documentation
+										Element:li
+										Element:a
+											Building Slack apps
+										Element:br
+										Element:em
+											Slack Platform documentation
+										Element:li
+										Element:a
+											Using OAuth 2.0
+										Element:br
+										Element:em
+											Slack Platform documentation
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:ul
+										Element:li
+											Using Slack
+										Element:li
+										Element:a
+											Product
+										Element:li
+										Element:a
+											Pricing
+										Element:li
+										Element:a
+											Support
+										Element:li
+										Element:a
+											Slack Guides
+										Element:li
+										Element:a
+											Video Guides
+										Element:li
+										Element:a
+											App Directory
+										Element:li
+										Element:a
+											API
+										Element:ul
+										Element:li
+											Slack
+										Element:li
+										Element:a
+											Jobs
+										Element:li
+										Element:a
+											Customers
+										Element:li
+										Element:a
+											Developers
+										Element:li
+										Element:a
+											Events
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Podcast
+										Element:li
+										Element:a
+											Slack Shop
+										Element:ul
+										Element:li
+											Legal
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Security
+										Element:li
+										Element:a
+											Terms of Service
+										Element:li
+										Element:a
+											Policies
+										Element:ul
+										Element:li
+											Handy Links
+										Element:li
+										Element:a
+											Download desktop app
+										Element:li
+										Element:a
+											Download mobile app
+										Element:li
+										Element:a
+											Brand Guidelines
+										Element:li
+										Element:a
+											Slack at Work
+										Element:li
+										Element:a
+											Status
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Contact Us
+										Element:li
+										Element:a
+										Element:li
+										Element:a

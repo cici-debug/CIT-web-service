@@ -1,0 +1,623 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Storing, retrieving, and modifying file uploads
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+					By Sachin Ranchod
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Ruby
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					File management
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Events API
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Have you ever wished that you could just upload a photo of a receipt to Slack to have it automatically attached to your expense report?
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Maybe you want to upload a quote from a supplier, discuss it with your team and have it immediately linked to the vendor's profile in your procurement system?
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					With the Files API, you can build amazing integrations that allow you to quickly and easily interact with the files your users have on their phone or desktop.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					To guide you through the process of using the Files API, we'll be building a simple app that takes images uploaded to Slack and uses a computer vision API to find (and draw red boxes) around every face in the image. We'll upload the marked up image and add reactions to it based on the subjects' emotions which have been determined using image sentiment analysis. Finally, if you mention the bot with one or more emotion emojis ( 😂,😡,😃,😭 ), we'll search the files we previously uploaded to the channel to find one that matches the set of emotions.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					To build our Slack App, we'll be using Ruby's Sinatra framework together with Slack's
+				Element:a
+					Events API
+					. We chose the Events API (over the
+				Element:a
+					RTM API
+					) due to the simplicity of the inbound request model.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The first thing we'll need to do is create a
+							Element:a
+								Slack App
+								and enable Event subscriptions. In order to receive events from the Events API, you'll need an HTTPS endpoint which is set up to respond to the url verification challenge. We recommend using
+							Element:a
+								ngrok
+								or
+							Element:a
+								LocalTunnel
+								to tunnel your localhost through HTTPS.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								post '/events' do request.body.rewind data = JSON.parse(request.body.read) if data["type"] == "url_verification" content_type :json return {challenge: data["challenge"]}.to_json end end
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Our app needs to respond to two events. First, the bot needs to notice when files are being shared so that it can scan images for faces. The bot also needs to listen to messages in channels so that it can respond when it is mentioned.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to get all the information we need, we'll subscribe to the following bot events:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+							Element:code
+								message.channels
+							Element:li
+							Element:a
+							Element:code
+								message.im
+							Element:li
+							Element:a
+							Element:code
+								message.mpim
+							Element:li
+							Element:a
+							Element:code
+								message.groups
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Our app does not need to subscribe to the
+							Element:code
+								file_shared
+								event because we'll receive that information as part of the
+							Element:code
+								message.*
+								events. You'll want to subscribe to the
+							Element:code
+								file_shared
+								if your app will only be responding to files being shared and not messages.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Save your
+							Element:code
+								client_id
+								,
+							Element:code
+								client_secret
+								and
+							Element:code
+								verification_token
+								as environment variables. Finally, set your
+							Element:a
+								OAuth
+								redirect URL to an
+							Element:code
+								/oauth
+								endpoint on your
+							Element:code
+								localhost
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Add to Slack button
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We'll be using OAuth and the
+							Element:a
+								Add to Slack button
+								to manage the process of granting our app access to a Slack team. In order to receive bot events, we'll need to request the
+							Element:code
+								bot
+								scope. To search files, we'll need to request the
+							Element:code
+								files:read
+								scope from a user.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Our 'Add to Slack' button HTML looks as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<a href="https://slack.com/oauth/authorize?scope=bot,files:read&client_id=#{ENV['SLACK_CLIENT_ID']"> <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x"/></a>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								/oauth
+								endpoint exchanges the code it receives for a bot and user token. This information is saved in a database keyed on
+							Element:code
+								team_id
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								get '/oauth' do if params['code'] options = { client_id: ENV['SLACK_CLIENT_ID'], client_secret: ENV['SLACK_CLIENT_SECRET'], code: params['code'] } res = RestClient.post 'https://slack.com/api/oauth.access', options, content_type: :json save_team(JSON.parse(res)) erb :success else erb :failure end end
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Verifying incoming requests & load data
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For every request coming in to our event subscription endpoint, we want to load up the saved authentication data (so that we can make requests with the correct tokens) and verify the verification token. When pulling up saved tokens, you'll want to first search by
+							Element:code
+								team_id
+								then user so that you can select the most appropriate token to use.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								post '/events' do request.body.rewind data = JSON.parse(request.body.read, object_class: OpenStruct) halt 500 if data.token != ENV['VERIFICATION_TOKEN'] case data.type when "url_verification" content_type :json return {challenge: data.challenge}.to_json when "event_callback" event = data.event @team = find_team(data.team_id, event.user) [...]
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Catching shared files
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When a file is shared, you'll either receive an event with a type of
+							Element:code
+								message
+								(and a subtype of
+							Element:code
+								file_share
+								) or
+							Element:code
+								file_shared
+								depending on which events you've subscribed to. When we receive this event, we'll confirm that the image isn't being uploaded by our bot. This will stop us from creating an endless loop of uploaded images.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								post '/events' do [...] when "event_callback" event = data.event @team = find_team(data.team_id, event.user) if event.subtype && event.subtype == "file_share" if @team && event.user != @team.bot["bot_user_id"] file = event.file fetch_and_compose_image(file, event.channel) end end end [...]
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When sending you an event, Slack expects a
+							Element:code
+								200 OK
+								response within 3 seconds. If you're downloading and processing files, there's a good chance you won't be able to respond in time. This could put you in a position where you're handling the same event multiple times and unintentionally spamming your users. To prevent this from happening, we'd recommend responding to the request immediately and passing the processing of files to a background job.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Downloading files from Slack
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you receive a file shared event, you'll also get all the information we have about file object, including
+							Element:code
+								url_private
+								which points to a URL to the file contents.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def fetch_and_compose_image(file, channel) filename = file.timestamp if file.filetype == "jpg" File.open("./tmp/#{filename}", 'wb') do |f| f << fetch_image(file.url_private) end fd = FaceDetection.new if fd.process_image file_id = upload(file, channel) add_reactions(file_id, fd) end end end
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To retrieve the file contents, you'll need to make a GET request to
+							Element:code
+								url_private
+								and include an Authorization header (
+							Element:code
+								"Authorization": "Bearer xoxp-123456-abcdef"
+								). The token used in the Authorization header needs to belong to a user who has access to the file.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def fetch_image(url) res = RestClient.get(url, { "Authorization" => "Bearer #{@team.access_token}" }) if res.code == 200 return res.body else raise 'Download failed' end end
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Upload file
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once we've downloaded the file and processed it, we'll upload the updated file to the channel, group or direct message where it was initially shared. To do this, we send a POST request to
+							Element:code
+								https://slack.com/api/files.upload
+								which includes the file contents, the
+							Element:code
+								bot_access_token
+								and the channels to share the file in.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def upload(file, channel) options = { token: @team.bot["bot_access_token"], file: File.new("./tmp/composed/#{file.timestamp}", 'rb'), filename: "composed_" + file.name, title: "Composed " + file.title, channels: channel } res = RestClient.post 'https://slack.com/api/files.upload', options # Return the uploaded file's ID JSON.parse(res.body)["file"]["id"] end
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once the file has been successfully uploaded, we'll parse the response to get the ID of the newly uploaded file. This ID will let us interact with the uploaded file by adding reactions or comments.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Comment or react to the file
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To add a reaction to the newly uploaded file, we cycle through the detected emotions (which have already been mapped to emojis) and send a request to
+							Element:code
+								https://slack.com/api/reactions.add
+								for each. The payload includes the bot_access_token for the team, the file_id of our uploaded file and the emoji name (without colons).
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def add_reactions(file_id, face_detection) face_detection.emotions.uniq.each do |emotion| options = { token: @team.bot["bot_access_token"], file: file_id, name: emotion } res = RestClient.post 'https://slack.com/api/reactions.add', options, content_type: :json end end
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Search files
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Besides being able to mark up images, our bot also needs to be able to search uploaded images within a channel by emotion and share a random result. To do this, we'll listen for mentions of our bot's name and see if the message sent to us includes any of the emotion emojis we understand.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								post '/events' do [...] when "event_callback" if event.text && event.text.match(/^<@#{@team.bot["bot_user_id"]}>/) arr = FaceDetection::Emotions.values.select do |emotion| event.text.include?(":#{emotion}:") end unless arr.empty? || already_processing?(event.ts) do find_image_with_emotion(arr, event.channel) end end [...]
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once we've parsed the message and extracted the emotion emojis, we'll search the files within the channel by sending a request to
+							Element:code
+								https://slack.com/api/files.list
+								. This endpoint expects a user's access token and will not work with a bot access token. We can limit the search to just our bot's uploaded files by passing the bot_user_id to the user parameter. Finally, we limit the files we're searching for to images in the current channel (by passing the channel id to the channel parameter and images to type).
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def find_image_with_emotion(array_of_emoji, channel) options = { token: @team.access_token, channel: channel, user: @team.bot["bot_user_id"], types: "images" } res = RestClient.post 'https://slack.com/api/files.list', options, content_type: :json body = JSON.parse(res.body, object_class: OpenStruct) files = body.files found_files = [] files.each do |file| found_files << file if bot_reacted(file, array_of_emoji) end rand_file = found_files.sample share_file(rand_file) if rand_file end
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Share an uploaded file
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To share the uploaded file in the channel, we use the
+							Element:code
+								https://slack.com/api/chat.postMessage
+								method. The text of the method is the file's
+							Element:code
+								url_private
+								value. The message should by posted using the
+							Element:code
+								bot_access_token
+								and
+							Element:code
+								as_user
+								set to
+							Element:code
+								true
+								so that the image unfurls correctly.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def share_file(file, channel) options = { token: @team.bot["bot_access_token"], channel: channel, text: file.url_private, as_user: true } res = RestClient.post 'https://slack.com/api/chat.postMessage', options, content_type: :json end
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Pulling it all together
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Related documentation
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											file
+										Element:br
+										Element:em
+											Object type documentation
+										Element:li
+										Element:a
+											files.upload
+										Element:br
+										Element:em
+											API method documentation
+										Element:li
+										Element:a
+											files.info
+										Element:br
+										Element:em
+											API method documentation
+										Element:li
+										Element:a
+											files.list
+										Element:br
+										Element:em
+											API method documentation
+										Element:li
+										Element:a
+											chat.postMessage
+										Element:br
+										Element:em
+											API method documentation
+										Element:li
+										Element:a
+											Attaching content and links to messages
+										Element:br
+										Element:em
+											Slack Platform documentation
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:ul
+										Element:li
+											Using Slack
+										Element:li
+										Element:a
+											Product
+										Element:li
+										Element:a
+											Pricing
+										Element:li
+										Element:a
+											Support
+										Element:li
+										Element:a
+											Slack Guides
+										Element:li
+										Element:a
+											Video Guides
+										Element:li
+										Element:a
+											App Directory
+										Element:li
+										Element:a
+											API
+										Element:ul
+										Element:li
+											Slack
+										Element:li
+										Element:a
+											Jobs
+										Element:li
+										Element:a
+											Customers
+										Element:li
+										Element:a
+											Developers
+										Element:li
+										Element:a
+											Events
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Podcast
+										Element:li
+										Element:a
+											Slack Shop
+										Element:ul
+										Element:li
+											Legal
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Security
+										Element:li
+										Element:a
+											Terms of Service
+										Element:li
+										Element:a
+											Policies
+										Element:ul
+										Element:li
+											Handy Links
+										Element:li
+										Element:a
+											Download desktop app
+										Element:li
+										Element:a
+											Download mobile app
+										Element:li
+										Element:a
+											Brand Guidelines
+										Element:li
+										Element:a
+											Slack at Work
+										Element:li
+										Element:a
+											Status
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Contact Us
+										Element:li
+										Element:a
+										Element:li
+										Element:a

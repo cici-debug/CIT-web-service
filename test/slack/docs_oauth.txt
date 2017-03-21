@@ -1,0 +1,752 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Using OAuth 2.0
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					OAuth 2.0 is a protocol that lets your app request authorization to private details in a user's Slack account without getting their password.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					You'll need to
+				Element:a
+					register your app
+					before getting started. A registered app is assigned a unique Client ID and Client Secret which will be used in the OAuth flow. The Client Secret should not be shared.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The easiest way to enable teams to install your app is with the
+				Element:strong
+					button.
+				Element:a
+					Add to Slack
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					is the best way to log individual team members into your application.
+				Element:a
+					Sign in with Slack
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								The OAuth Flow
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Slack uses OAuth 2.0's
+							Element:a
+								authorization code grant flow
+								to issue access tokens on behalf of users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 1 - Authorization
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your web or mobile app should redirect users to the following URL:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											https://slack.com/oauth/authorize
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following values should be passed as GET parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											client_id
+											- issued when you created your app (required)
+										Element:li
+										Element:code
+											scope
+											- permissions to request (see below) (required)
+										Element:li
+										Element:code
+											redirect_uri
+											- URL to redirect back to (see below) (optional)
+										Element:li
+										Element:code
+											state
+											- unique string to be passed back upon completion (optional)
+										Element:li
+										Element:code
+											team
+											- Slack team ID to attempt to restrict to (optional)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											scope
+											parameter is a space-separated list of OAuth scopes, indicating which parts of the Slack user's account you'd like your app to be able to access. The complete list of scopes can be found
+										Element:a
+											here
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											state
+											parameter should be used to avoid forgery attacks by passing in a value that's unique to the user you're authenticating and checking it when auth completes.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How the
+													Element:code
+														team
+														parameter behaves
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When a valid team ID is passed to
+													Element:code
+														team
+														and the authenticating user is already signed in to that team, passing this parameter ensures the user will auth against that team.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If the user is not signed in yet, the user will be asked to specify a team to sign in to. That team will then be used as they complete the authorization flow, regardless of any
+													Element:code
+														team
+														parameter you provided when the flow began.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you omit the optional
+													Element:code
+														team
+														parameter, the user will be allowed to choose which team they are authenticating against.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For the best user experience, use the
+													Element:a
+														Add to Slack
+														button to direct users to approve your application for access and
+													Element:a
+														Sign in with Slack
+														to log users in.
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 2 - Token Issuing
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the user authorizes your app, Slack will redirect back to your specified
+										Element:code
+											redirect_uri
+											with a temporary code in a
+										Element:code
+											code
+											GET parameter, as well as a
+										Element:code
+											state
+											parameter if you provided one in the previous step. If the states don't match, the request may have been created by a third party and you should abort the process.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:i
+											Authorization codes may only be exchanged once and expire 10 minutes after issuance.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If all is well, exchange the authorization code for an access token using the
+										Element:a
+											API method (
+										Element:code
+											oauth.access
+										Element:a
+											method documentation
+											).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											https://slack.com/api/oauth.access
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											client_id
+											- issued when you created your app (required)
+										Element:li
+										Element:code
+											client_secret
+											- issued when you created your app (required)
+										Element:li
+										Element:code
+											code
+											- a temporary authorization code (required)
+										Element:li
+										Element:code
+											redirect_uri
+											- must match the originally submitted URI (if one was sent)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You'll receive a JSON response containing an
+										Element:code
+											access_token
+											(among other details):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "access_token": "xoxp-23984754863-2348975623103", "scope": "read" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can then use this token to call
+										Element:a
+											API methods
+											on behalf of the user. The token will continue functioning until the installing user either revokes the token and/or uninstalls your application.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Slack apps can be installed multiple times by the same user
+										Element:em
+											and
+											additional users on the same team. Your app is considered "installed" as long as one of these tokens is still valid.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:i
+											Please note that these access tokens do not expire.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Bot user access tokens
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If your Slack app includes a
+													Element:a
+														bot user
+														, upon approval the JSON response will contain an additional node containing an access token to be specifically used for your bot user, within the context of the approving team.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When you connect to
+													Element:a
+														or use
+													Element:code
+														rtm.start
+													Element:a
+														Web API
+														methods on behalf of your bot user, you should use this bot user access token instead of the top-level access token granted to your application.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here's a more verbose example JSON response including a Bot user access token:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "access_token": "xoxp-XXXXXXXX-XXXXXXXX-XXXXX", "scope": "incoming-webhook,commands,bot", "team_name": "Team Installing Your Hook", "team_id": "XXXXXXXXXX", "incoming_webhook": { "url": "https://hooks.slack.com/TXXXXX/BXXXXX/XXXXXXXXXX", "channel": "#channel-it-will-post-to", "configuration_url": "https://teamname.slack.com/services/BXXXXX" }, "bot":{ "bot_user_id":"UTTTTTTTTTTR", "bot_access_token":"xoxb-XXXXXXXXXXXX-TTTTTTTTTTTTTT" } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Within this response, the
+													Element:code
+														bot
+														node contains two fields related to your bot user:
+													Element:code
+														bot_user_id
+														and
+													Element:code
+														bot_access_token
+														. Bot access tokens always begin with
+													Element:code
+														xoxb
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Bot user tokens may be revoked by all installing users having uninstalled your Slack app from their team.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:i
+													Element:strong
+														Secure your bot user tokens
+														, as with all tokens and credentials. Do not share tokens with users or anyone else. Bot user tokens have particularly expansive capabilities not afforded to typical user tokens issued on behalf of team members.
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 2a - Denied Requests
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the user denies your request, Slack redirects back to your
+										Element:code
+											redirect_uri
+											with an
+										Element:code
+											error
+											parameter.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://yourapp.com/oauth? error=access_denied
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Applications should handle this condition appropriately.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Storing tokens and credentials
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Store your application's credentials and user tokens with care. Read our article on
+							Element:a
+								safely storing credentials
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Redirect URIs
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								redirect_uri
+								parameter is optional. If left out, Slack will redirect users to the callback URL configured in your app's settings. If provided, the redirect URL's host and port must exactly match the callback URL. The redirect URL's path must reference a subdirectory of the callback URL.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								CALLBACK: http://example.com/path GOOD: https://example.com/path GOOD: http://example.com/path/subdir/other BAD: http://example.com/bar BAD: http://example.com/ BAD: http://example.com:8080/path BAD: http://oauth.example.com:8080/path BAD: http://example.org
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Handling Multiple Authorizations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your application may send a user through the OAuth flow multiple times.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can utilize this behavior to re-verify a user's identity or to retrieve a user's access token again as needed. You can also use it to upgrade an access token's
+							Element:a
+								OAuth scopes
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If your application
+							Element:em
+								requires
+								a basic set of permissions to function, but can utilize
+							Element:em
+								optional
+								permissions for advanced functionality, requesting additional scopes separately ensures that your application will have the access it needs to function without initially deterring users from approving it.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When your user is ready to indulge themselves in features requiring additional permissions, send them through the OAuth flow again, this time requesting the additional scopes you need.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example, if your app uses Slack to sign in to your service, you may want to restrict your initial OAuth request to just the
+							Element:code
+								identify
+								scope. If that same app also has an optional feature to import files from Slack using
+							Element:code
+								files:read
+								, you can initiate the application approval process again, within context of the user's action, so they understand why the additional permissions are being requested.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This ensures that your app retains critical functionality (signing in to your app) without requiring optional permissions (access to the user's files) and also provides better context for the user.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Appending Scopes
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you initially send a user through the OAuth flow, you receive a token that has the set of scopes you requested. Any subsequent time(s) you send that same user through the OAuth flow, any new scopes you request will be added to that initial set.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, if you initially request
+										Element:code
+											channels:read
+											and
+										Element:code
+											channels:write
+											from a user, the initial token will have only be scoped to
+										Element:code
+											identify channels:read
+											. If you send that same user through a second OAuth flow, this time requesting
+										Element:code
+											files:write
+											, the resulting token will have the new scope added to the previous set:
+										Element:code
+											channels:read channels:write files:write
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This process can be repeated any number of times, and each scope you request is
+										Element:strong
+											additive
+											to the scopes you've already been awarded. It is not possible to downgrade an access token's scopes.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As you make
+										Element:a
+											Web API
+											requests, a
+										Element:code
+											X-OAuth-Scopes
+											HTTP header will be returned with every response indicating which scopes the calling token currently has:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											X-OAuth-Scopes: identity.basic,reactions:read
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Verifying user identity without installing anything
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use
+										Element:a
+											Sign in with Slack
+											instead when you just want to log team members in and verify their identity without having them "install" something. If you need to ask for specific authorization scopes from a user, you can switch to the
+										Element:a
+											Add to Slack
+											flow to request them. Additional scopes awarded there will be appended to the same OAuth token for that user.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Revoking tokens
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want to dispose of an OAuth token, use
+							Element:a
+								. It works with tokens from
+							Element:code
+								auth.revoke
+							Element:a
+								Sign in with Slack
+								as well as from
+							Element:a
+								Add to Slack
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By revoking the last token associated between your application and a team, your application will be effectively uninstalled for that team.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Revoking tokens and asking a user to authenticate again is the best way to
+							Element:em
+								start over
+								and incrementally add more limited
+							Element:a
+								OAuth scopes
+								to a token.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Related Articles
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Tutorial by Slack
+							Element:span
+								Message Buttons with Node.js
+							Element:li
+							Element:a
+								Tutorial by Slack
+							Element:span
+								Building an onboarding bot in Ruby using Slack's Events API
+							Element:li
+							Element:a
+								Tutorial by Tomomi Imura (medium.com)
+							Element:span
+								Creating a Slack Command Bot from Scratch with Node.js & Distribute It
+							Element:li
+							Element:a
+								Tutorial by Slack
+							Element:span
+								Building a simple bot using Slack's Events API in Python
+							Element:li
+							Element:a
+								Tutorial by Manifestly (medium.com)
+							Element:span
+								How Manifestly implemented Sign in with Slack
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:ul
+							Element:li
+								Using Slack
+							Element:li
+							Element:a
+								Product
+							Element:li
+							Element:a
+								Pricing
+							Element:li
+							Element:a
+								Support
+							Element:li
+							Element:a
+								Slack Guides
+							Element:li
+							Element:a
+								Video Guides
+							Element:li
+							Element:a
+								App Directory
+							Element:li
+							Element:a
+								API
+							Element:ul
+							Element:li
+								Slack
+							Element:li
+							Element:a
+								Jobs
+							Element:li
+							Element:a
+								Customers
+							Element:li
+							Element:a
+								Developers
+							Element:li
+							Element:a
+								Events
+							Element:li
+							Element:a
+								Blog
+							Element:li
+							Element:a
+								Podcast
+							Element:li
+							Element:a
+								Slack Shop
+							Element:ul
+							Element:li
+								Legal
+							Element:li
+							Element:a
+								Privacy
+							Element:li
+							Element:a
+								Security
+							Element:li
+							Element:a
+								Terms of Service
+							Element:li
+							Element:a
+								Policies
+							Element:ul
+							Element:li
+								Handy Links
+							Element:li
+							Element:a
+								Download desktop app
+							Element:li
+							Element:a
+								Download mobile app
+							Element:li
+							Element:a
+								Brand Guidelines
+							Element:li
+							Element:a
+								Slack at Work
+							Element:li
+							Element:a
+								Status
+							Element:a
+							Element:ul
+							Element:li
+							Element:a
+								Contact Us
+							Element:li
+							Element:a
+							Element:li
+							Element:a

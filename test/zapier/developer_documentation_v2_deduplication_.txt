@@ -1,0 +1,557 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Deduplication
+				Element:a
+					#
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					We do the deduplication automatically for you, but you must be mindful of how it works. The important bits are outlined below!
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Deduplication tl;dr:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Provide a unique
+				Element:code
+					id
+					key.
+				Element:li
+					Sort reverse-chronologically by time created.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					An unfortunate artifact of
+				Element:a
+					polling
+					for new data is that we must deduplicate the results we get back from your API. After all, we don't want to trigger an action multiple times when a newly created item in your API exists in multiple distinct polls.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					For example, say your endpoint returns a list of to-dos:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					[
+				Element:span
+					{
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+					7
+				Element:span
+					,
+				Element:span
+					"created"
+				Element:span
+					:
+				Element:span
+					"Mon, 25 Jun 2012 16:41:54 -0400"
+				Element:span
+					,
+				Element:span
+					"list_id"
+				Element:span
+					:
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+					"description"
+				Element:span
+					:
+				Element:span
+					"integrate our api with zapier"
+				Element:span
+					,
+				Element:span
+					"complete"
+				Element:span
+					:
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+					{
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+					6
+				Element:span
+					,
+				Element:span
+					"created"
+				Element:span
+					:
+				Element:span
+					"Mon, 25 Jun 2012 16:41:45 -0400"
+				Element:span
+					,
+				Element:span
+					"list_id"
+				Element:span
+					:
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+					"description"
+				Element:span
+					:
+				Element:span
+					"get published in zapier library"
+				Element:span
+					,
+				Element:span
+					"complete"
+				Element:span
+					:
+				Element:span
+					false
+				Element:span
+					}
+				Element:span
+					]
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Every time a new Zap is created or turned on, we make a call to your API to populate our deduplication mechanism. We will cache and store each
+				Element:code
+					id
+					field in our database.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					After this, we will poll at an interval (based on customer's plan) looking for changes against this cached list of
+				Element:code
+					id
+					s.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Now let's say we created a new to-do:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					[
+				Element:span
+					{
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+					8
+				Element:span
+					,
+				Element:span
+					"created"
+				Element:span
+					:
+				Element:span
+					"Mon, 25 Jun 2012 16:42:09 -0400"
+				Element:span
+					,
+				Element:span
+					"list_id"
+				Element:span
+					:
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+					"description"
+				Element:span
+					:
+				Element:span
+					"re-do our api to support webhooks"
+				Element:span
+					,
+				Element:span
+					"complete"
+				Element:span
+					:
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+					}
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+					7
+				Element:span
+					,
+				Element:span
+					"created"
+				Element:span
+					:
+				Element:span
+					"Mon, 25 Jun 2012 16:41:54 -0400"
+				Element:span
+					,
+				Element:span
+					"list_id"
+				Element:span
+					:
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+					"description"
+				Element:span
+					:
+				Element:span
+					"integrate our api with zapier"
+				Element:span
+					,
+				Element:span
+					"complete"
+				Element:span
+					:
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+					{
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+					6
+				Element:span
+					,
+				Element:span
+					"created"
+				Element:span
+					:
+				Element:span
+					"Mon, 25 Jun 2012 16:41:45 -0400"
+				Element:span
+					,
+				Element:span
+					"list_id"
+				Element:span
+					:
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+					"description"
+				Element:span
+					:
+				Element:span
+					"get published in zapier library"
+				Element:span
+					,
+				Element:span
+					"complete"
+				Element:span
+					:
+				Element:span
+					false
+				Element:span
+					}
+				Element:span
+					]
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The first to-do with
+				Element:code
+					id
+					equal to
+				Element:code
+					8
+					will be seen as a new item. That particular JSON object will then be passed through to the action in the user's Zap. The
+				Element:code
+					id
+					of the next item (
+				Element:code
+					7
+					) we already know and because we assume the results are sorted in reverse-chronological order (newest first) this is where we stop processing the result.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Your API must be able to return results in reverse-chronological order.
+				Element:a
+					Wufoo is a great example
+					of an API that supports sorting on any field and direction.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					One other requirement is the
+				Element:code
+					id
+					field should always be supplied and unique among all items in the result.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Custom or multiple ID fields
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								What if the items your API returns do not have an
+							Element:code
+								id
+								field? Or how would you go about adding a
+							Element:em
+								Updated to-do
+								trigger to our to-do app? In both cases you'll use
+							Element:a
+								scripting
+								to modify the API response.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Let's assume your to-do API has an endpoint to return to-dos sorted by
+							Element:code
+								updatedAt
+								in descending direction. This is how you would use the scripting post poll trigger method:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								var
+							Element:span
+								Zap
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								TRIGGER_KEY_post_poll
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								var
+							Element:span
+								items
+							Element:span
+								=
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								parse
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								response
+							Element:span
+								.
+							Element:span
+								content
+							Element:span
+								);
+							Element:span
+								items
+							Element:span
+								.
+							Element:span
+								forEach
+							Element:span
+								(
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								item
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								item
+							Element:span
+								.
+							Element:span
+								originalId
+							Element:span
+								=
+							Element:span
+								item
+							Element:span
+								.
+							Element:span
+								id
+							Element:span
+								;
+							Element:span
+								item
+							Element:span
+								.
+							Element:span
+								id
+							Element:span
+								=
+							Element:span
+								item
+							Element:span
+								.
+							Element:span
+								id
+							Element:span
+								+
+							Element:span
+								'-'
+							Element:span
+								+
+							Element:span
+								item
+							Element:span
+								.
+							Element:span
+								updatedAt
+							Element:span
+								;
+							Element:span
+								});
+							Element:span
+								return
+							Element:span
+								items
+							Element:span
+								;
+							Element:span
+								}
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Notice how we preserve the original value before setting
+							Element:code
+								id
+								to a new combined value that is unique for every update of a to-do.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Re-order items
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								What if your API cannot order its results in reverse-chronological order? Again scripting can help you deal with this.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Depending on your API it is most likely you will need to use the scripting poll trigger method. This will let you handle the
+							Element:a
+								request(s) to your API
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								One possible scenario could be:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+								↑ Was this documentation useful?
+							Element:li
+								Fetch the first page, containing the oldest items, but also the total number of pages.
+							Element:li
+								Fetch the last page and reverse the order of the items before returning it.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								Can't find what you're looking for? We'd love to help.
+							Element:a
+								Yes
+							Element:a
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Send us a message
+								. Get Help
+						Node:
+						(type) c
+						(layer)2
+							Element:noscript
+							Element:img

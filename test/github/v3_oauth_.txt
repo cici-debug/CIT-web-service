@@ -1,0 +1,1529 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:a
+					OAuth
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Web Application Flow
+				Element:li
+				Element:a
+					Non-Web Application Flow
+				Element:li
+				Element:a
+					Redirect URLs
+				Element:li
+				Element:a
+					Scopes
+				Element:li
+				Element:a
+					Common errors for the authorization request
+				Element:li
+				Element:a
+					Common errors for the access token request
+				Element:li
+				Element:a
+					Directing users to review their access for an application
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					OAuth2 is a protocol that lets external applications request authorization to private details in a user's GitHub account without getting their password. This is preferred over
+				Element:a
+					Basic Authentication
+					because tokens can be limited to specific types of data, and can be revoked by users at any time.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All developers need to
+				Element:a
+					register their application
+					before getting started. A registered OAuth application is assigned a unique Client ID and Client Secret. The Client Secret should not be shared.
+				Element:strong
+					You may create a
+				Element:a
+					personal access token
+					for your own use or implement the web flow below to allow other users to authorize your application.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					GitHub's OAuth implementation supports the standard
+				Element:a
+					authorization code grant type
+					. Developers should implement the web application flow described below to obtain an authorization code and then exchange it for a token. (The
+				Element:a
+					implicit grant type
+					is not supported.)
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Web Application Flow
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This is a description of the OAuth2 flow from 3rd party web sites.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											1. Redirect users to request GitHub access
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											GET https://github.com/login/oauth/authorize
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Parameters
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											client_id
+										Element:td
+										Element:code
+											string
+										Element:td
+										Element:strong
+											Required
+											. The client ID you received from GitHub when you
+										Element:a
+											registered
+											.
+										Element:tr
+										Element:td
+										Element:code
+											redirect_uri
+										Element:td
+										Element:code
+											string
+										Element:td
+											The URL in your application where users will be sent after authorization. See details below about
+										Element:a
+											redirect urls
+											.
+										Element:tr
+										Element:td
+										Element:code
+											scope
+										Element:td
+										Element:code
+											string
+										Element:td
+											A space delimited list of
+										Element:a
+											scopes
+											. If not provided,
+										Element:code
+											scope
+											defaults to an empty list for users that have not authorized any scopes for the application. For users who have authorized scopes for the application, the user won't be shown the OAuth authorization page with the list of scopes. Instead, this step of the flow will automatically complete with the set of scopes the user has authorized for the application. For example, if a user has already performed the web flow twice and has authorized one token with
+										Element:code
+											user
+											scope and another token with
+										Element:code
+											repo
+											scope, a third web flow that does not provide a
+										Element:code
+											scope
+											will receive a token with
+										Element:code
+											user
+											and
+										Element:code
+											repo
+											scope.
+										Element:tr
+										Element:td
+										Element:code
+											state
+										Element:td
+										Element:code
+											string
+										Element:td
+											An unguessable random string. It is used to protect against cross-site request forgery attacks.
+										Element:tr
+										Element:td
+										Element:code
+											allow_signup
+										Element:td
+										Element:code
+											string
+										Element:td
+											Whether or not unauthenticated users will be offered an option to sign up for GitHub during the OAuth flow. The default is
+										Element:code
+											true
+											. Use
+										Element:code
+											false
+											in the case that a policy prohibits signups.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											2. GitHub redirects back to your site
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the user accepts your request, GitHub redirects back to your site with a temporary code in a
+										Element:code
+											code
+											parameter as well as the state you provided in the previous step in a
+										Element:code
+											state
+											parameter. If the states don't match, the request has been created by a third party and the process should be aborted.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Exchange this for an access token:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST https://github.com/login/oauth/access_token
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Parameters
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											client_id
+										Element:td
+										Element:code
+											string
+										Element:td
+										Element:strong
+											Required
+											. The client ID you received from GitHub when you
+										Element:a
+											registered
+											.
+										Element:tr
+										Element:td
+										Element:code
+											client_secret
+										Element:td
+										Element:code
+											string
+										Element:td
+										Element:strong
+											Required
+											. The client secret you received from GitHub when you
+										Element:a
+											registered
+											.
+										Element:tr
+										Element:td
+										Element:code
+											code
+										Element:td
+										Element:code
+											string
+										Element:td
+										Element:strong
+											Required
+											. The code you received as a response to
+										Element:a
+											Step 1
+											.
+										Element:tr
+										Element:td
+										Element:code
+											redirect_uri
+										Element:td
+										Element:code
+											string
+										Element:td
+											The URL in your application where users will be sent after authorization. See details below about
+										Element:a
+											redirect urls
+											.
+										Element:tr
+										Element:td
+										Element:code
+											state
+										Element:td
+										Element:code
+											string
+										Element:td
+											The unguessable random string you optionally provided in
+										Element:a
+											Step 1
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Response
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, the response will take the following form:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											access_token=e72e16c7e42f292c6912e7710c838347ae178b4a&scope=user%2Cgist&token_type=bearer
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also receive the content in different formats depending on the Accept header:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Accept: application/json {"access_token":"e72e16c7e42f292c6912e7710c838347ae178b4a", "scope":"repo,gist", "token_type":"bearer"} Accept: application/xml <OAuth> <token_type>bearer</token_type> <scope>repo,gist</scope> <access_token>e72e16c7e42f292c6912e7710c838347ae178b4a</access_token> </OAuth>
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Multiple tokens
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														GitHub allows multiple tokens to exist for a user/application/scope combination. This lets you create tokens for specific use cases. For example, your application might support one workflow that uses GitHub for sign in and only requires basic user information. Another workflow might require access to a user's private repositories. Using multiple tokens, your application can perform the web flow for each use case, requesting only the scopes needed. If a user only uses your application to sign in, they are never required to grant your application access to their private repositories. Note, there is a limit to the number of tokens that are issued per user/application/scope combination. If your application requests enough tokens to go over one of the limits, older tokens will stop working.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Warning:
+														Revoking all of a user's access to an application deletes any SSH keys the application generated on behalf of the user, including
+													Element:a
+														deploy keys
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Requested scopes vs. granted scopes
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														scope
+														attribute lists scopes attached to the token that were granted by the user. Normally, these scopes will be identical to what you requested. However, users
+													Element:a
+														will soon be able to edit their scopes
+														, effectively granting your application less access than you originally requested. Also, users will also be able to edit token scopes after the OAuth flow completed. You should be aware of this possibility and adjust your application's behavior accordingly.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														It is important to handle error cases where a user chooses to grant you less access than you originally requested. For example, applications can warn or otherwise communicate with their users that they will see reduced functionality or be unable to perform some actions.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Also, applications can always send users back through the flow again to get additional permission, but don’t forget that users can always say no.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Check out the
+													Element:a
+														Basics of Authentication guide
+														which provides tips on handling modifiable token scopes.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Normalized scopes
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When requesting multiple scopes, the token will be saved with a normalized list of scopes, discarding those that are implicitly included by another requested scope. For example, requesting
+													Element:code
+														user,gist,user:email
+														will result in a token with
+													Element:code
+														user
+														and
+													Element:code
+														gist
+														scopes only since the access granted with
+													Element:code
+														user:email
+														scope
+													Element:a
+														is included
+														in the
+													Element:code
+														user
+														scope.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											3. Use the access token to access the API
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The access token allows you to make requests to the API on a behalf of a user.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											GET https://api.github.com/user?access_token=...
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can pass the token in the query params like shown above, but a cleaner approach is to include it in the Authorization header
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Authorization: token OAUTH-TOKEN
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, in curl you can set the Authorization header like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -H "Authorization: token OAUTH-TOKEN" https://api.github.com/user
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Non-Web Application Flow
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Use
+							Element:a
+								Basic Authentication
+								to create an OAuth2 token using the
+							Element:a
+								interface below
+								. With this technique, a username and password need not be stored permanently, and the user can revoke access at any time. (Make sure to understand how to
+							Element:a
+								work with two-factor authentication
+								if you or your users have two-factor authentication enabled.)
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Redirect URLs
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								redirect_uri
+								parameter is optional. If left out, GitHub will redirect users to the callback URL configured in the OAuth Application settings. If provided, the redirect URL's host and port must exactly match the callback URL. The redirect URL's path must reference a subdirectory of the callback URL.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								CALLBACK: http://example.com/path GOOD: http://example.com/path GOOD: http://example.com/path/subdir/other BAD: http://example.com/bar BAD: http://example.com/ BAD: http://example.com:8080/path BAD: http://oauth.example.com:8080/path BAD: http://example.org
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Scopes
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Scopes let you specify exactly what type of access you need. Scopes
+							Element:em
+								limit
+								access for OAuth tokens. They do not grant any additional permission beyond that which the user already has.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For the web flow, requested scopes will be displayed to the user on the authorize form.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Check headers to see what OAuth scopes you have, and what the API action accepts.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								curl -H "Authorization: token OAUTH-TOKEN" https://api.github.com/users/technoweenie -I
+								HTTP/1.1 200 OK X-OAuth-Scopes: repo, user X-Accepted-OAuth-Scopes: user
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								X-OAuth-Scopes
+								lists the scopes your token has authorized.
+							Element:code
+								X-Accepted-OAuth-Scopes
+								lists the scopes that the action checks for.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								(no scope)
+							Element:td
+								Grants read-only access to public information (includes public user profile info, public repository info, and gists)
+							Element:tr
+							Element:td
+							Element:code
+								user
+							Element:td
+								Grants read/write access to profile info only. Note that this scope includes
+							Element:code
+								user:email
+								and
+							Element:code
+								user:follow
+								.
+							Element:tr
+							Element:td
+							Element:code
+								user:email
+							Element:td
+								Grants read access to a user's email addresses.
+							Element:tr
+							Element:td
+							Element:code
+								user:follow
+							Element:td
+								Grants access to follow or unfollow other users.
+							Element:tr
+							Element:td
+							Element:code
+								public_repo
+							Element:td
+								Grants read/write access to code, commit statuses, collaborators, and deployment statuses for public repositories and organizations. Also required for starring public repositories.
+							Element:tr
+							Element:td
+							Element:code
+								repo
+							Element:td
+								Grants read/write access to code, commit statuses, invitations, collaborators, adding team memberships, and deployment statuses for public and private repositories and organizations.
+							Element:tr
+							Element:td
+							Element:code
+								repo_deployment
+							Element:td
+								Grants access to
+							Element:a
+								deployment statuses
+								for public and private repositories. This scope is only necessary to grant other users or services access to deployment statuses,
+							Element:em
+								without
+								granting access to the code.
+							Element:tr
+							Element:td
+							Element:code
+								repo:status
+							Element:td
+								Grants read/write access to public and private repository commit statuses. This scope is only necessary to grant other users or services access to private repository commit statuses
+							Element:em
+								without
+								granting access to the code.
+							Element:tr
+							Element:td
+							Element:code
+								delete_repo
+							Element:td
+								Grants access to delete adminable repositories.
+							Element:tr
+							Element:td
+							Element:code
+								notifications
+							Element:td
+								Grants read access to a user's notifications.
+							Element:code
+								repo
+								also provides this access.
+							Element:tr
+							Element:td
+							Element:code
+								gist
+							Element:td
+								Grants write access to gists.
+							Element:tr
+							Element:td
+							Element:code
+								read:repo_hook
+							Element:td
+								Grants read and ping access to hooks in public or private repositories.
+							Element:tr
+							Element:td
+							Element:code
+								write:repo_hook
+							Element:td
+								Grants read, write, and ping access to hooks in public or private repositories.
+							Element:tr
+							Element:td
+							Element:code
+								admin:repo_hook
+							Element:td
+								Grants read, write, ping, and delete access to hooks in public or private repositories.
+							Element:tr
+							Element:td
+							Element:code
+								admin:org_hook
+							Element:td
+								Grants read, write, ping, and delete access to organization hooks.
+							Element:strong
+								Note:
+								OAuth tokens will only be able to perform these actions on organization hooks which were created by the OAuth application. Personal access tokens will only be able to perform these actions on organization hooks created by a user.
+							Element:tr
+							Element:td
+							Element:code
+								read:org
+							Element:td
+								Read-only access to organization, teams, and membership.
+							Element:tr
+							Element:td
+							Element:code
+								write:org
+							Element:td
+								Publicize and unpublicize organization membership.
+							Element:tr
+							Element:td
+							Element:code
+								admin:org
+							Element:td
+								Fully manage organization, teams, and memberships.
+							Element:tr
+							Element:td
+							Element:code
+								read:public_key
+							Element:td
+								List and view details for public keys.
+							Element:tr
+							Element:td
+							Element:code
+								write:public_key
+							Element:td
+								Create, list, and view details for public keys.
+							Element:tr
+							Element:td
+							Element:code
+								admin:public_key
+							Element:td
+								Fully manage public keys.
+							Element:tr
+							Element:td
+							Element:code
+								read:gpg_key
+							Element:td
+								List and view details for GPG keys.
+							Element:tr
+							Element:td
+							Element:code
+								write:gpg_key
+							Element:td
+								Create, list, and view details for GPG keys.
+							Element:tr
+							Element:td
+							Element:code
+								admin:gpg_key
+							Element:td
+								Fully manage GPG keys.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								NOTE: Your application can request the scopes in the initial redirection. You can specify multiple scopes by separating them with a space:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								https://github.com/login/oauth/authorize? client_id=...& scope=user%20public_repo
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Common errors for the authorization request
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are a few things that can go wrong in the process of obtaining an OAuth token for a user. In the initial authorization request phase, these are some errors you might see:
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Application Suspended
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the OAuth application you set up has been suspended (due to reported abuse, spam, or a mis-use of the API), GitHub will redirect to the registered callback URL with the following parameters summarizing the error:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://your-application.com/callback?error=application_suspended &error_description=Your+application+has+been+suspended.+Contact+support@github.com. &error_uri=https://developer.github.com/v3/oauth/%23application-suspended &state=xyz
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please contact
+										Element:a
+											support
+											to solve issues with suspended applications.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Redirect URI mismatch
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you provide a redirect_uri that doesn't match what you've registered with your application, GitHub will redirect to the registered callback URL with the following parameters summarizing the error:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://your-application.com/callback?error=redirect_uri_mismatch &error_description=The+redirect_uri+MUST+match+the+registered+callback+URL+for+this+application. &error_uri=https://developer.github.com/v3/oauth/%23redirect-uri-mismatch &state=xyz
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To correct this error, either provide a redirect_uri that matches what you registered or leave out this parameter to use the default one registered with your application.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Access denied
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the user rejects access to your application, GitHub will redirect to the registered callback URL with the following parameters summarizing the error:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://your-application.com/callback?error=access_denied &error_description=The+user+has+denied+your+application+access. &error_uri=https://developer.github.com/v3/oauth/%23access-denied &state=xyz
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There's nothing you can do here as users are free to choose not to use your application. More often than not, users will just close the window or press back in their browser, so it is likely that you'll never see this error.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Common errors for the access token request
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In the second phase of exchanging a code for an access token, there are an additional set of errors that can occur. The format of these responses is determined by the accept header you pass. The following examples only show JSON responses.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Incorrect client credentials
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the client_id and or client_secret you pass are incorrect you will receive this error response.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+											{
+										Element:span
+										Element:span
+											"error"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"incorrect_client_credentials"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"error_description"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"The client_id and/or client_secret passed are incorrect."
+										Element:span
+											,
+										Element:span
+										Element:span
+											"error_uri"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"https://developer.github.com/v3/oauth/#incorrect-client-credentials"
+										Element:span
+										Element:span
+											}
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To solve this error, go back and make sure you have the correct credentials for your oauth application. Double check the
+										Element:code
+											client_id
+											and
+										Element:code
+											client_secret
+											to make sure they are correct and being passed correctly to GitHub.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Redirect URI mismatch(2)
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you provide a redirect_uri that doesn't match what you've registered with your application, you will receive this error message:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+											{
+										Element:span
+										Element:span
+											"error"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"redirect_uri_mismatch"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"error_description"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"The redirect_uri MUST match the registered callback URL for this application."
+										Element:span
+											,
+										Element:span
+										Element:span
+											"error_uri"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"https://developer.github.com/v3/oauth/#redirect-uri-mismatch(2)"
+										Element:span
+										Element:span
+											}
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To correct this error, either provide a redirect_uri that matches what you registered or leave out this parameter to use the default one registered with your application.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Bad verification code
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+											{
+										Element:span
+										Element:span
+											"add_scopes"
+										Element:span
+											:
+										Element:span
+										Element:span
+											[
+										Element:span
+										Element:span
+											"repo"
+										Element:span
+										Element:span
+											],
+										Element:span
+										Element:span
+											"note"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"admin script"
+										Element:span
+										Element:span
+											}
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the verification code you pass is incorrect, expired, or doesn't match what you received in the first request for authorization you will receive this error.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+											{
+										Element:span
+										Element:span
+											"error"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"bad_verification_code"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"error_description"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"The code passed is incorrect or expired."
+										Element:span
+											,
+										Element:span
+										Element:span
+											"error_uri"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"https://developer.github.com/v3/oauth/#bad-verification-code"
+										Element:span
+										Element:span
+											}
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To solve this error, start the
+										Element:a
+											OAuth process over from the beginning
+											and get a new code.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Directing users to review their access for an application
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Users can review and revoke their application authorizations from the
+							Element:a
+								settings screen within GitHub
+								. A user's organizations
+							Element:a
+								control whether an application can access organization data
+								. Integrators can deep link to the authorization information for their particular application to let their end users review these details.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To build this link, you'll need your OAuth application's
+							Element:code
+								client_id
+								you received from GitHub when you
+							Element:a
+								registered the application
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								https://github.com/settings/connections/applications/:client_id
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For tips on discovering the resources that your application can access for a user, be sure to check out our
+							Element:a
+								guide
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Overview
+										Element:ul
+										Element:li
+										Element:a
+											Media Types
+										Element:li
+										Element:a
+											OAuth
+										Element:li
+										Element:a
+											OAuth Authorizations API
+										Element:li
+										Element:a
+											Other Authentication Methods
+										Element:li
+										Element:a
+											Troubleshooting
+										Element:li
+										Element:a
+											Pre-release Program
+										Element:li
+										Element:a
+											API Previews
+										Element:li
+										Element:a
+											Versions
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Activity
+										Element:ul
+										Element:li
+										Element:a
+											Events
+										Element:li
+										Element:a
+											Event Types & Payloads
+										Element:li
+										Element:a
+											Feeds
+										Element:li
+										Element:a
+											Notifications
+										Element:li
+										Element:a
+											Starring
+										Element:li
+										Element:a
+											Watching
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Gists
+										Element:ul
+										Element:li
+										Element:a
+											Comments
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Git Data
+										Element:ul
+										Element:li
+										Element:a
+											Blobs
+										Element:li
+										Element:a
+											Commits
+										Element:li
+										Element:a
+											References
+										Element:li
+										Element:a
+											Tags
+										Element:li
+										Element:a
+											Trees
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Integrations
+										Element:ul
+										Element:li
+										Element:a
+											Integrations
+										Element:li
+										Element:a
+											Installations
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Issues
+										Element:ul
+										Element:li
+										Element:a
+											Assignees
+										Element:li
+										Element:a
+											Comments
+										Element:li
+										Element:a
+											Events
+										Element:li
+										Element:a
+											Labels
+										Element:li
+										Element:a
+											Milestones
+										Element:li
+										Element:a
+											Timeline
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Migration
+										Element:ul
+										Element:li
+										Element:a
+											Migrations
+										Element:li
+										Element:a
+											Source Imports
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Miscellaneous
+										Element:ul
+										Element:li
+										Element:a
+											Emojis
+										Element:li
+										Element:a
+											Gitignore
+										Element:li
+										Element:a
+											Licenses
+										Element:li
+										Element:a
+											Markdown
+										Element:li
+										Element:a
+											Meta
+										Element:li
+										Element:a
+											Rate Limit
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Organizations
+										Element:ul
+										Element:li
+										Element:a
+											Members
+										Element:li
+										Element:a
+											Outside Collaborators
+										Element:li
+										Element:a
+											Teams
+										Element:li
+										Element:a
+											Webhooks
+										Element:li
+										Element:a
+											Blocking Users (Organizations)
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Projects
+										Element:ul
+										Element:li
+										Element:a
+											Cards
+										Element:li
+										Element:a
+											Columns
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Pull Requests
+										Element:ul
+										Element:li
+										Element:a
+											Reviews
+										Element:li
+										Element:a
+											Review Comments
+										Element:li
+										Element:a
+											Review Requests
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Reactions
+										Element:ul
+										Element:li
+										Element:a
+											Commit Comment
+										Element:li
+										Element:a
+											Issue
+										Element:li
+										Element:a
+											Issue Comment
+										Element:li
+										Element:a
+											Pull Request Review Comment
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Repositories
+										Element:ul
+										Element:li
+										Element:a
+											Branches
+										Element:li
+										Element:a
+											Collaborators
+										Element:li
+										Element:a
+											Comments
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Commits
+										Element:li
+										Element:a
+											Contents
+										Element:li
+										Element:a
+											Deploy Keys
+										Element:li
+										Element:a
+											Deployments
+										Element:li
+										Element:a
+											Downloads
+										Element:li
+										Element:a
+											Forks
+										Element:li
+										Element:a
+											Invitations
+										Element:li
+										Element:a
+											Merging
+										Element:li
+										Element:a
+											Pages
+										Element:li
+										Element:a
+											Releases
+										Element:li
+										Element:a
+											Statistics
+										Element:li
+										Element:a
+											Statuses
+										Element:li
+										Element:a
+											Traffic
+										Element:li
+										Element:a
+											Webhooks
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Search
+										Element:ul
+										Element:li
+										Element:a
+											Repositories
+										Element:li
+										Element:a
+											Code
+										Element:li
+										Element:a
+											Commits
+										Element:li
+										Element:a
+											Issues
+										Element:li
+										Element:a
+											Users
+										Element:li
+										Element:a
+											Legacy Search
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Users
+										Element:ul
+										Element:li
+										Element:a
+											Emails
+										Element:li
+										Element:a
+											Followers
+										Element:li
+										Element:a
+											Git SSH Keys
+										Element:li
+										Element:a
+											GPG Keys
+										Element:li
+										Element:a
+											Administration (Enterprise)
+										Element:li
+										Element:a
+											Blocking Users
+										Element:li
+										Element:h3
+										Element:a
+										Element:a
+											Enterprise
+										Element:ul
+										Element:li
+										Element:a
+											Admin Stats
+										Element:li
+										Element:a
+											LDAP
+										Element:li
+										Element:a
+											License
+										Element:li
+										Element:a
+											Management Console
+										Element:li
+										Element:a
+											Pre-receive Environments
+										Element:li
+										Element:a
+											Pre-receive Hooks
+										Element:li
+										Element:a
+											Search Indexing
+										Element:li
+										Element:a
+											Organization Administration
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											API Status
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+											© 2017 GitHub Inc. All rights reserved.
+										Element:span

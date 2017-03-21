@@ -1,0 +1,392 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Notification REST Hooks
+				Element:a
+					#
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Below is the same pattern as our
+				Element:a
+					REST Hooks
+					, but with a twist (and an extra step!). Instead of delivering the payload with each hook, it just delivers a resource URL where the payload resides. This helps us move big requests into a queue with everything else which lets us batch bigger requests. The URL can be one-time use or time sensitive as well.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Your Checklist
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								enumerate the events you'd like to make available as triggers
+							Element:li
+								create a
+							Element:em
+								subscribe
+								REST endpoint for hooks. For example:
+							Element:code
+								POST /api/hooks
+							Element:li
+								when each event happens, loop over and notify each active subscription (or batch events of same type)
+							Element:li
+								respect
+							Element:code
+								410
+								responses on payload delivery and remove subscriptions
+							Element:li
+								create a
+							Element:em
+								unsubscribe
+								REST endpoint for hooks. For example:
+							Element:code
+								DELETE /api/hooks/:id
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Read on for a step by step through the endpoints involved...
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 1: Subscribe
+										Element:small
+										Element:em
+											(a call from Zapier to your app)
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST <subscribe_endpoint>
+										Element:span
+											\
+											-H Authenticated: Somehow
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											'{"target_url": "https://hooks.zapier.com/<unique_target_url>",
+										Element:span
+											"event": "user_created"}'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This endpoint reuses whatever auth standard you have across the rest of your API (IE: Basic Auth, API Key, OAuth2, etc...). We'd send along a
+										Element:strong
+											unique
+											,
+										Element:strong
+											auto-generated
+											subscription URL and the event we'd like to subscribe to. These three items would be persisted on your backend (the authenticated user, target_url, and event).
+										Element:strong
+											A subscription is created when a user turns their Zap on.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you prefer, you can modify this request to provide additional information (like further filtering or other metadata) via our
+										Element:code
+											pre_subscribe
+											scripting method.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											On a successful subscribe, return a
+										Element:code
+											201
+											status code. You should store data about the hook you just created via the
+										Element:code
+											post_subscribe
+											scripting method (return an object like
+										Element:code
+											{"id": 1234}
+											). You'll need this data later to unsubscribe, unless you use the subscription URL as the unique identifier, which is uncommon).
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											Generally, subscription URLs should be unique. Return a
+										Element:code
+											409
+											status code if this criteria isn't met (IE: there is a uniqueness conflict).
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 2: Sending Hooks
+										Element:small
+										Element:em
+											(a call from your app to Zapier)
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST https://hooks.zapier.com/<unique_target_url>
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											{
+										Element:span
+											"resource_url"
+											:
+										Element:span
+											"<resources_url>"
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This hook must include a
+										Element:code
+											resource_url
+											or we will not perform a followup GET and thus Zaps will not trigger. If you are currently sending an
+										Element:code
+											id
+											, but not a
+										Element:code
+											resource_url
+											, you can modify the trigger's
+										Element:code
+											catch_hook
+											in scripting to add a
+										Element:code
+											resource_url
+											key that uses this
+										Element:code
+											id
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											On a successful hook, we'll return a
+										Element:code
+											200
+											status code, content is irrelevant.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											If Zapier responds with a
+										Element:code
+											410
+											status code you should immediately remove the subscription to the failing hook (unsubscribe). Additionally, excessive failures (multiple
+										Element:code
+											4xx
+											or
+										Element:code
+											5xx
+											failures) can be handled at your discretion. It is the clients responsibility to resubscribe if needed after failures.
+										Element:p
+											The maximum hook size is 100MB. Any payloads that exceed this limit will see a
+										Element:code
+											413
+											status code.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 3: Consuming
+										Element:small
+										Element:em
+											(a call from Zapier to your app)
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET <resources_url>
+										Element:span
+											\
+											-H Authenticated: Somehow
+										Element:span
+											\
+											-H Content-Type: application/json
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is an old fashioned REST hit to a standard endpoint, it requires the same authentication as the rest of the API. It can return a list or a single object.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+											If you don't want to perform this extra step, look at
+										Element:a
+											REST Hooks
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 4: Unsubscribe
+										Element:small
+										Element:em
+											(a call from Zapier to your app)
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE <unsubscribe_endpoint>
+										Element:span
+											\
+											-H Authenticated: Somehow
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d <content built/omitted in pre_unsubscribe scripting method>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you've properly stored identification data about the hook (like its unique ID) from the
+										Element:code
+											post_subscribe
+											scripting method, you should use our
+										Element:code
+											pre_unsubscribe
+											scripting method to formulate the DELETE call. In that call you have access to your previously stored data under the
+										Element:code
+											bundle.subscribe_data
+											variable.
+										Element:strong
+											Unsubscribing occurs when a user turns their Zap off.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Some example code is provided to make this as easy as possible.
+											A heads up: you will need to use that code if you intend to do a DELETE call. You'll be able to access
+										Element:code
+											bundle.subscribe_data
+											to build the URL in
+										Element:code
+											pre_unsubscribe
+											. The default behavior is slightly different and listed below.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											However, the
+										Element:strong
+											current default
+											does not perform a DELETE. For example, if you omit the
+										Element:code
+											pre_unsubscribe
+											function entirely, we will attempt a default unsubscribe call:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST <unsubscribe_endpoint>
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											'{"target_url": "https://hooks.zapier.com/<unique_target_url>"}'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											On a successful unsubscribe, return a
+										Element:code
+											200
+											status code, content is irrelevant.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is worth remembering that the subscription URL should effectively be unique (this could be enforced by your app as well) which also allows us to clean up unrecognized hooks (we also recommend not requiring authentication for such an endpoint).
+											↑ Was this documentation useful?
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Can't find what you're looking for? We'd love to help.
+										Element:a
+											Yes
+										Element:a
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Send us a message
+											. Get Help
+									Node:
+									(type) c
+									(layer)3
+										Element:noscript
+										Element:img

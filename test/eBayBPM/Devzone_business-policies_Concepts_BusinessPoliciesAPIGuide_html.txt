@@ -1,0 +1,1275 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Business Policies Users Guide
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Business Policies Management API allows sellers to create and manage business policies (payment, return, and shipping). Sellers can easily create these business policies and associate them to an eBay category group. Since every listing on eBay is linked to a category, this API will allow you to create a business policy and immediately apply it all listings for a group of categories. By using the Business Policies Management API, sellers will no longer have to recreate, reassign, and update the same payment, return policy, and shipping settings/values for each individual listing. Managing business policies through this API will help sellers save significant time in creating and updating their listings.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Business Policies are not yet available to all sellers. Once Business Policies become available to a seller, that seller can opt in to Business Policies through the
+				Element:strong
+					Sell
+					section in My eBay. A seller can verify whether or not their account is opted in to Business Policies by making a call to Trading API's
+				Element:a
+					GetUserPreferences
+					, and including the
+				Element:strong
+					ShowSellerProfilePreferences
+					flag in the call request. In the
+				Element:strong
+					GetUserPreferences
+					response, the seller will look for a 'true' value in the
+				Element:strong
+					SellerProfilePreferences.SellerProfileOptedIn
+					field. Regardless of opt-in status, a seller can actually use the Business Policies Management API to create and manage business policies, but that same seller will not be able to access the Business Policies Management UI on the eBay site nor apply specific business policies to listings until the account has been opted-in to Business Policies.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Once a seller is opted in to Business Policies, eBay will automatically extract and create all business policies for the seller's account based on listings created by that seller in the last 90 days. The seller then has the option to tweak (change name, change values, assign to new category groups, etc.) these existing policies or leave as is. A seller can create as many payment, return, and shipping policies as they wish, but there can only be one default business policy for each policy type/category group pair. The seller can manage which policies are used by default through My eBay. A seller can also discover which payment, return, and shipping policies are default by making a call to Trading API's
+				Element:a
+					GetUserPreferences
+					, and including the
+				Element:strong
+					ShowSellerProfilePreferences
+					flag in the call request. In the
+				Element:strong
+					GetUserPreferences
+					response, the seller will look for a 'true' value in the
+				Element:strong
+					SellerProfilePreferences.SupportedSellerProfiles.SupportedSellerProfile.CategoryGroup.IsDefault
+					field. If the seller had a default payment policy for Motor Vehicle listings and a default payment policy for all other listings, you might see the following nodes in the
+				Element:strong
+					GetUserPreferences
+					response:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					...
+				Element:br
+				Element:code
+					<SupportedSellerProfile>
+				Element:br
+					<ProfileID>5195425014</ProfileID>
+				Element:br
+					<ProfileType>PAYMENT</ProfileType>
+				Element:br
+					<ProfileName>standardpaymentprofile</ProfileName>
+				Element:br
+					<ShortSummary>Default Payment policy for all non-vehicle listings</ShortSummary>
+				Element:br
+					<CategoryGroup>
+				Element:br
+					<Name>ALL</Name>
+				Element:br
+					<IsDefault>true</IsDefault>
+				Element:br
+					</CategoryGroup>
+				Element:br
+					</SupportedSellerProfile>
+				Element:br
+					...
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					...
+				Element:br
+				Element:code
+					<SupportedSellerProfile>
+				Element:br
+					<ProfileID>5267672014</ProfileID>
+				Element:br
+					<ProfileType>PAYMENT</ProfileType>
+				Element:br
+					<ProfileName>vehiclepaymentprofile</ProfileName>
+				Element:br
+					<ShortSummary>Default Payment policy for vehicle listings</ShortSummary>
+				Element:br
+					<CategoryGroup>
+				Element:br
+					<Name>MOTORS_VEHICLE</Name>
+				Element:br
+					<IsDefault>true</IsDefault>
+				Element:br
+					</CategoryGroup>
+				Element:br
+					</SupportedSellerProfile>
+				Element:br
+					...
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Once a seller's account is opted into Business Policies, the payment, return, and shipping options/values set in the default business policies will automatically be set whenever the seller lists an item. It is then at the seller's discretion to modify, delete, or add new settings/values in Web flow or by using an
+				Element:b
+					addSellerProfile
+					or
+				Element:b
+					setSellerProfile
+					call. The seller also has the option of using/referencing another (non-default) business policy (in Web flow or through the
+				Element:strong
+					Item.SellerProfiles
+					container in an Add/Revise/RelistItem Trading API call).
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview of the Service
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Business Policies Management API is a SOA service that is meant to be consumed by users who want to programmatically create and manage business policies. The API allows you to create payment, return, and shipping business policies. The settings/values captured in these business policies can then be automatically applied to eBay listings.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When a seller lists an item, the Business Policies Management API verifies which Business Policies category group that the item belongs to (based on the eBay category the item is listed under), and then retrieves and applies the default business policies for that Business Policies category group.
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Previous to the concept of business policies, a seller had to specify and update payment, return, and shipping settings/values for each individual listing. This meant that the seller had to enter the same information repeatedly for each listing. With Business Policies, a seller can partially automate (through Web flow or through Trading API's Add/Revise/Relist calls) the process of listing, revising, or relisting an item.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											About Category Groups
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:b
+											categoryGroup
+											container in Business Policies Management API calls defines a group of eBay categories and connects this category group to a business policy. This allows seller to create one business policy that can be applied to many categories. The relationship between a
+										Element:b
+											categoryGroup
+											container and a business policy is:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											One business policy can be associated with multiple category groups.
+										Element:li
+											A category group can be associated with many business policies.
+										Element:p
+											Currently, the valid values for a category group names are 'ALL' (all non- motor vehicle categories) and 'MOTORS_VEHICLE' (all motor vehicle categories). The 'MOTORS_VEHICLE' category group is not valid for return policies, as return policies cannot be used with motor vehicle listings. In the future, there may be other valid values for category group names.
+										Element:br
+										Element:p
+											The first business policy (payment, return, or shipping) that the seller creates (or eBay creates for the seller) for a category group becomes the default policy for that category group and policy type combination. However, you can modify the "default" payment, return, or shipping policy through My eBay or through the
+										Element:strong
+											setSellerProfile
+											call. Only one policy can be set as default for the category group and policy type combination at any given time.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating a Business Policy
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a seller creates a business policy, the seller provides a name for the policy and eBay assigns a unique ID number (
+										Element:b
+											profileId
+											) to a successfully created policy. Other data that the seller provides for the business policy is the category group(s) to which the business policy will apply, the eBay site where the items will be sold, and all applicable settings/values for buyer payment (for payment policies), return policy details (for return policies), and the shipping details (for shipping policies). Here are the high-level steps for creating a business policy through an
+										Element:b
+											addSellerProfile
+											call:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Assign a category group to which the business policy will apply by setting the
+										Element:b
+											categoryGroup.name
+											value to 'ALL' or 'MOTORS_VEHICLE'. Optionally, set the assigned category group as default by including and setting the
+										Element:b
+											categoryGroup.default
+											value to 'true'. If the
+										Element:b
+											categoryGroup.default
+											field is included and set to 'true', the business policy (and its settings) will apply to all newly created listings that fall under that category group. However, the seller cannot pass in a
+										Element:b
+											categoryGroup.default
+											value of 'true' if a default business policy already exists for that category group and policy type combination. The 'MOTORS_VEHICLE' category group is not valid for return business policies, as return business policies cannot be used with motor vehicle listings.
+										Element:li
+											Define the policy type by including the
+										Element:b
+											profileType
+											field and setting its value to 'PAYMENT', 'RETURN_POLICY' or 'SHIPPING'.
+										Element:li
+											Assign a name to the business policy through the
+										Element:b
+											profileName
+											field. It is a good idea to give the business policy a descriptive name so you can easily identify it. All business policy names should be unique within each policy type (payment, return, shipping).
+										Element:li
+											Optionally, provide a text description of the business policy through the
+										Element:b
+											profileDesc
+											field.
+										Element:li
+											Optionally, provide the
+										Element:b
+											siteId
+											value of the listing site. If this field is not provided, the
+										Element:b
+											siteId
+											value defaults to the seller's registration site.
+										Element:li
+											Specify the details of each policy type that is being created through the
+										Element:b
+											paymentProfile.paymentInfo
+											,
+										Element:b
+											returnPolicyProfile.returnPolicyInfo
+											, and/or
+										Element:b
+											shippingPolicyProfile.shippingPolicyInfo
+											containers.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Modifying a Business Policy
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To modify an existing business policy, you use the
+										Element:b
+											setSellerProfile
+											call. First, you want to identify the payment, return, or shipping business policy to modify by providing a valid value in the
+										Element:b
+											profileName
+											and/or
+										Element:b
+											profileId
+											field in the request. Then, you can modify any existing value defined for a business policy or add fields to a business policy. For example, you might want to add additional
+										Element:b
+											acceptedPaymentMethod
+											values for a payment business policy, or add a text description of the return policy through the
+										Element:b
+											returnPolicyInfo.description
+											field, or add an additional domestic shipping service through an additional
+										Element:b
+											domesticShippingPolicyInfoService
+											container.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:b
+											Note:
+											Modifying an existing business policy creates a �clone' of that business policy, and all listings that referenced the previous business policy are reassigned to the new business policy. Active listings that are in restricted revise mode will be assigned to the new business policy, but values/settings will remain unchanged.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Another use case for using the
+										Element:b
+											setSellerProfile
+											call is to change the default business policy for a category group and policy type combination. It would actually require two
+										Element:b
+											setSellerProfile
+											calls to perform this action. In the first call, you'd identify the current default business policy through the
+										Element:strong
+											profileId
+											field, identify the category group that the business policy belongs to in the
+										Element:strong
+											categoryGroup.name
+											field, and then pass in a value of 'false' in the
+										Element:strong
+											categoryGroup.default
+											field. In the second call, you'd identify the business policy that you want set as the new default business policy through the
+										Element:strong
+											profileId
+											field, identify the category group that the business policy belongs to in the
+										Element:strong
+											categoryGroup.name
+											field, and then pass in a value of 'true' in the
+										Element:strong
+											categoryGroup.default
+											field.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Retrieving Business Policies
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To retrieve one or more business policies, you use the
+										Element:b
+											getSellerProfiles
+											call. The seller has the option of retrieving all existing business policies (no input parameters), specific business policies identified by
+										Element:b
+											profileId
+											and/or
+										Element:b
+											profileName
+											value(s), or business policies matching the specified
+										Element:b
+											profileType
+											value(s).
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Deleting a Business Policy
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To delete one business policy, you use the
+										Element:b
+											removeProfile
+											call. To identify the business policy to delete, the seller passes in the
+										Element:b
+											profileId
+											value. To delete multiple business policies, you use the
+										Element:b
+											removeSellerProfiles
+											call. To identify the business policies to delete, the seller passes in multiple
+										Element:b
+											profileIds
+											values.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:b
+											Note:
+											A business policy that is associated to one or more active listings cannot be deleted. Instead, these listings have to be reassigned to other active business policies first using a
+										Element:b
+											ReviseItem
+											call or the Business Policies Management UI. Similarly, the default business policy for a policy type (return, payment, shipping) cannot be deleted.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Consolidating Similar Shipping Policies
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Shipping business policies that have identical shipping services (with the exception of shipping costs) and identical settings (such as domestic and international shipping types, handling times, ship-to locations, rate tables, etc.) can be consolidated using the
+										Element:strong
+											consolidateShippingProfiles
+											call. When shipping business policies are consolidated, the shipping business policy that is used/referenced by the seller most frequently is kept, and the others are removed from the seller's account. Active or scheduled listings inherit the shipping business policy (and all its values/settings) that is kept after the consolidation, but the shipping costs that were specified for each shipping service in the newly deleted shipping policies are kept on the respective listings.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:b
+											consolidateShippingProfiles
+											call runs asynchronously. The status of a shipping policy consolidation job can be retrieved by using the
+										Element:strong
+											getConsolidationJobStatus
+											call.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:b
+											Note:
+											As a seller continues to create numerouse listings, there's a good chance that permutations in shipping settings will continue to accumulate. Due to this reason, it is recommended that client applications are set up to execute regular
+										Element:strong
+											consolidateShippingProfiles
+											calls.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Overriding Shipping Costs at the Listing Level
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The shipping costs for all domestic and international shipping services, that are defined in the
+										Element:strong
+											domesticShippingPolicyInfoService
+											and
+										Element:strong
+											intlShippingPolicyInfoService
+											containers of the shipping policy, can be overridden by supplying a
+										Element:strong
+											ShippingServiceCostOverrideList.ShippingServiceCostOverride
+											container for each domestic and international shipping service defined through the shipping policy.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Shipping costs include the shipping cost to ship one item (
+										Element:strong
+											ShippingServiceCost
+											in Trading API), the shipping cost to ship each additional identical item for a multi-quantity listing (
+										Element:strong
+											ShippingServiceAdditionalCost
+											in Trading API), and a shipping surcharge if one is applicable for the shipping service (
+										Element:strong
+											ShippingSurcharge
+											in Trading API).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For all domestic shipping services defined in the shipping business policy, the
+										Element:strong
+											ShippingServiceType
+											field in the
+										Element:strong
+											ShippingServiceCostOverrideList.ShippingServiceCostOverride
+											container should be set to 'Domestic', and for all international shipping services defined in the shipping business policy, the
+										Element:strong
+											ShippingServiceType
+											field should be set to 'International'. For both domestic and international shipping services, the
+										Element:strong
+											ShippingServicePriority
+											value in the
+										Element:strong
+											ShippingServiceCostOverrideList.ShippingServiceCostOverride
+											container should match the
+										Element:strong
+											sortOrderId
+											value for the matching shipping service in the shipping business policy.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:b
+											Note:
+											Once a shipping cost value is overridden on an active listing, it remains overridden, even if its respective value is changed in the shipping business policy that is associated to that listing.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Business Policies Eligible for eTRS
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the seller meets all Top-Rated Seller requirements, and the business policy meets all Top-Rated Plus listing requirements for the listing category, an
+										Element:strong
+											ETRS
+											flag is returned in the output under the
+										Element:strong
+											categoryGroup
+											container. For more information on Top-Rated Seller and Top-Rated Plus listings, see the
+										Element:a
+											Becoming a Top Rated Seller and qualifying for Top Rated Plus
+											help topic.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Mapping Business Policies Management API Fields to Trading API Fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In most cases, the names of data fields in the Business Policies Management API directly map to the names of data fields in the Trading API listing calls. The main difference is the initial character is lowercase in the Business Policies Management API, and the initial character is uppercase in the Trading API listing calls. The following table maps payment, return policy, and shipping-related fields in the Business Policies Management API to payment, return policy, and shipping-related fields in the Trading API listing calls.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Business Policies Management API Field
+										Element:th
+										Element:b
+											Trading API Listing Field
+										Element:tr
+										Element:th
+											Payment Fields
+										Element:tr
+										Element:td
+											paymentProfile.profileId
+										Element:td
+											Item.SellerProfiles.SellerPaymentProfile.PaymentProfileID
+										Element:tr
+										Element:td
+											paymentProfile.profileName
+										Element:td
+											Item.SellerProfiles.SellerPaymentProfile.PaymentProfileName
+										Element:tr
+										Element:td
+											paymentProfile.siteId
+										Element:td
+											X-EBAY-API-SITEID HTTP header; and
+										Element:br
+											siteid URL parameter
+										Element:tr
+										Element:td
+											paymentInfo.acceptedPaymentMethod
+										Element:td
+											Item.PaymentMethods
+										Element:tr
+										Element:td
+											paymentInfo.depositDetails.daysToFullPayment
+										Element:td
+											Item.PaymentDetails.DaysToFullPayment
+										Element:tr
+										Element:td
+											paymentInfo.depositDetails.depositAmount
+										Element:td
+											Item.PaymentDetails.DepositAmount
+										Element:tr
+										Element:td
+											paymentInfo.depositDetails.hoursToDeposit
+										Element:td
+											Item.PaymentDetails.HoursToDeposit
+										Element:tr
+										Element:td
+											paymentInfo.immediatePay
+										Element:td
+											Item.AutoPay
+										Element:tr
+										Element:td
+											paymentInfo.paymentInstructions
+										Element:td
+											Item.ShippingDetails.PaymentInstructions
+										Element:tr
+										Element:td
+											paymentInfo.paypalEmailAddress
+										Element:td
+											Item.PayPalEmailAddress
+										Element:tr
+										Element:th
+											Return Policy Fields
+										Element:tr
+										Element:td
+											returnPolicyProfile.profileId
+										Element:td
+											Item.SellerProfiles.SellerPaymentProfile.PaymentProfileID
+										Element:tr
+										Element:td
+											returnPolicyProfile.profileName
+										Element:td
+											Item.SellerProfiles.SellerReturnProfile.ReturnProfileName
+										Element:tr
+										Element:td
+											returnPolicyProfile.siteId
+										Element:td
+											X-EBAY-API-SITEID HTTP header; and
+										Element:br
+											siteid URL parameter
+										Element:tr
+										Element:td
+											returnPolicyInfo.description
+										Element:td
+											Item.ReturnPolicy.Description
+										Element:tr
+										Element:td
+											returnPolicyInfo.refundOption
+										Element:td
+											Item.ReturnPolicy.RefundOption
+										Element:tr
+										Element:td
+											returnPolicyInfo.restockingFeeValue
+										Element:td
+											Item.ReturnPolicy.RestockingFeeValueOption
+										Element:tr
+										Element:td
+											returnPolicyInfo.returnsAcceptedOption
+										Element:td
+											Item.ReturnPolicy.ReturnsAcceptedOption
+										Element:tr
+										Element:td
+											returnPolicyInfo.returnsWithinOption
+										Element:td
+											Item.ReturnPolicy.ReturnsWithinOption
+										Element:tr
+										Element:td
+											returnPolicyInfo.shippingCostPaidByOption
+										Element:td
+											Item.ReturnPolicy.ShippingCostPaidByOption
+										Element:tr
+										Element:td
+											returnPolicyInfo.warrantyDurationOption
+										Element:td
+											Item.ReturnPolicy.WarrantyDurationOption
+										Element:tr
+										Element:td
+											returnPolicyInfo.warrantyOfferedOption
+										Element:td
+											Item.ReturnPolicy.WarrantyOfferedOption
+										Element:tr
+										Element:td
+											returnPolicyInfo.warrantyTypeOption
+										Element:td
+											Item.ReturnPolicy.WarrantyTypeOption
+										Element:tr
+										Element:th
+											Shipping Fields
+										Element:tr
+										Element:td
+											shippingPolicyProfile.profileId
+										Element:td
+											Item.SellerProfiles.SellerShippingProfile.ShippingProfileID
+										Element:tr
+										Element:td
+											shippingPolicyProfile.profileName
+										Element:td
+											Item.SellerProfiles.SellerShippingProfile.ShippingProfileName
+										Element:tr
+										Element:td
+											shippingPolicyProfile.siteId
+										Element:td
+											X-EBAY-API-SITEID HTTP header; and
+										Element:br
+											siteid URL parameter
+										Element:tr
+										Element:td
+											shippingPolicyInfo.dispatchTimeMax
+										Element:td
+											Item.DispatchTimeMax
+										Element:tr
+										Element:td
+											shippingPolicyInfo.dispatchTimeReason
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticRateTable
+										Element:td
+											Item.ShippingDetails.RateTableDetails.DomesticRateTable
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingType
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.excludeShipToLocation
+										Element:td
+											Item.ShippingDetails.ExcludeShipToLocation
+										Element:tr
+										Element:td
+											shippingPolicyInfo.GlobalShipping
+										Element:td
+											Item.ShippingDetails.GlobalShipping
+										Element:tr
+										Element:td
+											shippingPolicyInfo.internationalPackagingHandlingCosts
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.InternationalPackagingHandlingCosts
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlRateTable
+										Element:td
+											Item.ShippingDetails.RateTableDetails.InternationalRateTable
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingType
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.packagingHandlingCosts
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.PackagingHandlingCosts
+										Element:tr
+										Element:td
+											shippingPolicyInfo.shippingOption
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.shippingPolicyCurrency
+										Element:td
+											currencyID attribute (in multiple shipping cost-related fields)
+											ID
+										Element:tr
+										Element:td
+											shippingPolicyInfo.shippingPolicyName
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.shipToLocations
+										Element:td
+											Item.ShipToLocations
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.buyerResponsibleForPickup
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.buyerResponsibleForShipping
+										Element:td
+											Item.BuyerResponsibleForShipping
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.fastShipping
+										Element:td
+											Item.GetItFast
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.freeShipping
+										Element:td
+											Item.ShippingDetails.ShippingServiceOptions.FreeShipping
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.shippingService
+										Element:td
+											Item.ShippingDetails.ShippingServiceOptions.ShippingService
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.shippingServiceAdditionalCost
+										Element:td
+											Item.ShippingDetails.ShippingServiceOptions.ShippingServiceAdditionalCost
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.shippingServiceCost
+										Element:td
+											Item.ShippingDetails.ShippingServiceOptions.ShippingServiceCost
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.shippingSurcharge
+										Element:td
+											Item.ShippingDetails.ShippingServiceOptions.ShippingSurcharge
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.shipToLocation
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.domesticShippingPolicyInfoService.sortOrderId
+										Element:td
+											Item.ShippingDetails.ShippingServiceOptions.ShippingServicePriority
+										Element:tr
+										Element:td
+											shippingPolicyInfo.freightShipping.commodityType
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.freightShipping.destPickupInside
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.freightShipping.destPickupLocationType
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.freightShipping.freightShippingClass
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.freightShipping.originPickupInside
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.freightShipping.originPickupLocationType
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.freightShipping.packagingHelpRequired
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.insurance.domesticInsuranceFee
+										Element:td
+											Item.ShippingDetails.InsuranceDetails.InsuranceFee
+										Element:tr
+										Element:td
+											shippingPolicyInfo.insurance.domesticInsuranceOption
+										Element:td
+											Item.ShippingDetails.InsuranceDetails.InsuranceOption
+										Element:tr
+										Element:td
+											shippingPolicyInfo.insurance.intlInsuranceFee
+										Element:td
+											Item.ShippingDetails.InternationalInsuranceDetails.InsuranceFee
+										Element:tr
+										Element:td
+											shippingPolicyInfo.insurance.intlInsuranceOption
+										Element:td
+											Item.ShippingDetails.InternationalInsuranceDetails.InsuranceOption
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingPolicyInfoService.buyerResponsibleForPickup
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingPolicyInfoService.buyerResponsibleForShipping
+										Element:td
+											Item.BuyerResponsibleForShipping
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingPolicyInfoService.codFee
+										Element:td
+											Item.ShippingDetails.CODCost
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingPolicyInfoService.shippingService
+										Element:td
+											Item.ShippingDetails.InternationalShippingServiceOption.ShippingService
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingPolicyInfoService.shippingServiceAdditionalCost
+										Element:td
+											Item.ShippingDetails.InternationalShippingServiceOption.ShippingServiceAdditionalCost
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingPolicyInfoService.shippingServiceCost
+										Element:td
+											Item.ShippingDetails.InternationalShippingServiceOption.ShippingServiceCost
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingPolicyInfoService.shippingSurcharge
+										Element:td
+											No equivalent field in Trading API
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingPolicyInfoService.shipToLocation
+										Element:td
+											Item.ShippingDetails.InternationalShippingServiceOption.ShipToLocation
+										Element:tr
+										Element:td
+											shippingPolicyInfo.intlShippingPolicyInfoService.sortOrderId
+										Element:td
+											Item.ShippingDetails.InternationalShippingServiceOption.ShippingServicePriority
+										Element:tr
+										Element:td
+											shippingPolicyInfo.shippingProfileDiscountInfo.applyDomesticPromoShippingProfile
+										Element:td
+											Item.ShippingDetails.PromotionalShippingDiscount
+										Element:tr
+										Element:td
+											shippingPolicyInfo.shippingProfileDiscountInfo.applyIntlPromoShippingProfile
+										Element:td
+											Item.ShippingDetails.InternationalPromotionalShippingDiscount
+										Element:tr
+										Element:td
+											shippingPolicyInfo.shippingProfileDiscountInfo.domesticFlatCalcDiscountProfileId
+										Element:td
+											Item.ShippingDetails.ShippingDiscountProfileID
+										Element:tr
+										Element:td
+											shippingPolicyInfo.shippingProfileDiscountInfo.intlFlatCalcDiscountProfileId
+										Element:td
+											Item.ShippingDetails.InternationalShippingDiscountProfileID
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Plans to Deprecate CalculatedShippingRate Container in Trading API
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With Business Policies coming online, there are plans to deprecate the
+										Element:b
+											CalculatedShippingRate
+											container and replace it with the
+										Element:b
+											ShippingPackageDetails
+											container. The table belows maps the "old" Trading API fields with the "new" Trading API fields:
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:b
+											These Current Trading API fields...
+										Element:td
+										Element:b
+											...are being replaced by these fields
+										Element:tr
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.MeasurementUnit
+										Element:td
+											Item.ShippingPackageDetails. MeasurementUnit
+										Element:br
+										Element:tr
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.PackageDepth
+										Element:br
+										Element:td
+											Item.ShippingPackageDetails. PackageDepth
+										Element:br
+										Element:tr
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.PackageLength
+										Element:br
+										Element:td
+											Item.ShippingPackageDetails. PackageLength
+										Element:br
+										Element:tr
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.PackageWidth
+										Element:br
+										Element:td
+											Item.ShippingPackageDetails. PackageWidth
+										Element:br
+										Element:tr
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.ShippingIrregular
+										Element:br
+										Element:td
+											Item.ShippingPackageDetails. ShippingIrregular
+										Element:tr
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.ShippingPackage
+										Element:br
+										Element:td
+											Item.ShippingPackageDetails. ShippingPackage
+										Element:br
+										Element:tr
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.WeightMajor
+										Element:br
+										Element:td
+											Item.ShippingPackageDetails.WeightMajor
+										Element:br
+										Element:tr
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.WeightMinor
+										Element:br
+										Element:td
+											Item.ShippingPackageDetails.WeightMinor
+										Element:br
+										Element:tr
+										Element:td
+											Item.ShippingDetails.CalculatedShippingRate.OriginatingPostalCode
+										Element:td
+											Item.PostalCode
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Differences Between Business Policies and Trading API Listing Fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to the new
+										Element:b
+											ShippingPackageDetails
+											container replacing the
+										Element:b
+											CalculatedShippingRate
+											, Business Policies is also introducing a few more changes when listing an item. The new fields and changes are summarized below:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:b
+											dispatchTimeReason
+											: this new shipping policy field allows the seller to provide a text description that provides more detail about handling time and the shipping of an item.
+										Element:li
+										Element:b
+											separate enumeration values used to specify domestic and international shipping services
+											:
+										Element:b
+											shippingPolicyInfo.domesticShippingType
+											and
+										Element:b
+											shippingPolicyInfo.intlShippingType
+											values in a shipping business policy will replace the enumeration value specified in the Trading API through the
+										Element:b
+											Item.ShippingDetails.ShippingType
+											field.
+										Element:li
+										Element:b
+											shippingOption
+											: this new shipping business policy enumeration value allows the seller to to summarize which regions/countries he/she is willing to ship to.
+										Element:li
+										Element:b
+											buyerResponsibleForPickup
+											: this new shipping business policy boolean field allows the seller to communicate to the buyer that the buyer is responsible for the pickup of the vehicle.
+										Element:li
+										Element:b
+											freightShipping
+											: this container allows the seller to provide more information to the buyer regarding freight shipping details.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Working with the Business Policies Management API
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Call Limits
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please refer to the
+										Element:a
+											API Call Limits page
+											on the eBay Developers Program site for current default call limits and call limits for applications that have completed the
+										Element:a
+											Compatible Application Check
+											, which is a free service that the eBay Developers Program provides to its members.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sandbox Environment
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Customers can enable Business Policies in their Sandbox account by going to the
+										Element:a
+											Business Policies Sandbox Opt-in
+											page. For more information about testing Business Policies, refer to
+										Element:a
+											Testing Overview
+											in the Making a Business Policies Management API Call document.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Reference
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Refer to the
+										Element:a
+											API Reference
+											index for a list of calls in the Business Policies Management API. The API Reference includes the following information:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Prototypes of the request and response structure for each call
+										Element:li
+											Comprehensive list of inputs and outputs supported by each call and descriptions of their meaning and behavior
+										Element:li
+											Call samples (request and response)
+										Element:li
+											Index of schema elements (types, fields, enumerations)
+										Element:li
+											Change history information for each call
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Back to top
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Additional Resources
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can get more information about the eBay Business Policies Management API at these locations:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Making an API Call
+							Element:li
+							Element:a
+								API Reference
+							Element:li
+							Element:a
+								Release Notes
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Copyright © 2009–2016 eBay, Inc. All rights reserved. This documentation and the API may only be used in accordance with the eBay Developers Program and API License Agreement.
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:br

@@ -1,0 +1,2396 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					SimplyBook (Session Auth)
+				Element:a
+					#
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This example will walk you through creating a Developer App that uses Session Auth and has a single visible trigger that looks for new data. To make the example real, we'll be implementing the SimplyBook API.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Quick Preparation Checklist
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you plan to follow along, it is recommended you set up everything beforehand and keep these resources open and ready for quick access.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								You must have a
+							Element:a
+								Zapier account
+								.
+							Element:li
+								You must have a
+							Element:a
+								SimplyBook account
+								.
+							Element:li
+								Read the
+							Element:a
+								Getting Started with the Zapier Developer Platform
+								section to familiarize yourself with some of the terminology and basic components of an App.
+							Element:li
+								Read the
+							Element:a
+								SimplyBook API Documentation
+								to familiarize yourself with SimplyBook.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Create the App
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, go to the
+							Element:a
+								Developer Platform
+								and click the "Create App" button. You'll be asked to provide a title and a brief description.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After you submit, you should find yourself with a fresh App like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting up authentication
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We'll start by defining how Zapier should authenticate with SimplyBook. From the above screen, click the "Get Started" button in the authentication section.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								On Step 1 you will want to choose Session Auth since that is what SimplyBook uses.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should then find yourself on Step 2 with a couple of pre-generated authentication fields. These are the fields that users will be presented with when they add a SimplyBook account to Zapier.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Looking at the documentation, there’s a
+							Element:code
+								companyLogin
+								we’ll need, so let’s add that by clicking on “Add Another Authentication Field” on the top left of the list of fields.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After adding that, we have all fields we need. Sorting them (clicking the arrow buttons to the right) is a good idea, for an improved UX.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After clicking Next, we’re at the final step for setting up the authentication schema plainly. Here we’ll want to define how authentication goes through, which, according to the documentation, is in the header.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								NOTE:
+								Sometimes the UI will not show anything here. Just save and in the app dashboard click “Manage Authentication Settings”, select “Session Auth” and you can get the screen below.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Authentication variables are added automatically with their key capitalised, if in the header, or unchanged if in the query string.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For SimplyBook we’ll need custom headers, so we’ll need more custom scripting later.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At this point, we have the authentication setup and are ready to make our test trigger.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting up a test trigger
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to verify the authentication users provide, we need to build a test trigger. The test trigger is simply an API call to an endpoint that requires authentication and is guaranteed to always return some data. This allows Zapier to verify that the authentication information a user provides is valid. For SimplyBook, we'll use the
+							Element:code
+								/admin
+								endpoint as the test call (using the
+							Element:code
+								getCompanyInfo()
+								method).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								NOTE:
+								Usually there’s a
+							Element:code
+								/me
+								or
+							Element:code
+								/user
+								endpoint you can use, in most APIs.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								From your App, click the "Add Your First Test Trigger" button.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The first form you see allows you to define some of the meta information about the trigger. Since this is a test trigger that will not be useful beyond verifying authentication, we can put something short and leave the "Hide" checkbox checked.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click next to proceed to Step 2, Trigger Fields. Trigger fields add extra information for the trigger which you can use in the URL or in Scripting. We're actually going to skip over this step because our trigger does not require any additional info. Hit next to get to Step 3, where we define how our trigger will fetch data from SimplyBook.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here, according to the documentation,, here is what we will need to fill out:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click save to proceed to Step 4. Typically in this step you would copy and paste an example JSON representation of a response in the text area. Since this test trigger will be hidden from actual use in the Zapier UI, we'll skip this step, so just click save.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At this point, we have defined our test trigger and are almost ready to try it out!
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Defining how authentication really works
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now we need to jump into Scripting and create our own
+							Element:a
+								method.
+							Element:code
+								get_session_info
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Also a “generic”
+							Element:code
+								add_custom_headers
+								method to inject in all
+							Element:code
+								TRIGGER_KEY_pre_poll
+								(and similarly for any other actions or searches we could have) our custom headers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click the “Edit Code” button.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								According to SimplyBook’s documentation, the authentication needs to be a
+							Element:code
+								POST
+								request to
+							Element:code
+								https://user-api.simplybook.me/login
+								, with a JSON body, like:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								{
+							Element:span
+								"jsonrpc"
+							Element:span
+								:
+							Element:span
+								"2.0"
+							Element:span
+								,
+							Element:span
+								"method"
+							Element:span
+								:
+							Element:span
+								"getUserToken"
+							Element:span
+								,
+							Element:span
+								"params"
+							Element:span
+								:
+							Element:span
+								[
+							Element:span
+								"companyLogin"
+							Element:span
+								,
+							Element:span
+								"username"
+							Element:span
+								,
+							Element:span
+								"password"
+							Element:span
+								],
+							Element:span
+								"id"
+							Element:span
+								:
+							Element:span
+								1
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That means we should make Scripting look like:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								'use strict'
+							Element:span
+								;
+							Element:span
+								var
+							Element:span
+								Zap
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								get_session_info
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								var
+							Element:span
+								user_token
+							Element:span
+								,
+							Element:span
+								request_data
+							Element:span
+								,
+							Element:span
+								token_request_payload
+							Element:span
+								,
+							Element:span
+								token_response
+							Element:span
+								,
+							Element:span
+								parsed_response
+							Element:span
+								;
+							Element:span
+								// Build Request Body
+							Element:span
+								request_data
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								jsonrpc
+							Element:span
+								:
+							Element:span
+								'2.0'
+							Element:span
+								,
+							Element:span
+								method
+							Element:span
+								:
+							Element:span
+								'getUserToken'
+							Element:span
+								,
+							Element:span
+								params
+							Element:span
+								:
+							Element:span
+								[
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								company
+							Element:span
+								,
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								username
+							Element:span
+								,
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								password
+							Element:span
+								],
+							Element:span
+								id
+							Element:span
+								:
+							Element:span
+								1
+							Element:span
+								};
+							Element:span
+								// Assemble the meta data for our key swap request
+							Element:span
+								token_request_payload
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								method
+							Element:span
+								:
+							Element:span
+								'POST'
+							Element:span
+								,
+							Element:span
+								url
+							Element:span
+								:
+							Element:span
+								'https://user-api.simplybook.me/login'
+							Element:span
+								,
+							Element:span
+								headers
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								'Content-Type'
+							Element:span
+								:
+							Element:span
+								'application/json'
+							Element:span
+								,
+							Element:span
+								'Accept'
+							Element:span
+								:
+							Element:span
+								'application/json'
+							Element:span
+								},
+							Element:span
+								data
+							Element:span
+								:
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								stringify
+							Element:span
+								(
+							Element:span
+								request_data
+							Element:span
+								)
+							Element:span
+								};
+							Element:span
+								// Fire off the key exchange request.
+							Element:span
+								token_response
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								(
+							Element:span
+								token_request_payload
+							Element:span
+								);
+							Element:span
+								parsed_response
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								parse
+							Element:span
+								(
+							Element:span
+								token_response
+							Element:span
+								.
+							Element:span
+								content
+							Element:span
+								);
+							Element:span
+								// Handle errors (ideally we'd look in the response status_code)
+							Element:span
+								if
+							Element:span
+								(
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								error
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								throw
+							Element:span
+								new
+							Element:span
+								HaltedException
+							Element:span
+								(
+							Element:span
+								'Error: '
+							Element:span
+								+
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								error
+							Element:span
+								.
+							Element:span
+								message
+							Element:span
+								);
+							Element:span
+								}
+							Element:span
+								// Extract the `user_token` from the returned JSON.
+							Element:span
+								if
+							Element:span
+								(
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								result
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								user_token
+							Element:span
+								=
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								result
+							Element:span
+								;
+							Element:span
+								}
+							Element:span
+								else
+							Element:span
+								{
+							Element:span
+								throw
+							Element:span
+								new
+							Element:span
+								HaltedException
+							Element:span
+								(
+							Element:span
+								'Invalid Login Credentials!'
+							Element:span
+								);
+							Element:span
+								}
+							Element:span
+								// Now we get the user_token!
+							Element:span
+								return
+							Element:span
+								{
+							Element:span
+								'user_token'
+							Element:span
+								:
+							Element:span
+								user_token
+							Element:span
+								};
+							Element:span
+								},
+							Element:span
+								// Add custom headers to a bundle
+							Element:span
+								add_custom_headers
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								method
+							Element:span
+								=
+							Element:span
+								'POST'
+							Element:span
+								;
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								[
+							Element:span
+								'X-Company-Login'
+							Element:span
+								]
+							Element:span
+								=
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								company
+							Element:span
+								;
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								[
+							Element:span
+								'X-User-Token'
+							Element:span
+								]
+							Element:span
+								=
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								user_token
+							Element:span
+								;
+							Element:span
+								// Delete unnecessary auto-added fields
+							Element:span
+								delete
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								.
+							Element:span
+								company
+							Element:span
+								;
+							Element:span
+								delete
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								.
+							Element:span
+								username
+							Element:span
+								;
+							Element:span
+								delete
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								.
+							Element:span
+								password
+							Element:span
+								;
+							Element:span
+								return
+							Element:span
+								bundle
+							Element:span
+								;
+							Element:span
+								},
+							Element:span
+								// Modify the request details before checking auth
+							Element:span
+								auth_test_pre_poll
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								bundle
+							Element:span
+								=
+							Element:span
+								this
+							Element:span
+								.
+							Element:span
+								add_custom_headers
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								);
+							Element:span
+								// Build Request Body
+							Element:span
+								var
+							Element:span
+								request_data
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								jsonrpc
+							Element:span
+								:
+							Element:span
+								'2.0'
+							Element:span
+								,
+							Element:span
+								method
+							Element:span
+								:
+							Element:span
+								'getCompanyInfo'
+							Element:span
+								,
+							Element:span
+								params
+							Element:span
+								:
+							Element:span
+								[],
+							Element:span
+								id
+							Element:span
+								:
+							Element:span
+								1
+							Element:span
+								};
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								data
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								stringify
+							Element:span
+								(
+							Element:span
+								request_data
+							Element:span
+								);
+							Element:span
+								return
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								;
+							Element:span
+								},
+							Element:span
+								// Check if there's an invalid session
+							Element:span
+								auth_test_post_poll
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								var
+							Element:span
+								parsed_response
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								parse
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								response
+							Element:span
+								.
+							Element:span
+								content
+							Element:span
+								);
+							Element:span
+								// Handle errors (ideally we'd look in the response status_code)
+							Element:span
+								if
+							Element:span
+								(
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								error
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								throw
+							Element:span
+								new
+							Element:span
+								InvalidSessionException
+							Element:span
+								();
+							Element:span
+								}
+							Element:span
+								return
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								result
+							Element:span
+								;
+							Element:span
+								}
+							Element:span
+								};
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Don’t forget to Save (top right button)!
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Testing what we have built so far (authentication)
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now is a good time to go and see if we have the authentication field and test trigger setup properly. To test them, you can go to your
+							Element:a
+								connected accounts
+								and click the connect account dropdown.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After you select the SimplyBook Example App, you will get this form:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As you can see, the form contains the authentication fields we set up. Fill out the form and click continue. At this point, Zapier will make an API call to the auth trigger. If everything is setup correctly, you should get a success message and the account should be added:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can check the requests and what they have in your app’s Monitoring tab.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now that we have working authentication, we are ready to create our first visible trigger!
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Creating a visible trigger
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A useful trigger would be to get all existing bookings.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Looking through the documentation we can find a
+							Element:code
+								getBookingsZaper()
+								method in the
+							Element:code
+								/admin
+								endpoint. Let’s use that.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We’ll start by clicking to add a new trigger.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s what we’d fill in for the first step:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click “Save & Next”. Since there are no fields/params for this trigger, we can skip step 2 as well. Click “Next”
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s what we’ll need in Step 3:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click “Save & Next”. In this last step we’ll add a sample object. This won’t usually be shown to the user in the UI, unless they skip the test step:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								{
+							Element:span
+								"id"
+							Element:span
+								:
+							Element:span
+								"1"
+							Element:span
+								,
+							Element:span
+								"record_date"
+							Element:span
+								:
+							Element:span
+								"2016-05-10 20:25:01"
+							Element:span
+								,
+							Element:span
+								"start_date"
+							Element:span
+								:
+							Element:span
+								"20160511T090000"
+							Element:span
+								,
+							Element:span
+								"end_date"
+							Element:span
+								:
+							Element:span
+								"20160511T100000"
+							Element:span
+								,
+							Element:span
+								"unit_id"
+							Element:span
+								:
+							Element:span
+								"1"
+							Element:span
+								,
+							Element:span
+								"text"
+							Element:span
+								:
+							Element:span
+								"Test Text"
+							Element:span
+								,
+							Element:span
+								"client"
+							Element:span
+								:
+							Element:span
+								"Test Client"
+							Element:span
+								,
+							Element:span
+								"unit"
+							Element:span
+								:
+							Element:span
+								"Test Unit"
+							Element:span
+								,
+							Element:span
+								"event"
+							Element:span
+								:
+							Element:span
+								"Test Event"
+							Element:span
+								,
+							Element:span
+								"event_id"
+							Element:span
+								:
+							Element:span
+								"1"
+							Element:span
+								,
+							Element:span
+								"is_confirm"
+							Element:span
+								:
+							Element:span
+								"1"
+							Element:span
+								,
+							Element:span
+								"client_id"
+							Element:span
+								:
+							Element:span
+								"1"
+							Element:span
+								,
+							Element:span
+								"client_phone"
+							Element:span
+								:
+							Element:span
+								"1111111111"
+							Element:span
+								,
+							Element:span
+								"client_email"
+							Element:span
+								:
+							Element:span
+								"test@example.com"
+							Element:span
+								,
+							Element:span
+								"offset"
+							Element:span
+								:
+							Element:span
+								"0"
+							Element:span
+								,
+							Element:span
+								"comment"
+							Element:span
+								:
+							Element:span
+								""
+							Element:span
+								,
+							Element:span
+								"code"
+							Element:span
+								:
+							Element:span
+								"test"
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Feel free to mark special fields as important and create better labels (we’ll automatically figure that out if you don’t set anything)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click save and we are done here.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now we just need to use Scripting to customise (add
+							Element:code
+								pre_poll
+								and
+							Element:code
+								post_poll
+								for this new trigger).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Basically Scripting should become this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								'use strict'
+							Element:span
+								;
+							Element:span
+								var
+							Element:span
+								Zap
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								get_session_info
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								var
+							Element:span
+								user_token
+							Element:span
+								,
+							Element:span
+								request_data
+							Element:span
+								,
+							Element:span
+								token_request_payload
+							Element:span
+								,
+							Element:span
+								token_response
+							Element:span
+								,
+							Element:span
+								parsed_response
+							Element:span
+								;
+							Element:span
+								// Build Request Body
+							Element:span
+								request_data
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								jsonrpc
+							Element:span
+								:
+							Element:span
+								'2.0'
+							Element:span
+								,
+							Element:span
+								method
+							Element:span
+								:
+							Element:span
+								'getUserToken'
+							Element:span
+								,
+							Element:span
+								params
+							Element:span
+								:
+							Element:span
+								[
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								company
+							Element:span
+								,
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								username
+							Element:span
+								,
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								password
+							Element:span
+								],
+							Element:span
+								id
+							Element:span
+								:
+							Element:span
+								1
+							Element:span
+								};
+							Element:span
+								// Assemble the meta data for our key swap request
+							Element:span
+								token_request_payload
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								method
+							Element:span
+								:
+							Element:span
+								'POST'
+							Element:span
+								,
+							Element:span
+								url
+							Element:span
+								:
+							Element:span
+								'https://user-api.simplybook.me/login'
+							Element:span
+								,
+							Element:span
+								headers
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								'Content-Type'
+							Element:span
+								:
+							Element:span
+								'application/json'
+							Element:span
+								,
+							Element:span
+								'Accept'
+							Element:span
+								:
+							Element:span
+								'application/json'
+							Element:span
+								},
+							Element:span
+								data
+							Element:span
+								:
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								stringify
+							Element:span
+								(
+							Element:span
+								request_data
+							Element:span
+								)
+							Element:span
+								};
+							Element:span
+								// Fire off the key exchange request.
+							Element:span
+								token_response
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								(
+							Element:span
+								token_request_payload
+							Element:span
+								);
+							Element:span
+								parsed_response
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								parse
+							Element:span
+								(
+							Element:span
+								token_response
+							Element:span
+								.
+							Element:span
+								content
+							Element:span
+								);
+							Element:span
+								// Handle errors (ideally we'd look in the response status_code)
+							Element:span
+								if
+							Element:span
+								(
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								error
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								throw
+							Element:span
+								new
+							Element:span
+								HaltedException
+							Element:span
+								(
+							Element:span
+								'Error: '
+							Element:span
+								+
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								error
+							Element:span
+								.
+							Element:span
+								message
+							Element:span
+								);
+							Element:span
+								}
+							Element:span
+								// Extract the `user_token` from the returned JSON.
+							Element:span
+								if
+							Element:span
+								(
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								result
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								user_token
+							Element:span
+								=
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								result
+							Element:span
+								;
+							Element:span
+								}
+							Element:span
+								else
+							Element:span
+								{
+							Element:span
+								throw
+							Element:span
+								new
+							Element:span
+								HaltedException
+							Element:span
+								(
+							Element:span
+								'Invalid Login Credentials!'
+							Element:span
+								);
+							Element:span
+								}
+							Element:span
+								// Now we get the user_token!
+							Element:span
+								return
+							Element:span
+								{
+							Element:span
+								'user_token'
+							Element:span
+								:
+							Element:span
+								user_token
+							Element:span
+								};
+							Element:span
+								},
+							Element:span
+								// Add custom headers to a bundle
+							Element:span
+								add_custom_headers
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								method
+							Element:span
+								=
+							Element:span
+								'POST'
+							Element:span
+								;
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								[
+							Element:span
+								'X-Company-Login'
+							Element:span
+								]
+							Element:span
+								=
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								company
+							Element:span
+								;
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								[
+							Element:span
+								'X-User-Token'
+							Element:span
+								]
+							Element:span
+								=
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								auth_fields
+							Element:span
+								.
+							Element:span
+								user_token
+							Element:span
+								;
+							Element:span
+								// Delete unnecessary auto-added fields
+							Element:span
+								delete
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								.
+							Element:span
+								company
+							Element:span
+								;
+							Element:span
+								delete
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								.
+							Element:span
+								username
+							Element:span
+								;
+							Element:span
+								delete
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								headers
+							Element:span
+								.
+							Element:span
+								password
+							Element:span
+								;
+							Element:span
+								return
+							Element:span
+								bundle
+							Element:span
+								;
+							Element:span
+								},
+							Element:span
+								// Modify the request details before checking auth
+							Element:span
+								auth_test_pre_poll
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								bundle
+							Element:span
+								=
+							Element:span
+								this
+							Element:span
+								.
+							Element:span
+								add_custom_headers
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								);
+							Element:span
+								// Build Request Body
+							Element:span
+								var
+							Element:span
+								request_data
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								jsonrpc
+							Element:span
+								:
+							Element:span
+								'2.0'
+							Element:span
+								,
+							Element:span
+								method
+							Element:span
+								:
+							Element:span
+								'getCompanyInfo'
+							Element:span
+								,
+							Element:span
+								params
+							Element:span
+								:
+							Element:span
+								[],
+							Element:span
+								id
+							Element:span
+								:
+							Element:span
+								1
+							Element:span
+								};
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								data
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								stringify
+							Element:span
+								(
+							Element:span
+								request_data
+							Element:span
+								);
+							Element:span
+								return
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								;
+							Element:span
+								},
+							Element:span
+								// Check if there's an invalid session
+							Element:span
+								auth_test_post_poll
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								var
+							Element:span
+								parsed_response
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								parse
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								response
+							Element:span
+								.
+							Element:span
+								content
+							Element:span
+								);
+							Element:span
+								// Handle errors (ideally we'd look in the response status_code)
+							Element:span
+								if
+							Element:span
+								(
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								error
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								throw
+							Element:span
+								new
+							Element:span
+								InvalidSessionException
+							Element:span
+								();
+							Element:span
+								}
+							Element:span
+								return
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								result
+							Element:span
+								;
+							Element:span
+								},
+							Element:span
+								// Modify the request details before getting bookings
+							Element:span
+								new_booking_pre_poll
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								bundle
+							Element:span
+								=
+							Element:span
+								this
+							Element:span
+								.
+							Element:span
+								add_custom_headers
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								);
+							Element:span
+								// Build Request Body
+							Element:span
+								var
+							Element:span
+								request_data
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								jsonrpc
+							Element:span
+								:
+							Element:span
+								'2.0'
+							Element:span
+								,
+							Element:span
+								method
+							Element:span
+								:
+							Element:span
+								'getBookingsZapier'
+							Element:span
+								,
+							Element:span
+								params
+							Element:span
+								:
+							Element:span
+								[],
+							Element:span
+								id
+							Element:span
+								:
+							Element:span
+								1
+							Element:span
+								};
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								.
+							Element:span
+								data
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								stringify
+							Element:span
+								(
+							Element:span
+								request_data
+							Element:span
+								);
+							Element:span
+								return
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								request
+							Element:span
+								;
+							Element:span
+								},
+							Element:span
+								// Check if there's an invalid session
+							Element:span
+								new_booking_post_poll
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								var
+							Element:span
+								parsed_response
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								parse
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								response
+							Element:span
+								.
+							Element:span
+								content
+							Element:span
+								);
+							Element:span
+								// Handle errors (ideally we'd look in the response status_code)
+							Element:span
+								if
+							Element:span
+								(
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								error
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								throw
+							Element:span
+								new
+							Element:span
+								InvalidSessionException
+							Element:span
+								();
+							Element:span
+								}
+							Element:span
+								return
+							Element:span
+								parsed_response
+							Element:span
+								.
+							Element:span
+								result
+							Element:span
+								;
+							Element:span
+								}
+							Element:span
+								};
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At this point, we have a visible trigger that we are ready to test.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Testing the trigger
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now that we have built out the basics of our App, it is time to try it out and see if it works. Go to your dashboard and click the “Make a Zap!” button.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								On the first step of the Zap Editor you should be able to see the SimplyBook app and select it’s single visible trigger
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now log into SimplyBook and create a new booking, if you don’t have any yet.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After that, you should be able to see it in your Zap.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As an action, you can use anything we like. Sending a direct message to slack tends to work really well.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should now be able to login to Slack and see the new booking.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Congratulations!
+								You have a working SimplyBook application that:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Uses Session Auth to authenticate.
+							Element:li
+								Has a polling trigger to test authentication credentials.
+							Element:li
+								Has a visible polling trigger.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Be sure to check out our other examples for more details on doing other interesting things with Zapier's developer platform!
+								↑ Was this documentation useful?
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								Can't find what you're looking for? We'd love to help.
+							Element:a
+								Yes
+							Element:a
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Send us a message
+								. Get Help
+						Node:
+						(type) c
+						(layer)2
+							Element:noscript
+							Element:img

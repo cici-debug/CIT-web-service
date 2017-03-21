@@ -1,0 +1,857 @@
+Node:
+(type) c
+(layer)0
+	Element:section
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Working with Events API
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Download Events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								CleverTap enables developers to download Events using the below documented API
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Understanding Events paging request and response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To support efficient batching and pagination of large record sets, accessing user event records via the Server API is a multi-request process.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With your first request you will specify a JSON formatted query for records as POST payload, and a
+										Element:code
+											batch_size
+											URL query parameter, specifying the number of records to be returned per request, along with your CleverTap Account ID and CleverTap Account Passcode in the request headers.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response to this initial query request will return a
+										Element:code
+											cursor
+											, which you will then append to the URL query in subsequent requests to fetch the actual record set paginated by the
+										Element:code
+											batch_size
+											you specify.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each response of records using that
+										Element:code
+											cursor
+											will return a
+										Element:code
+											next_cursor
+											to fetch the subsequent set of records. Once there are no more records to be fetched, the
+										Element:code
+											next_cursor
+											key will no longer be returned.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In this regard, it may be helpful to think of the
+										Element:code
+											cursor
+											as something akin to a
+										Element:a
+											database cursor
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every request to the API should include your CleverTap Account ID and CleverTap Account Passcode in the request header keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+										Element:br
+										Element:code
+											Content-Type
+											header must be specified as
+										Element:code
+											application/json
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Initial Endpoint For Cursor
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The cursor request to download events is an HTTP URL of the following form:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														POST https://api.clevertap.com/1/events.json?batch_size=5000
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Note:Maximum
+													Element:code
+														batch_size
+														is 5000, this will return 5000 records per request.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted request with the following parameters
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														event_name
+														– The name of the event which has been performed by the users whose events you want to download
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														from
+														&
+													Element:code
+														to
+														– Date range within which users should have performed the event you have specified in
+													Element:code
+														event_name
+														, input values have to be formatted as integers in format
+													Element:code
+														YYYYMMDD
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Optional Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+														Refer here for documentation on advanced queries, their structure, and examples.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														Notification Sent
+														event is not supported for event export API. You can obtain information about users receiving a particular notification using the
+													Element:a
+														profile download API.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "event_name": "choseNewFavoriteFood", "event_properties": [ { "name": "value", "operator": "contains", "value": "piz" } ], "from": 20150810, "to": 20151025 }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status": "success", "cursor": "ZiZiNwMEBQBkaWZzY2MuO20BBQFlYmN7ZG5hewYBTQVjb2BzZmphfwEABQUra2Jmeg%3D%3D" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Endpoint For Subsequent Records
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To download subsequent requests you have to use the endpoint documented below while keeping the CleverTap authentication headers in place:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											GET https://api.clevertap.com/1/events.json?cursor=ZiZiNwMEBQBkaWZzY2MuO20BBQFlYmN7ZG5hewYBTQVjb2BzZmphfwEABQUra2Jmeg%3D%3D
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											app=true
+											request parameter can be passed to receive app fields in response (
+										Element:code
+											os_version
+											,
+										Element:code
+											app_version
+											,
+										Element:code
+											make
+											(device make),
+										Element:code
+											model
+											(device model) within the
+										Element:code
+											profile
+											object)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											profile=true
+											request parameter can be passed to receive custom profile fields in response (
+										Element:code
+											profileData
+											within the
+										Element:code
+											profile
+											object)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "status": "success", "previous_cursor": "ZyZjfwYEAgdjYmZyKz8NegYFAwxmamF/Z21meU4BBQFlYmN7ZG5ifAYCTQQrai57K2ouegJMARl6", "next_cursor": "ZyZjfwYEAgdjYmZyKz8NegYFAwxmamF%2FZ21meU4BBQFlYmN7ZG5ifAYCTQQrai57K2ouegJMABl6", "records": [ { "profile": { "objectId": "a8ffcbc9-a747-4ee3-a791-c5e58ad03097", "platform": "Web", "email": "peter@foo.com", "profileData": { "favoriteColor": "blue" }, "identity": "5555555555", "id": 33 }, "ts": 20151023140416, // yyyyMMddHHmmSS format "event_props": { "value": "pizza" }, "session_props": { "utm_source": "Foo", "utm_medium": "Bar", "utm_campaign": "FooBar", "session_source": "Direct" } }, { "profile": { "objectId": "a8ffcbc9-a747-4ee3-a791-c5e58ad03097", "platform": "Web", "email": "peter@foo.com", "profileData": { "favoriteColor": "blue" }, "identity": "5555555555", "id": 33 }, "ts": 20151024121636, "event_props": { "value": "pizza" }, "session_props": { "session_source": "Others", "session_referrer": "http://example.com" } } ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											objectId
+											refers to CleverTap ID of user.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											profileData
+											contains all custom profile properties of user.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:mark
+										Element:code
+											profileData
+											field will be marked optional post 01/04/2017. Post this date, users will have to specify
+										Element:code
+											profile=true
+											parameter within record requests to receive profileData
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											identity
+											is the custom user identity provided by your app.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											ts
+											is the event timestamp, in yyyyMMddHHmmSS format.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											event_props
+											contains all event properties and their values.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											session_props
+											may contain the session properties
+										Element:code
+											utm_source
+											,
+										Element:code
+											utm_medium
+											,
+										Element:code
+											utm_campaign
+											,
+										Element:code
+											session_source
+											and
+										Element:code
+											session_referrer
+											for the event, if they were set.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Please refer here for explanation regarding session properties and their possible values.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											session_source
+											is
+										Element:code
+											UnAvailable
+											if unset, and
+										Element:code
+											Others
+											if there is a custom referrer.
+										Element:code
+											session_referrer
+											field contains the referrer value if source is Others. Other possible source values are
+										Element:code
+											Direct
+											,
+										Element:code
+											Search
+											,
+										Element:code
+											Social
+											,
+										Element:code
+											Email
+											,
+										Element:code
+											Batch
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Upload Events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								CleverTap enables developers to upload Events using the below documented API request
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Endpoint
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A request to upload Event information is an HTTP URL of the following form:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST https://api.clevertap.com/1/upload
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All requests should include your CleverTap Account ID and CleverTap Account Passcode in the request headers keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+										Element:br
+										Element:code
+											Content-Type
+											header must be specified as
+										Element:code
+											application/json
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted payload with
+										Element:code
+											Content-Type: application/json
+											header and a JSON object keyed with
+										Element:code
+											d
+											whose value is an Array container of JSON data records, and then JSON-encoded, e.g.
+										Element:code
+											{"d":JSON-encoded data}
+											with the following keys:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														type
+														– set to
+													Element:code
+														event
+														for updating an Events. Must be String
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														evtName
+														– name of the Event
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														evtData
+														– JSON keys and values to be updated. See example payload below
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														One of the following identity parameters are required
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														identity
+														– identity to recognize a user uniquely. It can be the user’s email id, a phone number or any other identifier that you are using to tag your users. This is the key that will be looked up to find the user whose profile needs to be updated. If this identity is not found a new user profile will be created. Must be String
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														FBID
+														– Can be used to identify a unique user by his/her Facebook ID. Must be String
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														GPID
+														– Can be used to identify a unique user by his Google Plus ID. Must be String
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														objectId
+														– Can be used to identify a unique user by their CleverTap Global Object ID. Must be String
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Optional parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														ts
+														– date and time when the event was originally performed, formatted as a UNIX epoch. Defaults to current timestamp if omitted. Must be Integer
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example payload
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In the below sample, there are two events being uploaded
+													Element:br
+														1. A user who is identified by his/her Facebook ID and performed a
+													Element:code
+														Product viewed
+														event
+													Element:br
+														2. A user who is identified by his/her email ID and performed a
+													Element:code
+														Charged
+														event
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "d": [ { "FBID": "34322423", "ts": 1468308340, // time when the event occurred "type": "event", "evtName": "Product viewed", "evtData": { "Product name": "Casio Chronograph Watch", "Category": "Mens Watch", "Price": 59.99, "Currency": "USD", } }, { "identity": "jack@gmail.com", "ts": 1468208340, // time when the event occurred "type": "event", "evtName": "Charged", "evtData": { "Amount": 300, "Currency": "USD", "Payment mode": "Credit Card", "Delivery By": "$D_1468322268", // UNIX epoch timestamp with $D_ prefix for recording date properties (string) "Items": [ { "Category": "books", "Book name": "The millionaire next door", "Quantity": 1 }, { "Category": "books", "Book name": "Achieving inner zen", "Quantity": 4 } ] } } ] }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example response format
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status":<success, partial, fail>, "processed":<count>, "unprocessed": [{"status":"fail", "code":<error code>, "error":<error msg>, "record":<record>}] }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status": "success", "processed": 2, "unprocessed": [] }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Error codes
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														509
+														Event name mandatory
+													Element:br
+													Element:code
+														512
+														Invalid event structure
+													Element:br
+													Element:code
+														513
+														Raised a restricted system event
+													Element:br
+													Element:code
+														522
+														Event properties limit exceeded
+													Element:br
+													Element:code
+														523
+														Missing identity
+													Element:br
+													Element:code
+														524
+														Data neither event nor profile
+													Element:br
+													Element:code
+														525
+														Timestamp not in UNIX epoch format
+													Element:br
+													Element:code
+														526
+														objectId invalid
+													Element:br
+													Element:code
+														555
+														Miscellaneous server error
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Additional error codes limited to download API
+													Element:br
+													Element:code
+														1
+														Too many requests were made concurrently
+													Element:br
+													Element:code
+														2
+														Request still in progress, please retry later
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											HTTP Response Codes
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											200
+											Successful request
+										Element:br
+										Element:code
+											400
+											Bad Request. Some mandatory parameter was missing
+										Element:br
+										Element:code
+											429
+											Too many requests were made concurrently.
+										Element:br
+										Element:code
+											500
+											Server Error
+										Element:br
+										Element:mark
+											Currently, we return 429 when you make more than 3 concurrent requests. Please try again after 10 minutes
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Debugging
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Records with errors in processing will be sent back along with the response of the HTTP request
+										Element:li
+											To test whether data submitted is without errors, you can add the parameter
+										Element:code
+											dryRun=1
+											to the URL. This will validate the input without submitting the data to the CleverTap backend
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Data Validation
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											The maximum number of event types per account is 100. The number of events submitted per account across those event types is practically unlimited
+										Element:li
+										Element:code
+											Notification Sent
+											,
+										Element:code
+											Notification Viewed
+											,
+										Element:code
+											Notification Clicked
+											,
+										Element:code
+											UTM Visited
+											,
+										Element:code
+											App Launched
+											,
+										Element:code
+											App Uninstalled
+											, and
+										Element:code
+											Stayed
+											are reserved event names
+										Element:li
+											For the
+										Element:code
+											Charged
+											event, its value object may optionally contain a nested array element called
+										Element:code
+											Items
+											which may further contain value objects. The Items array is limited to 16 elements.
+										Element:li
+											For each event type, the maximum number of properties is 16.
+										Element:li
+											Restricted characters in event and property names are :
+										Element:code
+											dot(.)
+											,
+										Element:code
+											colon(;)
+											,
+										Element:code
+											dollar sign($)
+											,
+										Element:code
+											single quote(')
+											,
+										Element:code
+											double quote(")
+											, and
+										Element:code
+											backslash(\)
+										Element:li
+											Event keys are limited to 32 characters and property values are limited to 40 bytes
+										Element:li
+											Events are query-able for period of 365 days.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Limitations and Constraints
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Maximum 1000 records may be sent per API call. The calls to the endpoint are synchronous. We recommend you make a single call from your server at a time, wait for the response before making another API request
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:mark
+											Concurrent requests are limited to 3 per account. Requests that exceed the limit will return a 429 HTTP response code

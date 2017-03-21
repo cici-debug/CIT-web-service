@@ -1,0 +1,5257 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Authentication
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					To authorize, use this code:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"api_endpoint_here?key=(PROJECT_KEY|USER_KEY)"
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Airbrake uses API keys to restrict access to the API. There are several kinds of keys:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Project API key (
+				Element:code
+					PROJECT_KEY
+					) that is used to submit errors and track deploys. This key is what you configure the notifier agent in your app to use.
+				Element:li
+					User API key (
+				Element:code
+					USER_KEY
+					) is used to access to the project data through Airbrake APIs. Each user of a project has their own key.
+				Element:li
+					User token (
+				Element:code
+					USER_TOKEN
+					) that is identical to
+				Element:code
+					USER_KEY
+					, but is valid for limited time.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Airbrake expects the API key to be included in all API requests to our servers in a query string that looks like the following:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					?key=(PROJECT_KEY|USER_KEY|USER_TOKEN)
+			Node:
+			(type) c
+			(layer)1
+				Element:aside
+					You must replace `(PROJECT_KEY|USER_KEY|USER_TOKEN)` with your personal key.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Create user token v4
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -d
+							Element:span
+								"email=EMAIL&password=PASSWORD"
+							Element:span
+								"https://airbrake.io/api/v4/sessions"
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+							Element:span
+								{
+							Element:span
+							Element:span
+								"token"
+							Element:span
+								:
+							Element:span
+							Element:span
+								"B20koMUuNDO0sep9rIzqomiQHkp4z7YpiN0P2Jmo0p9gElQsJ1z3qQYM23hTtVYY="
+							Element:span
+							Element:span
+								}
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											HTTP request
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											POST https://airbrake.io/api/v4/sessions
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											POST data
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The API expects URL-encoded data.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Key
+										Element:th
+											Example
+										Element:tbody
+										Element:tr
+										Element:td
+											email
+										Element:td
+											User email, e.g. john@airbrake.com.
+										Element:tr
+										Element:td
+											Password
+										Element:td
+											User password, e.g. qwerty.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The API returns
+										Element:code
+											200 OK
+											status code on success and JSON data.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Field
+										Element:th
+											Comment
+										Element:tbody
+										Element:tr
+										Element:td
+											token
+										Element:td
+											User token that can be passed to the API instead of
+										Element:code
+											USER_KEY
+											.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Pagination
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Almost all list APIs support pagination if you need access to all items. By default only first 20 items are returned.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"collectionName"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+					item
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					item
+				Element:span
+					2
+				Element:span
+					,
+				Element:span
+				Element:span
+					...
+				Element:span
+					,
+				Element:span
+				Element:span
+					item
+				Element:span
+					20
+				Element:span
+					],
+				Element:span
+				Element:span
+					"count"
+				Element:span
+					:
+				Element:span
+				Element:span
+					12345
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Get first page:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/collectionName
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Get second page:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/collectionName?page=2
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Ask for 100 items per page:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/collectionName?limit=100
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Query parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Default
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					page
+				Element:td
+					1
+				Element:td
+					Page number.
+				Element:tr
+				Element:td
+					limit
+				Element:td
+					20
+				Element:td
+					Number of items per page.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Field
+				Element:th
+					Example
+				Element:th
+					Comment
+				Element:tbody
+				Element:tr
+				Element:td
+					collectionName
+				Element:td
+				Element:code
+					projects
+				Element:td
+					Each API has different collection name. Some APIs return multiple collections.
+				Element:tr
+				Element:td
+					count
+				Element:td
+					12345
+				Element:td
+					Total number of available items.
+				Element:tr
+				Element:td
+					page
+				Element:td
+					2
+				Element:td
+					Actual page number that backend used internally.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Cursor pagination
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Some list APIs use cursor-based pagination, that only allows to fetch next and previous page.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"collectionName"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+					item
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					item
+				Element:span
+					2
+				Element:span
+					,
+				Element:span
+				Element:span
+					...
+				Element:span
+					,
+				Element:span
+				Element:span
+					item
+				Element:span
+					20
+				Element:span
+					],
+				Element:span
+				Element:span
+					"start"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"START_CURSOR"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"end"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"END_CURSOR"
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Get next page:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/collectionName?start=END_CURSOR
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Get previous page:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/collectionName?end=START_CURSOR
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Query parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Default
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					start
+				Element:td
+				Element:td
+					Starting position within a result set from which to retrieve results. Used to retrieve next page.
+				Element:tr
+				Element:td
+					end
+				Element:td
+				Element:td
+					Ending position within a result set from which to retrieve results. Used to retrieve previous page.
+				Element:tr
+				Element:td
+					limit
+				Element:td
+					20
+				Element:td
+					Number of items per page.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Field
+				Element:th
+					Example
+				Element:th
+					Comment
+				Element:tbody
+				Element:tr
+				Element:td
+					collectionName
+				Element:td
+				Element:code
+					projects
+				Element:td
+					Each API has different collection name. Some APIs return multiple collections.
+				Element:tr
+				Element:td
+					start
+				Element:td
+					abcdefg
+				Element:td
+					Position of the first element in the result set.
+				Element:tr
+				Element:td
+					end
+				Element:td
+					abcdefg
+				Element:td
+					Position of the last element in the result set.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Error notification v3
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Create notice v3
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Notifies Airbrake that a new error has occurred in your application.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					POST data
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API expects JSON data.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					See
+				Element:a
+					POST Data Fields
+					&
+				Element:a
+					POST Data Schema
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					POST https://airbrake.io/api/v3/projects/PROJECT_ID/notices?key=PROJECT_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST -H
+				Element:span
+					"Content-Type: application/json"
+					-d JSON
+				Element:span
+					"https://airbrake.io/api/v3/projects/PROJECT_ID/notices?key=PROJECT_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					Example JSON for the above request:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"errors"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"error1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"message"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"message1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"backtrace"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"file"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"backtrace file"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"line"
+				Element:span
+					:
+				Element:span
+				Element:span
+					10
+				Element:span
+					,
+				Element:span
+				Element:span
+					"function"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"backtrace function"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"error2"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"message"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"message2"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"backtrace"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"file"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"backtrace file"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"line"
+				Element:span
+					:
+				Element:span
+				Element:span
+					10
+				Element:span
+					,
+				Element:span
+				Element:span
+					"function"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"backtrace function"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"context"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"notifier"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"notifier name"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"notifier version"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"url"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"notifier url"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"os"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Linux 3.5.0-21-generic #32-Ubuntu SMP Tue Dec 11 18:51:59 UTC 2012 x86_64"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"hostname"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"production-rails-server-1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"language"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Ruby 2.1.1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"production"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1.1.1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"url:"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"http://some-site.com/example"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"rootDirectory"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"/home/app-root-directory"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"user"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"12345"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"root"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"email"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"root@root.com"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"PORT"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"443"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"CODE_NAME"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"gorilla"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"session"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"basketId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"123"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"456"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"params"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"page"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"3"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"sort"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"name"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"direction"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"asc"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					POST data fields v3
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Field
+				Element:th
+					Required
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					errors
+				Element:td
+					true
+				Element:td
+					An array of objects describing the error that occurred.
+				Element:tr
+				Element:td
+					errors/{i}/type
+				Element:td
+					false
+				Element:td
+					The class name or type of error that occurred.
+				Element:tr
+				Element:td
+					errors/{i}/message
+				Element:td
+					false
+				Element:td
+					A short message describing the error that occurred.
+				Element:tr
+				Element:td
+					errors/{i}/backtrace
+				Element:td
+					false
+				Element:td
+					An array of objects describing each line of the error’s backtrace.
+				Element:tr
+				Element:td
+					errors/{i}/backtrace/{i}/file
+				Element:td
+					false
+				Element:td
+					The full path of the file in this entry of the backtrace.
+				Element:tr
+				Element:td
+					errors/{i}/backtrace/{i}/line
+				Element:td
+					false
+				Element:td
+					The file’s line number in this entry of the backtrace.
+				Element:tr
+				Element:td
+					errors/{i}/backtrace/{i}/column
+				Element:td
+					false
+				Element:td
+					The line’s column number in this entry of the backtrace.
+				Element:tr
+				Element:td
+					errors/{i}/backtrace/{i}/function
+				Element:td
+					false
+				Element:td
+					When available, the function or method name in this entry of the backtrace.
+				Element:tr
+				Element:td
+					context
+				Element:td
+					false
+				Element:td
+					An object describing additional context for this error.
+				Element:tr
+				Element:td
+					context/notifier
+				Element:td
+					false
+				Element:td
+					An object describing the notifier client library.
+				Element:tr
+				Element:td
+					context/notifier/name
+				Element:td
+					false
+				Element:td
+					The name of the notifier client submitting the request, e.g. “airbrake-js”.
+				Element:tr
+				Element:td
+					context/notifier/version
+				Element:td
+					false
+				Element:td
+					The version number of the notifier client submitting the request, e.g. “1.2.3”.
+				Element:tr
+				Element:td
+					context/notifier/url
+				Element:td
+					false
+				Element:td
+					A URL at which more information can be obtained concerning the notifier client.
+				Element:tr
+				Element:td
+					context/environment
+				Element:td
+					false
+				Element:td
+					The name of the server environment in which the error occurred, e.g. “staging”, “production”, etc.
+				Element:tr
+				Element:td
+					context/component
+				Element:td
+					false
+				Element:td
+					The component or module in which the error occurred. In MVC frameworks like Rails, this should be set to the controller. Otherwise, this can be set to a route or other request category.
+				Element:tr
+				Element:td
+					context/action
+				Element:td
+					false
+				Element:td
+					The action in which the error occurred. If each request is routed to a controller action, this should be set here. Otherwise, this can be set to a method or other request subcategory.
+				Element:tr
+				Element:td
+					context/os
+				Element:td
+					false
+				Element:td
+					Details of the operating system on which the error occurred.
+				Element:tr
+				Element:td
+					context/hostname
+				Element:td
+					false
+				Element:td
+					The hostname of the server on which the error occurred.
+				Element:tr
+				Element:td
+					context/language
+				Element:td
+					false
+				Element:td
+					Describe the language on which the error occurred, e.g. “Ruby 2.1.1”.
+				Element:tr
+				Element:td
+					context/version
+				Element:td
+					false
+				Element:td
+					Describe the application version, e.g. “v1.2.3”.
+				Element:tr
+				Element:td
+					context/url
+				Element:td
+					false
+				Element:td
+					The application’s URL.
+				Element:tr
+				Element:td
+					context/userAgent
+				Element:td
+					false
+				Element:td
+					The requesting browser’s full user-agent string.
+				Element:tr
+				Element:td
+					context/rootDirectory
+				Element:td
+					false
+				Element:td
+					The application’s root directory path.
+				Element:tr
+				Element:td
+					context/user/id
+				Element:td
+					false
+				Element:td
+					If applicable, the current user’s ID.
+				Element:tr
+				Element:td
+					context/user/name
+				Element:td
+					false
+				Element:td
+					If applicable, the current user’s username.
+				Element:tr
+				Element:td
+					context/user/email
+				Element:td
+					false
+				Element:td
+					If applicable, the current user’s email address.
+				Element:tr
+				Element:td
+					environment
+				Element:td
+					false
+				Element:td
+					An object containing the current environment variables. Where the key is the variable name, e.g.
+				Element:code
+					{ "PORT": "443", "CODE_NAME": "gorilla" }
+					.
+				Element:tr
+				Element:td
+					session
+				Element:td
+					false
+				Element:td
+					An object containing the current session variables. Where the key is the variable name, e.g.
+				Element:code
+					{ "basket_total": "1234", "user_id": "123" }
+					.
+				Element:tr
+				Element:td
+					params
+				Element:td
+					false
+				Element:td
+					An object containing the request parameters. Where the key is the parameter name, e.g.
+				Element:code
+					{ "page": "3", "sort": "desc" }
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					POST data schema v3
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The JSON POST data schema for the v3 notifier API.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"object"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"additionalProperties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"properties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"errors"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"array"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					true
+				Element:span
+					,
+				Element:span
+				Element:span
+					"items"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"object"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"additionalProperties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"properties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+				Element:span
+					"message"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+				Element:span
+					"backtrace"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"array"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"items"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"object"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"additionalProperties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"properties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"file"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+				Element:span
+					"function"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+				Element:span
+					"line"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"number"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+				Element:span
+					"column"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"number"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"context"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"object"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"additionalProperties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"properties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"component"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"action"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"os"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"language"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"url"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"userAgent"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"rootDirectory"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"hostname"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"notifier"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"object"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"additionalProperties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"properties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+				Element:span
+					"version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					},
+				Element:span
+				Element:span
+					"url"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					"user"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"object"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"required"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"additionalProperties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"properties"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"username"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"email"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"string"
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"object"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"session"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"object"
+				Element:span
+					},
+				Element:span
+				Element:span
+					"params"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"object"
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					On success, the API returns a
+				Element:code
+					201 Created
+					status with the following JSON data.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Field
+				Element:th
+					Comment
+				Element:tbody
+				Element:tr
+				Element:td
+					id
+				Element:td
+					The ID of the newly created error notice. This can be used to
+				Element:a
+					query the status of this error notice
+					.
+				Element:tr
+				Element:td
+					url
+				Element:td
+					A URL that will take you to the error on the Airbrake dashboard.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Note
+					: a success response means that the data has been received and accepted for processing. Use the
+				Element:code
+					url
+					or
+				Element:code
+					id
+					in the response to query the status of an error. This will tell you if the error has been processed, or if it has been rejected for reasons including invalid JSON and rate limiting.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If the request body size exceeds
+				Element:strong
+					64KB
+					, the API will reject the notice and return a
+				Element:code
+					413 Request Entity Too Large
+					status.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Projects v4
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List projects v4
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v3/projects?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"projects"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Airbrake project name"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deployId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deployAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"rejectionCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"fileCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deployCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"groupResolvedCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"groupUnresolvedCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v3/projects?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Show project v4
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v3/projects/PROJECT_ID?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"project"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Airbrake project name"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deployId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deployAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"rejectionCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"fileCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deployCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"groupResolvedCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"groupUnresolvedCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v3/projects/PROJECT_ID?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Deploys v4
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Create deploy v4
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST -H
+				Element:span
+					"Content-Type: application/json"
+					-d
+				Element:span
+					'{"environment":"production","username":"john","repository":"https://github.com/airbrake/airbrake","revision":"38748467ea579e7ae64f7815452307c9d05e05c5","version":"v2.0"}'
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/deploys?key=PROJECT_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					POST https://airbrake.io/api/v4/projects/PROJECT_ID/deploys?key=PROJECT_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					POST data
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API expects JSON data.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Key
+				Element:th
+					Example
+				Element:tbody
+				Element:tr
+				Element:td
+					environment
+				Element:td
+					production
+				Element:tr
+				Element:td
+					username
+				Element:td
+					john
+				Element:tr
+				Element:td
+					repository
+				Element:td
+					https://github.com/airbrake/airbrake
+				Element:tr
+				Element:td
+					revision
+				Element:td
+					38748467ea579e7ae64f7815452307c9d05e05c5
+				Element:tr
+				Element:td
+					version
+				Element:td
+					v2.0
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					201 Created
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List deploys v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns list of project deploys. See
+				Element:a
+					Pagination
+					section for supported query parameters and response fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/deploys?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"deploys"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"production"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"username"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"john"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"repository"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"https://github.com/airbrake/airbrake"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"revision"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"38748467ea579e7ae64f7815452307c9d05e05c5"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"v2.0"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"count"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/deploys?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Show deploy v4
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/deploys/DEPLOY_ID?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"deploy"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"production"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"username"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"john"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"repository"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"https://github.com/airbrake/airbrake"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"revision"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"38748467ea579e7ae64f7815452307c9d05e05c5"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"v2.0"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/deploys/DEPLOY_ID?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Groups v4
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List groups v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns list of groups. See
+				Element:a
+					Pagination
+					section for supported query parameters and response fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/groups?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"groups"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"projectId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"resolved"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"errors"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"error type"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"message"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"error message"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"backtrace"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"file"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"/path/to/file"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"function"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"func_name"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"line"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"column"
+				Element:span
+					:
+				Element:span
+				Element:span
+					0
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"context"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"production"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"lastDeployId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"lastDeployAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"lastNoticeId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"lastNoticeAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"createdAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"count"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/groups?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Query parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Default
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					deploy_id
+				Element:td
+				Element:td
+					Filters groups by deploy id.
+				Element:tr
+				Element:td
+					environment
+				Element:td
+				Element:td
+					Filters groups by environment.
+				Element:tr
+				Element:td
+					component
+				Element:td
+				Element:td
+					Filters groups by component.
+				Element:tr
+				Element:td
+					action
+				Element:td
+				Element:td
+					Filters groups by action.
+				Element:tr
+				Element:td
+					archived
+				Element:td
+				Element:td
+					When set to
+				Element:code
+					true
+					returns archived groups.
+				Element:tr
+				Element:td
+					muted
+				Element:td
+				Element:td
+					When set to
+				Element:code
+					true
+					returns muted groups.
+				Element:tr
+				Element:td
+					start_time
+				Element:td
+				Element:td
+					Returns groups created after
+				Element:code
+					start_time
+					.
+				Element:tr
+				Element:td
+					end_time
+				Element:td
+				Element:td
+					Returns groups created before
+				Element:code
+					end_time
+					.
+				Element:tr
+				Element:td
+					order
+				Element:td
+					last_notice
+				Element:td
+					Sorts groups by
+				Element:code
+					last_notice
+					,
+				Element:code
+					notice_count
+					,
+				Element:code
+					weight
+					and
+				Element:code
+					created
+					fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Show group v4
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"group"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"projectId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"resolved"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"errors"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"error type"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"message"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"error message"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"backtrace"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"file"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"/path/to/file"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"function"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"func_name"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"line"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"column"
+				Element:span
+					:
+				Element:span
+				Element:span
+					0
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"context"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"production"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"lastDeployId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"lastDeployAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"lastNoticeId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"lastNoticeAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"createdAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Mute group v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This API removes group from the default list and disables all notifications.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X PUT
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID/muted?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					PUT https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID/muted?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					204 No Content
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Unmute group v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Opposite of the mute group.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X PUT
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID/unmuted?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					PUT https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID/unmuted?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					204 No Content
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Delete group v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API permanently deletes group.
+			Node:
+			(type) c
+			(layer)1
+				Element:aside
+					This operation can not be undone. Use it with care.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X DELETE
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					DELETE https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List group environments v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns list of group environments. See
+				Element:a
+					Pagination
+					section for supported query parameters and response fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/environments?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"environments"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"production"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"projectId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"count"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"page"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/environments?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Query parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Default
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					environment
+				Element:td
+				Element:td
+					Searches for similar environments.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List group components v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns list of group components. See
+				Element:a
+					Pagination
+					section for supported query parameters and response fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/components?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"components"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"component"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"projects"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"projectId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"count"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"page"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/components?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Query parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Default
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					component
+				Element:td
+				Element:td
+					Searches for similar components.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List group actions v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns list of group actions. See
+				Element:a
+					Pagination
+					section for supported query parameters and response fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/actions?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"actions"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"action"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"show"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"projectId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"count"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"page"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/actions?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Query parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Default
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					action
+				Element:td
+				Element:td
+					Searches for similar actions.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List groups across all projects v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns list of groups across all projects. See
+				Element:a
+					Cursor pagination
+					section for supported query parameters and response fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/groups?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"groups"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"projectId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"resolved"
+				Element:span
+					:
+				Element:span
+				Element:span
+					false
+				Element:span
+					,
+				Element:span
+				Element:span
+					"errors"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"type"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"error type"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"message"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"error message"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"backtrace"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"file"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"/path/to/file"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"function"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"func_name"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"line"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"column"
+				Element:span
+					:
+				Element:span
+				Element:span
+					0
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"context"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"environment"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"production"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"lastDeployId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"lastDeployAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"lastNoticeId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"lastNoticeAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"createdAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"end"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"d312cff95ca275d7d4"
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/groups?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Notices v4
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List notices v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns list of group notices. See
+				Element:a
+					Pagination
+					section for supported query parameters and response fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID/notices?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"notices"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1272072008639432675"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"projectId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"groupId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1272072008639432676"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"createdAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-10-22T03:00:00.407Z"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"count"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID/notices?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Query parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Default
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					version
+				Element:td
+				Element:td
+					Filters notices by version, e.g.
+				Element:code
+					version=1.0
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					204 NO CONTENT
+					status code on success.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Show notice status v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns notice status:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:code
+					processed
+					- notice is processed.
+				Element:code
+					groupId
+					contains notice group id.
+				Element:li
+				Element:code
+					rejected
+					- notice is rejected.
+				Element:code
+					message
+					contains the reason, e.g. “app version is 1.2.1, wanted >= 1.3”.
+				Element:li
+				Element:code
+					archived
+					- notice is archived according to the project retention limit.
+				Element:li
+				Element:code
+					not_found
+					- notice does not exist or is being processed by Airbrake.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/notice-status/NOTICE_ID?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"code"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"processed"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"groupId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success and JSON data.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Field
+				Element:th
+					Comment
+				Element:tbody
+				Element:tr
+				Element:td
+					code
+				Element:td
+				Element:code
+					processed
+					,
+				Element:code
+					rejected
+					,
+				Element:code
+					archived
+					or
+				Element:code
+					not_found
+					.
+				Element:tr
+				Element:td
+					message
+				Element:td
+				Element:code
+					message
+					explains
+				Element:code
+					code
+					in human readable format.
+				Element:tr
+				Element:td
+					groupId
+				Element:td
+				Element:code
+					groupId
+					contains notice group id if notice is processed.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List versions v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns list of notice versions. See
+				Element:a
+					Pagination
+					section for supported query parameters and response fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID/versions?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"versions"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1.0"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"groupId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					10
+				Element:span
+					,
+				Element:span
+				Element:span
+					"createdAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"updatedAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1.1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"groupId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"noticeTotalCount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					20
+				Element:span
+					,
+				Element:span
+				Element:span
+					"createdAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"updatedAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-09-26T17:37:33.638348Z"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"count"
+				Element:span
+					:
+				Element:span
+				Element:span
+					2
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/groups/GROUP_ID/versions?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Project activities v4
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns list of project activities. See
+				Element:a
+					Pagination
+					section for supported query parameters and response fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					List project activities v4
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl
+				Element:span
+					"https://airbrake.io/api/v4/projects/PROJECT_ID/activities?key=USER_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+				Element:span
+					{
+				Element:span
+				Element:span
+					"activities"
+				Element:span
+					:
+				Element:span
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"projectId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userName"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Mr. Smith"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userGravatarId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"8b7d4e7f9fddecc8d93d73b2c01c0549"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"activity"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"group.resolved"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"trackableId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"trackableType"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Group"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"createdAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-07-22T11:59:01.791773+03:00"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"updatedAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-07-22T11:59:01.791773+03:00"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"projectId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userName"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Mr. Smith"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userGravatarId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"8b7d4e7f9fddecc8d93d73b2c01c0549"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"activity"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"group.resolved"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"trackableId"
+				Element:span
+					:
+				Element:span
+				Element:span
+					2
+				Element:span
+					,
+				Element:span
+				Element:span
+					"trackableType"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Group"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"createdAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-07-22T12:59:01.791773+03:00"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"updatedAt"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2014-07-22T12:59:01.791773+03:00"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					],
+				Element:span
+				Element:span
+					"count"
+				Element:span
+					:
+				Element:span
+				Element:span
+					42
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://airbrake.io/api/v4/projects/PROJECT_ID/activities?key=USER_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					200 OK
+					status code on success.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					iOS crash reports v3
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Create iOS crash report v3
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST -H
+				Element:span
+					"Content-Type: application/json"
+					-d
+				Element:span
+					'{"report":"REPORT_TEXT"}'
+				Element:span
+					"https://airbrake.io/api/v3/projects/PROJECT_ID/ios-reports?key=PROJECT_KEY"
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					POST https://airbrake.io/api/v3/projects/PROJECT_ID/ios-reports?key=PROJECT_KEY
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					POST data
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API expects JSON data.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Key
+				Element:th
+					Example
+				Element:tbody
+				Element:tr
+				Element:td
+					report
+				Element:td
+				Element:tr
+				Element:td
+					context
+				Element:td
+					Same as in create notice API.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API returns
+				Element:code
+					201 Created
+					status code on success.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Grouping
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Airbrake supports 4 grouping rules: default, global, distinct and strict.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Default grouping
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					By default errors are grouped by:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					environment
+				Element:li
+					component and action
+				Element:li
+					error type
+				Element:li
+					file, line and column
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Global grouping
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Global grouping rule groups errors by:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					environment
+				Element:li
+					error type
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Distinct grouping
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Distinct grouping rule groups errors by:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					environment
+				Element:li
+					component and action
+				Element:li
+					error type and message
+				Element:li
+					file, line and column
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Strict grouping
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Strict grouping rule groups errors by:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					environment
+				Element:li
+					component and action
+				Element:li
+					error type
+				Element:li
+					backtrace
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+					shell

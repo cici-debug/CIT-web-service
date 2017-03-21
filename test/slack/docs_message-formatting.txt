@@ -1,0 +1,1118 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Basic message formatting
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Basic message formatting is easy, but there are a few quirks you'll want to understand before making your messages more complex. Learn how to mark your messages up so they're easy to read and go with the flow of conversation.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					How to escape characters
+				Element:li
+				Element:a
+					Linking to channels and users
+				Element:li
+				Element:a
+					Linking to URLs
+				Element:li
+				Element:a
+					Multiline Messages
+				Element:li
+				Element:a
+					Emoji
+				Element:li
+				Element:a
+					Formatting text
+				Element:li
+				Element:a
+					How to display formatted messages
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Messages can contain any displayable Unicode sequence of characters (all messages must use UTF-8 encoding), but need to be slightly escaped by clients.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All text in Slack uses the same system of escaping: chat messages, direct messages, file comments, etc.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:i
+					These formatting instructions pertain to content posted programmatically to Slack. For instructions on formatting messages within Slack itself, consult this
+				Element:a
+					help center article
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								How to escape characters
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											3 Characters you must encode as HTML entities
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are three characters you must convert to HTML entities and only three:
+										Element:code
+											&
+											,
+										Element:code
+											<
+											, and
+										Element:code
+											>
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Slack will take care of the rest.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Replace the ampersand,
+										Element:code
+											&
+											, with
+										Element:code
+											&amp;
+										Element:li
+											Replace the less-than sign,
+										Element:code
+											<
+											with
+										Element:code
+											&lt;
+										Element:li
+											Replace the greater-than sign,
+										Element:code
+											>
+											with
+										Element:code
+											&gt;
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That's it.
+										Element:strong
+											Don't HTML entity-encode the entire message.
+											Of course, when you send your message using URL-encoding, you'll still need to URL encode the ampersand.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Try it!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											URL encoding and Unicode
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When sending messages using URL or POST-based parameters, as you may with
+										Element:a
+											and similar approaches, you'll need to "URL encode" the parameter value containing your message.
+										Element:code
+											chat.postMessage
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Unicode characters, like many emojis and accent characters, should be presented in URL-encoded hex. For example,
+										Element:code
+											🌊
+											is
+										Element:code
+											F0 9F 8C 8A
+											in hex and further URL-encoded as
+										Element:code
+											%F0%9F%8C%8A
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											A user types : Hello & <world> 🌊 Encoded message : Hello &amp; &lt;world&gt; 🌊
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And would be sent URL-encoded as:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST https://slack.com/api/chat.postMessage text=Hello%20%26amp%3B%20%26lt%3Bworld%26gt%3B%20%F0%9F%8C%8A
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Control sequences
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Slack uses
+							Element:code
+								&
+								,
+							Element:code
+								<
+								, and
+							Element:code
+								>
+								as control characters so that messages may contain special escaped sequences.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Linking to channels and users
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, to refer to a channel or user within a message, a client should send the following messages:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Why not join <#C024BE7LR|general>?
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Hey <@U024BE7LH|bob>, did you see my file?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These escape sequences are then forwarded to all members of the channel as usual, and clients can format these links specially. The readable name can be included after the ID, by separating them with a pipe (
+										Element:code
+											|
+											) character. Both of these formats are valid:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<@U024BE7LH> <@U024BE7LH|bob>
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Linking to URLs
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For regular URL links, clients should just include the URL in the message; It is not the responsibility of individual clients to detect URLs within typed messages. For example, the following messages can be sent to the server:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											This message contains a URL http://foo.com/
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											So does this one: www.foo.com
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											URL detection is performed by the server. We do this so that URL detection (a non-trivial operation) is performed consistently across multiple clients. The example messages will be broadcast to other clients as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											This message contains a URL <http://foo.com/>
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											So does this one: <http://www.foo.com|www.foo.com>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the first case, the URL is detected as-is. In the second, the full URL is included first, then a pipe character (
+										Element:code
+											|
+											), then finally the originally typed version of the URL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The server will also detect mailto links in the format
+										Element:code
+											<email|user>
+											. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<mailto:bob@example.com|Bob>
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Formatting dates
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Messages containing a date or time should be displayed in the local timezone of the person seeing the message. The
+										Element:code
+											<!date>
+											command will format a Unix timestamp using tokens within a string that you set. You may also optionally link a date using a standard URL. A
+										Element:code
+											<!date>
+											must include some fallback text for older Slack clients (in case the conversion fails).
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<!date^unix_epoch_timestamp^string_containing_date_tokens^optional_link|fallback_text>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											unix_epoch_timestamp
+											is required and should be a number in standard
+										Element:a
+											Unix time format
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Describe your date and time as a string, using any of the following tokens:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											{date_num}
+											is displayed as
+										Element:code
+											2014-02-18
+											. It will include leading zeros before the month and date and is probably best for more technical integrations that require a developer-friendly date format.
+										Element:li
+										Element:code
+											{date}
+											is displayed as
+										Element:code
+											February 18th, 2014
+											.
+										Element:li
+										Element:code
+											{date_short}
+											is displayed as
+										Element:code
+											Feb 18, 2014
+											.
+										Element:li
+										Element:code
+											{date_long}
+											is displayed as
+										Element:code
+											Tuesday, February 18th, 2014
+											.
+										Element:li
+										Element:code
+											{date_pretty}
+											displays the same as
+										Element:code
+											{date}
+											but uses "yesterday", "today", or "tomorrow" where appropriate.
+										Element:li
+										Element:code
+											{date_short_pretty}
+											displays the same as
+										Element:code
+											{date_short}
+											but uses "yesterday", "today", or "tomorrow" where appropriate.
+										Element:li
+										Element:code
+											{date_long_pretty}
+											displays the same as
+										Element:code
+											{date_long}
+											but uses "yesterday", "today", or "tomorrow" where appropriate.
+										Element:li
+										Element:code
+											{time}
+											is displayed as
+										Element:code
+											6:39 AM
+											or
+										Element:code
+											6:39 PM
+											in 12-hour format. If the client is set to show 24-hour format, it is displayed as
+										Element:code
+											06:39
+											or
+										Element:code
+											18:39
+											.
+										Element:li
+										Element:code
+											{time_secs}
+											is displayed as
+										Element:code
+											6:39:45 AM
+										Element:code
+											6:39:42 PM
+											in 12-hour format. In 24-hour format it is displayed as
+										Element:code
+											06:39:45
+											or
+										Element:code
+											18:39:42
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your timestamp needs to be linked, specify an optional link parameter using a standard, fully qualified URL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, include a string of fallback text just in case the client is unable to process the date. Consider adding timezone information to your fallback text since it will potentially be different from the timezone of the person reading it.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Examples:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											<!date^1392734382^Posted {date_num} {time_secs}|Posted 2014-02-18 6:39:42 AM>
+											will display as: Posted 2014-02-18 6:39:42 AM
+										Element:li
+										Element:code
+											<!date^1392734382^{date} at {time}|February 18th, 2014 at 6:39 AM PST>
+											will display as: February 18th, 2014 at 6:39 AM
+										Element:li
+										Element:code
+											<!date^1392734382^{date_short}^https://example.com/|Feb 18, 2014 PST>
+											will display as:
+										Element:a
+											Feb 18, 2014
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Variables
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some messages contain special words with extra behavior. For these we use the format
+										Element:code
+											<!foo>
+											, where
+										Element:code
+											foo
+											is a special command. Currently defined commands are
+										Element:code
+											!channel
+											,
+										Element:code
+											!group
+											,
+										Element:code
+											!here
+											, and
+										Element:code
+											!everyone
+											(group is just a synonym for channel - both can be used in channels and groups). These indicate an @channel, @group, @here, or @everyone message, and should cause a notification to be displayed by the client.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that to display @here on older mobile clients you will need to specify a label with the
+										Element:code
+											<!here>
+											command (eg.
+										Element:code
+											<!here|here>
+											).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For paid teams there is an additional command for User Groups that follows the format
+										Element:code
+											<!subteam^ID|handle>
+											. (
+										Element:code
+											subteam
+											is literal text.
+										Element:code
+											ID
+											and
+										Element:code
+											handle
+											are replaced with the details of the group.) These indicate a User Group message, and should cause a notification to be displayed by the client. User Group IDs can be determined from the
+										Element:a
+											API endpoint. For example, if you have a User Group named
+										Element:code
+											usergroups.list
+										Element:code
+											happy-peeps
+											with ID of
+										Element:code
+											S012345
+											, then you would use the command
+										Element:code
+											<!subteam^S012345|happy-peeps>
+											to mention that group in a message.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More commands will be added in the future. Unrecognized commands can be output as-is, with the enclosing brackets to indicate something about the text is special. If a label is present it should be used.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											<!foo>
+											should be displayed as
+										Element:code
+											<foo>
+										Element:li
+										Element:code
+											<!foo|label>
+											should be displayed as
+										Element:code
+											<label>
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Parsing modes
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, messages you pass to API methods and webhooks will be assumed to be pre-formatted based on the above spec. That is, you can include marked up URLs, user links, channel links and commands, but we will still linkify any non-linked URLs present in your message.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								IN : Foo <!everyone> bar http://test.com OUT : Foo <!everyone> bar <http://test.com>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, Slack will not linkify channel names (starting with a '#') and usernames (starting with an '@'). You can enable this behavior by passing
+							Element:code
+								link_names=1
+								as an argument. This behavior is always enabled in
+							Element:code
+								parse=full
+								mode (see below).
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								IN : Hello @bob, say hi to @everyone in #general OUT : Hello <@U123|bob>, say hi to <!everyone> in <#C1234|general>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you don't want Slack to perform
+							Element:em
+								any
+								processing on your message, pass an argument of
+							Element:code
+								parse=none
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								IN : Foo <!everyone> bar http://test.com OUT : Foo <!everyone> bar http://test.com
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								(In this case, Slack will still test the validity of your markup - we won't send invalid messages to clients).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want Slack to treat your message as completely unformatted, pass
+							Element:code
+								parse=full
+								. This will ignore any markup formatting you added to your message.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								IN : Foo <!everyone> bar http://test.com OUT : Foo &lt;!everyone&gt; bar <http://test.com>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In full parse mode, we will find and linkify URLs, channel names (starting with a '#') and usernames (starting with an '@').
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Multiline Messages
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can post multiline messages through Slack's APIs. Insert a newline by including the characters
+							Element:code
+								\n
+								in your text. For example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "text": "This is a line of text.\nAnd this is another one." }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The above JSON payload will be displayed in the channel as:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								Try it!
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Emoji
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Slack attempts to normalize emoji across multiple platforms using the following approach:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								All emoji sent to Slack (as chat message to the message server, or arguments to the API) are translated into the common 'colon' format (e.g.
+							Element:code
+								:smile:
+								)
+							Element:li
+								At display time, Slack clients are encouraged to convert these colon-sequences into native Emoji where available, otherwise fallback to images.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Slack message server and API handle conversion from several binary emoji formats - the Unicode Unified format (used by OSX 10.7+ and iOS 6+), the Softbank format (used by iOS 5) and the Google format (used by some Android devices). These Unicode code points will be converted into their colon-format equivalents.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The list of emoji supported are taken from
+							Element:a
+								https://github.com/iamcal/emoji-data
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Formatting and Attachments
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can create richly-formatted messages using Attachments.
+							Element:strong
+							Element:a
+								Learn how to add attachments to messages.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We strongly recommend using a maximum of 20 attachments per message. Messages are limited to 100 attachments.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Message Formatting
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Slack messages may be formatted using a simple markup language similar to
+										Element:a
+											Markdown
+											. Supported formatting includes:
+										Element:code
+											```pre```
+											,
+										Element:code
+											`code`
+											,
+										Element:code
+											_italic_
+											,
+										Element:code
+											*bold*
+											, and even
+										Element:code
+											~strike~
+											.; full details are available on our
+										Element:a
+											help site
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default bot message text will be formatted, but
+										Element:a
+											attachments
+											are not. To disable formatting on a non-user message, set the
+										Element:code
+											mrkdwn
+											property to
+										Element:code
+											false
+											. To enable formatting on attachment fields, set the
+										Element:code
+											mrkdwn_in
+											array on each attachment to the list of fields to process. Some examples:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "text": "*bold* `code` _italic_ ~strike~", "username": "markdownbot", "mrkdwn": true }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Try it!
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "text": "*not bold*", "username": "markdownbot", "mrkdwn": false }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Try it!
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "attachments": [ { "title": "Title", "pretext": "Pretext _supports_ mrkdwn", "text": "Testing *right now!*", "mrkdwn_in": ["text", "pretext"] } ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Try it!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Valid values for
+										Element:code
+											mrkdwn_in
+											are:
+										Element:code
+											["pretext", "text", "fields"]
+											. Setting
+										Element:code
+											"fields"
+											will enable markup formatting for the
+										Element:code
+											value
+											of each field.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For best results, limit the number of characters in the
+										Element:code
+											text
+											field to a few thousand characters at most. Ideally, messages should be short and human-readable, if you need to post longer messages, please consider
+										Element:a
+											uploading a snippet instead
+											. (The absolute maximum number of characters allowed in a single message is 4000.)
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How to display formatted messages
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to display formatted messages on the web, your client should take the following steps:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Detect all sequences matching
+										Element:code
+											<(.*?)>
+										Element:li
+											Within those sequences, format content starting with
+										Element:code
+											#C
+											as a channel link
+										Element:li
+											Within those sequences, format content starting with
+										Element:code
+											@U
+											as a user link
+										Element:li
+											Within those sequences, format content starting with
+										Element:code
+											!
+											according to the rules for the special command.
+										Element:li
+											For remaining sequences, format as a link
+										Element:li
+											Once the format has been determined, check for a pipe - if present, use the text following the pipe as the link label
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Because the ampersands and angled brackets are already escaped, no further translation need take place (for a web-client). The server ensures that no extra un-escaped angled brackets or ampersands are included in the message.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a client sends a message, the response that is returned by the server contains the server-formatted version of the message. Clients should use this to replace their own local version of the message so that urls are correctly highlighted.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Disabling markup processing
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you just want to turn Slack's markdown-like processing off so that all those characters (
+										Element:code
+											`*_```~
+											) do nothing, include the
+										Element:code
+											mrkdwn
+											attribute with a
+										Element:code
+											false
+											value:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "mrkdwn": false, "text": "*This will not be bold.* It will be surrounded gloriously with stars." }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											(
+										Element:a
+											Message Builder Example
+											)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to reinforce the default behavior explicitly, add a
+										Element:code
+											mrkdwn
+											field to your message JSON and set it to
+										Element:code
+											true
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The attribute
+										Element:code
+											mrkdwn
+											is missing vowels because our markup language is not quite markdown but something quite like it.
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:ul
+										Element:li
+											Using Slack
+										Element:li
+										Element:a
+											Product
+										Element:li
+										Element:a
+											Pricing
+										Element:li
+										Element:a
+											Support
+										Element:li
+										Element:a
+											Slack Guides
+										Element:li
+										Element:a
+											Video Guides
+										Element:li
+										Element:a
+											App Directory
+										Element:li
+										Element:a
+											API
+										Element:ul
+										Element:li
+											Slack
+										Element:li
+										Element:a
+											Jobs
+										Element:li
+										Element:a
+											Customers
+										Element:li
+										Element:a
+											Developers
+										Element:li
+										Element:a
+											Events
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Podcast
+										Element:li
+										Element:a
+											Slack Shop
+										Element:ul
+										Element:li
+											Legal
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Security
+										Element:li
+										Element:a
+											Terms of Service
+										Element:li
+										Element:a
+											Policies
+										Element:ul
+										Element:li
+											Handy Links
+										Element:li
+										Element:a
+											Download desktop app
+										Element:li
+										Element:a
+											Download mobile app
+										Element:li
+										Element:a
+											Brand Guidelines
+										Element:li
+										Element:a
+											Slack at Work
+										Element:li
+										Element:a
+											Status
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Contact Us
+										Element:li
+										Element:a
+										Element:li
+										Element:a

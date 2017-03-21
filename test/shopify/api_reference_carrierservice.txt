@@ -1,0 +1,784 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					CarrierService
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					A
+				Element:strong
+					Carrier Service
+					(also known as a Carrier Calculated Service or Shipping Service) provides real-time shipping rates to Shopify. Some common carrier services include: FedEx, USPS and UPS.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Reminder
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Access to the Carrier Services API requires the store be on the Advanced Shopify Plan or higher. The term "carrier" is often used interchangeably with "shipping".
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Using the Carrier Services API, you can register a new carrier service and provide endpoints to Shopify with a list of applicable shipping rates. With the Carrier Services API you can even use the cart data to adjust shipping rates and offer shipping discounts based on what is in the customer's cart.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When registering a new carrier service, your will need to provide a POST endpoint rooted in the
+													Element:code
+														where Shopify can retrieve applicable
+													Element:a
+														callback_url
+													Element:strong
+														shipping rates
+														. Your
+													Element:code
+														should be a public endpoint that expects these requests from Shopify.
+													Element:a
+														callback_url
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Shopify provides server-side caching to reduce the number of external requests. Any shipping rate estimate request that identically matches the following fields will be retrieved from Shopify's cache of the initial response:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														variant ids
+													Element:li
+														variant quantities
+													Element:li
+														carrier service id
+													Element:li
+														origin address
+													Element:li
+														destination address
+													Element:li
+														item weights & signatures
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If any of these fields differ, or if the cache has expired since the original request, new shipping rates will be requested from the external provider.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														A sample Shopify request for shipping rates:
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:pre
+													Element:span
+														POST
+														Your callback URL
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:p
+														Get a list of applicable shipping rates for the following...
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example Shipping Rate Request sent to a Carrier Service
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "rate": { "origin": { "country": "CA", "postal_code": "K1S4J3", "province": "ON", "city": "Ottawa", "name": null, "address1": "520 Cambridge Street South", "address2": null, "address3": null, "phone": null, "fax": null, "address_type": null, "company_name": null }, "destination": { "country": "CA", "postal_code": "K1S 3T7", "province": "ON", "city": "Ottawa", "name": "Jason Normore", "address1": "520 Cambridge Street South Apt. 5", "address2": null, "address3": null, "phone": "7097433959", "fax": null, "address_type": null, "company_name": null }, "items": [ { "name": "My Product 3", "sku": null, "quantity": 1, "grams": 1000, "price": 2000, "vendor": "TestVendor", "requires_shipping": true, "taxable": true, "fulfillment_service": "manual" } ], "currency": "CAD" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "rates": [ { "service_name": "canadapost-overnight", "service_code": "ON", "total_price": "1295", "description": "This is the fastest option by far", "currency": "CAD", "min_delivery_date": "2013-04-12 14:48:45 -0400", "max_delivery_date": "2013-04-12 14:48:45 -0400" }, { "service_name": "fedex-2dayground", "service_code": "2D", "total_price": "2934", "currency": "USD", "min_delivery_date": "2013-04-12 14:48:45 -0400", "max_delivery_date": "2013-04-12 14:48:45 -0400" }, { "service_name": "fedex-priorityovernight", "service_code": "1D", "total_price": "3587", "currency": "USD", "min_delivery_date": "2013-04-12 14:48:45 -0400", "max_delivery_date": "2013-04-12 14:48:45 -0400" } ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that the
+										Element:code
+											address3
+											,
+										Element:code
+											fax
+											,
+										Element:code
+											address_type
+											, and
+										Element:code
+											company_name
+											fields are returned by specific
+										Element:a
+											ActiveShipping
+											providers. For API-created Carrier Services, you can faithfully stick to shipping address fields only, i.e.
+										Element:code
+											address1
+											,
+										Element:code
+											address2
+											,
+										Element:code
+											city
+											,
+										Element:code
+											zip
+											,
+										Element:code
+											province
+											, and
+										Element:code
+											country
+											. Other values are not sent to the callback URL; they remain null.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Callback interface
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When Shopify requests a shipping rate using your configured carrier service
+										Element:code
+											callback_url
+											, the response object
+										Element:code
+											rates
+											must be a JSON object with the following fields. Required fields must be included in the response for the carrier service integration to work properly.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:strong
+											Field
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+										Element:code
+											service_name
+										Element:td
+											Name of the registered carrier service.
+										Element:i
+											Required
+										Element:tr
+										Element:td
+										Element:code
+											service_code
+										Element:td
+											Code associated with the service.
+										Element:i
+											Required
+										Element:tr
+										Element:td
+										Element:code
+											description
+										Element:td
+											Description of the carrier service.
+										Element:i
+											Required
+											.
+										Element:tr
+										Element:td
+										Element:code
+											currency
+										Element:td
+											Currency of the shipping rate.
+										Element:i
+											Required
+											.
+										Element:tr
+										Element:td
+										Element:code
+											total_price
+										Element:td
+											Total price based on the shipping rate
+										Element:code
+											currency
+											.
+										Element:i
+											Required
+											.
+										Element:tr
+										Element:td
+										Element:code
+											phone_required
+										Element:td
+											States whether or not the customer must provide a phone number on checkout.
+										Element:tr
+										Element:td
+										Element:code
+											min_delivery_date
+										Element:td
+											Earliest delivery date for the displyed rate.
+										Element:tr
+										Element:td
+										Element:code
+											max_delivery_date
+										Element:td
+											Latest delivery date for the displyed rate to still be valid.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting carrier service permissions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Add the
+							Element:code
+								write_shipping
+								permission to your requested scopes.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What you can do with CarrierService
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Shopify API lets you do the following with the CarrierService resource. More detailed versions of these general actions may be available:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								POST /admin/carrier_services.json
+							Element:span
+								Create a new CarrierService
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								PUT /admin/carrier_services/#{id}.json
+							Element:span
+								Modify an existing CarrierService
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								GET /admin/carrier_services.json
+							Element:span
+								Receive a list of all CarrierServices
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								GET /admin/carrier_services/#{id}.json
+							Element:span
+								Receive a single CarrierService
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								DELETE /admin/carrier_services/#{id}.json
+							Element:span
+								Remove a CarrierService from the database
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								CarrierService properties
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+								active
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"active"
+							Element:span
+								:
+							Element:span
+								true
+							Element:span
+							Element:p
+								States whether or not this carrier service is active. Valid values are "true" and "false".
+							Element:tr
+							Element:td
+								callback_url
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"callback_url"
+							Element:span
+								:
+							Element:span
+								"http://myapp.com"
+							Element:span
+							Element:p
+								States the URL endpoint that shopify needs to retrieve shipping rates. This must be a public URL.
+							Element:tr
+							Element:td
+								carrier_service_type
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"carrier_service_type"
+							Element:span
+								:
+							Element:span
+								"api"
+							Element:span
+							Element:p
+								Distinguishes between api or legacy carrier services.
+							Element:tr
+							Element:td
+								name
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"name"
+							Element:span
+								:
+							Element:span
+								"My Carrier Service"
+							Element:span
+							Element:p
+								The name of the shipping service as seen by merchants and their customers.
+							Element:tr
+							Element:td
+								service_discovery
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"service_discovery"
+							Element:span
+								:
+							Element:span
+								true
+							Element:span
+							Element:p
+								States if merchants are able to send dummy data to your service through the Shopify admin to see shipping rate examples. Valid values are "true" and "false"
+							Element:tr
+							Element:td
+								format
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"format"
+							Element:span
+								:
+							Element:span
+								"json"
+							Element:span
+							Element:p
+								The format of the data returned by the URL endpoint. Valid values are "json" and "xml". If a format is not specified, it will default to json.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Endpoints
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								POST
+								/admin/carrier_services.json
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To create a carrier service, you can also use a cURL request that uses that
+							Element:code
+								carrier_service.json
+								payload:
+						Node:
+						(type) c
+						(layer)2
+							Element:figure
+							Element:pre
+							Element:code
+								curl -X POST -d @fulfillment_service.json -H"Accept:application/json" -H"Content-Type:application/json" -H"X-Shopify-Access-Token:THE_TOKEN_GOES_HERE" https://AUTHORIZED_SHOP.myshopify.com/admin/carrier_services
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Where
+							Element:code
+								THE_TOKEN_GOES_HERE
+								is replaced by the OAuth token given to you by Shopify and
+							Element:code
+								https://AUTHORIZED_SHOP.myshopify.com/admin/carrier_services
+								is replaced by the authorized shop's URL.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Create a carrier service
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /admin/carrier_services.json
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "carrier_service": { "name": "Shipping Rate Provider", "callback_url": "http:\/\/shippingrateprovider.com", "service_discovery": true } }
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 201 Created { "carrier_service": { "id": 1006327397, "name": "Shipping Rate Provider", "active": true, "service_discovery": true, "carrier_service_type": "api", "format": "json", "callback_url": "http:\/\/shippingrateprovider.com\/" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								PUT
+								/admin/carrier_services/1006327401.json
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Update a carrier service
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT /admin/carrier_services/#{id}.json
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "carrier_service": { "id": 1006327401, "name": "Some new name", "active": false } }
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK { "carrier_service": { "id": 1006327401, "name": "Some new name", "active": false, "service_discovery": true, "carrier_service_type": "api", "format": "json", "callback_url": "http:\/\/example.com\/" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								GET
+								/admin/carrier_services.json
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								List carrier services
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /admin/carrier_services.json
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK { "carrier_services": [ { "id": 1006327399, "name": "Purolator", "active": true, "service_discovery": true, "carrier_service_type": "api", "format": "json", "callback_url": "http:\/\/example.com\/" } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								GET
+								/admin/carrier_services/1006327400.json
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Get a single carrier service by its ID
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /admin/carrier_services/#{id}.json
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK { "carrier_service": { "id": 1006327400, "name": "Purolator", "active": true, "service_discovery": true, "carrier_service_type": "api", "format": "json", "callback_url": "http:\/\/example.com\/" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								DELETE
+								/admin/carrier_services/1006327398.json
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Destroy a carrier service
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								DELETE /admin/carrier_services/#{id}.json
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK {}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								How helpful was this page?
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								1
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								2
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								3
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								4
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								5
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+							Element:span
+								Select an option
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+							Element:span
+								What was good or bad about this page?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								This page was printed on 20 Mar 2017
+								. For the latest version, please go to
+							Element:a
+								https://help.shopify.com/api/reference/carrierservice/
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:a
+								About
+							Element:a
+								Careers
+							Element:a
+								Blog
+							Element:a
+								Press and Media
+							Element:a
+								Enterprise
+							Element:a
+								Sitemap
+							Element:h3
+								Online store
+							Element:a
+								Sell online
+							Element:a
+								Features
+							Element:a
+								Examples
+							Element:a
+								Website editor
+							Element:a
+								Online retail
+							Element:a
+								Ecommerce website
+							Element:a
+								Themes
+							Element:a
+								Shopping cart
+							Element:a
+								Ecommerce hosting
+							Element:a
+								Mobile commerce
+							Element:a
+								Ecommerce software
+							Element:h3
+								Point of sale
+							Element:a
+								Point of sale
+							Element:a
+								Features
+							Element:a
+								Hardware
+							Element:a
+								POS software
+							Element:h3
+								Support
+							Element:a
+								24/7 support
+							Element:a
+								Shopify Help Center
+							Element:a
+								Forums
+							Element:a
+								API documentation
+							Element:a
+								Free tools
+							Element:h3
+								Shopify
+							Element:a
+								Contact
+							Element:a
+								Partner program
+							Element:a
+								Affiliate program
+							Element:a
+								App developers
+							Element:a
+								Investors
+							Element:a
+								Accessibility
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+								Terms of Service
+							Element:a
+								Privacy Policy

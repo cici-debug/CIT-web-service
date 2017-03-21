@@ -1,0 +1,486 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					REST Hooks
+				Element:a
+					#
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Below is our simple standard to stop the
+				Element:a
+					Polling Madness
+					™. This is a suggested pattern for you to implement. It was chosen because there are many examples of REST APIs providing resources around GETing, POSTing and DELETEing webhooks just like any other REST resource.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The big benefit to REST Hooks is consumers wouldn't need to poll for changes, but could instead wait for hooks to deliver the payload. Additionally, producers can provide real-time updates with fewer devoted resources (compared to polling).
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The gist is: we POST a subscription
+				Element:code
+					/api/hooks
+					requesting to receive hooks at some target URL. Every time the event happens, ping us at the target URL with the payload.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					After we're done, we can cleanup with a DELETE (
+				Element:code
+					/api/hooks/:id
+					).
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:em
+					Though we highly recommend this native pattern, you can override all the methods below with
+				Element:a
+					scripting
+					. This means you can bend our pattern to match an existing pattern of your own.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Your Checklist
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								enumerate the events you'd like to make available as triggers
+							Element:li
+								create a
+							Element:em
+								subscribe
+								REST endpoint for hooks. For example:
+							Element:code
+								POST /api/hooks
+							Element:li
+								when each event happens, loop over and notify each active subscription (or batch events of same type)
+							Element:li
+								respect
+							Element:code
+								410
+								responses on payload delivery and remove subscriptions
+							Element:li
+								create a
+							Element:em
+								unsubscribe
+								REST endpoint for hooks. For example:
+							Element:code
+								DELETE /api/hooks/:id
+							Element:li
+								add a polling URL for your REST Hook trigger for the best user experience
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Read on for a step by step through the endpoints involved...
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 1: Subscribe
+										Element:small
+										Element:em
+											(a call from Zapier to your app)
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST <subscribe_endpoint>
+										Element:span
+											\
+											-H Authenticated: Somehow
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											'{"target_url": "https://hooks.zapier.com/<unique_target_url>",
+										Element:span
+											"event": "user_created"}'
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											You may notice a duplicate property
+										Element:code
+											subscription_url
+											. That's legacy terminology. You can safely ignore it and use
+										Element:code
+											target_url
+											only.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This endpoint reuses whatever auth standard you have across the rest of your API (IE: Basic Auth, API Key, OAuth2, etc...). We'd send along a
+										Element:strong
+											unique
+											,
+										Element:strong
+											auto-generated
+											subscription URL and the event we'd like to subscribe to. These three items would be persisted on your backend (the authenticated user, target_url, and event).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The value for the
+										Element:strong
+											subscribe_endpoint
+											field can be specified within the "Manage Trigger Settings" option in your app's dashboard.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The value for the
+										Element:strong
+											event
+											field can be specified within the Trigger's setup:
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you prefer, you can modify this request to provide additional information (like further filtering or other metadata) via our
+										Element:code
+											pre_subscribe
+											scripting method.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											On a successful subscribe, return a
+										Element:code
+											201
+											status code. You should store data about the hook you just created via the
+										Element:code
+											post_subscribe
+											scripting method (return an object like
+										Element:code
+											{"id": 1234}
+											). You'll need this data later to unsubscribe, unless you use the subscription URL as the unique identifier, which is uncommon).
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											Generally, subscription URLs should be unique. Return a
+										Element:code
+											409
+											status code if this criteria isn't met (IE: there is a uniqueness conflict).
+										Element:p
+											Your service should permit a user to connect multiple webhook URLs to their account
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 2: Sending Hooks
+										Element:small
+										Element:em
+											(a call from your app to Zapier)
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST https://hooks.zapier.com/<unique_target_url>
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d <json payload>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This hook could provide any amount of data or payload in either JSON or XML (or form-encoded). Just like static webhooks, we'll do our best to parse the response.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Usually Zapier expects an array of objects. If your API only sends a single object, wrap it in a single element array:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"firstName"
+										Element:span
+											:
+										Element:span
+											"Tom"
+										Element:span
+											,
+										Element:span
+											"lastName"
+										Element:span
+											:
+										Element:span
+											"Smith"
+										Element:span
+											}
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											On a successful hook, we'll return a
+										Element:code
+											200
+											status code, content is irrelevant.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											If Zapier responds with a
+										Element:code
+											410
+											status code you should immediately remove the subscription to the failing hook (unsubscribe). Additionally, excessive failures (multiple
+										Element:code
+											4xx
+											or
+										Element:code
+											5xx
+											failures) can be handled at your discretion. It is the clients responsibility to resubscribe if needed after failures.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Step 3: Unsubscribe
+										Element:small
+										Element:em
+											(a call from Zapier to your app)
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE <unsubscribe_endpoint>
+										Element:span
+											\
+											-H Authenticated: Somehow
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d <content built/omitted in pre_unsubscribe scripting method>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you've properly stored identification data about the hook (like its unique ID) from the
+										Element:code
+											post_subscribe
+											scripting method, you should use our
+										Element:code
+											pre_unsubscribe
+											scripting method to formulate the DELETE call. In that call you have access to your previously stored data under the
+										Element:code
+											bundle.subscribe_data
+											variable.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Some example code is provided to make this as easy as possible.
+											A heads up: you will need to use that code if you intend to do a DELETE call. You'll be able to access
+										Element:code
+											bundle.subscribe_data
+											to build the URL in
+										Element:code
+											pre_unsubscribe
+											. The default behavior is slightly different and listed below.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The value for the
+										Element:strong
+											unsubscribe_endpoint
+											field can be specified within the "Manage Trigger Settings" option in your app's dashboard.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											However, the
+										Element:strong
+											current default
+											does not perform a DELETE. For example, if you omit the
+										Element:code
+											pre_unsubscribe
+											function entirely, we will attempt a default unsubscribe call:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST <unsubscribe_endpoint>
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											'{"target_url": "https://hooks.zapier.com/<unique_target_url>"}'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											On a successful unsubscribe, return a
+										Element:code
+											200
+											status code, content is irrelevant.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is worth remembering that the subscription URL should effectively be unique (this could be enforced by your app as well) which also allows us to clean up unrecognized hooks (we also recommend not requiring authentication for such an endpoint).
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Optional: Reverse Unsubscribe
+										Element:small
+										Element:em
+											(a call from your app to Zapier)
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE https://hooks.zapier.com/<unique_target_url>
+										Element:span
+											\
+											-H Content-Type: application/json
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you'd like to allow users to manage their subscriptions from inside your app (or maybe you are cleaning up after a user deletes their account or revokes credentials) you can issue a
+										Element:code
+											DELETE
+											to the unique target URL which was generated when the subscription was created -- this will pause the Zap on Zapier's end.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Required to Go Global: Set a polling URL
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the trigger setup, there is a field to define a polling URL. This URL will be used when users are setting up a Zap and must test it. Without this defined, the user must always go to your app, create a new data point, and have it send the hook to Zapier. This is not ideal, and in some cases may be particularly undesirable (if for example other Zaps are already set up on that hook, it would trigger them).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Setting up a polling URL fixes this. The polling URL is only used during this testing phase, not during the regular operation of the Zap. If you need to script special behavior, you can do so using the standard
+										Element:code
+											pre_poll
+											and
+										Element:code
+											post_poll
+											methods on the trigger key.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											↑ Was this documentation useful?
+										Element:strong
+											Note
+											: Please ensure that the data format that returns from the Polling URL is the same as what returns from the REST Hook, so users can correctly map fields.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Can't find what you're looking for? We'd love to help.
+										Element:a
+											Yes
+										Element:a
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Send us a message
+											. Get Help
+									Node:
+									(type) c
+									(layer)3
+										Element:noscript
+										Element:img

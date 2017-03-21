@@ -1,0 +1,701 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Real-Time Feeds
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Etsy API now has infrastructure to support real-time updates of our data. Our first available feed is the real-time listings feed and we also now have per shop real-time listings feeds.
+				Element:strong
+					This resource is not generally available. If you would like access, please write to
+				Element:a
+					developer@etsy.com
+					.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Consuming the Real-time Listings Feed
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We've set up a real-time listing feed via our RESTful API, which you can keep up with by regularly polling.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											The API Key (api_key)
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To access our API, you will need an
+										Element:code
+											api_key
+											. An
+										Element:code
+											api_key
+											is a parameter you will need to include in every request to our API. Note the key for real-time feeds is separate from the key used for the rest of the api, and each developer's key will be unique and have its own rate limits and daily call quotas.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Methods
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The base URL for the feeds API endpoint is https://openapi.etsy.com/v2/feeds/. Calling the endpoint directly will list possible methods.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														/listings/latest
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Unlike our regular API methods, these results are not cached and regular polling will return a complete list of
+													Element:a
+														Listings
+														. You can control the number of listings returned by using a
+													Element:code
+														time_limit
+														(default of 10 seconds) and
+													Element:code
+														time_offset
+														parameter (no default and required, units are epoch seconds). In addition,
+													Element:code
+														limit
+														(default 25, max 100) and
+													Element:code
+														offset
+														(default 0) parameters can be used in conjunction with the
+													Element:code
+														time_limit
+														and
+													Element:code
+														time_offset
+														parameters. We currently have around ~250 new listings a minute on average, though this is subject to time of day, year, and our growth, so you'll want to retrieve several times a minute to make sure you don't miss any new listings.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Listings in this feed mean there has been some sort of change to it. This may mean that the Listing underwent one of several actions: it may have been newly created, renewed, activated (left
+													Element:code
+														edit
+														state), deactivated (in
+													Element:code
+														edit
+														state), deleted, the user is on vacation, or removed for unspecified reasons. Only Listings with a state of
+													Element:code
+														active
+														are available for sale.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The possible states for Listings in the feed are:
+													Element:code
+														active
+														,
+													Element:code
+														sold_out
+														,
+													Element:code
+														expired
+														,
+													Element:code
+														removed
+														,
+													Element:code
+														edit
+														,
+													Element:code
+														vacation
+														,
+													Element:code
+														private
+														,
+													Element:code
+														unavailable
+														. The items available for purchase have only one state:
+													Element:code
+														active
+														. Any other state indicates that the item cannot currently be purchased, and you can remove it from display from your site. You may continue to link to Listing pages that are
+													Element:code
+														sold_out
+														or in
+													Element:code
+														vacation
+														state, but Listings in these states are not purchasable.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+													Element:code
+														state
+													Element:th
+														Meaning
+													Element:th
+														Display?
+													Element:tr
+													Element:td
+													Element:code
+														active
+													Element:td
+														The Listing is currently for sale.
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+													Element:code
+														sold_out
+													Element:td
+														The Listing has sold out.
+													Element:td
+														Optional
+													Element:tr
+													Element:td
+													Element:code
+														expired
+													Element:td
+														The Listing has expired.
+													Element:td
+														Optional
+													Element:tr
+													Element:td
+													Element:code
+														vacation
+													Element:td
+														The seller is not accepting orders at this time, but will return later.
+													Element:td
+														Optional
+													Element:tr
+													Element:td
+													Element:code
+														removed
+													Element:td
+														The Listing has been removed by its owner.
+													Element:td
+														No
+													Element:tr
+													Element:td
+													Element:code
+														edit
+													Element:td
+														The Listing is currently being edited by the owner.
+													Element:td
+														No
+													Element:tr
+													Element:td
+													Element:code
+														private
+													Element:td
+														The owner of the Listing has requested that it not appear in API results.
+													Element:td
+														No
+													Element:tr
+													Element:td
+													Element:code
+														unavailable
+													Element:td
+														The Listing has been removed by Etsy admin for unspecified reasons.
+													Element:td
+														No
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As when parsing methods that return Listings in our regular api, you'll need to be careful that Listings in various states may expose fewer fields than items in the
+													Element:code
+														active
+														state. For items in the
+													Element:code
+														vacation
+														or
+													Element:code
+														sold_out
+														state, all fields will be exposed, with the exception that
+													Element:code
+														sold_out
+														listings will not display
+													Element:code
+														price
+														. For all other states, the only guaranteed fields will be
+													Element:code
+														listing_id
+														and
+													Element:code
+														state
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To return JSON, call this method like so:
+													Element:code
+														https://openapi.etsy.com/v2/feeds/listings/latest?api_key=<api_key>
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To return Atom formatted data, call this method like so:
+													Element:code
+														https://openapi.etsy.com/v2/feeds/listings/latest.atom?api_key=<api_key>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Atom format
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We also provide the option to retrieve listings in a valid, standards-compliant Atom format. It is essentially a mapping of our
+										Element:code
+											resource fields to Atom fields, with any other fields not having a good mapping stored as XHTML inside the <content> element.
+										Element:a
+											Listing
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The mapping is as follows. The left column is an XPath of an element in the Atom feed, and the right column is a Resource field (described in our API documentation). X means the element does not correspond to a standard resource field and a description follows.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:th
+											XPath in Atom Feed
+										Element:th
+											Etsy API Equivalent
+										Element:th
+											Notes
+										Element:tr
+										Element:td
+										Element:code
+											//entry/author/name
+										Element:td
+											Listing.Shop.shop_name
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/id
+										Element:td
+											Listing.listing_id
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/title
+										Element:td
+											Listing.title
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/updated
+										Element:td
+										Element:em
+											n/a
+										Element:td
+											Time that this feed is retrieved (this is because many feeds do not have correct updated elements and thus many readers and parsers do not understand the updated element correctly)
+										Element:tr
+										Element:td
+										Element:code
+											//entry/published
+										Element:td
+											Listing.original_creation_tsz
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/link[0]
+										Element:td
+											Listing.url
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/link[1]
+										Element:td
+											Listing.Shop.url
+										Element:td
+											Equivalent to pulling via Includes in our regular API
+										Element:tr
+										Element:td
+										Element:code
+											//entry/link[2]
+										Element:td
+											Listing.MainImage.url_75x75
+										Element:td
+											Equivalent to pulling via Includes in our regular API
+										Element:tr
+										Element:td
+										Element:code
+											//entry/link[3]
+										Element:td
+											Listing.MainImage.url_170x135
+										Element:td
+											Equivalent to pulling via Includes in our regular API
+										Element:tr
+										Element:td
+										Element:code
+											//entry/link[4]
+										Element:td
+											Listing.MainImage.url_570xN
+										Element:td
+											Equivalent to pulling via Includes in our regular API
+										Element:tr
+										Element:td
+										Element:code
+											//entry/link[5]
+										Element:td
+											Listing.MainImage.url_fullxfull
+										Element:td
+											Equivalent to pulling via Includes in our regular API
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='updated']
+										Element:td
+											None
+										Element:td
+											The epoch time of the update to the listing that triggered this ping. The updated element of the entry only reflects the time the ping was sent, which due to network delays, may diverge quite a bit from the true update time.
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='description']
+										Element:td
+											Listing.description
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='state']
+										Element:td
+											Listing.state
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='user_id']
+										Element:td
+											Listing.user_id
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='creation_tsz']
+										Element:td
+											Listing.creation_tsz
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='ending_tsz']
+										Element:td
+											Listing.ending_tsz
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='original_creation_tsz']
+										Element:td
+											Listing.original_creation_tsz
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='last_modified_tsz']
+										Element:td
+											Listing.last_modified_tsz
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='price']
+										Element:td
+											Listing.price
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='currency_code']
+										Element:td
+											Listing.currency_code
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='quantity']
+										Element:td
+											Listing.quantity
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='tags']
+										Element:td
+											Listing.tags
+										Element:td
+											Each tag is in a separate div
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='materials']
+										Element:td
+											Listing.materials
+										Element:td
+											Each material is in a separate div
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='category_path']
+										Element:td
+											Listing.category_path
+										Element:td
+											Each category is in a separate div
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='shop_section_id']
+										Element:td
+											Listing.shop_section_id
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='featured_rank']
+										Element:td
+											Listing.featured_rank
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='state_tsz']
+										Element:td
+											Listing.state_tsz
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='hue']
+										Element:td
+											Listing.hue
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='saturation']
+										Element:td
+											Listing.saturation
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='brightness']
+										Element:td
+											Listing.brightness
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='is_black_and_white']
+										Element:td
+											Listing.is_black_and_white
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='non_taxable']
+										Element:td
+											Listing.non_taxable
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='views']
+										Element:td
+											Listing.views
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='origin_country_id']
+										Element:td
+											Listing.ShippingInfo.X.origin_country_id
+										Element:td
+										Element:tr
+										Element:td
+										Element:code
+											//entry/content/div/div
+										Element:br
+											[@class='origin_country_name']
+										Element:td
+											Listing.ShippingInfo.X.origin_country_name
+										Element:td
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that the listing descriptions, which are in entity-encoded HTML, are re-encoded before they're included in the XML. This means that HTML entities in the feed will appear to be double-encoded. You should at the very least, decode the ampersand (
+										Element:code
+											&amp;
+											) XML entity before display the listing.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As when developing any other Etsy API application, we recommend the following tools:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											JSONView browser plugin to view JSON pretty-printed (Firefox and Chrome)
+										Element:li
+											Firefox to view Atom feeds in a human-readable format
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Developers Home
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Discussion
+										Element:li
+										Element:a
+											API Terms of Use
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Your Developer Account
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Register as a developer
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Looking for Etsy Apps?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Check out our new
+							Element:br
+							Element:a
+								App Gallery
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It's the best way to find cool and useful tools built upon Etsy's API.
+						Node:
+						(type) c
+						(layer)2
+							Element:img

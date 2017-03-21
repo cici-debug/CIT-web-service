@@ -1,0 +1,405 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Handling events from the Events API using AWS Lambda
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+					By John Agan
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Node.js
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Botkit
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Slash commands
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Amazon Lambda
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Introduction
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This is a demonstration of
+							Element:a
+								Slack's Event API
+								using
+							Element:a
+								AWS Lambda
+								to receive events and respond to specific messages. This demo looks for the words aws and lambda in a message. If found, it will respond by mentioning the sender and giving Lambda praises.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Prerequisites
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								An
+							Element:a
+								AWS account
+								with admin privileges
+							Element:li
+								An
+							Element:a
+								AWS Lambda
+								function triggered by a url (Read
+							Element:a
+								this tutorial
+								to find out how)
+							Element:li
+								A Slack App
+							Element:a
+								installed on a team
+								with the
+							Element:code
+								channels:history
+								and
+							Element:code
+								chat:write:bot
+							Element:a
+								OAuth scopes
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Demonstration
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Lambda Function
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								const https = require('https'), qs = require('querystring'), VERIFICATION_TOKEN = "[APP VERIFICATION TOKEN]", ACCESS_TOKEN = "[SLACK ACCESS TOKEN]"; // Verify Url - https://api.slack.com/events/url_verification function verify(data, callback) { if (data.token === VERIFICATION_TOKEN) callback(null, data.challenge); else callback("verification failed"); } // Post message to Slack - https://api.slack.com/methods/chat.postMessage function process(event, callback) { // test the message for a match and not a bot if (!event.bot_id && /(aws|lambda)/ig.test(event.text)) { var text = `<@${event.user}> isn't AWS Lambda awesome?`; var message = { token: ACCESS_TOKEN, channel: event.channel, text: text }; var query = qs.stringify(message); // prepare the querystring https.get(`https://slack.com/api/chat.postMessage?${query}`); } callback(null); } // Lambda handler exports.handler = (data, context, callback) => { switch (data.type) { case "url_verification": verify(data, callback); break; case "event_callback": process(data.event, callback); break; default: callback(null); } };
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Readying your app for the Events API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Navigate to your
+							Element:a
+								Slack Apps
+								and select the App you would like to use for subscriptions. If you don't have an App already, you can follow this guide to set one up.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											1. Enable Events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											2. Add Your AWS Lambda URL
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is the URL that will trigger the Lambda event. If you haven't set this up yet, follow the
+										Element:a
+											AWS Lambda guide
+											first.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											3. Select The Events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For this tutorial, we're only listening for the
+										Element:code
+											message.channels
+											event.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											4. All Systems Go!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If everything goes well, we're done on the Slack side. Now we need to setup Lambda to handle these events.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Configuring your Lambda Function
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Copy/paste the Lambda Function (provided above) into the Lambda function you created. Replace the following variables in the code with real data:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:p
+							Element:strong
+								[APP VERIFICATION TOKEN]
+								- Replace with the Verification Token found at the bottom of your Slack App's OAuth & Permission Page https://api.slack.com/apps/A####XXXX/oauth
+							Element:li
+							Element:p
+							Element:strong
+								[SLACK ACCESS TOKEN]
+								- The Slack access token used to post messages to Slack. This should have been collecting after installing the App to a team. [LINK TO TUTORIAL]
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Related documentation
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Slash Commands
+										Element:br
+										Element:em
+											Slack Platform documentation
+										Element:li
+										Element:a
+											Building Slack apps
+										Element:br
+										Element:em
+											Slack Platform documentation
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:ul
+										Element:li
+											Using Slack
+										Element:li
+										Element:a
+											Product
+										Element:li
+										Element:a
+											Pricing
+										Element:li
+										Element:a
+											Support
+										Element:li
+										Element:a
+											Slack Guides
+										Element:li
+										Element:a
+											Video Guides
+										Element:li
+										Element:a
+											App Directory
+										Element:li
+										Element:a
+											API
+										Element:ul
+										Element:li
+											Slack
+										Element:li
+										Element:a
+											Jobs
+										Element:li
+										Element:a
+											Customers
+										Element:li
+										Element:a
+											Developers
+										Element:li
+										Element:a
+											Events
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Podcast
+										Element:li
+										Element:a
+											Slack Shop
+										Element:ul
+										Element:li
+											Legal
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Security
+										Element:li
+										Element:a
+											Terms of Service
+										Element:li
+										Element:a
+											Policies
+										Element:ul
+										Element:li
+											Handy Links
+										Element:li
+										Element:a
+											Download desktop app
+										Element:li
+										Element:a
+											Download mobile app
+										Element:li
+										Element:a
+											Brand Guidelines
+										Element:li
+										Element:a
+											Slack at Work
+										Element:li
+										Element:a
+											Status
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Contact Us
+										Element:li
+										Element:a
+										Element:li
+										Element:a

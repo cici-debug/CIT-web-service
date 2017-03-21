@@ -1,0 +1,479 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					OAuth V1
+				Element:a
+					#
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The flow we respect matches
+				Element:a
+					Twitter's
+					and
+				Element:a
+					Trello's
+					implementation of the 3-legged oauth flow.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Note that OAuth v1 is not officially support on Zapier; we highly recommend using OAuth 2 if possible!
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					That being said, with OAuth v1 having been a popular authentication mechanism found on the web, we have a sample implementation if you want to try it, respecting OAuth v1 "revision a".
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Initial Setup:
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, you'll need to select
+							Element:code
+								OAuth 1
+								as your auth type, and then provide the required parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Capture extra data from token response
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If your app returns extra data through the token response (user id for example) you can grab those extra parameters using the
+							Element:strong
+								Extra Requested Fields
+								option.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								How we authenticate with your OAuth service
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We attempt a 3 legged OAuth 1 process that has 3 high level steps:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Obtain temporary oauth_token and oauth_secret from your app
+							Element:li
+								Get user to authorize Zapier access to your app
+							Element:li
+								Exchange the temporary oauth_token for an authorized oauth_token
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											1. Requesting Temporary Credentials From Your App:
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a user goes to add a new account for your app, we make a request behind-the-scenes to ask your app for a request token and secret. Your app should respond back with a valid
+										Element:code
+											oauth_token
+											and
+										Element:code
+											oauth_token_secret
+											. Additionally, our request contains an
+										Element:code
+											oauth_callback
+											URL that your app will use in a later step.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The signed POST request to your application's
+										Element:code
+											request_token_url
+											will look like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST https://example.com/api/1.0/oauth/request_token Authorization: OAuth oauth_nonce="ZAPIER-GENERATED-NONCE", oauth_callback="ZAPIER-OAUTH-CALLBACK", oauth_signature_method="HMAC-SHA1", oauth_timestamp="ZAPIER-GENERATED-TIMESTAMP", oauth_consumer_key="<Your consumer key>", oauth_signature="ZAPIER-GENERATED-SIGNATURE", oauth_version="1.0"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your app should validate the request and return with the temporary response token, like so:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											oauth_token_secret=TEMP-OAUTH-TOKEN-SECRET&oauth_token=TEMP-OAUTH-TOKEN&oauth_callback_confirmed=true
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											2. Redirecting the User to Your App:
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With token in hand, we redirect the user to the
+										Element:code
+											authorization_url
+											you provided, so that they can grant access to Zapier.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											302 https://example.com/api/v1/oauth/authenticate?oauth_token=<oauth_token>
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											3. Redirecting the User Back to Zapier:
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After the user clicks allow, your app redirects the user to
+										Element:code
+											oauth_callback
+											(from Step 1), along with an
+										Element:code
+											oauth_verifier
+											parameter in the query string.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											302 <oauth_callback>?oauth_verifier=<oauth_verifier>
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											4. Exchanging Temporary Credentials for Token Credentials:
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We use that
+										Element:code
+											oauth_verifier
+											to make a POST to the
+										Element:code
+											access_token_url
+											you provided.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST https://example.com/api/1.0/oauth/access_token
+										Element:span
+											\
+											-H Accept: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											'
+										Element:span
+											consumer_key
+										Element:span
+											=
+											<consumer_key>
+										Element:span
+											&
+										Element:span
+											consumer_secret
+										Element:span
+											=
+											<consumer_secret>
+										Element:span
+											&
+										Element:span
+											oauth_verifier
+										Element:span
+											=
+											<oauth_verifier>
+										Element:span
+											&
+										Element:span
+											oauth_token
+										Element:span
+											=
+											<oauth_token>
+										Element:span
+											&
+										Element:span
+											oauth_token
+										Element:span
+											=
+											<oauth_token_secret>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your service should then provide an access_token and access_token_secret, along with any extra parameters that you may have included in the optional
+										Element:em
+											Capture extra data from token response
+											step.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While we ask for a JSON response, the response can be JSON, XML or query string encoded. For example, any of the below are valid responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With
+										Element:code
+											Content-Type: application/json
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"oauth_token"
+										Element:span
+											:
+										Element:span
+											"1234567890abcdef"
+										Element:span
+											,
+										Element:span
+											"oauth_token_secret"
+										Element:span
+											:
+										Element:span
+											"1234567890abcdef"
+										Element:span
+											,
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With
+										Element:code
+											Content-Type: application/xml
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											<AnyRootElem>
+										Element:span
+											<oauth_token>
+											1234567890abcdef
+										Element:span
+											</oauth_token>
+										Element:span
+											<oauth_token_secret>
+											1234567890abcdef
+										Element:span
+											</oauth_token_secret>
+										Element:span
+											</AnyRootElem>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With
+										Element:code
+											Content-Type: text/plain
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											oauth_token=1234567890abcdef&oauth_token_secret=1234567890abcdef
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											5. Using the Token Credentials
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We sign all requests using your secret and the new
+										Element:code
+											oauth_token
+											and
+										Element:code
+											oauth_token_secret
+											. We're talking standard HMAC-SHA1, RSA is not supported. However, you can use
+										Element:a
+											scripting
+											to modify request parameters (including headers) as you see fit.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, if a POST request to your API expects
+										Element:code
+											Content-Type:application/x-www-url-form-encoded
+											instead of the standard
+										Element:code
+											application/x-www-form-urlencoded
+											then you can use a custom script to modify the request that we make. In an app with a trigger
+										Element:code
+											create_ticket
+											the Scripting API would look like so:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											var Zap = { create_ticket_pre_write: function(bundle) { bundle.request.headers['Content-Type'] = 'application/x-www-url-form-encoded'; return bundle.request; } }
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Example:
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We highly recommend looking at each of
+								↑ Was this documentation useful?
+							Element:a
+								Bitbucket's
+								,
+							Element:a
+								Twitter's
+								and
+							Element:a
+								Trello's
+								authentication documentation for some great examples of how OAuth 1a can be implemented. Our system is designed to match their industry standard implementation pattern. Additionally,
+							Element:a
+								oauth1a spec
+								and
+							Element:a
+								oauth bible
+								can be extremely useful in understanding the 3 legged oauth flow.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								Can't find what you're looking for? We'd love to help.
+							Element:a
+								Yes
+							Element:a
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Send us a message
+								. Get Help
+						Node:
+						(type) c
+						(layer)2
+							Element:noscript
+							Element:img

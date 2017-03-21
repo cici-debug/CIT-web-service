@@ -1,0 +1,510 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Hello World Slack OAuth
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+					By Steve Hammond
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Slack apps
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Node.js
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Apps make Slack a more productive and enjoyable place to get work done. Let’s not also forget that super amazing features, like the
+				Element:a
+					Events API
+					and
+				Element:a
+					message buttons
+					, are exclusive to apps. If you want to create an app and install it on your team – but are new to Slack’s OAuth process – this tutorial is for you.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					You will have a shiny new app installed on your team upon completing these three steps:
+			Node:
+			(type) c
+			(layer)1
+				Element:ol
+				Element:li
+					Create your Slack app
+				Element:li
+					Setup the OAuth installation flow
+				Element:li
+					Install the app on your team
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					A
+				Element:strong
+					Node.js
+					app will be used as an example. If you prefer Python, Ruby, or another web-friendly language, you should be able to follow along and translate to your chosen language.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														What you’ll need
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														Publicly accessible server running
+													Element:a
+														Node.js
+													Element:li
+													Element:p
+														Following Node.js modules:
+													Element:ul
+													Element:li
+													Element:a
+														: popular http framework
+													Element:strong
+														Express
+													Element:li
+													Element:a
+														: simple http request client
+													Element:strong
+														Request
+													Element:li
+													Element:a
+														: loads environment variables from a .env file
+													Element:strong
+														Dotenv
+													Element:p
+														For example, the beginning of your server file should resemble:
+													Element:pre
+													Element:code
+														require('dotenv').config() var express = require('express') var request = require('request') var app = express()
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Our complete
+													Element:a
+														OAuth documentation
+														is a good reference as you go through the tutorial.
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Create your app
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:p
+														Go to
+													Element:a
+														https://api.slack.com/apps
+														and click the big green
+													Element:strong
+														Create New App
+														button. Enter a name for your app and click the next prominent green button.
+													Element:li
+													Element:p
+														The
+													Element:strong
+														Basic Information
+														link on the left hand side of your app’s settings page contains information you’ll need, such as the
+													Element:strong
+														Client ID
+														and
+													Element:strong
+														Client Secret
+														, to authenticate OAuth requests for your app. Copy these to your
+													Element:strong
+														.env
+														file on your server. See docs
+													Element:a
+														here
+														for variable format if you’re following the Node.js example.
+													Element:li
+													Element:p
+														It’s time to setup a
+													Element:strong
+														Redirect URL
+														for your app. This is the endpoint for Slack to send a unique temporary code to your server during a user’s installation. Your server will then send back this code, along with your
+													Element:strong
+														Client ID
+														and
+													Element:strong
+														Client Secret
+														, so that we know we can trust you.
+													Element:p
+														The Redirect URL must be publicly accessible and secure. If you want to run your server locally, e.g. on
+													Element:code
+														localhost
+														,
+													Element:strong
+														Ngrok
+														is a service that will create a tunnel to your local or private endpoint.
+													Element:p
+														Here’s a quick
+													Element:a
+														ngrok tutorial
+														to get you up and running. 💯
+													Element:p
+														You can save your
+													Element:strong
+														Redirect URL
+														in the
+													Element:strong
+														OAuth & Permissions
+														section on the left. After you save your changes, you can always come back later and change them.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														That’s it for your Slack app settings page. Now let's get your Node.js app configured for OAuth glory!
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Setup OAuth installation flow
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:a
+														Add to Slack button
+														is an easy way to install the app. Navigate
+													Element:a
+														here
+														, select your new app from the
+													Element:strong
+														Code for app
+														dropdown menu and tick your desired scopes from the list of
+													Element:code
+														incoming-webhook
+														,
+													Element:code
+														commands
+														, and
+													Element:code
+														bot
+														. Now copy the HTML for the button to a file on your server. We'll call it
+													Element:strong
+														add_to_slack.html
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Scopes are an integral part of OAuth as they define your app’s permissions to access API methods and bundled features, such as
+													Element:a
+														webhooks
+														and
+													Element:a
+														slash commands
+														. Browse the
+													Element:a
+														OAuth Scopes page
+														to learn more.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Next, add a GET route to your server file for your basic, yet elegant, button:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														app.get('/auth', (req, res) =>{ res.sendFile(__dirname + '/add_to_slack.html') })
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Add Redirect URL route
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When a user clicks your
+													Element:strong
+														Add to Slack
+														button, a request is sent to Slack’s servers. The
+													Element:strong
+														Client ID
+														sent via the button click is validated and a
+													Element:code
+														code
+														is sent as a
+													Element:strong
+														GET
+														request to your
+													Element:strong
+														Redirect URL
+														. The
+													Element:code
+														code
+														is in a JSON object named
+													Element:code
+														query
+														of the request, i.e.
+													Element:code
+														req.query.code
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You server’s task is to receive this
+													Element:code
+														code
+														and send it back along with the
+													Element:strong
+														Client ID
+														and
+													Element:strong
+														Client Secret
+														as parameters to the OAuth Access Token URL:
+													Element:a
+														https://slack.com/api/oauth.access
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The response body of your request will contain the tokens, webhooks and IDs that your app can use to make its magic happen. Example response body:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "ok":true, "access_token":"xoxp-...", "scope":"YOUR_SCOPES", "user_id":"U...", "team_name":"TEAM_NAME", "team_id":"TEAM_ID", "incoming_webhook": { "channel":"#general", "channel_id":"C...", "configuration_url":"https:\\/\\/my.slack.com\\/services\\/B...", "url":"https:\\/\\/hooks.slack.com\\/services\\/TEAM_ID\\/B...\\/..." } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														See the following snippet to accomplish the receipt of the
+													Element:code
+														code
+														to your
+													Element:strong
+														Redirect URL
+														, the GET request back to Slack and the response with your newly installed app’s credentials. Not too hard, hey?
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														app.get('/auth/redirect', (req, res) =>{ var options = { uri: 'https://slack.com/api/oauth.access?code=' +req.query.code+ '&client_id='+process.env.CLIENT_ID+ '&client_secret='+process.env.CLIENT_SECRET+ '&redirect_uri='+process.env.REDIRECT_URI, method: 'GET' } request(options, (error, response, body) => { var JSONresponse = JSON.parse(body) if (!JSONresponse.ok){ console.log(JSONresponse) res.send("Error encountered: \n"+JSON.stringify(JSONresponse)).status(200).end() }else{ console.log(JSONresponse) res.send("Success!") } }) })
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In the above example,
+													Element:code
+														console.log()
+														is used to view the response body. In your code, you’ll want save the response object immediately in a safe and secure place.
+													Element:strong
+														You only get one chance to save it!
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Check out the
+													Element:a
+														Safely Storing Credentials
+														page for best practices on how to handle this sensitive data.
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Install the app on your team
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Save your files, triple-check your code, and restart your server.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Now open your
+													Element:strong
+														Add to Slack
+														button page in your browser, click on the button and you should be navigated through the installation of your app!
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If installed successfully, your app will be listed here:
+													Element:a
+														https://my.slack.com/apps/manage
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Congratulations!
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Related documentation
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Building Slack apps
+										Element:br
+										Element:em
+											Slack Platform documentation
+										Element:li
+										Element:a
+											Using OAuth 2.0
+										Element:br
+										Element:em
+											Slack Platform documentation
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:ul
+										Element:li
+											Using Slack
+										Element:li
+										Element:a
+											Product
+										Element:li
+										Element:a
+											Pricing
+										Element:li
+										Element:a
+											Support
+										Element:li
+										Element:a
+											Slack Guides
+										Element:li
+										Element:a
+											Video Guides
+										Element:li
+										Element:a
+											App Directory
+										Element:li
+										Element:a
+											API
+										Element:ul
+										Element:li
+											Slack
+										Element:li
+										Element:a
+											Jobs
+										Element:li
+										Element:a
+											Customers
+										Element:li
+										Element:a
+											Developers
+										Element:li
+										Element:a
+											Events
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Podcast
+										Element:li
+										Element:a
+											Slack Shop
+										Element:ul
+										Element:li
+											Legal
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Security
+										Element:li
+										Element:a
+											Terms of Service
+										Element:li
+										Element:a
+											Policies
+										Element:ul
+										Element:li
+											Handy Links
+										Element:li
+										Element:a
+											Download desktop app
+										Element:li
+										Element:a
+											Download mobile app
+										Element:li
+										Element:a
+											Brand Guidelines
+										Element:li
+										Element:a
+											Slack at Work
+										Element:li
+										Element:a
+											Status
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Contact Us
+										Element:li
+										Element:a
+										Element:li
+										Element:a

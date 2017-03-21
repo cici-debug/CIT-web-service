@@ -1,0 +1,1008 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								JSON REST API
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Overview
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We provide a simple to use JSON API built on the REST principle. Our API uses the HTTP features like verbs, authentification and status codes. Request and response bodies are JSON encoded.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Requests
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All requests must go via
+													Element:strong
+														HTTPS
+														, the base URL is
+													Element:strong
+														Each request need to include the Content-Type and Authorization HTTP header
+													Element:pre
+														https://api.uclassify.com/v1/
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														Content-Type: application/json Authorization:Token YOUR_API_KEY_HERE
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Use either your read or write key (
+													Element:a
+														Login
+														and see 'Api keys').
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Requests in the examples below are illustrated by using the
+													Element:a
+														curl
+														, by replacing the YOUR_API_KEY_HERE you can test the API from command line. If you get SSL certificate errors, you can ignore certificate verification with the -k flag or preferably install a
+													Element:a
+														cert bundle
+														.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Read Calls
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Read calls do not modify classifiers, they are read-only. There are 3 different endpoints for read calls,
+										Element:code
+											classify
+											,
+										Element:code
+											keywords
+											and
+										Element:code
+											getInformation
+											. Set the
+										Element:a
+											authorization header
+											to your read API key in the request. You can make read calls to classifier owned by yourself or any published classifier.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each successful read response (HTTP status code 2xx) returns a JSON body, if the call was not successful an
+										Element:a
+											error response
+											is returned.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Classify
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The call
+														Endpoint
+													Element:strong
+														sends one or more texts to a classifier and returns an array with one classification per text.
+													Element:code
+														classify
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST https://api.uclassify.com/v1/{username}/{classifierName}/classify
+														Request body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{"texts":["text 1 to process","text 2 to process"]}
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The classify response consists of an array of classifications. Each classification corresponds to a text in the request. Classifications are listed in the same order as the texts, meaning the classification for the first text is the first element in the array.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+														This example shows how you send one text to the public 'Sentiment' classifier, which returns a classification.
+													Element:thead
+													Element:tr
+													Element:th
+														Name
+													Element:th
+														Type
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														textCoverage
+													Element:td
+														double
+													Element:td
+														The propotion of the classified text that was found in the training data. 1 means that every word was used, 0 that no words were used. Useful to determine the relevance of the classification.
+													Element:tr
+													Element:td
+														classification
+													Element:td
+														Array
+													Element:td
+														Array of classes and respective probability.
+													Element:tr
+													Element:td
+														className
+													Element:td
+														RestrictedString
+													Element:td
+														The name of the class.
+													Element:tr
+													Element:td
+														p
+													Element:td
+														double
+													Element:td
+														The probability that the text belongs to this class [0-1].
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_READ_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"texts\":[\"I am so happy today\"]}" https://api.uclassify.com/v1/uClassify/Sentiment/classify
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														[ { "textCoverage": 1.0, "classification": [ { "className": "negative", "p": 0.133089 }, { "className": "positive", "p": 0.866911 } ] } ]
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Keywords
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The call
+														Endpoint
+													Element:strong
+														sends one or more texts to a classifier. For each text it returns an array with relevant keywords.
+													Element:code
+														keywords
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST https://api.uclassify.com/v1/{username}/{classifierName}/keywords
+														Request body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{"texts":["text 1 to process","text 2 to process"]}
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:strong
+														request returns an array with lists of keywords, one list per text.
+													Element:code
+														keywords
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+														This example shows how you can extract keywords from the sentiment classifier.
+													Element:thead
+													Element:tr
+													Element:th
+														Name
+													Element:th
+														Type
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														className
+													Element:td
+														RestrictedString
+													Element:td
+														The name of the class.
+													Element:tr
+													Element:td
+														p
+													Element:td
+														double
+													Element:td
+														The probability (weight) that the text belongs to this class.
+													Element:tr
+													Element:td
+														keyword
+													Element:td
+														RestrictedString
+													Element:td
+														The keyword.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_READ_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"texts\":[\"happy good fine bad stinks worse\"]}" https://api.uclassify.com/v1/uClassify/Sentiment/keywords
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														[ [ { "className": "positive", "p": 0.698998, "keyword": "happy" }, { "className": "negative", "p": 0.736395, "keyword": "bad" }, { "className": "negative", "p": 0.914256, "keyword": "stinks" }, { "className": "negative", "p": 0.8317, "keyword": "worse" } ] ]
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Get classifier information
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The call
+														Endpoint
+													Element:strong
+														returns information about a classifier. It lists the classes and on how many features they have been trained.
+													Element:code
+														getInformation
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET https://api.uclassify.com/v1/{username}/{classifierName}
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:strong
+														response contains information about a classifier. The response consists of an array with one object per class.
+													Element:code
+														getInformation
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+														Request to get information about the public 'Sentiment' classifier.
+													Element:thead
+													Element:tr
+													Element:th
+														Name
+													Element:th
+														Type
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														className
+													Element:td
+														RestrictedString
+													Element:td
+														The name of the class.
+													Element:tr
+													Element:td
+														totalCount
+													Element:td
+														int
+													Element:td
+														Total number of words the class is trained on.
+													Element:tr
+													Element:td
+														uniqueFeatures
+													Element:td
+														int
+													Element:td
+														The number of unique words the class is trained on.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X GET -H "Authorization:Token YOUR_READ_API_KEY_HERE" -H "Content-Type: application/json" https://api.uclassify.com/v1/uClassify/Sentiment
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														[ { "className": "negative", "uniqueFeatures": 6832265, "totalCount": 208068140 }, { "className": "positive", "uniqueFeatures": 6607607, "totalCount": 180593163 } ]
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Write Calls
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Requests to
+										Element:code
+											create
+											,
+										Element:code
+											remove
+											,
+										Element:code
+											addClass
+											,
+										Element:code
+											removeClass
+											,
+										Element:code
+											train
+											and
+										Element:code
+											untrain
+											classifiers. Set the
+										Element:a
+											authorization header
+											to your write api key in the request to any write call. You can only write to classifiers owned by yourself.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Successful write requests (HTTP status code 2xx) have an empty (void) response body. If something goes wrong an error response is returned.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Create classifier
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The call
+														Endpoint
+													Element:strong
+														creates a classifier for the account associated with the write API key.
+													Element:code
+														create
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST https://api.uclassify.com/v1/me/
+														Request body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{"classifierName":"NameOfTheNewClassifier"}
+														Creates a classifier named 'MyTopics'
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"classifierName\":\"MyTopics\"}" https://api.uclassify.com/v1/me/
+														If successful (HTTP status code 2xx) the response will not contain any JSON content (void).
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Remove classifier
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The call
+														Endpoint
+													Element:strong
+														removes the specified classifier for the account associated with the write API key.
+													Element:code
+														remove
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														DELETE https://api.uclassify.com/v1/me/MyTopics
+														Removes the classifier named 'MyTopics'
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X DELETE -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" https://api.uclassify.com/v1/me/MyTopics
+														If successful (HTTP status code 2xx) the response will not contain any JSON content (void).
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Add class
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The call
+														Endpoint
+													Element:strong
+														adds a class to a classifier.
+													Element:code
+														addClass
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST https://api.uclassify.com/v1/me/{classifierName}/addClass
+														Request body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{"className":"NameOfTheNewClass"}
+														Adds a class named 'Computers' to the classifier 'MyTopics'
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"className\":\"Computers\"}" https://api.uclassify.com/v1/me/MyTopics/addClass
+														If successful (HTTP status code 2xx) the response will not contain any JSON content (void).
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Remove class
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The call
+														Endpoint
+													Element:strong
+														removes a class from a classifier.
+													Element:code
+														removeClass
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														DELETE https://api.uclassify.com/v1/me/MyTopics/Computers
+														Removes the class named 'Computers' from the classifier 'MyTopics'
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X DELETE -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" https://api.uclassify.com/v1/me/MyTopics/Computers
+														If successful (HTTP status code 2xx) the response will not contain any JSON content (void).
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Train classifier
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The call
+														Endpoint
+													Element:strong
+														trains a class in a classifier on one or more texts.
+													Element:code
+														train
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST https://api.uclassify.com/v1/me/{classifierName}/{className}/train
+														RequestBody
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{"texts":["text 1 to process","text 2 to process"]}
+														Trains the class called 'Computers' of the classifier 'MyTopics'
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"texts\":[\"The motherboard was filled with good RAM and CPUs\"]}" https://api.uclassify.com/v1/me/MyTopics/Computers/train
+														If successful (HTTP status code 2xx) the response will not contain any JSON content (void).
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Untrain classifier
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The call
+														Endpoint
+													Element:strong
+														untrains a class in a classifier on one or more texts. The common usage for this call is to correct misstakes, if you train a classifier on a text and then untrain it on the same text the classifier will returned to the previous state. For example if a spam message incorrectly is trained as a legitimate - use this call to fix the misstake by untraining the spam message from the legitimate class and then training it (train call) on the spam class.
+													Element:code
+														train
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST https://api.uclassify.com/v1/me/{classifierName}/{className}/untrain
+														RequestBody
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{"texts":["text 1 to process","text 2 to process"]}
+														Untrains the class called 'Comptuers' of the classifier 'MyTopics'
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"texts\":[\"Bouldering is the best type of climing\"]}" https://api.uclassify.com/v1/me/MyTopics/Computers/untrain
+														If successful (HTTP status code 2xx) the response will not contain any JSON content (void).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Error Responses
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the request was unsuccessful (HTTP status code other than 2xx) an JSON encoded error response body is returned.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+											Trying to create a classifier 'MyTopics' but a classifier with that same name already exists
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											statusCode
+										Element:td
+											int
+										Element:td
+											400=BAD_REQUEST, 413=REQUEST_ENTITY_TOO_LARGE, 500=INTERNAL_SERVER_ERROR, 530=SERVICE_UNAVAILABLE
+										Element:tr
+										Element:td
+											message
+										Element:td
+											string
+										Element:td
+											The error message.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "statusCode": 400, "message": "The classifier 'MyTopics' is already created." }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Examples
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following are examples of how you can use the API to programmatically create classifiers. Remember that all of this is also possible via our gui!
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Twitter sentiment
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This shows how to batch multiple texts in one request. In this case it's 5 tweets that are classified for sentiment
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_READ_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"texts\":[\"I am so happy today\",\"Tomorrow will be a horrible day\",\"I hate mornings\",\"Machine learning is fun\",\"Others prove theorems. Geoff Hinton proves axioms.\"]}" https://api.uclassify.com/v1/uClassify/Sentiment/classify
+														Response body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														[ { "textCoverage": 1.0, "classification": [ { "className": "negative", "p": 0.133089 }, { "className": "positive", "p": 0.866911 } ] }, { "textCoverage": 1.0, "classification": [ { "className": "negative", "p": 0.964776 }, { "className": "positive", "p": 0.0352237 } ] }, { "textCoverage": 1.0, "classification": [ { "className": "negative", "p": 0.954094 }, { "className": "positive", "p": 0.0459057 } ] }, { "textCoverage": 1.0, "classification": [ { "className": "negative", "p": 0.149686 }, { "className": "positive", "p": 0.850314 } ] }, { "textCoverage": 1.0, "classification": [ { "className": "negative", "p": 0.352569 }, { "className": "positive", "p": 0.647431 } ] } ]
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Creating a Fantasy Language Classifier step-by-step
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Let's say that you want to create a classifier that finds detects what Fantasy Language a text is written in. The first steps you take are
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:a
+														Register
+														and get a free uClassify account
+													Element:li
+														Under the tab 'Api Keys' obtain your read and write keys
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Now you have an account and can use your write API key to programatically create classifiers. The following examples shows how to create a classifier that distinguishes text between the classes Klingon, Sindarin and Huttese. This is done in one request, however it's possible to split it into one for each call, or any number. And of course it's possible (and necessary) to continue training the classifier with more texts for each fantasy language.
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Create the new classifier, 'FantasyLanguage'
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"classifierName\":\"FantasyLanguage\"}" https://api.uclassify.com/v1/me/
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The request simply creates a classifier named 'MySentiment' using the write call
+													Element:code
+														create
+														. The
+													Element:code
+														id
+														attribute is set to an arbitrary identifier for that call. Each request sends back an xml response, informing you if the request was successful or not. You can now log in to your account and be able to find a classifier called 'ManOrWoman' under the 'Classifiers' tab. The next thing to do is to add the possible classes. In our sentiment classifier there are two classes, 'Positive' and 'Negative'.
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Add 'Klingon' class to 'FantasyLanguage'
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"className\":\"Klingon\"}" https://api.uclassify.com/v1/me/FantasyLanguage/addClass
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Add 'Sindarin' class to 'FantasyLanguage'
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"className\":\"Sindarin\"}" https://api.uclassify.com/v1/me/FantasyLanguage/addClass
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Add 'Huttese' class to 'FantasyLanguage'
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"className\":\"Huttese\"}" https://api.uclassify.com/v1/me/FantasyLanguage/addClass
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Before we can start using the classifier we need to train it. To do this we need collect training data for each class. In this case it would be a bunch of positive texts and negative. For simplicity of this example we train it on one short message per class.
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Train the 'Klingon' class in 'FantasyLanguage'
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"texts\":[\"JIlajneS. ghIj qet jaghmeyjaj\",\"'e' pa' jaj law' mo' jaj puS\",\"'ej Doq, SoDtaH, ghoStaH SIQal\"]}" https://api.uclassify.com/v1/me/FantasyLanguage/Klingon/train
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Train the 'Sindarin' class in 'FantasyLanguage'
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"texts\":[\"Ingon i athrad dammen beriathar aen\",\"Hon mabathon. Rochon ellint im\",\"Lasto Carahdras, sedho, hodo\"]}" https://api.uclassify.com/v1/me/FantasyLanguage/Sindarin/train
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Train the 'Hutttese' class in 'FantasyLanguage'
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_WRITE_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"texts\":[\"Kaa bazza kundee hodrudda\",\"Spasteelya bookie ookie\",\"Me dwana no bata\"]}" https://api.uclassify.com/v1/me/FantasyLanguage/Huttese/train
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Send a request with a text to find out in what fantasy language a text is written
+													Element:pre
+														curl -X POST -H "Authorization:Token YOUR_READ_API_KEY_HERE" -H "Content-Type: application/json" --data "{\"texts\":[\"Iw bIQtqDaq bIlengjaj 'ej pa'\",\"Padol raid, athan hendad aen hon\"]}" https://api.uclassify.com/v1/YOUR_USERNAME_HERE/FantasyLanguage/classify
+														Response
+													Element:pre
+														[ { "textCoverage": 0.222222, "classification": [ { "className": "Huttese", "p": 0.00300907 }, { "className": "Klingon", "p": 0.994839 }, { "className": "Sindarin", "p": 0.00215189 } ] }, { "textCoverage": 0.181818, "classification": [ { "className": "Huttese", "p": 0.00295934 }, { "className": "Klingon", "p": 0.00180259 }, { "className": "Sindarin", "p": 0.995238 } ] } ]
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code examples
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here are some snippets to show how to programmatically make a requests from different languages. The code is intended to demostrate simple requests. For example json serialize and deserialization is not demonstrated.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This snippets below make a classify request, with one text "the movie is really good 5/5"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This printed response in the examples below is
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											[{"textCoverage":1.0,"class":[{"className":"negative","p":1.19693E-05},{"className":"positive","p":0.999988}]}]
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Classify from Python
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														import requests response = requests.post('https://api.uclassify.com/v1/uclassify/sentiment/classify', \ data = "{\"texts\": [\"the movie is really good 5/5\"]}", \ headers = {'Authorization': 'Token ' + "YOUR_READ_API_KEY_HERE"}) print(response.content)
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Classify from PHP
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														$options = array( 'http' => array( 'method' => 'POST', 'header' => "Authorization: Token YOUR_READ_API_KEY_HERE\r\nContent-Type: application/json\r\n", 'content' => '{"texts": ["the movie is really good 5/5"]}', ), ); $context = stream_context_create($options); $result = file_get_contents('https://api.uclassify.com/v1/uclassify/sentiment/classify', false, $context); print($result)
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Classify from C#
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														using System; using System.Net; using System.Net.Http; using System.Net.Http.Headers; namespace Example { internal class CodeSample { private static void Main(string[] args) { using (var client = new HttpClient {BaseAddress = new Uri("https://api.uclassify.com/v1/")}) { client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", "YOUR_READ_API_KEY_HERE"); const string requestBody = "{\"texts\": [\"the movie is really good 5/5\"]}"; var response = client.PostAsync("uclassify/sentiment/classify", new StringContent(requestBody)).Result; var content = response.Content.ReadAsStringAsync().Result; Console.WriteLine(content); } } } }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Classify from Java
+														It may be a better idea to use the Apache HTTP client instead of Javas native HttpURLConnection.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														package example; import java.io.*; import java.net.HttpURLConnection; import java.net.URL; public class Main { public static void main(String[] args) throws IOException { byte[] requestData = "{\"texts\": [\"the movie is really good 5/5\"]}".getBytes("UTF-8"); URL url = new URL("https://api.uclassify.com/v1/uclassify/sentiment/classify"); HttpURLConnection conn = (HttpURLConnection) url.openConnection(); conn.setDoOutput(true); conn.setUseCaches(false); conn.setInstanceFollowRedirects(false); conn.setRequestMethod("POST"); conn.setRequestProperty("Content-Type", "application/json"); conn.setRequestProperty("Content-Length", Integer.toString(requestData.length)); conn.setRequestProperty("Authorization", "Token YOUR_READ_API_KEY_HERE"); DataOutputStream wr = new DataOutputStream(conn.getOutputStream()); wr.write(requestData); Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8")); for (int c = in.read(); c != -1; c = in.read()) { System.out.print((char) c); } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Details
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This section presents more in depth information about the web API.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Restrictions
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Each xml request can at a maximum be 3MB. All parameters that is of the type 'RestrictedString' is restricted to a-Z, space and 0-9.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Encoding
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														It's important that the encoding (ASCII, UTF-8, Unicode, ANSI etc) of the training documents are the same as the documents being classified (the classifier doesn't differentiate between the encodings internally). It's possible to mix encodings (requires more training data), however, we recommend that you make sure that you train and classify on the same encoding. What encoding you use is up to you but we strongly recommend UTF-8.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Versions
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When something changes in the API a new version is added in order to maintain compatibility with current API users. This means that users explicitly need to bump their request versions to use the latest API version. The version is specified in the base url.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Latest news
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														IAB Taxonomy V2
+													Element:li
+													Element:a
+														Language Detector for +370 major and rare languages
+													Element:li
+													Element:a
+														Analyze your uClassify results with Excel
+													Element:li
+													Element:a
+														Translation API
+													Element:li
+													Element:a
+														Visit blog...
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														About
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														uClassify was launched 2008 by a small Stockholm based team who love machine learning.
+													Element:a
+														Read more...
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Contact Us
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+													Element:i
+													Element:li
+													Element:a
+													Element:i
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														uclassify.com
+														2008-2017

@@ -1,0 +1,1727 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Making messages more interactive with buttons
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Simplify complex workflows and empower users to take decisive action by adding interactive buttons to your messages. Make your notifications, slash commands, and bot users more intuitive with progressively evolving responses. All you need is a Slack app.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Want to build rich interactions like this? Let's cover everything you need to know.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					The message button interaction flow
+				Element:li
+				Element:a
+					Configure your Slack app
+				Element:li
+				Element:a
+					Composing messages with buttons
+				Element:li
+				Element:a
+					Responding to message button actions
+				Element:li
+				Element:a
+					Best practices
+				Element:li
+				Element:a
+					Glossary
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Interactive messages with buttons are just like other messages, except they contain buttons that invoke remote actions on your server.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The lifecycle of an interactive message is something like:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+							Element:strong
+								Your application produces a message containing buttons
+								. Maybe the message originated in response to an invoked
+							Element:a
+								slash command
+								, or in response to a
+							Element:a
+								bot user
+								's trigger phrase. Or maybe your app posted the message manually using an
+							Element:a
+								incoming webhook
+								or
+							Element:a
+								. In any case, your
+							Element:code
+								chat.postMessage
+							Element:a
+								Slack app
+								produced a message with buttons, offering users a chance to interact with it.
+							Element:li
+							Element:p
+							Element:strong
+								Users encounter your message and, inspired by its call to action, clicks one of your buttons
+								. This triggers an invocation of your application's associated Action URL.
+							Element:li
+							Element:p
+							Element:strong
+								Slack sends a request to your Action URL
+								, sending all the context needed to identify the originating message, the user that executed the action, and the specific values you've associated with the button. This request also contains a
+							Element:code
+								response_url
+								you can use to continue interacting with the user or channel.
+							Element:li
+							Element:p
+							Element:strong
+								Your application responds to the action
+								. If you respond directly to the incoming invocation request, your provided message will replace the existing message. It's also possible to respond with an ephemeral message, visible only to the invoking user. Or you can just respond with HTTP 200 OK and wait to continue the interaction until later using the
+							Element:code
+								response_url
+								provided as part of the action.
+							Element:li
+							Element:p
+							Element:em
+								Meanwhile
+								:
+							Element:strong
+								Your application does whatever it does
+								as a result of the intended action to be taken: enqueue a process, save a database row, or continue interacting with users through additional message buttons.
+							Element:li
+							Element:p
+							Element:strong
+								By using the
+								, your app can continue interacting with users up to 5 times within 30 minutes of the action invocation. Use this to continue through a workflow until it is complete.
+							Element:code
+								response_url
+							Element:li
+							Element:p
+							Element:strong
+								Messages can evolve
+								. By using
+							Element:a
+								and your created message's
+							Element:code
+								chat.update
+							Element:code
+								message_ts
+								field, you can modify the original interactive message (including all of its attachments) to add or remove buttons based on user interactions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								With many users interacting with many messages, this lifecycle repeats itself with all its various decisions and destinations. Messages are truly a garden of forking paths.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								So that's the map. Now, the territory.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Readying your application for message buttons
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Posting messages with buttons requires registering a
+							Element:a
+								. Interactive messages cannot be posted using a
+							Element:em
+								Slack app
+							Element:a
+								custom integration
+								.
+							Element:a
+								Create an app
+								if you don't already have one.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Preparing your Action URL
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Navigate to your
+										Element:a
+											application management tool
+											and find your app's "Interactive Messages" section.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here you'll find a interface for setting your Action URL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can only configure one action URL for your application. It will receive actions from all clicks happening throughout messages with buttons your app has produced, across all channels and teams. It's a master dispatch station of interactivity. If you're familiar with
+										Element:a
+											slash commands
+											, you'll find it behaves very similarly.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In some ways, you're building a guided API on your servers for responding to interactive messages.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											See
+										Element:a
+											Responding to users
+											later in this doc for more detail on how to process these requests.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Action URL SSL certificate requirements
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:i
+														Action URLs
+													Element:strong
+														must
+														point to a TLS-enabled HTTPS URL located on a publicly accessible server with a valid SSL certificate.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This
+													Element:a
+														testing tool
+														can help you understand whether your HTTPS implementation is valid and publicly accessible.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Don't have a SSL certificate yet? Consider using these low-cost, simple providers:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Let's Encrypt
+													Element:li
+													Element:a
+														CloudFlare
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Asking for the appropriate scopes
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To post messages with buttons and process their interactions, your app just needs to be capable of posting messages. If you have a
+										Element:a
+											bot user
+											integration, your bot user already has permission to create messages.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Otherwise, you'll need to request
+										Element:a
+											OAuth permission scopes
+											involved with posting messages:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											incoming-webhook
+											(if you're sending messages via
+										Element:a
+											incoming webhooks
+											)
+										Element:li
+										Element:code
+											commands
+											(if you're using
+										Element:a
+											slash commands
+											)
+										Element:li
+										Element:code
+											chat:write:user
+											(if you're sending interactive messages on behalf of users)
+										Element:li
+										Element:code
+											chat:write:bot
+											(if you're sending interactive messages on behalf of a bot identity)
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Crafting your message
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You'll be building messages that contain attachments and attachment actions. You may want to review how
+							Element:a
+								and
+							Element:em
+								basic message formatting
+							Element:a
+								typically work.
+							Element:em
+								message attachments
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Interactive messages are made up of very simple building blocks that can be combined, modified, and removed based on your server's responses to create interactive experiences.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here's a message with buttons containing simple values for the most important fields you'll use when composing interactive messages. Your messages may get more complex than this, and we'll dive into a more complex example later.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This message has some light text, three specific buttons, including one that looks like a destructive action.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here's the JSON used to compose this message:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "text": "Would you like to play a game?", "attachments": [ { "text": "Choose a game to play", "fallback": "You are unable to choose a game", "callback_id": "wopr_game", "color": "#3AA3E3", "attachment_type": "default", "actions": [ { "name": "game", "text": "Chess", "type": "button", "value": "chess" }, { "name": "game", "text": "Falken's Maze", "type": "button", "value": "maze" }, { "name": "game", "text": "Thermonuclear War", "style": "danger", "type": "button", "value": "war", "confirm": { "title": "Are you sure?", "text": "Wouldn't you prefer a good game of chess?", "ok_text": "Yes", "dismiss_text": "No" } } ] } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								Try it in the message builder!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To identify a few key parts of this message, besides just the presentation:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If this message appeared within a channel or direct message, and a user clicked on
+							Element:em
+								Chess
+								, your registered action URL would receive a payload of JSON identifying the specific set of message buttons:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								the
+							Element:code
+								callback_id
+								you set when creating the message
+							Element:li
+								the specific
+							Element:code
+								name
+								of the clicked button
+							Element:li
+								and the corresponding
+							Element:code
+								value
+								of that same clicked button
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Let's review all the fields related to creating interactive messages. If you're curious about other formatting opportunities, check our our
+							Element:a
+								formatting guide
+								and our details on
+							Element:a
+								attaching content to messages
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Fields to make messages interactive
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Some of these attributes must be adapted to POST parameters when using
+							Element:a
+								.
+							Element:code
+								chat.postMessage
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Top-level message fields
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								See the
+							Element:a
+								formatting guide
+								for tips on arranging your text.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+								Field
+							Element:th
+								Type
+							Element:th
+								Required?
+							Element:th
+								Description
+							Element:tr
+							Element:td
+							Element:code
+								text
+							Element:td
+								string
+							Element:td
+								No
+							Element:td
+								The basic text of the message. Only required if the message contains zero attachments.
+							Element:tr
+							Element:td
+							Element:code
+								attachments
+							Element:td
+							Element:a
+								attachment array
+							Element:td
+								No
+							Element:td
+								Provide a JSON array of
+							Element:a
+								attachment objects
+								. Adds additional components to the message. Messages can contain no more than 20 attachments.
+							Element:tr
+							Element:td
+							Element:code
+								response_type
+							Element:td
+								string
+							Element:td
+								No
+							Element:td
+								Expects one of two values:
+							Element:ul
+								This field cannot be specified for a brand new message and must be used only in response to the execution of message button action or a slash command response. Once a
+							Element:li
+							Element:code
+								in_channel
+								— display the message to all users in the channel where a message button was clicked. Messages sent in response to invoked button actions are set to
+							Element:code
+								in_channel
+								by default.
+							Element:li
+							Element:code
+								ephemeral
+								— display the message only to the user who clicked a message button. Messages sent in response to Slash commands are set to
+							Element:code
+								ephemeral
+								by default.
+							Element:code
+								response_type
+								is set, it cannot be changed when updating the message.
+							Element:tr
+							Element:td
+							Element:code
+								replace_original
+							Element:td
+								boolean
+							Element:td
+								No
+							Element:td
+								Used
+							Element:em
+								only
+								when creating messages in response to a button action invocation. When set to
+							Element:code
+								true
+								, the inciting message will be replaced by this message you're providing. When
+							Element:code
+								false
+								, the message you're providing is considered a brand new message.
+							Element:tr
+							Element:td
+							Element:code
+								delete_original
+							Element:td
+								boolean
+							Element:td
+								No
+							Element:td
+								Used
+							Element:em
+								only
+								when creating messages in response to a button action invocation. When set to
+							Element:code
+								true
+								, the inciting message will be deleted and if a message is provided, it will be posted as a brand new message.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Attachment fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Consult the guide to
+										Element:a
+											attaching content to messages
+											for more flavor on working with attachments. Attachments house
+										Element:a
+											message buttons
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These fields should be presented as a hash within an array presented in the message's
+										Element:code
+											attachments
+											field.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:th
+											Field
+										Element:th
+											Type
+										Element:th
+											Required?
+										Element:th
+											Description
+										Element:tr
+										Element:td
+										Element:code
+											title
+										Element:td
+											string
+										Element:td
+											No
+										Element:td
+											Provide this attachment with a visual header by providing a short string here.
+										Element:tr
+										Element:td
+										Element:code
+											fallback
+										Element:td
+											string
+										Element:td
+										Element:strong
+											Yes
+										Element:td
+											A plaintext message displayed to users using an interface that does not support attachments or interactive messages. Consider leaving a URL pointing to your service if the potential message actions are representable outside of Slack. Otherwise, let folks know what they are missing.
+										Element:tr
+										Element:td
+										Element:code
+											callback_id
+										Element:td
+											string
+										Element:td
+										Element:strong
+											Yes
+										Element:td
+											The provided string will act as a unique identifier for the collection of buttons within the attachment. It will be sent back to your message button action URL with each invoked action. This field is required when the attachment contains message buttons. It is key to identifying the interaction you're working with.
+										Element:tr
+										Element:td
+										Element:code
+											color
+										Element:td
+											string
+										Element:td
+											No
+										Element:td
+											used to visually distinguish an attachment from other messages. Accepts hex values and a few named colors as documented in
+										Element:a
+											attaching content to messages
+											. Use sparingly and according to
+										Element:a
+											best practices
+											.
+										Element:tr
+										Element:td
+										Element:code
+											actions
+										Element:td
+										Element:a
+											action array
+										Element:td
+										Element:strong
+											Yes
+										Element:td
+											A collection of
+										Element:a
+											actions
+											(buttons) to include in the attachment. Required when using message buttons and otherwise not useful. A maximum of 5 actions may be provided.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Action fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The actions you provide will be rendered as message buttons to users. Be sure and consult our
+										Element:a
+											best practices
+											and storyboard your button interactions.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These fields should be provided as a JSON hash within an array as part of an
+										Element:code
+											attachment
+											definition defined in the
+										Element:code
+											attachments
+											field of a message.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:th
+											Field
+										Element:th
+											Type
+										Element:th
+											Required?
+										Element:th
+											Description
+										Element:tr
+										Element:td
+										Element:code
+											name
+										Element:td
+											string
+										Element:td
+										Element:strong
+											Yes
+										Element:td
+											Provide a string to give this specific action a name. The name will be returned to your Action URL along with the message's
+										Element:code
+											callback_id
+											when this action is invoked. Use it to identify this particular response path.
+										Element:strong
+											If multiple actions share the same name, only one of them can be in a triggered state.
+										Element:tr
+										Element:td
+										Element:code
+											text
+										Element:td
+											string
+										Element:td
+										Element:strong
+											Yes
+										Element:td
+											The user-facing label for the message button representing this action. Cannot contain markup. Best to keep these short and decisive.
+										Element:tr
+										Element:td
+										Element:code
+											style
+										Element:td
+											string
+										Element:td
+											No
+										Element:td
+											Your buttons can have a little extra visual importance added to them, which is especially useful when providing logical default action or highlighting something destructive.
+										Element:ul
+										Element:li
+										Element:code
+											default
+											— Yes, it's the default. Buttons will look simple.
+										Element:li
+										Element:code
+											primary
+											— Use this sparingly, when the button represents a key action to accomplish. You should probably only ever have one primary button within a set.
+										Element:li
+										Element:code
+											danger
+											— Use this when the consequence of the button click will result in the destruction of something, like a piece of data stored on your servers. Use even more sparingly than
+										Element:code
+											primary
+											.
+										Element:tr
+										Element:td
+										Element:code
+											type
+										Element:td
+											string
+										Element:td
+										Element:strong
+											Yes
+										Element:td
+											Provide nothing but
+										Element:code
+											button
+											here. There are no other types of actions today.
+										Element:tr
+										Element:td
+										Element:code
+											value
+										Element:td
+											string
+										Element:td
+											No
+										Element:td
+											Provide a string identifying this specific action. It will be sent to your Action URL along with the
+										Element:code
+											name
+											and attachment's
+										Element:code
+											callback_id
+											. If providing multiple actions with the same name,
+										Element:code
+											value
+											can be strategically used to differentiate intent.
+										Element:tr
+										Element:td
+										Element:code
+											confirm
+										Element:td
+										Element:a
+											confirmation hash
+										Element:td
+											No
+										Element:td
+											If you provide a JSON hash of
+										Element:a
+											confirmation fields
+											, your button will pop up dialog with your indicated text and choices, giving them one last chance to avoid a destructive action or other undesired outcome.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Confirmation fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Protect users from destructive actions or particularly distinguished decisions by asking them to confirm their button click one more time. Use confirmation dialogs with care.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These fields should be presented as a JSON hash buried deep within the
+										Element:code
+											confirm
+											field of an
+										Element:code
+											action
+											within the
+										Element:code
+											actions
+											array that's also part of an attachment that's inside the
+										Element:code
+											attachments
+											array field of a message.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:th
+											Field
+										Element:th
+											Type
+										Element:th
+											Required?
+										Element:th
+											Description
+										Element:tr
+										Element:td
+										Element:code
+											title
+										Element:td
+											string
+										Element:td
+										Element:strong
+											No
+										Element:td
+											Title the pop up window. Please be brief.
+										Element:tr
+										Element:td
+										Element:code
+											text
+										Element:td
+											string
+										Element:td
+										Element:strong
+											Yes
+										Element:td
+											Describe in detail the consequences of the action and contextualize your button text choices.
+										Element:tr
+										Element:td
+										Element:code
+											ok_text
+										Element:td
+											string
+										Element:td
+											No
+										Element:td
+											The text label for the button to continue with an action. Keep it short. Defaults to
+										Element:code
+											Okay
+											.
+										Element:tr
+										Element:td
+										Element:code
+											dismiss_text
+										Element:td
+											string
+										Element:td
+											No
+										Element:td
+											The text label for the button to cancel the action. Keep it short. Defaults to
+										Element:code
+											Cancel
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You'll use a combination of all the above fields when producing, updating, and transforming interactive messages.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here's another example to consider from a local comic book shop that uses Slack for team collaboration:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For a message that looks like this:
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use JSON like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "text": "New comic book alert!", "attachments": [ { "title": "The Further Adventures of Slackbot", "fields": [ { "title": "Volume", "value": "1", "short": true }, { "title": "Issue", "value": "3", "short": true } ], "author_name": "Stanford S. Strickland", "author_icon": "http://a.slack-edge.com/7f18https://a.slack-edge.com/bfaba/img/api/homepage_custom_integrations-2x.png", "image_url": "http://i.imgur.com/OJkaVOI.jpg?1" }, { "title": "Synopsis", "text": "After @episod pushed exciting changes to a devious new branch back in Issue 1, Slackbot notifies @don about an unexpected deploy..." }, { "fallback": "Would you recommend it to customers?", "title": "Would you recommend it to customers?", "callback_id": "comic_1234_xyz", "color": "#3AA3E3", "attachment_type": "default", "actions": [ { "name": "recommend", "text": "Recommend", "type": "button", "value": "recommend" }, { "name": "no", "text": "No", "type": "button", "value": "bad" } ] } ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Try it the message builder!
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Responding to message actions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The time has come for your application to respond to a message action.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your Action URL will receive a HTTP POST request, including a
+										Element:code
+											payload
+											body parameter, itself containing an
+										Element:code
+											application/x-www-form-urlencoded
+											JSON string.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here's an example invocation you may receive for the comic book recommendation example above:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "actions": [ { "name": "recommend", "value": "yes", "type": "button" } ], "callback_id": "comic_1234_xyz", "team": { "id": "T47563693", "domain": "watermelonsugar" }, "channel": { "id": "C065W1189", "name": "forgotten-works" }, "user": { "id": "U045VRZFT", "name": "brautigan" }, "action_ts": "1458170917.164398", "message_ts": "1458170866.000004", "attachment_id": "1", "token": "xAB3yVzGS4BQ3O9FACTa8Ho4", "original_message": {"text":"New comic book alert!","attachments":[{"title":"The Further Adventures of Slackbot","fields":[{"title":"Volume","value":"1","short":true},{"title":"Issue","value":"3","short":true}],"author_name":"Stanford S. Strickland","author_icon":"https://api.slack.comhttps://a.slack-edge.com/bfaba/img/api/homepage_custom_integrations-2x.png","image_url":"http://i.imgur.com/OJkaVOI.jpg?1"},{"title":"Synopsis","text":"After @episod pushed exciting changes to a devious new branch back in Issue 1, Slackbot notifies @don about an unexpected deploy..."},{"fallback":"Would you recommend it to customers?","title":"Would you recommend it to customers?","callback_id":"comic_1234_xyz","color":"#3AA3E3","attachment_type":"default","actions":[{"name":"recommend","text":"Recommend","type":"button","value":"recommend"},{"name":"no","text":"No","type":"button","value":"bad"}]}]}, "response_url": "https://hooks.slack.com/actions/T47563693/6204672533/x7ZLaiVMoECAW50Gw1ZYAXEM" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's break this action URI response into its component pieces. You can use these fields to decide what to do next.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Action URL invocation payload
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tr
+													Element:th
+														Field
+													Element:th
+														Type
+													Element:th
+														Description
+													Element:tr
+													Element:td
+													Element:code
+														actions
+													Element:td
+														action array
+													Element:td
+														An array of actions that were clicked, including the name and value of the actions, as you prepared when creating your message buttons. Though presented as an array, at this time you'll only receive a single action per incoming invocation.
+													Element:ul
+													Element:li
+													Element:code
+														name
+														— the string correlating to the
+													Element:code
+														name
+														attribute set in the originating action
+													Element:li
+													Element:code
+														value
+														— the string correlating to the
+													Element:code
+														value
+														attribute set in the originating action
+													Element:li
+													Element:code
+														type
+														— the string correlating to the
+													Element:code
+														type
+														attribute set in the originating action
+													Element:tr
+													Element:td
+													Element:code
+														callback_id
+													Element:td
+														string
+													Element:td
+														The string you provided in the original message attachment as the
+													Element:code
+														callback_id
+														. Use this to identify the specific set of actions/buttons originally posed. If the
+													Element:code
+														value
+														of an action is the answer,
+													Element:code
+														callback_id
+														is the specific question that was asked.
+													Element:tr
+													Element:td
+													Element:code
+														team
+													Element:td
+														team hash
+													Element:td
+														A small set of string attributes about the team where this action occurred.
+													Element:ul
+													Element:li
+													Element:code
+														id
+														— A unique identifier for the Slack team where the originating message appeared
+													Element:li
+													Element:code
+														domain
+														— The slack.com subdomain of that same Slack team, like
+													Element:code
+														watermelonsugar
+													Element:tr
+													Element:td
+													Element:code
+														channel
+													Element:td
+														channel hash
+													Element:td
+														Where it all happened — the user inciting this action clicked a button on a message contained within a channel, and this hash presents attributed about that channel.
+													Element:ul
+													Element:li
+													Element:code
+														id
+														— A string identifier for the channel housing the originating message. Channel IDs are unique to the team they appear within.
+													Element:li
+													Element:code
+														name
+														— The name of the channel the message appeared in, without the leading
+													Element:code
+														#
+														character.
+													Element:tr
+													Element:td
+													Element:code
+														user
+													Element:td
+														user hash
+													Element:td
+														The clicker! The action-invoker! The button-presser! These attributes tell you all about the user who decided to interact your message.
+													Element:ul
+													Element:li
+													Element:code
+														id
+														— A string identifier for the user invoking the action. Users IDs are unique to the team they appear within.
+													Element:li
+													Element:code
+														name
+														— The name of that very same user.
+													Element:tr
+													Element:td
+													Element:code
+														action_ts
+													Element:td
+														string
+													Element:td
+														The time when the action occurred, expressed in decimal epoch time, wrapped in a string. Like
+													Element:code
+														"1458170917.164398"
+													Element:tr
+													Element:td
+													Element:code
+														message_ts
+													Element:td
+														string
+													Element:td
+														The time when the message containing the action was posted, expressed in decimal epoch time, wrapped in a string. Like
+													Element:code
+														"1458170917.164398"
+													Element:tr
+													Element:td
+													Element:code
+														attachment_id
+													Element:td
+														string
+													Element:td
+														A 1-indexed identifier for the specific attachment within a message that contained this action. In case you were curious or building messages containing buttons within many attachments.
+													Element:tr
+													Element:td
+													Element:code
+														token
+													Element:td
+														string
+													Element:td
+														This is the same string you received when configuring your application for interactive message support, presented to you on an
+													Element:a
+														app details page
+														. Validate this to ensure the request is coming to you from Slack. See
+													Element:a
+														below
+														.
+													Element:tr
+													Element:td
+													Element:code
+														original_message
+													Element:td
+														object
+													Element:td
+														A object hash containing JSON expressing the original message that triggered this action. This is especially useful if you don't retain state or need to know the message's
+													Element:code
+														message_ts
+														for use with
+													Element:a
+													Element:code
+														chat.update
+													Element:strong
+														This value is not provided for ephemeral messages.
+													Element:tr
+													Element:td
+													Element:code
+														response_url
+													Element:td
+														string
+													Element:td
+														A string containing a URL, used to respond to this invocation independently from the triggering of your action URL.
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Validating Action URL tokens
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your Slack application record contains a verification code used for interactive messages and slash commands.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When your action URL is executed, validate the
+										Element:code
+											token
+											field value you receive as part of the payload against your recorded value. If they do not match, do not respond to the request with a 200 OK or other message.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								How to respond to message button actions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are several different ways you can respond and they can be used in combination together for richer interactions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When creating new messages or modifying old ones, consult the
+							Element:a
+								message field guide
+								above to continue using interactive elements within a progressive workflow.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Respond to the message right away
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Respond to the request we send to your Action URL with a JSON message body directly.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You must respond within
+										Element:strong
+											3 seconds.
+											If it takes your application longer to process the request, we recommend responding with a HTTP 200 OK immediately, then use the
+										Element:code
+											response_url
+											to respond five times within thirty minutes.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Responding immediately with a JSON message body will replace the current message in its entirety by default. If you explicitly indicate that you want to create a new message instead, specify
+										Element:code
+											false
+											in the
+										Element:code
+											replace_original
+											field.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Respond incrementally with the
+										Element:code
+											response_url
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use the response URL provided in the post to:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Replace the current message
+										Element:li
+											Respond with a public message in the channel
+										Element:li
+											Respond with an ephemeral message in the channel that only the acting user will see
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You'll be able to use a
+										Element:code
+											response_url
+										Element:em
+											five times
+											within
+										Element:em
+											30 minutes
+											. After that, it's best to move on to new messages and new interactions.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Use
+										Element:code
+											chat.update
+											to modify the original message instead
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you created your message using
+										Element:code
+											chat.postMessage
+											, you can modify the original message with
+										Element:a
+											, by providing the
+										Element:code
+											chat.update
+										Element:code
+											message_ts
+											value from the original message.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We helpfully provide the original message in the
+										Element:code
+											original_message
+											field of your action URL invocation. Bot users can modify their messages too!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Interactive messages produced by apps using
+										Element:code
+											chat.update
+											can continue updating messages beyond any time window restrictions imposed on human team members.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Responding to the user with an error message
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you would like to let the user know that something went wrong, you can return an ephemeral response containing a helpful error message. To do this, you can either respond directly to the Action request, or use the provided
+										Element:code
+											response_url
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You'll want to send a JSON payload that looks like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "response_type": "ephemeral", "replace_original": false, "text": "Sorry, that didn't work. Please try again." }
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Replacing the original message
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By replacing the original message, you can incrementally change that message's content to reflect the actions taken by team members. By adding additional interactive messages, you can refine dialog options with users, either by broadcasting to the whole channel or focusing on particular users who've invoked actions via ephemeral messages.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As you replace messages using
+							Element:a
+								or the
+							Element:code
+								chat.update
+							Element:code
+								replace_original
+								option, you cannot change a message's type from
+							Element:code
+								ephemeral
+								to
+							Element:code
+								in_channel
+								. Once a message has been issued, it will retain its visibility quality for life.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Since your interactive messages can respond or evolve with additional content and message buttons, this cycle between creating messages, processing responses, and replacing and generating new messages is potentially endless.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Be sure and review those
+							Element:a
+								interactive message guidelines
+								we keep mentioning.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Identifying user identity against your service
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your service or application needs to associate a Slack team member with a specific account within your product, you'll want to unobtrusively link their account to complete the action.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When your Action URL is triggered, you'll receive the user ID and team ID for the invoker. If they do not yet exist in your system, send them an ephemeral message containing a link they can follow to link accounts on your website.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is a great opportunity to identify users with
+										Element:a
+											.
+										Element:strong
+											Sign in with Slack
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Guidelines and best practices
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Crafting the ideal message is never easy. Adding interactive flows and additional content while maintaining a productive flow of conversation is even harder!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We've put together a collection of
+							Element:a
+								best practices and guidelines
+								to help you build the most effective and unobtrusive messages.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here are some quick highlights:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Though messages may contain up to 20 attachments, messages containing buttons shouldn't have more than one or two attachments.
+							Element:li
+								Each attachment can contain up to 5 message buttons and corresponding actions, but it's best to keep options limited and decisive.
+							Element:li
+								Use confirmation dialogs, colors, and differentiated button types (
+							Element:code
+								primary
+								and
+							Element:code
+								danger
+								) sparingly.
+							Element:li
+								Message action buttons and confirmation dialogs may not contain Slack's formatting markup.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								Review our guidelines
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Glossary
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Message Button
+								: The user interface for invoking Attachment Actions. Buttons can be added, removed, changed, and of course clicked. Clicking a button triggers its associated Attachment Action.
+							Element:li
+							Element:strong
+								Interactive Message
+								: Mutable messages appearing in Slack, providing users with message buttons that applications may respond to and modify.
+							Element:li
+							Element:strong
+								Attachments
+								:
+							Element:a
+								are contained within messages, and typically offer a means to include rich formatting in messages, such as images, color, and lightweight key/value pairs. They may also contain
+							Element:em
+								Message Attachments
+							Element:em
+								Attachment Actions
+								.
+							Element:li
+							Element:strong
+								Attachment Actions
+								: Objectives a team member may interact with within a Message Attachment, executing an
+							Element:em
+								action URL
+								. The user will see a message button. The result of an invocation may change something in the calculus universe, and if desired, within the parent interactive message.
+							Element:li
+							Element:strong
+								Action URL
+								: URLs associated with your application to complete specific attachment actions. Slack will use this URL when team members click buttons that trigger Attachment Actions.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Related Articles
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Tutorial by Beep Boop (beepboophq.com)
+							Element:span
+								Lessons learned building Beep Boop's new Slack bot
+							Element:li
+							Element:a
+								Tutorial by Slack
+							Element:span
+								Message Buttons with Node.js
+							Element:li
+							Element:a
+								Best practices from Adam Zimman (medium.com)
+							Element:span
+								The 36 chambers (#channels?) of chat
+							Element:li
+							Element:a
+								Tutorial from Slack (medium).com
+							Element:span
+								Building Admin-Approved Apps
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:ul
+							Element:li
+								Using Slack
+							Element:li
+							Element:a
+								Product
+							Element:li
+							Element:a
+								Pricing
+							Element:li
+							Element:a
+								Support
+							Element:li
+							Element:a
+								Slack Guides
+							Element:li
+							Element:a
+								Video Guides
+							Element:li
+							Element:a
+								App Directory
+							Element:li
+							Element:a
+								API
+							Element:ul
+							Element:li
+								Slack
+							Element:li
+							Element:a
+								Jobs
+							Element:li
+							Element:a
+								Customers
+							Element:li
+							Element:a
+								Developers
+							Element:li
+							Element:a
+								Events
+							Element:li
+							Element:a
+								Blog
+							Element:li
+							Element:a
+								Podcast
+							Element:li
+							Element:a
+								Slack Shop
+							Element:ul
+							Element:li
+								Legal
+							Element:li
+							Element:a
+								Privacy
+							Element:li
+							Element:a
+								Security
+							Element:li
+							Element:a
+								Terms of Service
+							Element:li
+							Element:a
+								Policies
+							Element:ul
+							Element:li
+								Handy Links
+							Element:li
+							Element:a
+								Download desktop app
+							Element:li
+							Element:a
+								Download mobile app
+							Element:li
+							Element:a
+								Brand Guidelines
+							Element:li
+							Element:a
+								Slack at Work
+							Element:li
+							Element:a
+								Status
+							Element:a
+							Element:ul
+							Element:li
+							Element:a
+								Contact Us
+							Element:li
+							Element:a
+							Element:li
+							Element:a

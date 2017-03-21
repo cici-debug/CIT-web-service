@@ -1,0 +1,719 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Incoming Webhooks
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Send data into Slack in real-time.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Incoming Webhooks are a simple way to post messages from external sources into Slack. They make use of normal HTTP requests with a
+							Element:a
+								JSON
+								payload that includes the message text and some options.
+							Element:a
+								Message Attachments
+								can also be used in Incoming Webhooks to display richly-formatted messages that stand out from regular chat messages.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Start by setting up an
+							Element:a
+								incoming webhook integration
+								in your Slack team to try these features out:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:a
+								Sending messages
+							Element:li
+							Element:a
+								Adding links
+							Element:li
+							Element:a
+								Make it fancy with advanced formatting
+							Element:li
+							Element:a
+								Putting it all together
+							Element:li
+							Element:a
+								Packaging as a Slack app
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Use
+							Element:a
+								, a simple, ubiquitous tool for sending HTTP requests on the command line, for the
+							Element:strong
+								curl
+							Element:em
+								curl examples
+								that follow.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sending messages
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's learn how to send this in-channel message as an incoming webhook:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It's a simple, multi-line message without special formatting:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											This is a line of text. And this is another one.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The first step is to prepare this message as a key/value pair in JSON. For a simple message, your JSON payload only needs to define a
+										Element:code
+											text
+											property, containing the text that will be posted to the channel.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In JSON, our message is defined as:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "text": "This is a line of text.\nAnd this is another one." }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please note that we indicated the line break as the control character
+										Element:code
+											\n
+											. We also added additional whitespace for readability, which we could have more tidily presented to you as:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{"text":"This is a line of text.\nAnd this is another one."}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you've put together the JSON for your message, you can choose to send it to your Incoming Webhook URL one of two ways:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Send it directly in JSON
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The preferred way to send Slack your JSON body is by sending a HTTP POST to your webhook URL, containing a request body with an explicit
+													Element:code
+														Content-type
+														HTTP header set to
+													Element:code
+														application/json
+														. This tells Slack how to interpret the data you're sending us.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														POST https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX Content-type: application/json { "text": "This is a line of text.\nAnd this is another one." }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														By declaring the content type, no further encoding of the POST body is needed — just provide valid JSON in UTF-8.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	curl example
+																Element:i
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	curl -X POST -H 'Content-type: application/json' \ --data '{"text":"This is a line of text.\nAnd this is another one."}' \ https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Send a JSON string within a parameter of a standard POST request
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you want to stick with the more traditional
+													Element:code
+														Content-type
+														of
+													Element:code
+														application/x-www-form-urlencoded
+														, you can sneakily send URL-escaped JSON within the
+													Element:code
+														payload
+														parameter instead.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Send the
+													Element:code
+														payload
+														parameter as part of your POST body and explicitly state the
+													Element:code
+														Content-type
+														. Payloads should not be included as query parameters on the webhook URL.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The trickiest part of this approach is that you must properly
+													Element:a
+														URL encode
+														your
+													Element:code
+														payload
+														. Your elegant JSON message becomes seeming nonsense, filled with percent-encoded characters.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														POST https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX Content-type: application/x-www-form-urlencoded payload=%7B%22text%22%3A%22This%20is%20a%20line%20of%20text.%5CnAnd%20this%20is%20another%20one.%22%7D
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Many HTTP clients provide convenient functions for URL encoding and setting the
+													Element:code
+														Content-type
+														.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	curl example
+																Element:i
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	curl -X POST \ --data-urlencode 'payload={"text":"This is a line of text.\nAnd this is another one."}' \ https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Using the
+																Element:code
+																	--data-urlencode
+																	curl parameter automatically URL encodes the provided string.
+															Node:
+															(type) c
+															(layer)5
+																Element:hr
+															Node:
+															(type) c
+															(layer)5
+																Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Adding links
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To create a link in your text, enclose the URL in
+										Element:code
+											<>
+											angle brackets. For example:
+										Element:code
+											payload={"text": "<https://slack.com>"}
+											will post a clickable link to https://slack.com.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To display hyperlinked text instead of the actual URL, use the pipe character, as shown in this example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "text": "<https://alert-system.com/alerts/1234|Click here> for details!" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This will be displayed in the channel as:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Customizations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:i
+											You
+										Element:strong
+											cannot override
+											the default username, icon, or channel for incoming webhooks attached to
+										Element:a
+											Slack apps
+											. Instead, these values will stubbornly inherit from the associated Slack app configuration.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sending messages to "yourself"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When installing your Slack app, the installer may choose their own account as the webhook's target. Messages will automatically route to that user's direct message conversation with themselves.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Try to limit messages to a reasonable maximum of a few thousand characters.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Advanced message formatting
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can use
+										Element:a
+											Slack's standard message markup
+											to add simple formatting to your messages. You can also use
+										Element:a
+											message attachments
+											to display richly-formatted message blocks.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:i
+											Use the
+										Element:a
+											to preview your message formatting and attachments in real time!
+										Element:strong
+											Message Builder
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Putting it all together
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is a sample
+										Element:a
+											curl
+											command for posting to a channel using the payload parameter:
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	curl example
+																Element:i
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	curl -X POST \ --data-urlencode 'payload={"text": "This is posted to #general and comes from *monkey-bot*.", "channel": "#general", "link_names": 1, "username": "monkey-bot", "icon_emoji": ":monkey_face:"}' \ https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	And here is a version using a
+																Element:code
+																	Content-type
+																	of
+																Element:code
+																	application/json
+																	:
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	curl example
+																Element:i
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	curl -X POST \ -H 'Content-type: application/json' \ --data '{"text": "This is posted to #general and comes from *monkey-bot*.", "channel": "#general", "link_names": 1, "username": "monkey-bot", "icon_emoji": ":monkey_face:"}' \ https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	With either approach, this will be displayed in the #general channel as:
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Share your incoming webhook as a Slack app
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You will be able to set up an incoming webhook when you create a
+										Element:a
+											Slack app
+											and configure a
+										Element:a
+											Slack button
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once a user installs your app, you will exchange the
+										Element:code
+											code
+											for an access token using
+										Element:a
+											the
+											. The JSON response from this API call will contain the access token and incoming webhook URL:
+										Element:code
+											oauth.access
+											method
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "access_token": "xoxp-XXXXXXXX-XXXXXXXX-XXXXX", "scope": "incoming-webhook", "team_name": "Team Installing Your Hook", "incoming_webhook": { "url": "https://hooks.slack.com/TXXXXX/BXXXXX/XXXXXXXXXX", "channel": "#channel-it-will-post-to", "channel_id": "C05002EAE", "configuration_url": "https://teamname.slack.com/services/BXXXXX" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Keep in mind that incoming webhooks packaged as Slack apps cannot override the default channel, username, or icon associated with the webhook.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											to package and distribute your incoming webhook and share it in our
+										Element:a
+											Create a Slack app
+										Element:a
+											application directory
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Making your notifications more interactive
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														With a Slack app, you can attach
+													Element:a
+														message buttons
+														to your notifications, making them more interactive.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Handling errors
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Though in most cases you'll receive a "HTTP 200 OK" response with a JSON body indicating that your message posted successfully, it's best to prepare for scenarios where attempts to publish a message will fail.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Incoming webhooks may throw errors when receiving malformed requests, when utilized webhook URLs are no longer valid, or when something truly exceptional prevents your messages from making it through to channels and users.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Incoming webhooks return more expressive errors than our Web API, including more relevant HTTP status codes (like "HTTP 400 Bad Request" and "HTTP 404 Not Found"). These changes are described in our changelog:
+										Element:a
+											Changes to errors for incoming webhooks
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Common errors you may encounter include:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											invalid_payload
+											typically indicates that received request is malformed — perhaps the JSON is structured incorrectly, or the message text is not properly escaped. The request should not be retried without correction.
+										Element:li
+										Element:code
+											user_not_found
+											and
+										Element:code
+											channel_not_found
+											indicate that the user or channel being addressed either do not exist or are invalid. The request should not be retried without modification or until the indicated user or channel is set up.
+										Element:li
+										Element:code
+											channel_is_archived
+											indicates the specified channel has been archived and is no longer accepting new messages.
+										Element:li
+										Element:code
+											action_prohibited
+											usually means that a team admin has placed some kind of restriction on this avenue of posting messages and that, at least for now, the request should not be attempted again.
+										Element:li
+										Element:code
+											posting_to_general_channel_denied
+											is thrown when an incoming webhook attempts to post to the "#general" channel for a team where posting to that channel is 1) restricted and 2) the creator of the same incoming webhook is not authorized to post there. You'll receive this error with a HTTP 403.
+										Element:li
+										Element:code
+											too_many_attachments
+											is thrown when an incoming webhook attempts to post a message with greater than 100 attachments. A message can have a maximum of 100 attachments associated with it.
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:ul
+										Element:li
+											Using Slack
+										Element:li
+										Element:a
+											Product
+										Element:li
+										Element:a
+											Pricing
+										Element:li
+										Element:a
+											Support
+										Element:li
+										Element:a
+											Slack Guides
+										Element:li
+										Element:a
+											Video Guides
+										Element:li
+										Element:a
+											App Directory
+										Element:li
+										Element:a
+											API
+										Element:ul
+										Element:li
+											Slack
+										Element:li
+										Element:a
+											Jobs
+										Element:li
+										Element:a
+											Customers
+										Element:li
+										Element:a
+											Developers
+										Element:li
+										Element:a
+											Events
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Podcast
+										Element:li
+										Element:a
+											Slack Shop
+										Element:ul
+										Element:li
+											Legal
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Security
+										Element:li
+										Element:a
+											Terms of Service
+										Element:li
+										Element:a
+											Policies
+										Element:ul
+										Element:li
+											Handy Links
+										Element:li
+										Element:a
+											Download desktop app
+										Element:li
+										Element:a
+											Download mobile app
+										Element:li
+										Element:a
+											Brand Guidelines
+										Element:li
+										Element:a
+											Slack at Work
+										Element:li
+										Element:a
+											Status
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Contact Us
+										Element:li
+										Element:a
+										Element:li
+										Element:a

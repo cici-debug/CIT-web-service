@@ -1,0 +1,1175 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Threading messages together
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Messages
+					are islands floating in a sea of channels. Most stand alone, seen or unseen, but some generate such volcanic conversation that replies flow from an inciting message, forming a kind of archipelagic thread in its wake.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This is the story of how messages link together and how your app can read, write, and party with threads.
+			Node:
+			(type) c
+			(layer)1
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Let's get knitting.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					How messages thread together
+				Element:li
+				Element:a
+					Finding message threads in the wild
+				Element:li
+				Element:a
+					Creating threads and replying to messages
+				Element:li
+				Element:a
+					Best practices for apps and bots
+				Element:li
+				Element:a
+					Field guide
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Forking conversations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A channel or DM conversation is a nearly linear timeline of messages exchanged between people, bots, and apps. When one of these messages is replied to, it becomes the parent of a thread. By default, threaded replies do not appear directly in the channel, instead relegated to a kind of forked timeline descending from the parent message.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Even though Slack clients treat replies this way, messages are delivered the same old way over
+							Element:a
+								RTM
+								,
+							Element:a
+								Events API
+								, or methods like
+							Element:a
+								. Easily identify & differentiate parent messages and replies — everything is thoughtfully marked.
+							Element:code
+								channels.history
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+								Not familiar with threads yet? Consult our user-facing
+							Element:a
+								help center article
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Threading the needle
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Threads are a big enough deal that we're going to wordily wrench and write all the hows and whys in this big long document.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											But here is a shortcut through these hedges of threaded knowledge:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Recognize threaded messages by looking for a
+										Element:code
+											thread_ts
+											attribute: any message with a
+										Element:code
+											thread_ts
+											attribute is part of a thread!
+										Element:li
+											Identify replies by noting when a threaded message's
+										Element:code
+											ts
+											and
+										Element:code
+											thread_ts
+											values
+										Element:em
+											differ
+											. If they're
+										Element:em
+											equal
+											, you're dealing with a parent.
+										Element:li
+											Attach your messages to a thread by specifying another message's
+										Element:code
+											ts
+											value as your reply's
+										Element:code
+											thread_ts
+											.
+										Element:li
+											When responding to a message that's part of a thread, you should keep your responses
+										Element:em
+											in the thread
+											.
+										Element:li
+											When responding to a non-threaded message, consider creating a thread by replying to the message inciting your response.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fun facts
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Short on time, trying to follow the five steps above and don't want to read everything else written here?
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														These are the facts:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														Message threads may have only one parent, they can only fork once.
+													Element:li
+														Replies can't spawn from replies and must tie back to a single originating message.
+													Element:li
+														Parent messages may have zero or any number of replies.
+													Element:li
+														Threaded messages can be found in channels, private channels, group messages, and direct messages.
+													Element:li
+														Users may "subscribe" to specific threads, but their subscriptions have no effect on whether threaded messages are sent via the RTM or Events APIs.
+													Element:li
+														Replies are presented chronologically in the Web API, Events API, and RTM API, just like any old message.
+													Element:li
+														Your app needs to parse
+													Element:code
+														thread_ts
+														fields to understand whether a message is part of a thread.
+													Element:li
+														To retain continuity, your bot's responses to in-thread invocations should
+													Element:em
+														stay
+														within the thread.
+													Element:li
+														Replies may contain attachments and message buttons, though there are
+													Element:a
+														some quirks
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Finding message threads in the wild
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You'll discover threads treading through our
+							Element:a
+								Web
+								,
+							Element:a
+								RTM
+								, and
+							Element:a
+								Events
+								APIs. Here's what to look for:
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											The message thread data model
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Messages that are part of a thread will contain a
+										Element:code
+											thread_ts
+											attribute, populated with a string
+										Element:em
+											timestamp
+											-style identifier for the thread in a specific channel or conversation.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Example
+										Element:code
+											thread_ts
+											(or
+										Element:code
+											ts
+											) values include:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											1485051909.018632
+										Element:li
+										Element:code
+											1482960137.003543
+										Element:li
+										Element:code
+											1924992000.023230
+										Element:li
+										Element:code
+											978307200.129921
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These IDs are guaranteed unique within the context of a channel or conversation. They
+										Element:em
+											look like
+											UNIX/epoch timestamps with specified milliseconds. They'll even
+										Element:em
+											sort like
+											the same. But they're message IDs, even if they're partially composed in seconds-since-the-epoch.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Parent messages
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A message that spawns a thread is called a
+													Element:em
+														parent
+														. Its replies are its children.
+												Node:
+												(type) c
+												(layer)4
+													Element:blockquote
+													Element:p
+														When a message has a
+													Element:code
+														thread_ts
+														value and it
+													Element:em
+														matches
+														the same message's
+													Element:code
+														ts
+														, the message is a thread parent.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The message will also contain a
+													Element:code
+														replies
+														array with references to all the messages acting as replies to this parent.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A parent message remains a thread with a
+													Element:code
+														thread_ts
+														and
+													Element:code
+														replies
+														array even if all of its replies have been deleted.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Child messages, or
+													Element:em
+														replies
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Child messages are like any other message, with their own channel-unique
+													Element:code
+														ts
+														value. They'll also contain a
+													Element:code
+														thread_ts
+														attribute, pointing to the
+													Element:code
+														ts
+														value of the parent message. Child messages are replies to the parent.
+												Node:
+												(type) c
+												(layer)4
+													Element:blockquote
+													Element:p
+														When a message has a
+													Element:code
+														thread_ts
+														and it
+													Element:em
+														differs
+														from the same message's
+													Element:code
+														ts
+														, the message is a reply.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A true parent's
+													Element:code
+														thread_ts
+														should be used when replying. Providing a child's message ID will result in a new, detached thread breaking all context and sense. Imagine trying to read all this Gertrude Stein
+													Element:em
+														out of order
+														?
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Thread representation in RTM & Events API
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Since replies are just messages, if you subscribe or listen to message events in both of our event-driven APIs, you will receive them. We also include some bonus message subtype events, letting your app know how the thread is knitting together.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														1. Parent messages arrive as usual
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You just don't know they're parent to a threaded conversation until it happens... They're messages just like any other message, ripe with potential to become conversation-starters.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "type": "message", "channel": "C061EG9SL", "user": "U061F7TRS", "text": "Was there was there was there what was there was there what was there was there there was there.", "ts": "1482960137.003543", "source_team": "T061EG9R6" }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Just an ordinary message, same as practically any other message. It's not a thread-bearer yet.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														2. The dispatch of reply messages is also typical
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A fellow team member found that Gertrude Stein quote intriguing, and to prove their cleverness adds another quote from the same piece (
+													Element:a
+														If I Told Him (A Completed Portrait of Picasso)
+														).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Your stream receives this message and its notable attribute
+													Element:code
+														thread_ts
+														pointing back to the originating message:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "type": "message", "channel": "C061EG9SL", "user": "U061F7AUR", "text": "Shutters shut and shutters and so shutters shut and shutters and so and so shutters and so shutters shut and so shutters shut and shutters and so.", "ts": "1483037603.017503", "source_team": "T061EG9R6", "thread_ts": "1482960137.003543" }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Our first message, the one known as
+													Element:code
+														"1482960137.003543"
+														, is now the happy parent of
+													Element:code
+														"1482960025.002142"
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														3. Events emit signifying the original message's updated status
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Slack will send a
+													Element:a
+														message
+														event,
+													Element:em
+														subtype
+													Element:code
+														message_replied
+														. This event is about the parent message (
+													Element:code
+														"1482960137.003543"
+														in the above example), describing how that message's metadata has changed to include an additional reply. This subtype's inner
+													Element:code
+														message
+														object will contain an incremented
+													Element:code
+														reply_count
+														and you should find a reference to the new reply in its
+													Element:code
+														replies
+														array. See the
+													Element:a
+														field guide
+														below for more detail on these mostly self-descriptive fields.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "type": "message", "message": { "type": "message", "user": "U061F7TRS", "text": "Was there was there was there what was there was there what was there was there there was there.", "thread_ts": "1482960137.003543", "reply_count": 1, "replies": [ { "user": "U061F7AUR", "ts": "1483037603.017503" } ], "ts": "1482960137.003543" }, "subtype": "message_replied", "hidden": true, "channel": "C061EG9SL", "event_ts": "1483037604.017506", "ts": "1483037604.017506" }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You may also notice
+													Element:code
+														thread_subscribed
+														,
+													Element:code
+														thread_unsubscribed
+														,
+													Element:code
+														thread_marked
+													Element:code
+														update_thread_state
+														event types. These events are used by Slack clients to manage user interest in threads and is not yet meant for developer use.
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Retrieving message replies
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you prefer to work with threaded conversations more holistically and deliberately, we provide a suite of
+										Element:a
+											Web API
+											methods suitable for retrieving the entire conversation thread from a channel, private channel, or direct message.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											requires the
+										Element:code
+											channels.replies
+										Element:code
+											channels:history
+											scope.
+										Element:li
+										Element:a
+											requires the
+										Element:code
+											groups.replies
+										Element:code
+											groups:history
+											scope.
+										Element:li
+										Element:a
+											requires the
+										Element:code
+											im.replies
+										Element:code
+											im:history
+											scope.
+										Element:li
+										Element:a
+											requires the
+										Element:code
+											mpim.replies
+										Element:code
+											mpim:history
+											scope.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While Slack app-based
+										Element:a
+											bot users
+											can't access these methods directly, user tokens granted with the correlating scope can.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each forked timeline method's response format is similar and includes both the parent message and its replies. Here's an example response from
+										Element:code
+											channels.replies
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "ok": true, "messages": [ { "type": "message", "user": "U061F7TRS", "text": "Was there was there was there what was there was there what was there was there there was there.", "thread_ts": "1482960137.003543", "reply_count": 2, "replies": [ { "user": "U061F7AUR", "ts": "1483037603.017503" }, { "user": "U061F7TRS", "ts": "1483051909.018632" } ], "subscribed": true, "last_read": "1483051909.018632", "unread_count": 0, "ts": "1482960137.003543" }, { "type": "message", "user": "U061F7AUR", "text": "Shutters shut and shutters and so shutters shut and shutters and so and so shutters and so shutters shut and so shutters shut and shutters and so.", "thread_ts": "1482960137.003543", "parent_user_id": "U061F7TRS", "ts": "1483037603.017503" }, { "type": "message", "user": "U061F7TRS", "text": "Let me recite what history teaches. History teaches.", "thread_ts": "1482960137.003543", "parent_user_id": "U061F7TRS", "ts": "1483051909.018632" } ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And that's how you read and understand message threads.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Becoming party to threads
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your bot user or properly-scoped user token can join the fun of contributing to message threads too.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Posting replies
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Today there are two ways to reply to messages:
+										Element:a
+											using the Web API
+											and
+										Element:a
+											using the RTM API
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Using the Web API
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Use
+													Element:a
+														to post replies by specifying a
+													Element:code
+														chat.postMessage
+													Element:code
+														thread_ts
+														parameter pointing to the
+													Element:code
+														ts
+														value for the message being replied to. The message will become part of that thread.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Our @gertrude_stein bot chimes in using
+													Element:code
+														chat.postMessage
+														:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														POST /api/chat.postMessage Host: slack.com Content-type: application/x-www-form-urlencoded text=I%20judge%20judge.&channel=C061EG9SL&thread_ts=1482960137.003543
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														And this is what we get back in response:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "ok": true, "channel": "C061EG9SL", "ts": "1483116860.020084", "message": { "text": "I judge judge.", "username": "gertrude_stein", "bot_id": "B012345AB6", "type": "message", "subtype": "bot_message", "thread_ts": "1482960137.003543", "parent_user_id": "U061F7TRS", "ts": "1483116860.020084" } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We've thrown our coin into this little conversation fountain.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Using the RTM API
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If using a websocket connection and want to send a simple reply by sending a JSON message, just add a
+													Element:code
+														thread_ts
+														attribute to your JSON message object, pointing to the
+													Element:code
+														ts
+														value for the message being replied to. The message will become part of that thread.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here's another contribution from @gertrude_stein:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "id": 1, "type": "message", "channel": "C061EG9SL", "text": "Exactly do they do.", "thread_ts": "1482960137.003543" }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														And in response, our websocket answers:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "ok": true, "reply_to": 1, "ts": "1483125339.020269", "text": "Exactly do they do.", "thread_ts": "1482960137.003543" }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Posting your reply back to the channel
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Set the
+													Element:code
+														reply_broadcast
+														boolean parameter to
+													Element:code
+														true
+														to indicate your reply is germane to all members of a channel. By default,
+													Element:code
+														reply_broadcast
+														is set to
+													Element:code
+														false
+														. Your message will still be considered part of the thread represented by
+													Element:code
+														thread_ts
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When your reply is broadcast to the channel, it'll actually be a
+													Element:em
+														reference
+														to your reply, not the reply itself. So, when appearing in the channel, it won't contain any attachments or message buttons.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The broadcast message looks something like this (here as a
+													Element:a
+														event):
+													Element:code
+														reply_broadcast
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "attachments": [ { "from_url": "https://lost-generation-authors.slack.com/archives/general/p1482960137003543", "fallback": "[December 28th, 2016 1:22 PM] confused: what was there?", "ts": "1482960137.003543", "author_subname": "confused", "channel_id": "C061EG9SL", "channel_name": "general", "text": "island", "author_link": "https://lost-generation-authors.slack.com/team/confused", "author_icon": "https://...png", "mrkdwn_in": [ "text" ], "id": 1, "footer": "5 replies" }, { "fallback": "Was there was there what was there?", "author_subname": "gertrude_stein", "text": "Was there was there what was there?", "mrkdwn_in": [ "text" ], "author_link": "https://lost-generation-authors.slack.com/team/gertrude_stein", "ts": "1484678597.521003", "author_icon": "https://...png", "id": 2 } ], "type": "message", "subtype": "reply_broadcast", "user": "U061F7AUR", "ts": "1484678597.521010", "channel": "C061EG9SL", "event_ts": "1484678597.521010" }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Party hardier with interactive messages
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Building evolving workflows without disturbing the whole channel or moving to DMs is now possible with threads. Bots can reply to messages and create threads while including
+													Element:a
+														attachments
+														and
+													Element:a
+														message buttons
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When creating a new message as part of a message action response, create a reply by specifying a
+													Element:code
+														thread_ts
+														attribute, whether responding directly or by using a
+													Element:code
+														response_url
+														. The
+													Element:code
+														thread_ts
+														must point to the same thread that the message button appears in. Your follow up message will become part of the thread.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Messages posted with
+													Element:code
+														reply_broadcast
+														set to
+													Element:code
+														true
+														won't render in-channel with message buttons; use a non-threaded message to post message buttons to an entire channel.
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Best practices
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								If receiving some kind of invocation (like a keyword or an @mention)
+							Element:em
+								within
+								a threaded message, your bot user should respond within the same thread by specifying its
+							Element:code
+								thread_ts
+								.
+							Element:li
+								Don't specify a message that is already a reply's
+							Element:code
+								ts
+								value as a new message's
+							Element:code
+								thread_ts
+								. Specify the parent message.
+							Element:li
+								Tactfully use
+							Element:code
+								reply_broadcast
+								when your bot's reply is useful for everyone in a channel. Keep in mind these broadcast replies will not contain the message's attachments or message buttons, but instead as a
+							Element:em
+								reference to
+								your bot's actual message.
+							Element:li
+								Consider moving your multi-step workflows to a thread format, still "public" but contained in a forked conversation.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Field guide
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here are the most pertinent fields related to reading and writing threaded messages. Of course many other message fields are important too (
+							Element:em
+								we're looking at you,
+								), and you're welcome to review all the
+							Element:code
+								text
+							Element:a
+								message documentation
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+								Field
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tr
+							Element:td
+							Element:code
+								ts
+							Element:td
+								string
+							Element:td
+								The unique identifier of a message. When the same message contains a
+							Element:code
+								thread_ts
+								that is equal to this
+							Element:code
+								ts
+								value, the message is the parent of a thread and may contain zero or more
+							Element:code
+								replies
+								. When replying to a parent message, this
+							Element:code
+								ts
+								value is used for the
+							Element:code
+								thread_ts
+							Element:em
+								parameter
+								.
+							Element:tr
+							Element:td
+							Element:code
+								thread_ts
+							Element:td
+								string
+							Element:td
+								A unique identifier of an originating message of a thread. When ingesting messages, this attribute indicates that the message is either the parent of a thread or a reply to it.
+							Element:tr
+							Element:td
+							Element:code
+								parent_user_id
+							Element:td
+								string
+							Element:td
+								The user ID belonging to the team member that authored the parent message in a thread. This field only appears attached to replies. Only included in replies transmitted via Web API methods.
+							Element:tr
+							Element:td
+							Element:code
+								reply_count
+							Element:td
+								integer
+							Element:td
+								When present, indicates `0` or more replies to the parent message.
+							Element:tr
+							Element:td
+							Element:code
+								replies
+							Element:td
+								array
+							Element:td
+							Element:p
+								A collection of zero or more references to a parent message's threaded children messages.
+							Element:p
+								Each reply in the array will be a JSON hash containing two attributes.
+							Element:ul
+							Element:li
+							Element:code
+								user
+								— The user ID belonging to the team member authoring this reply.
+							Element:li
+							Element:code
+								ts
+								— The unique identifier for this specific reply message.
+							Element:p
+								See
+							Element:a
+								Retrieving message replies
+								to learn how to obtain further messages.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Related documentation
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Web API methods
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+													Element:code
+														channels.replies
+													Element:li
+													Element:a
+													Element:code
+														groups.replies
+													Element:li
+													Element:a
+													Element:code
+														im.replies
+													Element:li
+													Element:a
+													Element:code
+														mpim.replies
+													Element:li
+													Element:a
+													Element:code
+														chat.postMessage
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Event types
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+													Element:code
+														message_replied
+													Element:li
+													Element:a
+													Element:code
+														reply_broadcast
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+														Using Slack
+													Element:li
+													Element:a
+														Product
+													Element:li
+													Element:a
+														Pricing
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Slack Guides
+													Element:li
+													Element:a
+														Video Guides
+													Element:li
+													Element:a
+														App Directory
+													Element:li
+													Element:a
+														API
+													Element:ul
+													Element:li
+														Slack
+													Element:li
+													Element:a
+														Jobs
+													Element:li
+													Element:a
+														Customers
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Blog
+													Element:li
+													Element:a
+														Podcast
+													Element:li
+													Element:a
+														Slack Shop
+													Element:ul
+													Element:li
+														Legal
+													Element:li
+													Element:a
+														Privacy
+													Element:li
+													Element:a
+														Security
+													Element:li
+													Element:a
+														Terms of Service
+													Element:li
+													Element:a
+														Policies
+													Element:ul
+													Element:li
+														Handy Links
+													Element:li
+													Element:a
+														Download desktop app
+													Element:li
+													Element:a
+														Download mobile app
+													Element:li
+													Element:a
+														Brand Guidelines
+													Element:li
+													Element:a
+														Slack at Work
+													Element:li
+													Element:a
+														Status
+													Element:a
+													Element:ul
+													Element:li
+													Element:a
+														Contact Us
+													Element:li
+													Element:a
+													Element:li
+													Element:a

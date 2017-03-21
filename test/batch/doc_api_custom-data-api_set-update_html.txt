@@ -1,0 +1,619 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					POST - Set or update
+			Node:
+			(type) c
+			(layer)1
+				Element:b
+					Note:
+					The Custom Data API is a feature included in
+			Node:
+			(type) c
+			(layer)1
+				Element:b
+					Premier
+					and
+			Node:
+			(type) c
+			(layer)1
+				Element:b
+					Enterprise
+					plans.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Request structure
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The users data endpoint allows you to
+							Element:strong
+								set user data
+								either for one user, or for multiple users.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Route
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The custom data API exposes two POST endpoints:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											https://api.batch.com/1.0/BATCH_API_KEY/data/users/YOUR_USER_ID
+											for a single update
+										Element:li
+										Element:code
+											https://api.batch.com/1.0/BATCH_API_KEY/data/users
+											for bulk updates
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											NOTE
+											:
+										Element:code
+											YOUR_USER_ID
+											is a custom id as described
+										Element:a
+											here
+											for iOS and
+										Element:a
+											here
+											for Android.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Bulk updates allow you to update custom data for multiple users (up to 10,000) with one API call.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here are two valid cURL examples.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Single update:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -H "Content-Type: application/json" -H "X-Authorization: BATCH_REST_API_KEY" -X POST -d "@payload.json" "https://api.batch.com/1.0/BATCH_API_KEY/data/users/YOUR_USER_ID"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Bulk update:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -H "Content-Type: application/json" -H "X-Authorization: BATCH_REST_API_KEY" -X POST -d "@payload.json" "https://api.batch.com/1.0/BATCH_API_KEY/data/users"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											BATCH_API_KEY
+											value is either your
+										Element:strong
+											Live
+											or
+										Element:strong
+											Dev
+											Batch API key from the settings page of your app within the dashboard (⚙ Settings → General).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Headers
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to authenticate with the API, you need to provide your
+										Element:strong
+											company REST API Key
+											as the value of the
+										Element:code
+											X-Authorization
+											header.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Post data
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For a single update, the body of the request must contain a
+										Element:strong
+											valid JSON payload
+											describing the update operations to execute for the user's custom data.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is a how a complete JSON payload looks like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "overwrite": false, "values": { "u.nickname": "The Rock", "u.force": 42, "ut.hobbies": ["Lifting", "Wrestling", "Acting"], "u.is_subscribed": null, "date(u.last_subscription)": "2016-01-10T10:00:00.000", "date(u.last_purchase)": 1472656161, "ut.locations": { "$add": ["Paris"], "$remove": ["Berlin"] } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's see the parameters in detail.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Id
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											overwrite
+										Element:td
+										Element:strong
+											Boolean
+											-
+										Element:em
+											Optional
+											Instead of merging the data we already have for a user, we overwrite it. Defaults to false
+										Element:em
+											E.g.
+										Element:code
+											{"overwrite":true}
+										Element:tr
+										Element:td
+										Element:code
+											values
+										Element:td
+										Element:strong
+											Object
+											-
+										Element:em
+											Required
+											An object containing all attributes and tags with their respective update operations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											NOTE
+											: it is not valid to
+										Element:code
+											$add
+											a tag,
+										Element:code
+											$remove
+											a tag or remove an attribute by setting it to
+										Element:code
+											null
+											while using the
+										Element:code
+											overwrite
+											mode.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														The values object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The values object details what operations to do on a set of attributes or tags. It has the following form:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "<scope>.<attribute name>": <attribute value>, "<scope>.<attribute name>": <attribute value>, "<scope>.<attribute name>": <attribute value>, "<scope>.<attribute name>": <attribute value>, "<scope>.<tag name>": <tag update operation>, }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														NOTE
+														: only one operation per attribute or tag is allowed in one call to the API.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	The scope
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The scope determines what the key refers to: an attribute or tags:
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:code
+																	u
+																	is for attributes
+																Element:li
+																Element:code
+																	ut
+																	is for tags
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	The attribute value
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The value describes what you want to do on an attribute; either set or remove a value. The rules are as follow:
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																	When the value is
+																Element:code
+																	null
+																	, the attribute is removed.
+																Element:li
+																	Otherwise the attribute's value is inserted or updated.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The following types are supported in a value:
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:strong
+																	string
+																	. E.g:
+																Element:code
+																	{"u.nickname": "Johnny"}
+																Element:li
+																Element:strong
+																	integer
+																	. E.g:
+																Element:code
+																	{"u.age": 23}
+																Element:li
+																Element:strong
+																	boolean
+																	. E.g:
+																Element:code
+																	{"u.is_subscribed": true}
+																Element:li
+																Element:strong
+																	float
+																	. E.g:
+																Element:code
+																	{"u.level_progress": 45.09}
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:strong
+																	NOTE
+																	: There is a special case to be aware of. We support dates, unfortunately JSON does not, thus we need extra information to know an attribute is actually a date. We do this via wrapping the key name in the
+																Element:code
+																	date()
+																	function. E.g:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	{ "date(u.last_subscription)": 1451642400, "date(u.first_subscription)": "2015-01-01T04:00:00.000" }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	When using
+																Element:code
+																	date()
+																	on a string, be sure to use the format
+																Element:strong
+																	YYYY-MM-ddTHH:mm:ss
+																	. Be aware that we will interpret the date as UTC in both cases.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	The tag update operation
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The value describes what you want to do on a tag. The rules are as follow:
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																	When the value is
+																Element:code
+																	null
+																	, the tag is removed.
+																Element:li
+																	When the value is in array, the tag's content is replaced.
+																Element:li
+																	When the value is an object, that object must describe the update to do. See below for the description of that object.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Here is the description of a tag update object.
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:thead
+																Element:tr
+																Element:th
+																	Id
+																Element:th
+																	Description
+																Element:tbody
+																Element:tr
+																Element:td
+																Element:code
+																	$add
+																Element:td
+																Element:strong
+																	Array
+																	-
+																Element:em
+																	Optional
+																	The values to add to the tag
+																Element:em
+																	E.g.
+																Element:code
+																	{"$add":["Paris","Berlin","San Francisco"]}
+																Element:tr
+																Element:td
+																Element:code
+																	$remove
+																Element:td
+																Element:strong
+																	Array
+																	-
+																Element:em
+																	Optional
+																	The values to remove from the tag
+																Element:em
+																	E.g.
+																Element:code
+																	{"$remove":["Tokyo","London","New York"]}
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Here is a complete example combining all possible operations:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	{ "ut.hobbies": ["Cooking", "Chess"], "ut.previous_locations": null, "ut.locations": { "$add": ["Paris", "London"], "$remove": ["Berlin"] } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Bulk post data
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Bulk updates work basically the same way as a single update, except now you need to provide an array of objects of the following type:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Id
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											id
+										Element:td
+										Element:strong
+											String
+											-
+										Element:em
+											Required
+											The user id
+										Element:em
+											E.g.
+										Element:code
+											{"id":"Vincent"}
+										Element:tr
+										Element:td
+										Element:code
+											update
+										Element:td
+										Element:strong
+											Object
+											-
+										Element:em
+											Required
+											The update operation as described for the single update above
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is an example of a valid JSON payload:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											[ { "id": "Vincent", "update": { "values": { "u.nickname": "Vincent", "u.age": 55 } } }, { "id": "Johnny", "update": { "overwrite": true, "values": { "u.nickname": "BeGood", "u.age": 30 } } } ]
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Responses
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Success
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the POST to the API endpoint is successful you will receive an
+										Element:strong
+											HTTP 200
+											confirmation and
+										Element:strong
+											a unique token
+											reprensenting the transaction.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{"token": "fd576e9f-8b07-4844-91f9-ecfc2137c6f8"}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please keep this token: it will be useful for upcoming features, and it will also help in getting faster support.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Failure
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the POST data does not meet the API requirements you will receive an actionable error message. Contact us at
+										Element:a
+											support@batch.com
+											if you need further support.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											AUTHENTICATION_INVALID
+											(Http status code: 401, Error code: 10)
+										Element:li
+										Element:code
+											ROUTE_NOT_FOUND
+											(Http status code: 404, Error code: 20)
+										Element:li
+										Element:code
+											MISSING_PARAMETER
+											(Http status code: 400, Error code: 30)
+										Element:li
+										Element:code
+											MALFORMED_PARAMETER
+											(Http status code: 400, Error code: 31)
+										Element:li
+										Element:code
+											MALFORMED_JSON_BODY
+											(Http status code: 400, Error code: 32)
+										Element:li
+										Element:code
+											SERVER_ERROR
+											(Http status code: 500, Error code: 1)
+										Element:li
+										Element:code
+											MAINTENANCE_ERROR
+											(Http status code: 503, Error code: 2)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+										Element:span
+											Next step
+										Element:span
+											Updating a campaign

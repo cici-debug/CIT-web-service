@@ -1,0 +1,635 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Files
+				Element:a
+					#
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Zapier supports some limited file operations via both triggers and actions, though they behave a bit differently depending on what you want to do. At a high level, this is what you can expect:
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Triggers via URLs/Dehydration
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+								This is how you'd surface a file hosted by your app, so other apps can consume it.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If your files aren't private (IE: they have a public route), just provide the URL in the normal payload (right alongside
+							Element:code
+								id
+								,
+							Element:code
+								name
+								, etc.). Our system is smart enough to download public URLs when they get used like a file!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								However, if the files are behind authentication, you can define a route for us to retrieve the file at some time in the future and we'll attempt the normal style of authentication:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								var
+							Element:span
+								Zap
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								your_trigger_post_poll
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								var
+							Element:span
+								records
+							Element:span
+								=
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								parse
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								response
+							Element:span
+								.
+							Element:span
+								content
+							Element:span
+								);
+							Element:span
+								return
+							Element:span
+								_
+							Element:span
+								.
+							Element:span
+								map
+							Element:span
+								(
+							Element:span
+								records
+							Element:span
+								,
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								record
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								// if you just do url, we'll include any standard authentication headers
+							Element:span
+								record
+							Element:span
+								.
+							Element:span
+								file
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								dehydrateFile
+							Element:span
+								(
+							Element:span
+								'https://yoursite.com/files/download/'
+							Element:span
+								+
+							Element:span
+								record
+							Element:span
+								.
+							Element:span
+								id
+							Element:span
+								);
+							Element:span
+								return
+							Element:span
+								record
+							Element:span
+								;
+							Element:span
+								});
+							Element:span
+								}
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also define a more specific request if there is more data you need to provide to activate the download, like a special key or checksum:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								var
+							Element:span
+								Zap
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								your_trigger_post_poll
+							Element:span
+								:
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								var
+							Element:span
+								records
+							Element:span
+								=
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								parse
+							Element:span
+								(
+							Element:span
+								bundle
+							Element:span
+								.
+							Element:span
+								response
+							Element:span
+								.
+							Element:span
+								content
+							Element:span
+								);
+							Element:span
+								return
+							Element:span
+								_
+							Element:span
+								.
+							Element:span
+								map
+							Element:span
+								(
+							Element:span
+								records
+							Element:span
+								,
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								record
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								// if you provide the full request, we will NOT include
+							Element:span
+								// any standard authentication headers
+							Element:span
+								var
+							Element:span
+								url
+							Element:span
+								=
+							Element:span
+								'https://yoursite.com/files/download/'
+							Element:span
+								+
+							Element:span
+								record
+							Element:span
+								.
+							Element:span
+								id
+							Element:span
+								;
+							Element:span
+								record
+							Element:span
+								.
+							Element:span
+								file
+							Element:span
+								=
+							Element:span
+								z
+							Element:span
+								.
+							Element:span
+								dehydrateFile
+							Element:span
+								(
+							Element:span
+								url
+							Element:span
+								,
+							Element:span
+								{
+							Element:span
+								method
+							Element:span
+								:
+							Element:span
+								'post'
+							Element:span
+								,
+							Element:span
+								headers
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								'X-Download-Key'
+							Element:span
+								:
+							Element:span
+								record
+							Element:span
+								.
+							Element:span
+								key
+							Element:span
+								}
+							Element:span
+								},
+							Element:span
+								{
+							Element:span
+								name
+							Element:span
+								:
+							Element:span
+								record
+							Element:span
+								.
+							Element:span
+								fileName
+							Element:span
+								,
+							Element:span
+								// if blank we will guess/inspect!
+							Element:span
+								length
+							Element:span
+								:
+							Element:span
+								record
+							Element:span
+								.
+							Element:span
+								size
+							Element:span
+								// if blank we will guess/inspect!
+							Element:span
+								});
+							Element:span
+								return
+							Element:span
+								record
+							Element:span
+								;
+							Element:span
+								});
+							Element:span
+								}
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								And we'll handle the rest!
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Actions via Multipart
+							Element:a
+								#
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+								This is how you'd accept binary data to be uploaded to your app, the data is coming from some other app.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Downloading files is a little simpler than uploading them, so files in actions is a bit more involved. By default we attempt multipart uploading and include the original JSON right alongside, but you can (of course) tweak this with the developer platform.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Let's assume your API can accept JSON as well as JSON + multipart for attachments, if you set up this action:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can expect this request to be sent by default (no scripting required at all):
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST https://yoursite.com/files/upload Content-Type: multipart/form-data; boundary=f94636b7375c4a37862029d4dc8bafe7 --f94636b7375c4a37862029d4dc8bafe7 Content-Disposition: form-data; name="data" Content-Type: application/json; charset=utf-8 {"path": "/user/provided/path", "delete_date": "2014-10-10T13:59:36"} --f94636b7375c4a37862029d4dc8bafe7 Content-Disposition: form-data; name="file_to_upload"; filename="user-provided-file.pdf" Content-Type: application/pdf <BINARY DATA HERE> --f94636b7375c4a37862029d4dc8bafe7--
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+								The
+							Element:code
+								name="data"
+								key for the JSON subtype in
+							Element:code
+								multipart/form-data
+								is the default, though the rest of the multipart files will respect your action field keys.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Limited Customization Via Scripting
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have some other method of uploading files, you'll need to break out the scripting platform. Probably the most common way to tweak the upload is with the classic
+										Element:code
+											pre_write
+											method.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A popular alternative pattern is likely just a pure
+										Element:code
+											multipart/form-data
+											, no JSON at all. We support that just fine, just remove the
+										Element:code
+											Content-Type
+											and return an object as
+										Element:code
+											request.data
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											var
+										Element:span
+											Zap
+										Element:span
+											=
+										Element:span
+											{
+										Element:span
+											your_action_pre_write
+										Element:span
+											:
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											bundle
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											// bundle.request.files is an object of strings: arrays
+										Element:span
+											// bundle.request.files.file_to_upload is an array:
+										Element:span
+											// * first item is the filename, if any
+										Element:span
+											// * second item is a zapier.com endpoint that will stream the file
+										Element:span
+											// * third item is the mimetype, if any
+										Element:span
+											bundle
+										Element:span
+											.
+										Element:span
+											request
+										Element:span
+											.
+										Element:span
+											headers
+										Element:span
+											[
+										Element:span
+											'Content-Type'
+										Element:span
+											]
+										Element:span
+											=
+										Element:span
+											'application/x-www-form-urlencoded'
+										Element:span
+											;
+										Element:span
+											// leave request data as object, not string!
+										Element:span
+											bundle
+										Element:span
+											.
+										Element:span
+											request
+										Element:span
+											.
+										Element:span
+											data
+										Element:span
+											=
+										Element:span
+											JSON
+										Element:span
+											.
+										Element:span
+											parse
+										Element:span
+											(
+										Element:span
+											bundle
+										Element:span
+											.
+										Element:span
+											request
+										Element:span
+											.
+										Element:span
+											data
+										Element:span
+											);
+										Element:span
+											// we will mix request.data and request.files together
+										Element:span
+											return
+										Element:span
+											bundle
+										Element:span
+											.
+										Element:span
+											request
+										Element:span
+											;
+										Element:span
+											// let zapier complete it
+										Element:span
+											}
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That pure
+										Element:code
+											multipart/form-data
+											raw request will now look like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST https://yoursite.com/files/upload Content-Type: multipart/form-data; boundary=0c61d2f9bd1a4675a2db6afe21f230f1 --0c61d2f9bd1a4675a2db6afe21f230f1 Content-Disposition: form-data; name="path" /user/provided/path --0c61d2f9bd1a4675a2db6afe21f230f1 Content-Disposition: form-data; name="delete_date" 2014-10-10T13:59:36 --0c61d2f9bd1a4675a2db6afe21f230f1 Content-Disposition: form-data; name="file_to_upload"; filename="user-provided-file.pdf" Content-Type: application/pdf <BINARY DATA HERE> --0c61d2f9bd1a4675a2db6afe21f230f1--
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											All name keys respect the keys provided.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Advanced Streaming via Scripting
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At this time we do no support advanced streaming of files via the scripting platform (for example, uploading a file to receive an attachment ID that gets mixed into the normal JSON for POSTing). We may support that in the future, please send us an
+											↑ Was this documentation useful?
+										Element:a
+											email
+											if you have questions!
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Can't find what you're looking for? We'd love to help.
+										Element:a
+											Yes
+										Element:a
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Send us a message
+											. Get Help
+									Node:
+									(type) c
+									(layer)3
+										Element:noscript
+										Element:img

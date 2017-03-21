@@ -1,0 +1,640 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Requests
+			Node:
+			(type) c
+			(layer)1
+				Element:section
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Formats and Fields
+									Node:
+									(type) c
+									(layer)3
+										Element:section
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+											Transaction requests are submitted to the Clearent Payment Gateway using the HTTP POST method, with a URL in the following form:
+										Element:p
+										Element:strong
+											https://gateway-sb.clearent.net/rest/v2/transactions
+										Element:p
+											The body of the request consists of a Transaction Request Object. The Transaction API supports both Extensible Markup Language (XML) and JavaScript Object Notation (JSON).
+										Element:p
+											If you use XML, include the following in the HTTP request header:
+										Element:p
+											Content-Type:application/xml
+										Element:p
+											If you use JSON, include the following in the HTTP request header:
+										Element:p
+											Accept:application/json
+										Element:p
+											The list of required and optional fields, along with their format and meaning, is provided in the following table. Please note that the column “Req” may contain one or more values that indicate whether a field is required, and under what conditions:
+										Element:ul
+										Element:li
+											A value of ‘A’ indicates that the field is required for all transactions.
+										Element:li
+											A value of ‘K’ indicates that the field is required for Keyed transactions.
+										Element:li
+											A value of ‘M’ indicates that the field is required for Mag-Stripe transactions.
+										Element:li
+											A value of ‘C’ indicates that the field is Conditionally required; see the Description for details.
+										Element:li
+											If no indicator is provided, the field is not required in any case.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+									Node:
+									(type) c
+									(layer)3
+										Element:section
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Field Name
+										Element:td
+										Element:strong
+											Format
+										Element:td
+										Element:strong
+											Req
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+										Element:strong
+											api-key
+										Element:td
+											A/N
+										Element:td
+											C
+										Element:td
+											An assigned value required for authentication of transaction processing via the RESTful API. Can be provided in request body or as a header field with the same name.
+										Element:tr
+										Element:td
+										Element:strong
+											software-type
+										Element:td
+											A/N
+										Element:td
+											A
+										Element:td
+											Name of your software application; “CoffeeHouseApp”, etc.
+										Element:tr
+										Element:td
+										Element:strong
+											type
+										Element:td
+											A/N
+										Element:td
+											A
+										Element:td
+											Supported Transaction Types are:
+										Element:ul
+										Element:li
+											SALE
+										Element:li
+											FORCED SALE
+										Element:li
+											AUTH
+										Element:li
+											CAPTURE
+										Element:li
+											REFUND
+										Element:li
+											VOID
+										Element:p
+											Your API key must be configured with permission to conduct the transaction type in question in order for the Gateway to accept the request. See Chapter 3, “Configuration and Setup”, for details.
+										Element:tr
+										Element:td
+										Element:strong
+											id
+										Element:td
+											N
+										Element:td
+											C
+										Element:td
+										Element:strong
+											(Required for
+										Element:strong
+											CAPTURE, REFUND, VOID
+											) Used to identify the transaction to be captured, refunded or voided. In the case of a Void or Matched Refund, the value provided here must match what was returned in the original transaction response.
+										Element:tr
+										Element:td
+										Element:strong
+											card
+										Element:td
+											A/N
+										Element:td
+											C,K
+										Element:td
+										Element:strong
+											(Required for
+										Element:strong
+											SALE, FORCED SALE, or AUTH on Keyed transactions)
+											Cardholder’s payment card account number, formally known as the Primary Account Number (PAN).
+										Element:p
+											Do not include the ‘card’ field when sending track data; instead, see ‘Encrypted Track Data’ or ‘track2Data’ below.
+										Element:tr
+										Element:td
+										Element:strong
+											csc
+										Element:td
+											N
+										Element:td
+											K
+										Element:td
+											The Card Security Code (‘CSC’) is an embossed or printed number located on the card (but not referenced in the magnetic stripe) that is often collected in Card Not Present transaction processing.
+										Element:p
+											These codes are alternatively known as Card Verification Value 2 (‘CVV2’) for Visa cards, Card Verification Code 2 (‘CVC2’) for MasterCard and Card ID (‘CID’) for American Express and Discover.
+										Element:p
+											For MasterCard, Visa and Discover, the code is typically a separate group of three digits to the right of the signature strip. For American Express, the code is a printed, not embossed, string of four digits on the front towards the right.
+										Element:tr
+										Element:td
+										Element:strong
+											exp-date
+										Element:td
+											MMYY
+										Element:td
+											K
+										Element:td
+											The expiration date visible on the payment card. Note that leading zeroes are material. For example, the value depicting an expiration date of July 2015 should be sent as ‘0715’ not ‘715’.
+										Element:tr
+										Element:td
+										Element:strong
+											encrypted-track-data
+										Element:td
+											A/N
+										Element:td
+											C,M
+										Element:td
+											(
+										Element:strong
+											Optional for SALE, AUTH, FORCED SALE, and UNMATCHED REFUND. Required for encrypted card swipe transactions). I
+											ncludes track1/2 output from magnetic stripe as captured by the card reader.
+										Element:p
+											With the secure card reader set to keyboard emulation mode, place the ENTIRE contents of the raw swipe read in this field.
+										Element:p
+											Only ONE of ‘encrypted-track-data’ or ‘track2-data’ should be submitted, never both.
+										Element:p
+											You will get an error if you submit encrypted track 2 data.
+										Element:tr
+										Element:td
+										Element:strong
+											track2-data
+										Element:td
+											A/N
+										Element:td
+											C,M
+										Element:td
+											(
+										Element:strong
+											Optional for Sale, Auth, Forced Sale, and Unmatched Refund.
+										Element:p
+										Element:strong
+											Required for any card swipe transaction supporting unencrypted track2 data).
+											Includes Track 2 output from the magnetic stripe read; note that leading and trailing sentinels must be removed.
+										Element:p
+											The Clearent Gateway does not support the sending of Track 1 data at this time.
+										Element:tr
+										Element:td
+										Element:strong
+											track-format
+										Element:td
+											A/N
+										Element:td
+											C,M
+										Element:td
+										Element:strong
+											(Required for SALE, FORCED SALE, or AUTH Mag-Stripe transactions)
+											Specifies the type of card reader. Accepted values:
+										Element:ul
+										Element:li
+											‘MAGTEK’ – MagTek SCRM (must be present when the ‘Encrypted Track Data’ field is present).
+										Element:li
+											‘TRACK2’ – Non-Encrypting Card Reader (must be present when the ‘track2Data’ field is present).
+										Element:tr
+										Element:td
+										Element:strong
+											amount
+										Element:td
+											N
+										Element:td
+											C
+										Element:td
+										Element:strong
+											(Required for all transaction types except VOID)
+											The amount of the transaction in US Dollars; decimal notation is required, but the currency symbol (i.e. ‘$’) should be omitted. Examples include 25.00, 8.32, etc.
+										Element:p
+											Only US Dollars are supported at this time. For Capture transactions that include a tip, the amount is the original authorization amount.
+										Element:tr
+										Element:td
+										Element:strong
+											sales-tax-amount
+										Element:td
+											N
+										Element:td
+											C
+										Element:td
+										Element:strong
+											(Required if sales-tax-type is “LOCAL_SALES_TAX. Should NOT be set if sales-tax-type is “TAX_EXEMPT”)
+											Supported Transaction Types are:
+										Element:ul
+										Element:li
+											SALE
+										Element:li
+											FORCED SALE
+										Element:li
+											AUTH
+										Element:p
+											The amount of the sales tax in US Dollars; decimal notation is required, but the currency symbol (i.e. ‘$’) should be omitted. Examples include 2.00, 1.24, etc.
+										Element:p
+											Only US Dollars are supported at this time.
+										Element:tr
+										Element:td
+										Element:strong
+											sales-tax-type
+										Element:td
+											A
+										Element:td
+											C
+										Element:td
+										Element:strong
+											(Required if sales-tax-amount is non-zero)
+											Specifies the sales tax type. Accepted values:
+										Element:ul
+										Element:li
+											‘
+										Element:span
+											TAX_EXEMPT
+											’
+										Element:li
+											‘
+										Element:span
+											LOCAL_SALES_TAX
+											’
+										Element:tr
+										Element:td
+										Element:strong
+											tip-amount
+										Element:td
+											N
+										Element:td
+											C
+										Element:td
+										Element:strong
+											(Required for CAPTURE Transactions where the Amount differs from the Authorization Amount)
+											Supported Transaction Types are:
+										Element:ul
+										Element:li
+											SALE
+										Element:li
+											CAPTURE
+										Element:p
+											The amount of any tip that was added to the ticket amount by the cardholder, in US Dollars; decimal notation is required, but the currency symbol (i.e. ‘$’) should be omitted. Examples include 5.00, 1.92, etc.
+										Element:p
+											Only US Dollars are supported at this time.
+										Element:tr
+										Element:td
+										Element:strong
+											tip-adjusted
+										Element:td
+											A/N
+										Element:td
+											C
+										Element:td
+											Will be 1 if a tip is adjusted and 0 if not.
+										Element:tr
+										Element:td
+										Element:strong
+											invoice
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											An optional field that allows the user to identify and track the transaction through the use of a number or code.
+										Element:tr
+										Element:td
+										Element:strong
+											authorization-code
+										Element:td
+											A/N
+										Element:td
+											C
+										Element:td
+										Element:strong
+											(Required for FORCED SALE)
+											A six-character code provided during a Voice Authorization.
+										Element:tr
+										Element:td
+										Element:strong
+											purchase-order
+										Element:td
+											AN
+										Element:td
+											C
+										Element:td
+										Element:strong
+											(Required for Level II and Level III purchasing card transactions)
+											Allows the user to provide a unique ID per customer. The Gateway will automatically assign a unique Purchase Order number if one is not given.
+										Element:tr
+										Element:td
+										Element:strong
+											email-address
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Customer email address, which can be used to send the customer a transaction receipt.
+										Element:tr
+										Element:td
+										Element:strong
+											customer-id
+										Element:td
+											AN
+										Element:td
+											C
+										Element:td
+										Element:strong
+											(Required for Level II and Level III purchasing card transactions)
+											Allows the user to provide a unique ID per customer.
+										Element:tr
+										Element:td
+										Element:strong
+											order-id
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											An order number required on all transactions (up to 18 positions in length, 0–9; A–Z)
+										Element:p
+											For void transaction types (i.e. reversals), the order id supplied must be the same as the one referenced in the original purchase or return.
+										Element:tr
+										Element:td
+										Element:strong
+											description
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											An optional field that includes a short description of the goods or services purchased.
+										Element:tr
+										Element:td
+										Element:strong
+											comments
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											An optional field that includes any additional comments associated with this transaction, or the goods or services purchased.
+										Element:tr
+										Element:td
+										Element:strong
+											client-ip
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											IP address of the request originator. Used for location services and fraud module processing.
+										Element:tr
+										Element:td
+										Element:strong
+											billing-is-shipping
+										Element:td
+											A
+										Element:td
+										Element:td
+											To use information in the billing object as shipping information, include this element with the value ‘
+										Element:strong
+											true’
+											.
+										Element:tr
+										Element:td
+										Element:strong
+											billing
+										Element:td
+											Object
+										Element:td
+										Element:td
+											Contains fields that define billing information.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [first-name]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											First name that appears on the card.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [last-name]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Last name that appears on the card.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [company]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Company name.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [street]
+										Element:td
+											A/N
+										Element:td
+											K
+										Element:td
+											Address, first line – used for Address Verification Service (AVS) requests.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [street2]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											AVS address, second line.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [city]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											City.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [state]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Two-letter US State Code.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [country]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Country.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [zip]
+										Element:td
+											A/N
+										Element:td
+											K
+										Element:td
+											AVS ZIP code.
+										Element:tr
+										Element:td
+										Element:strong
+											billing [phone]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Billing contact phone number.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping
+										Element:td
+											Object
+										Element:td
+										Element:td
+											Contains fields that define shipping information.
+										Element:p
+											If the ‘billing-is-shipping’ field is present, and set to ‘
+										Element:strong
+											true
+											’ (see above), the Gateway will re-use the billing information provided, and it is therefore not necessary to submit identical information in a shipping object.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping [first-name]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											First name as it should appear on the shipping label.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping [last-name]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Last name as it should appear on the shipping label.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping [company]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Company name as it should appear on the shipping label.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping [street]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Street address as it should appear on the shipping label.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping [street2]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Line 2 of the street address as it should appear on the shipping label.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping [city]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											City name as it should appear on the shipping label.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping [state]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Two-letter US State Code as it should appear on the shipping label.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping[country]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Country.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping [zip]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Five- or nine-digit US ZIP code as it should appear on the shipping label.
+										Element:tr
+										Element:td
+										Element:strong
+											shipping [phone]
+										Element:td
+											A/N
+										Element:td
+										Element:td
+											Phone number for where the goods are being shipped.
+									Node:
+									(type) c
+									(layer)3
+										Element:footer

@@ -1,0 +1,296 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					PubSubHubbub Feeds
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Description
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This document describes how to access the Etsy real-time listings feed via our Superfeedr hosted PubSubHubbub (PuSH) hub at
+							Element:a
+								https://etsy.superfeedr.com
+								. We also provide
+							Element:a
+								a sample PuSH subscriber webserver
+								and
+							Element:a
+								a sample script to subscribe/unsubscribe from a feed
+								. For more complete documentation on Superfeedr and PuSH, please refer to their documentation:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Superfeedr documentation:
+							Element:a
+								http://superfeedr.com/documentation#pubsubhubbub
+							Element:li
+								PubSubHubbub documentation:
+							Element:a
+								http://code.google.com/p/pubsubhubbub/
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Available Subscriptions
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following subscriptions are available:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								A Firehose feed of all listing changes:
+							Element:a
+								http://www.etsy.com/api/push/listings/latest.atom
+							Element:li
+								Shop feeds of all listing changes of a single shop:
+							Element:a
+								http://www.etsy.com/api/push/shops/:shop_name/listings/latest.atom
+							Element:br
+								Please note that you must subscribe using the
+							Element:code
+								shop_name
+								and not the
+							Element:code
+								shop_id
+							Element:li
+								Country feeds of all listing changes of a single country:
+							Element:a
+								http://www.etsy.com/api/push/countries/:country_slug/listings/latest.atom
+							Element:br
+								Please note that you must subscribe using the country's name's
+							Element:code
+								slug
+								and not the
+							Element:code
+								country_id
+								or
+							Element:code
+								name
+								. See the
+							Element:code
+								API reference.
+							Element:a
+								Country
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The above urls are placeholders and will return an empty Atom feed. The actual listings data is sent over the PubSubHubbub protocol.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What is PubSubHubbub?
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The PubSubHubbub or PuSH protocol allows publishers to push notifications to subscribers in real-time rather than asking subscribers to regularly poll for new updates. The advantage is pushing is more efficient and will not require you to try to time your polling correctly to make sure you are getting a complete list of updates. The cost is that the initial setup may be more complicated and the subscriber will have to maintain a web server to receive updates from the hub.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The basic flow is to:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Make sure your PuSH subscriber server is up and running
+							Element:li
+								Make a subscribe request to
+							Element:a
+								https://etsy.superfeedr.com
+								for the feed url you want to subscribe to and a callback url.
+							Element:li
+								Superfeedr will verify your request with us. If approved, it will return a 2xx response.
+							Element:li
+								Superfeedr will start POST-ing updates to the callback url you provided upon subscription.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For the sample code, this translates to:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Install python and cherrypy
+							Element:li
+								Edit the sample push subscriber code and set your server hostname and port
+							Element:li
+								Edit scribe.py and set your api_key
+							Element:li
+								Start the server: python name_of_push_subscriber.py
+							Element:li
+								Make a subscribe request: python push_subscription_script.py
+							Element:li
+								Watch the output in output.txt
+							Element:li
+								Make an unsubscribe request: python push_subscription_script.py unsubscribe
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Please read the comments in the sample subscriber code for a more thorough understanding of the PuSH subscribe flow.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Format
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The listing updates are in Atom format and described
+							Element:a
+								in our documentation
+								for /v2/feeds/listings/latest. You may also find our
+							Element:code
+								API reference helpful.
+							Element:a
+								Listing
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Confused?
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Why aren't my subscribe requests being authorized?
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Possibility 1: You're not using an api_key param in your subscription requests. Subscribe requests must have an additional api_key parameter. This is not in the PuSH standard, but is necessary for us to verify you are authorized to subscribe to our feed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Possibility 2: You're not using the right api_key. Your api_key is not the same one used for /v2/{public,private}. It is a separate key for feeds, and
+										Element:em
+											it is the same key
+											used for feeds at /v2/feeds/.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Why is the feed I'm subscribing to empty?
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The feed at
+										Element:a
+											http://www.etsy.com/api/push/listings/latest.atom
+											and any other available feed is simply a placeholder to let you know that there is a PuSH hub available for authorized subscribers. After you successfully subscribe to the feed, you'll get all the listing updates via PuSH even though the placeholder doesn't show any Atom entries.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Developers Home
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Discussion
+										Element:li
+										Element:a
+											API Terms of Use
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Your Developer Account
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Register as a developer
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Looking for Etsy Apps?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Check out our new
+							Element:br
+							Element:a
+								App Gallery
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It's the best way to find cool and useful tools built upon Etsy's API.
+						Node:
+						(type) c
+						(layer)2
+							Element:img

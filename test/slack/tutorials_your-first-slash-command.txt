@@ -1,0 +1,1288 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Your first slash command and custom integration
+					You're viewing a tutorial about
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+					legacy custom integrations
+					, an older way for teams to build into their Slack team. To securely utilize the newest platform features like message buttons & the Events API, build
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+					as part of a
+				Element:em
+					internal
+					integrations
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+					Slack app
+					just for your team instead.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+					Get started
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+					By David McCreath
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Slash commands
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					Custom integrations
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:a
+					PHP
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This very simple demo will take you through the process of setting up both a custom
+				Element:a
+					slash command
+					and an
+				Element:a
+					incoming webhook
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Wikipedia
+					is good to use for this because you don't need an API key to access their search API. All you need to do is identify your script with a user agent string (which we'll cover in a bit). In fact, because this is the default for all MediaWiki installations, you could repurpose this script to search
+				Element:em
+					any
+					site built on MediaWiki.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Our script is going to:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Take the values from a slash command on Slack and turn them into variables
+							Element:li
+								Use cURL to send the search string entered by your user to Wikipedia's Search API
+							Element:li
+								Accept the results returned by the Wikipedia search and figure out what to do with them
+							Element:li
+								Format the results into a proper JSON payload for the incoming webhook
+							Element:li
+								Use cURL to send the formatted JSON to the incoming webhook's URL
+							Element:li
+								Post the results to the Slack channel where the slash command was used
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								This tutorial makes use of the following technologies:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								PHP
+							Element:a
+								http://php.net
+							Element:li
+								JSON (JavaScript Object Notation -
+							Element:a
+								http://json.org/
+								)
+							Element:li
+								cURL
+							Element:a
+								https://curl.haxx.se/
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Don't worry too much if you've never used one or more of those. Our use of them will be thoroughly explained in the tutorial.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								You'll need the following tools:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								A plain text editor. If you want a free one,
+							Element:a
+								TextWrangler for Mac
+								or
+							Element:a
+								Notepad++ for Windows
+								are both great.
+							Element:li
+								A hosting account running PHP 5 and cURL where you can put the script we're going to write. Pretty much any shared hosting account in the world should work for this.
+							Element:li
+								A Slack account with privileges to create integrations. (A free team is fine.)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Slack's
+							Element:a
+								custom slash commands
+								perform a very simple task: they take whatever text you enter after the command itself (along with some other predefined values), send it to a URL, then accept whatever the script returns and posts it as a Slackbot message to the person who issued the command. What you do with that text at the URL is what makes slash commands so useful.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you're not familiar with slash commands, I recommend reading through my
+							Element:a
+								slash command tutorial
+								before you tackle this one.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Webhooks are common tools for services with APIs. They provide a structured way to send information into or out of the service. Slack's incoming webhooks accept data in a format called JSON, which is a widely-used format for this kind of data. We'll go over a little bit of it when we're setting up the webhook, but what you need to know for now is that an incoming webhook lives at a specific URL, and when send this formatted JSON to that URL, Slack can take it and post a message to any channel, group, or direct message that you have access to.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								What that means for our project is that when someone uses our Wikipedia search slash command, we have a way to post the results publicly for others to see.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Set up Slack
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Slash Command
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Go to your integrations page at Slack (http://my.slack.com/services/new) and scroll down to the bottom section, "DIY Integrations & Customizations". Click on the "Add" button for "Slash Commands".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Create the text command itself. This is the text that the user will type after the slash. I use
+										Element:code
+											wikip
+											, because it's just enough to indicate that this isn't just any wiki that you're searching. But you could use the entire word
+										Element:code
+											Wikipedia
+											or
+										Element:code
+											searchwiki
+											. Whatever makes the most sense for your command and your users.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For now you can leave everything else empty. We'll come back and finish setting this up in a bit. Just scroll down to the bottom and click the "Save Integration" button.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Incoming Webhook
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Go to your
+										Element:a
+											custom integrations
+										Element:a
+											configuration page
+											Click on the "Add Configuration" button for "Incoming Webhooks". If your team limits which users can install and configure custom integrations and apps, you may see a "Request" button instead, in which case this becomes a lot more complicated! You may want to follow along with this tutorial with your own personal test team as a development environment.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All incoming webhooks require a default channel to post to. We're going to see how to override that default later, but for now, either pick one of your existing channels or use the "create new channel" option to make new channel.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you've done that click the "Add Incoming Webhook Integration" button.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Put "Slackipedia" in the Descriptive Label field. This will help you distinguish this webhook from any others you set up in your list of configured integrations.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Also put "Slackipedia" in the Customize Name field. This is what the webhook will use as a "username" when it posts to your channels.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now you can upload the Wikipedia logo icon that's in the code package you downloaded. (Or, you know, use something inferior.)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Save your settings again, and you're done with the webhook for the moment.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								The PHP script
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now we're going to go step by step through the PHP script. If PHP isn't your jam, this should still be pretty simple to apply to the language of your choice.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											cURL, briefly
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you're familiar with cURL, feel free to jump over this section.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											cURL is an open source command line tool that lets you transfer data with URL syntax, which is what web browsers use, and as a result, much of the web uses. Being able to transfer data with URL syntax is what makes webhooks work. The thing about cURL that's useful for us is that not only can you use it from the command line (which makes it easy to use for testing things), but you can interact with it from most modern scripting language.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											PHP has had support for cURL for years, and we're going to take advantage of that so that our script can receive data from Slack and then send it back in. We'll be using a few very basic commands that are common for this type of task. All of the cURL that we use in this script will be transferable to any other webhook script that you want to write.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Set up your config
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are a few things we're going to need for the script, so let's set those up at the very top.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, your incoming webhook URL. This tells the script where to send the reply it gets back from Wikipedia. Get this URL from your incoming webhook configuration page.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$slack_webhook_url = "https://hooks.slack.com/services/T0XXXXXXX/B0XXXXXXX/xxxxxxxxxxxxxxxxxxxxxxxx"; // replace that URL with your webhook URL
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, the icon for your integration. You probably remember that we already set a custom icon for the webhook on the configuration page, but you can also specify within the webhook's payload. This is useful if you want to reuse the webhook itself for a few slash commands, or just as a fallback for the one on the configuration page.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$icon_url = ""; // the URL for where you upload the image, eg http://domain.com/slackipedia/wikipedia-logo-cc-by-sa_0.png
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And now some defaults for Wikipedia itself.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can change the language you're searching in with this. Set it to
+										Element:code
+											en
+											for English. You can find other ISO 639-1 language codes found
+										Element:a
+											here
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$wiki_lang = "en";
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, the WikiMedia API will return 10 search results. That will make for a very long message in Slack, so I like to default it to 4. You can play around with this and see what makes the most sense for your team.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$search_limit = "4";
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, the WikiMedia API requests that the client is identified by a User-Agent string. You could take our word for it or you could read the
+										Element:a
+											genuine article
+											. This allows the Wikipedia folks to look through their logs and see how often our script is being used to search their site. Feel free to leave this set to this, or you can update it with any info you want.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$user_agent = "Slackipedia/1.0 (https://github.com/mccreath/slackipedia; mccreath@gmail.org)";
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Create some variables from the slash command
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The first thing you need to do when the script is called by your slash command is grab all the values from the command and make variables out of them. We'll use most of them at various points in the script, and the variable names will be easy to remember.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, the command string itself. In our case, we know it's
+										Element:code
+											wikip
+											. But it's good to set it as a variable if you decide you want to test against it.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$command = $_POST['command'];
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, the text that was entered with the command. For this webhook, this will be the search string we send to Wikipedia.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$text = $_POST['text'];
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The token is an additional identifier that's sent with the slash command that you could use to verify that what's calling your script is actually your slash command.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$token = $_POST['token'];
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The channel ID is the channel where the slash command was issued. We'll use this later in the script to tell the webhook to return the results to that same channel.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$channel_id = $_POST['channel_id'];
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We're going to display the user name with the webhook message, just so it's clear who caused the message to appear in the channel.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$user_name = $_POST['user_name'];
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, we want to encode the search string properly. All API searches go to Wikipedia as
+										Element:code
+											GET
+											requests, which means the search query gets appended to the URL of API request. That means we need to properly encode the text for use in a URL. PHP has a function just for that.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											# # Encode the $text for the Wikipedia search string # $encoded_text = urlencode($text);
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Build the URL to send to Wikipedia
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Before we can actually send the URL to Wikipedia, we need to create it. We'll make one more new variable called
+										Element:code
+											$wiki_url
+											, which uses PHP's string concatenation to add some of the variables we've been creating to the standard Wikipedia API search URL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The MediaWiki API responds to GET requests, which means that all the search values are passed to the server as part of the URL. For our search we're going to pass four values.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											action
+											, which tells the Wikipedia server what function of the API we're going to use. In our case it's going to be
+										Element:code
+											opensearch
+											.
+										Element:li
+										Element:code
+											search
+											, which is the string will be looking for. In our case it will be our
+										Element:code
+											$encoded_text
+											variable.
+										Element:li
+										Element:code
+											format
+											, which tells the Wikipedia server how we want to receive the data it sends back. We want
+										Element:code
+											json
+											.
+										Element:li
+										Element:code
+											limit
+											, which tells the Wikipedia server how many results to return to us. We're going to limit it to
+										Element:code
+											4
+											for this tutorial. You can do any number, but bear in mind the context of a Slack channel and whether it would make sense in that context to have 10, or even 20, results. It probably wouldn't.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The completed URL will look like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://en.wikipedia.org/w/api.php?action=opensearch&search=searchtext&format=json&limit=4
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Taking that and replacing all the appropriate parts with our variables results in this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											# # Create URL for Wikipedia API, which requires using GET # $wiki_url = "http://".$wiki_lang.".wikipedia.org/w/api.php?action=opensearch&search=".$encoded_text."&format=json&limit=".$search_limit;
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Send the URL to Wikipedia
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now we're ready to actually send the search to Wikipedia. This is where the first use of cURL happens.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First we have to initialize cURL, and we'll create a variable with that, which we'll use in the next few lines to set some options and execute the call. (It's very common to use the variable name
+										Element:code
+											$ch
+											for this. It stands for
+										Element:code
+											curl handle
+											and it can be used over and over for all your cURL handles. However, I like to give my cURL handles more descriptive names.)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$wiki_call = curl_init($wiki_url);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next we set a couple of options. The first one,
+										Element:code
+											CURLOPT_RETURNTRANSFER
+											, tells cURL that we expect to get something back from the URL that we're calling. In this case it's the search results. The second one,
+										Element:code
+											CURLOPT_USERAGENT
+											is where we pass that User-Agent string that we created to identify our script.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl_setopt($wiki_call, CURLOPT_RETURNTRANSFER, true); curl_setopt($wiki_call, CURLOPT_USERAGENT, $user_agent);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now we execute our cURL. This is basically like your script opening up a web browser, typing a URL into the address field, and hitting "Return". Just like with the initialization command, we're going to set a variable for this, which will allow us to do a test immediately.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$wiki_respsonse = curl_exec($wiki_call);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now we check to see if that execution returned anything we can use. If not, the contents of that variable will be
+										Element:code
+											FALSE
+											. In that case, we create a variable called
+										Element:code
+											$message_text
+											and put in an error message. Later on, we're going to send the value of
+										Element:code
+											$message_text
+											back to Slack. If there are no results, we want to let user know that. However, if there are results, then we'll leave
+										Element:code
+											$message_text
+											blank, and fill it in with some of the results (after we do some formatting).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note the use of the triple equal signs! There's a very good PHP reason for doing your comparison with triple equals instead of just double. We use
+										Element:code
+											===
+											to enforce a little type safety, ensuring that
+										Element:code
+											$wiki_response
+											isn't just something false-like enough to satisfy the lazy evaluation of a
+										Element:code
+											==
+											but is in fact, a boolean value that could be specified as none other than
+										Element:code
+											FALSE
+											itself.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											if($wiki_response === FALSE ){ $message_text = "There was a problem reaching Wikipedia. This might be helpful: The cURL error is " . curl_error($wiki_call); } else { $message_text = ""; }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And now we close the cURL connection, so there's not something on your server just taking up memory.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl_close($wiki_call);
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Understanding the returned data, or:
+										Element:br
+											A short discursion into JSON and arrays.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Assuming we got data back from Wikipedia, we need to get it properly organized for sending back through our webhook. Let's take a look at what Wikipedia sends back in their search results. It's important to know that all sites structure their JSON in the way that makes sense for their data, which means you need to understand what that structure is and how to transform it into the structure that Slack's webhooks use.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We'll use the search term
+										Element:code
+											airship
+											as our example. If you paste this URL into a browser's address bar (or run it with cURL in a terminal):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://en.wikipedia.org/w/api.php?action=opensearch&search=airship&format=json&limit=4
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You'll get back a JSON object that looks like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											[ "airship", [ "Airship", "Airship Italia", "Airship Industries", "Airship (Final Fantasy)" ], [ "An airship or dirigible is a type of aerostat or lighter-than-air aircraft which can navigate through the air under its own power.", "Airship Italia was a semi-rigid airship used by Italian engineer Umberto Nobile in his second series of flights around the North Pole.", "Airship Industries was a British manufacturers of modern non-rigid airships (blimps) active under that name from 1970 to the present day and controlled for part of that time by Alan Bond.", "This is a redirect from a page that was merged into the target page. This page was kept as a redirect to the corresponding main page on the topic it names, in order to preserve this page's edit history after its content was merged into the target page's content." ], [ "http://en.wikipedia.org/wiki/Airship", "http://en.wikipedia.org/wiki/Airship_Italia", "http://en.wikipedia.org/wiki/Airship_Industries", "http://en.wikipedia.org/wiki/Airship_(Final_Fantasy)" ] ]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It's a very simple object, with no more information in it than is absolutely necessary. The first item in the array is the search term. That's followed by three more arrays, each of which has four quoted strings in it, separated by commas. Knowing what we know about Wikipedia, we can make some guesses as to what each of those objects.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											First is a page title
+										Element:li
+											Second is a page summary
+										Element:li
+											Third is a page URL
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Fortunately, that's all we need to build a nicely formatted and informative message to return to Slack.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											However, it will be much easier to work with the data in PHP if we turn it into an array first. So we'll use PHP's
+										Element:code
+											json_decode()
+											function, which does just that.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$wiki_array = json_decode($wiki_response);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That will give us a standard indexed PHP array which would look like this. Notice that all of the items we got back from Wikipedia now have numbers associated with them. The number for each item is called its
+										Element:code
+											index
+											, and an array that uses numbers to identify its contents like this is called an "indexed array".
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$wiki_array = array( [0] => 'airship' [1] => Array( [0] => 'Airship' [1] => 'Airship Italia' [2] => 'Airship Industries' [3] => 'Airship (Final Fantasy)' ) [2] => Array( [0] => 'An airship or dirigible is a type of aerostat or lighter-than-air aircraft which can navigate through the air under its own power.' [1] => 'Airship Italia was a semi-rigid airship used by Italian engineer Umberto Nobile in his second series of flights around the North Pole.' [2] => 'Airship Industries was a British manufacturers of modern non-rigid airships (blimps) active under that name from 1970 to the present day and controlled for part of that time by Alan Bond.' [3] => 'This is a redirect from a page that was merged into the target page. This page was kept as a redirect to the corresponding main page on the topic it names, in order to preserve this page\'s edit history after its content was merged into the target page\'s content.' ) [3] => Array( [0] => 'http://en.wikipedia.org/wiki/Airship' [1] => 'http://en.wikipedia.org/wiki/Airship_Italia' [2] => 'http://en.wikipedia.org/wiki/Airship_Industries' [3] => 'http://en.wikipedia.org/wiki/Airship_(Final_Fantasy)' ) )
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In an indexed array, we reference each item in the array by its index. Using the array above, if we wanted to make a variable with the title for the Wikipedia page "Airship", we would use
+										Element:code
+											$wiki_array[1][0]
+											. That basically tells PHP "Look in the array called
+										Element:code
+											$wiki_array
+											, go to index
+										Element:code
+											[1]
+											, and within that, find index
+										Element:code
+											[0]
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Building on that, if we want to make variables from the title, summary, and URL for the page "Airship".
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$title = $wiki_array[1][0] $summary = $wiki_array[2][0] $url = $wiki_array[3][0]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To do the same thing for the page "Airship Italia", it would look like this.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$title = $wiki_array[1][1] $summary = $wiki_array[2][1] $url = $wiki_array[3][1]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											See the pattern? All the titles are in index
+										Element:code
+											[1]
+											, all the summaries are in index
+										Element:code
+											[2]
+											, all the URLs are in index
+										Element:code
+											[3]
+											. Now that we understand how the results are coming back, we can start building the message that we're going to send into the webhook.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Designing your message
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The information you send into Slack and how it's formatted will directly effect how successful your integration is. No matter what the message is, you want to provide enough data for the user to take any action that might need, but not so much that it overwhelms the channel.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In the case of our Wikipedia search, the message is something that will be triggered by a human user so there shouldn't be too much concern about spamming a channel, at least from a technical standpoint.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Other good practices for bot messages in Slack:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Identify the bot that posted the message
+								. We'll do that with a custom username and a custom icon. These are both helpful for team members to see in the context of a Slack channel to help distinguish human messages from bot and integration messages.
+							Element:li
+							Element:strong
+								Identify the team member
+								that caused the message to be posted, if possible. This good etiquette for both the message poster and their fellow team members.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We've already set the username and icon webhook configuration page. Setting the name on the configuration page can be very useful for finding Slackipedia in your list of integrations if you have a lot of incoming webhooks.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For our message, we have two cases that we'll need to handle:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								In most cases, Wikipedia will return one page as its best result, along with as many other options as it can, up to your
+							Element:code
+								$search_limit
+								number. In those cases, we want to
+							Element:strong
+								display the title and summary of the page
+								, as well as a link to and then list the other options, in case the primary result wasn't what the user was looking for.
+							Element:li
+								If Wikipedia doesn't have one page that it considers the best for that search, it will return a link to a disambiguation page, along with a list of possible options. In that case, we need to make sure that's clear to the user.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Options for displaying data in a webhook message
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two basic places in a webhook message to display text.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											The
+										Element:code
+											text
+											parameter, which is the main body of the message. This is required
+										Element:em
+											unless
+											you send in
+										Element:code
+											attachments
+											.
+										Element:li
+											Attachments in incoming webhooks are not attachments in the sense of email attachments; they're not files. They're additional chunks of data that can help with formatting and clarifying the message that your webhook posts. You can have up to ten attachments per message.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We'll put the linked name of the person who performed the search in the main message
+										Element:code
+											text
+											field, along with the text they searched for.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The search results will go in an attachment. Because Wikipedia will always return more than one result, we'll put the primary result in the attachment's text field, then the other options in attachment fields, which will help differentiate them from the primary result. To keep the in-channel message from getting too long, we'll just display the link for each of those items.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Creating the webhook payload
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We'll use an
+							Element:code
+								if
+								statement to see if
+							Element:code
+								$wiki_response
+								contains anything, and if it does, we'll decode the JSON and put it into a PHP array, which is much faster and easier to work with than the JSON text string.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								if($wiki_response !== FALSE){ $wiki_array = json_decode($wiki_response);
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								While we're working with the array, we'll put our non-primary results into their own array called
+							Element:code
+								$other_options
+								so they'll be easier to work with. We're only going to display the link for each of these items, which are all in the third sub-array of
+							Element:code
+								$wiki_array
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								$other_options = $wiki_array[3];
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Since we only need the alternate options, we can use
+							Element:code
+								array_shift
+								to remove the first item from our new array. Finally, we'll set the number of alternate options as a variable that we can display later.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								$first_item = array_shift($other_options); $other_options_count = count($other_options);
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To identify who performed the Wikipedia search, we'll insert the linked username of the user, along with the text that was searched for. Both the user_id and user_name are part of the
+							Element:code
+								$_POST
+								variables that came over with the slash command. This will also be the start of the string that we'll send to Slack as the
+							Element:code
+								text
+								parameter of the main message.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								$message_text = "<@".$user_id."|".$user_name."> searched for *".$text."*.\n";
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Next we want to verify whether the primary search result is a disambiguation page or not. If the first item in
+							Element:code
+								$wiki_array[2]
+								contains the string "may refer to:", then we know it's a disambiguation page. (
+							Element:strong
+								Note:
+								This is not the greatest way to test something like this, because Wikipedia could conceivably change that text, but it's the only bit of info in our JSON object that identifies these pages.)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In PHP we can use the
+							Element:code
+								strpos()
+								function to check whether a specific string exists within any other string. That's useful in this case because we don't know what the value of
+							Element:code
+								$wiki_array[2][0]
+								is at this point.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								if (strpos($wiki_array[2][0],"may refer to:") !== false) { $disambiguation_check = TRUE; }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In keeping with my habit of obvious naming for later maintainability, we'll set some variables for the pieces of the primary result
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								$message_primary_title = $wiki_array[1][0]; $message_primary_summary = $wiki_array[2][0]; $message_primary_link = $wiki_array[3][0];
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								And finally we're ready to create the message and attachments that we'll send into Slack through the webhook.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To start with, if we got a reply from Wikipedia, but the reply was that nothing could be found, then
+							Element:code
+								$wiki_array[1]
+								will be empty, and that's all we need to send back through the webhook.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								if(count($wiki_array[1]) == 0){ $message_text = "Sorry! I couldn't find anything like *".$text."*.";
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If we did get results, then first we check to see whether we're dealing with a disambiguation page, and make the
+							Element:code
+								$message_text
+								reflect that.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								} else { if ($disambiguation_check == TRUE) { // see if it's a disambiguation page $message_text .= "There are several possible results for "; $message_text .= "*<".$message_primary_link."|".$text.">*.\n"; $message_text .= $message_primary_link; $message_other_title = "Here are some of the possibilities:"; } else { $message_text .= "*<".$message_primary_link."|".$message_primary_title.">*\n"; $message_text .= $message_primary_summary."\n"; $message_text .= $message_primary_link; $message_other_title = "Here are a few other options:"; }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then we loop through the other options, putting a line break between each one. Remember, we're only displaying the link for each of the other options, and Slack will autoformat a complete link, so all we have to do is send the link itself.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								foreach ($other_options as $value) { $message_other_options .= $value."\n"; } } // close the `if` where we check the count of `$wiki_array[1]` } // close the `if` where we verify that `$wiki_response` is not FALSE
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Building the final PHP Array for the Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The last step is to put all the variables we just made into a new array, and encode them as JSON to pass to the incoming webhook. (The first two items,
+										Element:code
+											username
+											and
+										Element:code
+											icon_url
+											are not strictly necessary because we already set those on the configuration page. I included them here because you
+										Element:em
+											can
+											use these to override the default settings of a webhook.)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$data = array( "username" => "Slackipedia", "channel" => $channel_id, "text" => $message_text, "mrkdwn" => true, "icon_url" => $icon_url, "attachments" => array( array( "color" => "#b0c4de", // "title" => $message_primary_title, "fallback" => $message_attachment_text, "text" => $message_attachment_text, "mrkdwn_in" => array( "fallback", "text" ), "fields" => array( array( "title" => $message_other_options_title, "value" => $message_other_options ) ) ) ) ); $json_string = json_encode($data); $slack_call = curl_init($slack_webhook_url); curl_setopt($slack_call, CURLOPT_CUSTOMREQUEST, "POST"); curl_setopt($slack_call, CURLOPT_POSTFIELDS, $json_string); curl_setopt($slack_call, CURLOPT_CRLF, true); curl_setopt($slack_call, CURLOPT_RETURNTRANSFER, true); curl_setopt($slack_call, CURLOPT_HTTPHEADER, array( "Content-Type: application/json", "Content-Length: " . strlen($json_string)) ); $result = curl_exec($slack_call); curl_close($slack_call);
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Final Touches
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To include your new slash command in the autocomplete list, check the box, then add a short description and a usage hint. This is especially useful if you need to create a longer command for your users. The description and usage hint will display in the autocomplete list.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Finally, enter the descriptive label. This is what will show on the list of slash commands in your integrations list page, so make it something relevant.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:ul
+							Element:li
+								Using Slack
+							Element:li
+							Element:a
+								Product
+							Element:li
+							Element:a
+								Pricing
+							Element:li
+							Element:a
+								Support
+							Element:li
+							Element:a
+								Slack Guides
+							Element:li
+							Element:a
+								Video Guides
+							Element:li
+							Element:a
+								App Directory
+							Element:li
+							Element:a
+								API
+							Element:ul
+							Element:li
+								Slack
+							Element:li
+							Element:a
+								Jobs
+							Element:li
+							Element:a
+								Customers
+							Element:li
+							Element:a
+								Developers
+							Element:li
+							Element:a
+								Events
+							Element:li
+							Element:a
+								Blog
+							Element:li
+							Element:a
+								Podcast
+							Element:li
+							Element:a
+								Slack Shop
+							Element:ul
+							Element:li
+								Legal
+							Element:li
+							Element:a
+								Privacy
+							Element:li
+							Element:a
+								Security
+							Element:li
+							Element:a
+								Terms of Service
+							Element:li
+							Element:a
+								Policies
+							Element:ul
+							Element:li
+								Handy Links
+							Element:li
+							Element:a
+								Download desktop app
+							Element:li
+							Element:a
+								Download mobile app
+							Element:li
+							Element:a
+								Brand Guidelines
+							Element:li
+							Element:a
+								Slack at Work
+							Element:li
+							Element:a
+								Status
+							Element:a
+							Element:ul
+							Element:li
+							Element:a
+								Contact Us
+							Element:li
+							Element:a
+							Element:li
+							Element:a

@@ -1,0 +1,1752 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Unfurling links in messages
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					As users post messages containing links into Slack, we attach simple previews, adding context and continuity to conversations. With a Slack app, you can customize these link unfurls further, turning brief reading experiences into something richer.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Bring your own content and make it thrive: actionable, interactive, and easily addressed by URL. Or just keep it simple and let your content stand vivaciously alone.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					There are at least two kinds of unfurls.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:p
+				Element:a
+					- When Slack encounters links your app is associated with, we send your app an event & your app decides what to do next with it. It's an exciting opportunity to start an interactive message workflow.
+				Element:strong
+					Slack app unfurling
+				Element:li
+				Element:p
+				Element:a
+					- When Slack spots a link, we crawl it, devour its metadata, and spit out a mostly uniform summary.
+				Element:strong
+					Classic unfurling
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If you've already read
+				Element:a
+					Everything you ever wanted to know about unfurling but were afraid to ask
+					, then you might not actually know
+				Element:em
+					everything
+					yet. Let's start with what's new.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Slack app unfurling
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Teach links new tricks by using the
+							Element:a
+								Events API
+								and
+							Element:a
+								Web API
+								together. Of course, you'll need your very own
+							Element:a
+								Slack app
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Don't know if you're ready to get started? Read our
+							Element:a
+								announcement about app unfurls
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Setting up your app
+							Element:li
+							Element:a
+								Handling event deliveries
+							Element:li
+							Element:a
+								Attaching content to messages
+							Element:li
+							Element:a
+								Making unfurls interactive
+							Element:li
+							Element:a
+								Locking unfurling down by requiring authentication
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here's how to unfurl links with the greatest of ease:
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Setting things up
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														If you haven't already, set your app up to support the Events API and subscribe to
+													Element:a
+														events.
+													Element:code
+														link_shared
+													Element:li
+														Using your app's
+													Element:em
+														Event Subscriptions
+														configuration page, register one or more domains your app will provide unfurling behavior for.
+													Element:li
+														Install your app into your Slack team if you haven't already. You'll need the
+													Element:code
+														links:read
+														and
+													Element:code
+														links:write
+														scopes to perform all operations.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Actually unfurling links
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Provide an inciting incident: have a team member post a message containing a fully-qualified URL matching the registered domain.
+													Element:li
+														Your app will receive a
+													Element:a
+														event, giving your app the hints it needs to its thing.
+													Element:code
+														link_shared
+													Element:li
+														Your app uses
+													Element:a
+														to attach custom unfurling behavior to the original message. Like a cherry on top of an already special sundae, you can make the messages interactive too.
+													Element:code
+														chat.unfurl
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Let's review that song and dance in more detail.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Readying your app
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You'll need a
+										Element:a
+											Slack app
+											and a server Slack can reach to follow along. If you want to develop locally, consider using a connection proxying tool as described in
+										Element:a
+											this tutorial
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Set your app up to use the
+										Element:a
+											Events API
+											. You'll also be using the
+										Element:a
+											Web API
+											— to unfurl links you'll need both the
+										Element:code
+											links:read
+											and
+										Element:code
+											links:write
+										Element:a
+											permission scopes
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Before installing your app, be sure and set up your event subscriptions and register your domain.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Subscribing to the right events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your app will be notified when a message containing a URL its interested in is posted to a channel it has access to. The vehicle for this notification is an Events API-only event type,
+										Element:a
+											link_shared
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These events do not contain the message itself, but instead just the info about the message you need to provide it unfurl behavior: the message's
+										Element:code
+											ts
+											value, the channel it appeared in, and which URLs it contained matching your registered domains.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two kinds of event subscriptions: "Team Events" and "Bot Events". Slack app unfurling only supports "Team Events." Subscriptions to "Team Events" yield events perspectival to the installing user.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your app will receive events as messages are posted in channels one or more installing users
+										Element:em
+											can
+											see — including all of a team's public channels but only the private channels and direct messages the installing users may access.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:i
+											Your app can't unfurl links it's not party to. If Person A installed the app, and Persons B & C are having a direct messaging each other, your app can't unfurl links in that conversation.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Registering your domain names
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Slack apps can act as unfurlers for up to five registered domains. Register your domains on the
+										Element:em
+											Event Subscriptions
+											page of your app's configuration.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each domain you submit will be matched to URLs by a few heuristics:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Domains must have a TLD and cannot be a TLD alone (
+										Element:code
+											example.com
+											and
+										Element:code
+											another.example.com
+											are valid,
+										Element:code
+											example
+											is not and nor is
+										Element:code
+											.com
+											).
+										Element:li
+											IP addresses are not domains and cannot be matched.
+										Element:li
+											All
+										Element:em
+											additive
+											subdomains and paths to the domain you provide will be considered matches.
+										Element:li
+											By including a subdomain in your domain, you
+										Element:em
+											exclude
+											the
+										Element:em
+											naked
+											domain.
+										Element:li
+											When users mention links to one of your domains, it must be fully qualified with a protocol (
+										Element:code
+											http://
+											or
+										Element:code
+											https://
+											). Slack will not unfurl decidedly ambiguous domain and URL mentions.
+										Element:li
+											When users mention links and they contain an explicit port (like
+										Element:code
+											https://example.com:23/skidoo
+											), Slack will still consider it a clean match to a registered
+										Element:code
+											example.com
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here's another way of looking at the matching rules:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:th
+											Domain
+										Element:th
+											URL in a message
+										Element:th
+											Matches?
+										Element:tr
+										Element:td
+											example.com
+										Element:td
+											https://example.com
+										Element:td
+											Yes
+										Element:tr
+										Element:td
+											example.com
+										Element:td
+											http://www.example.com
+										Element:td
+											Yes
+										Element:tr
+										Element:td
+											example.com
+										Element:td
+											example.com
+										Element:td
+											No
+										Element:tr
+										Element:td
+											example.com
+										Element:td
+											https://example.com/some/path?yes=indeed
+										Element:td
+											Yes
+										Element:tr
+										Element:td
+											example.com
+										Element:td
+											http://another.example.com/some/other/path?no=exit
+										Element:td
+											Yes
+										Element:tr
+										Element:td
+											example.com
+										Element:td
+											https://someotherexample.com
+										Element:td
+											No
+										Element:tr
+										Element:td
+											another.example.com
+										Element:td
+											https://another.example.com
+										Element:td
+											Yes
+										Element:tr
+										Element:td
+											another.example.com
+										Element:td
+											https://example.com
+										Element:td
+											No
+										Element:tr
+										Element:td
+											example
+										Element:td
+											http://example
+										Element:td
+											No
+										Element:tr
+										Element:td
+											127.0.0.1
+										Element:td
+											https://127.0.0.1
+										Element:td
+											No
+										Element:tr
+										Element:td
+											.com
+										Element:td
+											http://example.com
+										Element:td
+											No,
+										Element:br
+											No,
+										Element:br
+											No.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:i
+										Element:strong
+											Domain etiquette
+											: You should own these domains and if you don't, you must follow all the terms, conditions, rules, policies, proclamations, warnings, and edicts around a domain. Be courteous, be kind, be helpful.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Be sure and leave out the protocol part of a URL when registering your domain. Discard any
+										Element:code
+											http://
+											or
+										Element:code
+											https://
+											or path or query string components, please.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, Unicode domains are not yet supported.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How installation pairs with domain registration
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Before proceeding, make sure your Slack app has been installed on the team you're working against and that installation included the
+										Element:code
+											links:read
+											and
+										Element:code
+											links:write
+											scopes (or the
+										Element:code
+											bot
+											scope if that's more relevant to your subscriptions).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Adding or removing domains
+										Element:strong
+											requires re-installation of your Slack app
+											. Every time an app is installed, the installing user is agreeing to those specifically mentioned domains.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Handling event deliveries
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You've set everything up: your
+										Element:a
+											Slack app
+											, the
+										Element:a
+											Events API
+											, a
+										Element:a
+											event subscription, and you've registered your domains. You've installed your Slack app on a team, specifically requesting the scopes you needed and
+										Element:code
+											link_shared
+										Element:em
+											after
+											you've registered your domains.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You have the knowledge. You have the back end. You have the power. You are ready to receive and react to
+										Element:code
+											link_shared
+											event deliveries.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a user shares a link in a channel that matches your criteria, you'll receive an event shaped like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "token": "XXYYZZ", "team_id": "TXXXXXXXX", "api_app_id": "AXXXXXXXXX", "event": { "type": "link_shared", "channel": "Cxxxxxx", "user": "Uxxxxxxx", "message_ts": "123456789.9875", "links": [ { "domain": "example.com", "url": "https://example.com/12345" }, { "domain": "example.com", "url": "https://example.com/67890" }, { "domain": "another-example.com", "url": "https://yet.another-example.com/v/abcde" } ] }, "type": "event_callback", "authed_users": [ "UXXXXXXX1", "UXXXXXXX2" ], "event_id": "Ev08MFMKH6", "event_time": 123456789 }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For detail on most of these fields, consult the
+										Element:a
+											Events API field guide
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You'll want to pay extra special attention to these fields while working with
+										Element:code
+											link_shared
+											events:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											token
+											- As with all
+										Element:a
+											Events API
+											events, this value is a shared secret between you and Slack. You'll find it in your
+										Element:em
+											App Credentials
+											section of the
+										Element:em
+											Basic Information
+											app configuration page. Compare this value with the one given to you by Slack and only process the event if they match.
+										Element:li
+										Element:code
+											event
+											- this is where all the stuff you're looking for lurks. It's an object.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's crack that event open:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:th
+											Field
+										Element:th
+											Type
+										Element:th
+											Required?
+										Element:th
+											Description
+										Element:tr
+										Element:td
+										Element:code
+											type
+										Element:td
+											string
+										Element:td
+											Yes
+										Element:td
+											The specific name of the event described by its adjacent fields. This field will always be
+										Element:code
+											link_shared
+											for this flavor of unfurling event.
+										Element:p
+											Example:
+										Element:code
+											link_shared
+										Element:tr
+										Element:td
+										Element:code
+											channel
+										Element:td
+											string
+										Element:td
+											Yes
+										Element:td
+											The scene of the crime! This is where the link was mentioned. It's a channel ID, which means it might begin with
+										Element:code
+											C
+											for a public channel,
+										Element:code
+											D
+											for a direct message. But really, your app shouldn't care what it starts with. You'll need this mostly opaque value when using
+										Element:a
+											to attach your content & behavior to a message.
+										Element:code
+											chat.unfurl
+										Element:p
+											Examples:
+										Element:code
+											C123456
+											,
+										Element:code
+											D123456
+										Element:tr
+										Element:td
+										Element:code
+											user
+										Element:td
+											string
+										Element:td
+											Yes
+										Element:td
+											The user ID belonging to the user that posted the message mentioning the link. If the content you unfurl requires some kind of authority to post in a channel, compare this value with your explicitly authenticated records before proceeding. See
+										Element:a
+											authenticated unfurls
+											for more info.
+										Element:p
+											Examples:
+										Element:code
+											U123456
+											,
+										Element:code
+											W123456
+											,
+										Element:code
+											B123456
+										Element:tr
+										Element:td
+										Element:code
+											message_ts
+										Element:td
+											string
+										Element:td
+											Yes
+										Element:td
+											Almost all Slack messages have their own kind of quasi-timetsamp quasi-ID value called
+										Element:code
+											ts
+											. You'll find the message that mentioned the link's
+										Element:code
+											ts
+											value here and you need to provide it as part of
+										Element:a
+											, along with
+										Element:code
+											chat.unfurl
+										Element:code
+											channel
+											.
+										Element:tr
+										Element:td
+										Element:code
+											links
+										Element:td
+											array
+										Element:td
+											Yes
+										Element:td
+											A collection of key/value pairs indicating the specific matching domains and URLs referenced in the invoking message. Each array item is a simple hash containing two fields:
+										Element:ul
+										Element:li
+										Element:code
+											domain
+											- a domain name you registered that is triggering this link match. Examples:
+										Element:code
+											example.com
+											,
+										Element:code
+											www.example.com
+											,
+										Element:li
+										Element:code
+											url
+											- the URL posted by the user, complete with protocol, path, and any query parameters. Example:
+										Element:code
+											https://example.com/fortune/private
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you've received this event it's time to do decide what to do next. Most likely, you'll use those
+										Element:code
+											url
+											values to look up what to display to the user. Maybe you'll make an API call to another service. Maybe you'll just reference your app's own base of knowledge and never even hit another service at all.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Be sure and respond with a friendly HTTP 200 OK to the event as quickly as possible. Do not wait to wrestle an unfurl with
+										Element:a
+											before telling Slack you received the event. You'll probably want to enqueue behavior like this.
+										Element:code
+											chat.unfurl
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Consider this
+										Element:code
+											link_shared
+											event a kind of ping. Now it's up to you to pong with
+										Element:code
+											chat.unfurl
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Attaching content with
+										Element:code
+											chat.unfurl
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											Web API
+											method
+										Element:a
+											takes a message identifier, a pointer to the channel where it was mentioned, and your wonderful content.
+										Element:code
+											chat.unfurl
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											links:write
+											scope requested when users install your
+										Element:a
+											Slack app
+											grants it the ability to leverage user tokens to attach additional content to messages mentioning your registered domains.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sorry,
+										Element:a
+											bot user
+											tokens cannot use
+										Element:code
+											chat.unfurl
+											directly. You must still request the
+										Element:code
+											links:write
+											permission scope and use the installing user's token instead.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Most of the
+										Element:code
+											chat.unfurl
+											parameters are required:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											token
+											- the user token granted to you when installing your app for the team you're acting on behalf of.
+										Element:li
+										Element:code
+											channel
+											- the channel ID belonging to where the message mentioning your links happened
+										Element:li
+										Element:code
+											ts
+											- the unique timestamp / message ID belonging to the message mentioning your links
+										Element:li
+										Element:code
+											unfurls
+											- a URL-encoded string on JSON, detailing the unfurl attachments you'll provide for each mentioned URL. See
+										Element:a
+											below
+											.
+										Element:li
+										Element:code
+											user_auth_required
+											- (
+										Element:em
+											optional
+											) require the user posting the link to authenticate with your app first. See
+										Element:a
+											authenticated unfurls
+											below.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The provided
+										Element:code
+											ts
+											value must correspond to a message in the specified
+										Element:code
+											channel
+											. Additionally, the message must contain a fully-qualified URL pointing to a domain that is already registered and associated with your Slack app. All of these things must be true to use
+										Element:code
+											chat.unfurl
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											The particularities of the
+										Element:code
+											unfurls
+											parameter
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The third important parameter to provide to
+										Element:code
+											chat.unfurl
+											is
+										Element:code
+											unfurls
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											unfurls
+											parameter expects a URL-encoded string of JSON. Unlike
+										Element:a
+											's
+										Element:code
+											chat.postMessage
+										Element:code
+											attachments
+											parameter, it does not expect a JSON array but instead, a hash keyed on the specific URLs you're offering an unfurl for.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each defined URL may have a
+										Element:a
+											single attachment
+											, including message buttons. All the typical formatting available to you in message attachments hold true, except you can have only one per URL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You could send the parameter very simple JSON like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "https://example.com/": { "text": "Every day is the test." } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And then prepare that for a
+										Element:code
+											unfurls
+											parameter like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											unfurls=%7B%22https%3A%2F%2Fexample.com%2F%22%3A%7B%22text%22%3A%22Every%20day%20is%20the%20test.%22%7D%7D
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sending it along with your channel ID and message
+										Element:code
+											ts
+											like so:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST /api/chat.unfurl?token=xoxa-1234abcdefghijklmnop channel=C123456&ts=123456789.9875&unfurls=%7B%22https%3A%2F%2Fexample.com%2F%22%3A%7B%22text%22%3A%22Every%20day%20is%20the%20test.%22%7D%7D
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your attempt to attach your unfurl to the message is successful, you'll be the proud winner of a rather generic HTTP 200 OK response:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "ok": true }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your work here is done, unless you're conducting
+										Element:a
+											interactive message
+											operations.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Of course, there are error responses too. You'll receive them if you forget to include
+										Element:code
+											ts
+											,
+										Element:code
+											channel
+											, and properly-formed
+										Element:code
+											unfurls
+											attachments. See the errors section of
+										Element:a
+											for more info.
+										Element:code
+											chat.unfurl
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That's it. You made a link unfurl and added to the complexity of the universe in your own way.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Making unfurls interactive
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Since the attachments you provide as link unfurls are just like other Slack app-enabled
+										Element:a
+											message attachments
+											, you can make them interactive with
+										Element:a
+											message buttons
+											too.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's build on the knowledge gained so far and, provided you've set yourself up to use message buttons already, let's examine a more complicated example.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's say your app received an event detailing a match for
+										Element:code
+											https://figment.example.com/imagine
+											. This is a service you provide to help stimulate the imagination. At this specific URL, you generate a random imagination exercise to stimulate the working mind.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This imagination machine might construct its JSON hash response to something resembling this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "https://figment.example.com/imagine": { "title": "Let's pretend we're on a rocket ship to Neptune", "text": "The planet Neptune looms near. What do you want to do?", "callback_id": "imagine_001", "attachment_type": "default", "fallback": "Pretend your rocket ship is approaching Neptune. What do you want to do next?", "actions": [ { "name": "decision", "value": "orbit", "style": "primary", "text": "Orbit", "type": "button" }, { "name": "decision", "value": "land", "text": "Attempt to land", "type": "button" }, { "name": "decision", "value": "self_destruct", "text": "Self destruct", "type": "button", "style": "danger", "confirm": { "title": "Are you sure you want to self destruct?", "text": "Maybe you should attempt to land instead. You might crash.", "ok_text": "Yes, self destruct", "dismiss_text": "No thanks" } } ] } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And then URL encode that JSON and stuff it into one extra long
+										Element:code
+											unfurls
+											parameter, along with your
+										Element:code
+											channel
+											and
+										Element:code
+											ts
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST /api/chat.unfurl?token=xoxa-1234abcdefghijklmnop channel=C123456&ts=123456789.9875&unfurls=%7B%22https%3A%2F%2Ffigment.example.com%2Fimagine%22%3A%20%7B%22title%22%3A%20%22Let%27s%20pretend%20we%27re%20on%20a%20rocket%20ship%20to%20Neptune%22%2C%22text%22%3A%20%22The%20planet%20Neptune%20looms%20near.%20What%20do%20you%20want%20to%20do%3F%22%2C%22callback_id%22%3A%20%22imagine_001%22%2C%22attachment_type%22%3A%20%22default%22%2C%22fallback%22%3A%20%22Pretend%20your%20rocket%20ship%20is%20approaching%20Neptune.%20What%20do%20you%20want%20to%20do%20next%3F%22%2C%22actions%22%3A%20%5B%7B%22name%22%3A%20%22decision%22%2C%22value%22%3A%20%22orbit%22%2C%22style%22%3A%20%22primary%22%2C%22text%22%3A%20%22Orbit%22%2C%22type%22%3A%20%22button%22%7D%2C%7B%22name%22%3A%20%22decision%22%2C%22value%22%3A%20%22land%22%2C%22text%22%3A%20%22Attempt%20to%20land%22%2C%22type%22%3A%20%22button%22%7D%2C%7B%22name%22%3A%20%22decision%22%2C%22value%22%3A%20%22self_destruct%22%2C%22text%22%3A%20%22Self%20destruct%22%2C%22type%22%3A%20%22button%22%2C%22style%22%3A%20%22danger%22%2C%22confirm%22%3A%20%7B%22title%22%3A%20%22Are%20you%20sure%20you%20want%20to%20self%20destruct%3F%22%2C%22text%22%3A%20%22Maybe%20you%20should%20attempt%20to%20land%20instead.%20You%20might%20crash.%22%2C%22ok_text%22%3A%20%22Yes%2C%20self%20destruct%22%2C%22dismiss_text%22%3A%20%22No%20thanks%22%7D%7D%5D%7D%7D%7D
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now your interactive unfurl is firmly attached to the originating message, complete with buttons.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Almost everything you already know about
+										Element:a
+											message buttons
+											is true for these kind of buttons too.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Almost everything. Read on.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Alternate action URL invocation behavior
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a user decides to click on one of your buttons, we'll send your action URL an invocation payload just as usual.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The only catch is that the
+										Element:code
+											original_message
+											field will only contain the message attachment your app added when providing the unfurl. You still can't see the entire message.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here's an example invocation:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "actions": [ { "name": "decision", "type": "button", "value": "self_destruct" } ], "callback_id": "response_123", "team": { "id": "T123456", "domain": "example" }, "channel": { "id": "C123456", "name": "generators" }, "user": { "id": "U061F7AUR", "name": "exemplar" }, "action_ts": "123456791.2111", "message_ts": "123456789.9875", "attachment_id": "1", "token": "xxx", "is_app_unfurl": true, "original_message": { "attachments": [ { "callback_id": "imagine_001", "fallback": "Pretend your rocket ship is approaching Neptune. What do you want to do next?", "text": "The planet Neptune looms near. What do you want to do?", "title": "Let's pretend we're on a rocket ship to Neptune", "id": 1, "actions": [ { "name": "decision", "value": "orbit", "style": "primary", "text": "Orbit", "type": "button" }, { "name": "decision", "value": "land", "text": "Attempt to land", "type": "button" }, { "name": "decision", "value": "self_destruct", "text": "Self destruct", "type": "button", "style": "danger", "confirm": { "title": "Are you sure you want to self destruct?", "text": "Maybe you should attempt to land instead. You might crash.", "ok_text": "Yes, self destruct", "dismiss_text": "No thanks" } } ], "bot_id": "B123456", "app_unfurl_url": "https://figment.example.com/imagine", "is_app_unfurl": true } ] }, "response_url": "https://hooks.slack.com/actions/T123456/XXXX/XXXX" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Looks like the user decided for the ship to self destruct after all.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here's a closer look at the most relevant fields in this flavor of interactive message:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:th
+											Field
+										Element:th
+											Type
+										Element:th
+											Required?
+										Element:th
+											Description
+										Element:tr
+										Element:td
+										Element:code
+											is_app_unfurl
+										Element:td
+											boolean
+										Element:td
+											No
+										Element:td
+											When set to
+										Element:code
+											true
+											, this invocation is related to a Slack app unfurl your app is registered to handle. When absent or
+										Element:code
+											false
+											, it's a standard message action.
+										Element:tr
+										Element:td
+										Element:code
+											original_message
+										Element:td
+											object
+										Element:td
+											No
+										Element:td
+											Contains attachments relevant to link unfurling from the original message that started this flow.
+										Element:a
+											See below.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Inner attachment fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Within an action invocation's
+										Element:code
+											original_message
+											field you'll find an array containing only the attachments relevant to your unfurling behavior — in fact they are the
+										Element:em
+											same
+											attachments you provided in the original
+										Element:a
+											call that initiated this workflow. But we've decorated them with some helpful fields.
+										Element:code
+											chat.unfurl
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each attachment field in
+										Element:code
+											original_message
+											's
+										Element:code
+											attachments
+											array contains:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:th
+											Field
+										Element:th
+											Type
+										Element:th
+											Required?
+										Element:th
+											Description
+										Element:tr
+										Element:td
+										Element:code
+											app_unfurl_url
+										Element:td
+											string
+										Element:td
+											No
+										Element:td
+											This is the URL that sparked this flurry of activity. Tie this to a URL received in a
+										Element:a
+											event you processed.
+										Element:code
+											link_shared
+										Element:tr
+										Element:td
+										Element:code
+											is_app_unfurl
+										Element:td
+											boolean
+										Element:td
+											No
+										Element:td
+											When set to
+										Element:code
+											true
+											, this specific attachment is related to a Slack app unfurl your app is registered to handle. When absent or
+										Element:code
+											false
+											, it's a standard message attachment.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											From this point forward, you can use the
+										Element:code
+											response_url
+											and all the other tools in the interactive message toolbox to evolve this workflow. What next will befall our intrepid interstellar travelers?
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authenticated unfurls
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Of course, not all links are wild and free, full of content anyone can see. Some links require you to pay the piper or validate your identity and authority to access.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We provide a helpful way to ask the user posting a link to your service to authenticate before proceeding with an unfurl the whole channel can see.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you react to a
+										Element:code
+											link_shared
+											event with a call to
+										Element:code
+											chat.unfurl
+											with the
+										Element:code
+											user_auth_required
+											parameter set to
+										Element:code
+											true
+											, instead of displaying custom unfurl attachments, Slack displays an ephemeral message encouraging the user to install your app:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By selecting
+										Element:code
+											Install from App Directory
+											, users will be taken to your application's installation or configuration page — even if it's not part of the app directory. That's confusing, we know. We'll keep making the installation steps in this sequence more intuitive.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Unless you're building an
+										Element:a
+											internal integration
+											, you'll likely want to provide an
+										Element:a
+											Add to Slack
+											on your app's home page that requests the
+										Element:code
+											links:read
+											and
+										Element:code
+											links:write
+											scopes.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This way you use the OAuth sequence to validate the authority of the team member to unfurl privileged content within a channel for everyone to see. During the callback step where the user returns to your website, you would capture any needed additional information about the user about their identity on your service. What you need to do is up to you and the context of your content. Avoid surprising users by doing something unexpected.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After installation, the next time the user posts a message mentioning your links (or even retroactively), you can provide unfurl attachments.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Tips, tricks, and warnings
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Subtlety makes life secretly spicy. In case you missed it:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Links will only unfurl if the message they appear in contains a fully-qualified URL. Yes, the protocol like
+										Element:code
+											http
+											or
+										Element:code
+											https
+											is required.
+										Element:li
+											As you register additional domains, teams will need to install your Slack app again for changes to take effect on that team.
+										Element:li
+											App unfurls are a terrific way to build
+										Element:a
+											interactive workflows
+											for your
+										Element:a
+											internal integrations
+											.
+										Element:li
+											Interactive message action invocations only include an excerpt of the
+										Element:code
+											original_message
+											, relevant to the links you provided unfurling behavior for.
+										Element:li
+											It's best to only register domains that you own, but if you're providing wrapper functionality for domains owned by others, you must follow all the terms, conditions, and policies declared by the owner. Even if that means you can't provide app unfurl functionality for that domain.
+										Element:li
+										Element:code
+											link_shared
+											events don't contain the original message; your app just learns about any links that match your registered domains.
+										Element:li
+											Everyone in a channel can see your app's unfurls. Using
+										Element:a
+											authenticated unfurls
+											only requires authentication to
+										Element:em
+											unfurl
+											, but still broadcasts those unfurls to a conversation.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+										Element:em
+											Imagine the figure of a fiddlehead fern frond unfurling, its universe within unraveled— revealed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to Slack app unfurling, we generate simpler content previews by default. Learn more about classic unfurling below.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Classic unfurling
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If a team doesn't have a Slack app handler for a specific domain, unfurling will fall back to classic behavior: Slack crawls the URL, looks for common OpenGraph and Twitter Card metadata, and renders some micro-approximation of the content. For some domains, Slack even provides its own extra bells and whistles.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When deciding whether to unfurl a link we consider the type of content that has been linked to. We treat "media" -- that is images, tweets, videos, or audio -- differently to pages that are primarily text-content.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here are some examples of media content:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								http://www.youtube.com/watch?v=wq1R93UMqlk
+							Element:li
+							Element:a
+								http://www.flickr.com/photos/karstenmay/11787125913/
+							Element:li
+							Element:a
+								https://twitter.com/tweetsoutloud/status/416692366037094400
+							Element:li
+							Element:a
+								http://imgs.xkcd.com/comics/regex_golf.png
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								While these are examples of text-based content:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								http://www.cnn.com/2014/01/06/tech/web/ces-unveiled/index.html?hpt=hp_c3
+							Element:li
+							Element:a
+								https://slack.com/
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default we unfurl all links in any messages posted by users. For messages posted via
+							Element:a
+								incoming webhooks
+								or
+							Element:a
+								the chat.postMessage API method
+								, we will unfurl links to media, but not other links.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you'd like to override these defaults on a per-message basis you can pass
+							Element:code
+								unfurl_links
+								or
+							Element:code
+								unfurl_media
+								while posting that message.
+							Element:code
+								unfurl_links
+								applies to text based content,
+							Element:code
+								unfurl_media
+								applies to media based content. These flags are mutually exclusive, the
+							Element:code
+								unfurl_links
+								flag has no effect on media content.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There is one notable exception to these rules: we never unfurl links where the label is a complete substring of your URL minus the protocol. This is so a paragraph of text can contain domain names or abbreviated URLs that are treated as a simple reference, and not a link to be unfurled. For example, if a message contains a link to
+							Element:code
+								http://example.com
+								with the label
+							Element:code
+								example.com
+								then that link will not be unfurled. There are more examples of this rule below.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that our servers need to fetch every URL in a message in order to determine what kind of content it references. If you'd like to stop this from happening, set both
+							Element:code
+								unfurl_links
+								and
+							Element:code
+								unfurl_media
+								to false when posting the message.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Want to know more about unfurling? Find out
+							Element:a
+								.
+							Element:strong
+								everything you ever wanted to know about unfurling but were afraid to ask
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Examples
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All of these examples are for incoming webhooks, but similar rules apply to our other APIs:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														api.slack.com
+														is text-based, so this link will not unfurl:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "text": "<https://api.slack.com>" }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Passing
+													Element:code
+														"unfurl_links": true
+														means the link will unfurl:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "text": "<https://api.slack.com>", "unfurl_links": true }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This xkcd link is an image, so the content will be unfurled by default:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "text": "<http://imgs.xkcd.com/comics/regex_golf.png>" }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We can then disable that using the
+													Element:code
+														unfurl_media
+														flag:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "text": "<http://imgs.xkcd.com/comics/regex_golf.png>", "unfurl_media": false }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Even though
+													Element:code
+														unfurl_links
+														is true, this link has a label that matches the URL minus the protocol, so the link
+													Element:strong
+														will not
+														unfurl:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "text": "<https://api.slack.com|api.slack.com>", "unfurl_links": true }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The label for this link does not match the URL minus the protocol, so this link
+													Element:strong
+														will
+														unfurl:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "text": "<https://api.slack.com|Slack API>", "unfurl_links": true }
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Featuring artwork by
+													Element:a
+														Peter Ryan
+														.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Related Articles
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Sample code by Slack
+							Element:span
+								Learn how to make unfurls interactive with node.js and node-slack-sdk
+							Element:li
+							Element:a
+								Slack platform blog (medium.com)
+							Element:span
+								Everything you ever wanted to know about unfurling but were afraid to ask /or/ How to make your site previews look amazing in Slack
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:ul
+							Element:li
+								Using Slack
+							Element:li
+							Element:a
+								Product
+							Element:li
+							Element:a
+								Pricing
+							Element:li
+							Element:a
+								Support
+							Element:li
+							Element:a
+								Slack Guides
+							Element:li
+							Element:a
+								Video Guides
+							Element:li
+							Element:a
+								App Directory
+							Element:li
+							Element:a
+								API
+							Element:ul
+							Element:li
+								Slack
+							Element:li
+							Element:a
+								Jobs
+							Element:li
+							Element:a
+								Customers
+							Element:li
+							Element:a
+								Developers
+							Element:li
+							Element:a
+								Events
+							Element:li
+							Element:a
+								Blog
+							Element:li
+							Element:a
+								Podcast
+							Element:li
+							Element:a
+								Slack Shop
+							Element:ul
+							Element:li
+								Legal
+							Element:li
+							Element:a
+								Privacy
+							Element:li
+							Element:a
+								Security
+							Element:li
+							Element:a
+								Terms of Service
+							Element:li
+							Element:a
+								Policies
+							Element:ul
+							Element:li
+								Handy Links
+							Element:li
+							Element:a
+								Download desktop app
+							Element:li
+							Element:a
+								Download mobile app
+							Element:li
+							Element:a
+								Brand Guidelines
+							Element:li
+							Element:a
+								Slack at Work
+							Element:li
+							Element:a
+								Status
+							Element:a
+							Element:ul
+							Element:li
+							Element:a
+								Contact Us
+							Element:li
+							Element:a
+							Element:li
+							Element:a

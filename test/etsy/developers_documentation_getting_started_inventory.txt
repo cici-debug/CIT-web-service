@@ -1,0 +1,1603 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Working with Inventory (Developer Preview)
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Updates
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											6 December 2016
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We've reached
+										Element:a
+											Phase 3
+											! Most of the planned endpoints are now live for developers using
+										Element:a
+											Provisional Access
+											keys (not "Full Access" keys!) on their own accounts, once they've joined the
+										Element:a
+											Seller Tools Development Prototype
+											group. Accounts in this group will also have access to all the new Inventory Management tools when editing listings on the web. We'll send invitations to join the prototype to developers who have recently made API requests editing listings, but any developers should feel free to request access.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This API should be fairly stable, but code is still being worked on and there may be bugs. If you find bugs, or have feedback on the API, please let us know in the Prototype group.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Where API endpoints are now live, the draft documentation below links to the live documentation.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We’ll soon be launching new tools for all sellers to allow them to represent their inventory more accurately in their listings, giving them more control over how they set their prices and manage their stock.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We’ll also be rolling out additional tools around “structured data” - ways to allow sellers to describe their items in ways that have a consistent meaning to buyers (and - importantly - to our search systems).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								These updates are exciting, but they do have implications for the Open API and possibly for you as a developer!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This document will cover inventory management terminology and concepts, the forthcoming changes to the API (new endpoints, changed endpoints, and deprecated endpoints), example use cases and how to tackle them, and our provisional timeline and process for rolling this out.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Before we get into that, a (very brief) summary of what is going to change:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Price and quantity will no longer be editable on the listing.
+							Element:li
+								Price and quantity on the listing will be guideline figures.
+							Element:li
+								Variations will no longer be writable.
+							Element:li
+								A new “inventory” data structure will represent available stock options, and their quantities and prices.
+							Element:li
+								New endpoints will allow developers to access and edit structured data attributes on listings.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What is inventory?
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Put simply, inventory is the stuff a seller has to sell. This may be actual ready-to-go stock, or it may be items the seller is able to make to order given the materials on hand (and their capacity for making them).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Products
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Historically, these have been represented on Etsy as a
+										Element:a
+											Listing
+											. We introduced
+										Element:a
+											variations
+											to allow sellers to express different options for a given listing but that has had some limitations.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With the work on inventory management, we’re introducing a separation between a listing and the actual
+										Element:em
+											things
+											it represents.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Imagine I’m a supply seller, and I have a listing for a glass bead. I sell them in red and blue. I also have the same bead in 6mm and 10mm diameters. The listing actually represents four different physical things - red 6mm bead, blue 6mm bead, red 10mm bead, and blue 10mm bead. We refer to these individual things as
+										Element:strong
+											products
+											. A product is the actual thing a seller ships.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You’ll notice the parallels here between products and variations - we’re maintaining variations in the user interface for sellers and just storing and handling them in a new way on the back end. For the time being, we still have the restriction of a maximum of two variations, so products can have at most two different properties. With no variations, you have a single product. With one variation, you have a product for each option in that variation. With two variations, you have products for each combination of options.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each product can be given an optional product identifier (we’re labelling it “SKU”) so that sellers can link products on Etsy back to their physical inventory tracking process if they wish.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Offerings
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An
+										Element:strong
+											offering
+											is an instance of a product with a specific price and quantity. Right now, there's a 1:1 mapping of products to offerings, but splitting the two allows us some room for future expansion, hopefully without making disruptive changes to the API.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By having price and quantity on offerings, we give sellers a lot more flexibility in how they specify what they have for sale. For example, maybe I got a good deal on the 6mm beads and I’d like to pass that on to my buyers, but the 10mm ones were more pricey. I have 1,000 each of both sizes of the red beads, but for some reason the manufacturer is having serious trouble with the blue ones. I’m down to 100 in the 6mm, and I’m out of the 10mm. That’s impossible to express with variations as they currently are! Sellers are obliged to create multiple listings or use other workarounds to handle it, and may run the risk of selling things they don’t have (or not selling as much of some things as they could). With this new approach, each product can be managed separately, simplifying the process of listing items considerably.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Attributes
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We allow listings to have metadata as
+										Element:strong
+											attributes
+											- in other words, things that apply to all products represented by the listing. In our bead example, we might specify that the material is “glass”.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There will be endpoints in the API to allow you to determine what attributes are available for a given listing, and what sorts of values can be set for them.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Structured data
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The available attributes and product properties for a given listing - and their semantics - depend on the category that the seller has chosen for them. A glass bead might have a diameter, whereas a shoe would not. A shoe would have a size, but the scale and meaning of the size (e.g. “US women’s 10”) would be different from the size of a t-shirt (e.g. “Men’s XL”).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The values that sellers can assign to their products’ properties and listings' attributes may now be
+										Element:em
+											structured
+											- in other words they can express specific
+										Element:em
+											meaning
+											. In our bead example, “6mm” and “10mm” have meaning - they represent the physical diameter of the bead. Given the value and the scale, we can say things about the item - for example, if I’m looking for a 1cm bead that 10mm bead would be perfect, whereas if I need something smaller than 0.25” then the 6mm bead would be the one. Similarly if we know that “US women’s 10” refers to a specific shoe size, we can help buyers find your item no matter what scale they are using to find a shoe on Etsy by translating “US women’s 10” into the buyer’s preferred scale.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Structured data will allow us to provide buyers with more meaningful search and browsing experiences, and we’re really excited to be opening it up to our sellers.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								The Inventory Management API
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following forms a baseline of the changes we will roll out to support the launch of Inventory Management to all our sellers. There may be further enhancements to the API as we add new features but they should be backwards-compatible with what is described here. As such, these are what we believe the minimum endpoints needed to build useful tools around inventory (see use cases later in this document). If there are things you find particularly difficult or impossible to achieve,
+							Element:a
+								please let us know
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Listings
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Reading listings
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In returned
+													Element:a
+														Listing
+														resources,
+													Element:code
+														price
+														and
+													Element:code
+														quantity
+														will represent the minimum possible price given all available offerings, and quantity will be the sum of all available offerings. Specific prices and quantities will have to be retrieved from Inventory endpoints.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														An Inventory association will be added.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Writing listings
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For convenience, when creating listings, passed price and quantity will be used to create a single product and offering record for the listing. If more complex inventory is needed, create the listing with the state ‘draft’ and then use Inventory endpoints to replace these with more products and offerings before activating the listing.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When editing listings, changes to price and quantity will be ignored. Use
+													Element:a
+														Inventory
+														endpoints to update products and offerings.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When creating a listing, it is possible to supply either a
+													Element:code
+														category_id
+														or a
+													Element:code
+														taxonomy_id
+														. If a listing doesn't have a
+													Element:code
+														taxonomy_id
+														, it can't have any structured data attributes. All listings will in time need a
+													Element:code
+														taxonomy_id
+														- you are strongly encouraged to move your code over to use
+													Element:code
+														taxonomy_id
+														and the
+													Element:a
+														Taxonomy
+														endpoints as soon as possible. (An exact schedule for deprecating the
+													Element:code
+														category_id
+														field is still being determined.)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Variations
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Read variations
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You will still be able to read variations through the API (at least for the time being), although prices will be incorrect when prices depend on multiple properties (the
+													Element:code
+														price_diff
+														will be set to zero). It is recommended that you use
+													Element:a
+														Inventory
+														endpoints in place of the Variations endpoints.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Write variations
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following write endpoints will be deprecated:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:code
+														createListingVariations
+													Element:li
+													Element:code
+														updateListingVariations
+													Element:li
+													Element:code
+														createListingVariation
+													Element:li
+													Element:code
+														updateListingVariation
+													Element:li
+													Element:code
+														deleteListingVariation
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Variations will be inferred from products created in Inventory endpoints.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											PropertyValue
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fields
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[6 December 2016] See
+													Element:a
+														PropertyValue fields
+														.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Money
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fields
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[6 December 2016] See
+													Element:a
+														Money fields
+														.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Product
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fields
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[6 December 2016] See
+													Element:a
+														ListingProduct fields
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Methods
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Method Name
+													Element:td
+													Element:code
+														updateProduct
+													Element:tr
+													Element:th
+														Synopsis
+													Element:td
+														Update a specific product
+													Element:tr
+													Element:th
+														HTTP Method
+													Element:td
+													Element:code
+														PUT
+													Element:tr
+													Element:th
+														URI
+													Element:td
+													Element:code
+														/listings/:listing_id/products/:product_id
+													Element:tr
+													Element:th
+														Parameters
+													Element:td
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Name
+													Element:th
+														Required
+													Element:th
+														Default
+													Element:th
+														Type
+													Element:tr
+													Element:td
+													Element:code
+														listing_id
+													Element:td
+													Element:code
+														Y
+													Element:td
+													Element:code
+													Element:td
+													Element:code
+													Element:code
+													Element:a
+														int
+													Element:tr
+													Element:td
+													Element:code
+														product_id
+													Element:td
+													Element:code
+														Y
+													Element:td
+													Element:code
+													Element:td
+													Element:code
+													Element:code
+													Element:a
+														int
+													Element:tr
+													Element:td
+													Element:code
+														sku
+													Element:td
+													Element:code
+														N
+													Element:td
+													Element:code
+													Element:td
+													Element:code
+													Element:code
+													Element:a
+														string
+													Element:tr
+													Element:th
+														Requires OAuth
+													Element:td
+													Element:code
+														Y
+													Element:tr
+													Element:th
+														Permission Scope
+													Element:td
+													Element:code
+													Element:code
+													Element:a
+														listings_w
+													Element:tr
+													Element:th
+														Notes
+													Element:td
+														If you need to make changes to properties (i.e. changing properties, or adding or removing values) you'll need to update the entire inventory. If SKUs are linked (i.e. shared between multiple products) updating a single product may update other products.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Inventory
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fields
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[6 December 2016] See
+													Element:a
+														ListingInventory fields
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Methods
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[6 December 2016] See
+													Element:a
+														ListingInventory methods
+														.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Offering
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fields
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[6 December 2016] See
+													Element:a
+														ListingOffering fields
+														.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Methods
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Method Name
+										Element:td
+										Element:code
+											updateOffering
+										Element:tr
+										Element:th
+											Synopsis
+										Element:td
+											Update a specific offering
+										Element:tr
+										Element:th
+											HTTP Method
+										Element:td
+										Element:code
+											PUT
+										Element:tr
+										Element:th
+											URI
+										Element:td
+										Element:code
+											/listings/:listing_id/products/:product_id/offerings/:offering_id
+										Element:tr
+										Element:th
+											Parameters
+										Element:td
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Required
+										Element:th
+											Default
+										Element:th
+											Type
+										Element:tr
+										Element:td
+										Element:code
+											listing_id
+										Element:td
+										Element:code
+											Y
+										Element:td
+										Element:code
+										Element:td
+										Element:code
+										Element:code
+										Element:a
+											int
+										Element:tr
+										Element:td
+										Element:code
+											product_id
+										Element:td
+										Element:code
+											Y
+										Element:td
+										Element:code
+										Element:td
+										Element:code
+										Element:code
+										Element:a
+											int
+										Element:tr
+										Element:td
+										Element:code
+											offering_id
+										Element:td
+										Element:code
+											Y
+										Element:td
+										Element:code
+										Element:td
+										Element:code
+										Element:code
+										Element:a
+											int
+										Element:tr
+										Element:td
+										Element:code
+											price
+										Element:td
+										Element:code
+											N
+										Element:td
+										Element:code
+										Element:td
+										Element:code
+										Element:code
+										Element:a
+											float
+										Element:tr
+										Element:td
+										Element:code
+											currency_code
+										Element:td
+										Element:code
+											N
+										Element:td
+										Element:code
+											'USD'
+										Element:td
+										Element:code
+										Element:code
+										Element:a
+											string
+										Element:tr
+										Element:td
+										Element:code
+											quantity
+										Element:td
+										Element:code
+											N
+										Element:td
+										Element:code
+										Element:td
+										Element:code
+										Element:code
+										Element:a
+											int
+										Element:tr
+										Element:td
+										Element:code
+											is_enabled
+										Element:td
+										Element:code
+											N
+										Element:td
+										Element:code
+										Element:td
+										Element:code
+										Element:code
+										Element:a
+											boolean
+										Element:tr
+										Element:td
+										Element:code
+											quantity_delta
+										Element:td
+										Element:code
+											N
+										Element:td
+										Element:code
+										Element:td
+										Element:code
+										Element:code
+										Element:a
+											int
+										Element:tr
+										Element:th
+											Requires OAuth
+										Element:td
+										Element:code
+											Y
+										Element:tr
+										Element:th
+											Permission Scope
+										Element:td
+										Element:code
+										Element:a
+											listings_w
+										Element:tr
+										Element:th
+											Notes
+										Element:td
+											Specify
+										Element:code
+											quantity
+											or
+										Element:code
+											quantity_delta
+											.
+										Element:code
+											quantity_delta
+											allows atomic quantity changes. The supplied price should be the value you'd get for
+										Element:code
+											formatted_raw
+											in the
+										Element:a
+											Money
+											resource (i.e. the amount divided by the divisor for the currency in question). If prices or quantities are linked (i.e. shared between multiple offerings) updating a single offering may update other offerings. Setting
+										Element:code
+											is_enabled
+											to false will prevent this offering from being show to buyers.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Attributes
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fields
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[6 December 2016] See
+													Element:a
+														PropertyValue fields
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Methods
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[6 December 2016] See
+													Element:a
+														PropertyValue methods
+														.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											TaxonomyNodeProperty
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fields
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[7 December 2016] See
+													Element:a
+														TaxonomyNodeProperty fields
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Methods
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[7 December 2016] See
+													Element:a
+														TaxonomyNodeProperty methods
+														.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											TaxonomyPropertyScale
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fields
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[7 December 2016] See
+													Element:a
+														TaxonomyPropertyScale fields
+														.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											TaxonomyPropertyValue
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fields
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														[7 December 2016] See
+													Element:a
+														TaxonomyPropertyValue fields
+														.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Working with Inventory Management API endpoints
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Although we can't foresee every use case, below are a few use cases we can imagine, and will hopefully give you a flavor of how the new endpoints work.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to keep things simple and focus on the API interactions, for interactions requiring OAuth these examples assume a suitable OAuth object has been created and that the user has properly authorized the app with the necessary scopes. See our
+							Element:a
+								OAuth documentation
+								for more information. They also don't do any error checking! Please see the documentation on
+							Element:a
+								Making Requests
+								and
+							Element:a
+								OAuth Authentication
+								for some examples of errors you might check for.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								These examples are in PHP and use PHP's
+							Element:a
+								OAuth library
+								, but are just intended to give a sense of how code might look. Any language capable of making HTTP requests can be used to access the API.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating a simple listing
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If we consider the simple case of a listing with no variations or attributes, there's nothing different in what you need to do. We'll do the creation of the relevant inventory records in the background.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											$data = $oauth->fetch( $etsy_base . '/listings', [ 'quantity' => 1, 'taxonomy_id' => 1431, 'title' => 'Baby shoes', 'description' => 'Cute little shoes!', 'price' => 42.00, 'currency_code' => 'USD', 'who_made' => 'i_did', 'is_supply' => 0, 'when_made' => 'made_to_order' ], OAUTH_HTTP_METHOD_POST ); $inventory_uri = sprintf( '%s/listings/%d/inventory', $etsy_base, $data['listing_id'] ); $inventory = $oauth->fetch( $inventory_uri, null, OAUTH_HTTP_METHOD_GET ); /* { "price_on_property" => [], "quantity_on_property" => [], "sku_on_property" => [], "products" => [ { "product_id" => 1234, "properties" => [], "offerings" => [ { "offering_id" => 1235, "price" => { "amount" => 4200, "divisor" => 100, "currency_code" => "USD", "formatted_raw" => "42.00", "formatted_short" => "US$42.00", "formatted_long" => "$42.00 USD", "original_currency_code" => "USD" }, "quantity" => 1, "is_enabled" => 1 } ] } ] } */
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating a complex listing with two variations
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, we need to know what properties we can vary on for a listing with a given
+										Element:code
+											taxonomy_id
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											$properties_uri = sprintf( '%s/taxonomy/seller/%d/properties', $etsy_base, $taxonomy_id ); $properties = $oauth->fetch( $properties_uri, null, OAUTH_HTTP_METHOD_GET );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response is too long to include here, but you can
+										Element:a
+											see a sample
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the sample response, you'll see this taxonomy node has seven possible properties -
+										Element:em
+											Primary Color
+											,
+										Element:em
+											Holiday
+											,
+										Element:em
+											Occasion
+											,
+										Element:em
+											Secondary Color
+											,
+										Element:em
+											Kids' Shoe Size
+											,
+										Element:em
+											Custom Property 1
+											, and
+										Element:em
+											Custom Property 2
+											. Of these,
+										Element:em
+											Color
+											,
+										Element:em
+											Secondary Color
+											,
+										Element:em
+											Kids' Shoe Size
+											,
+										Element:em
+											Custom Property 1
+											, and
+										Element:em
+											Custom Property 2
+											are marked as "supports variations".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's make a listing with Shoe Size (
+										Element:code
+											property_id
+											18107358732) and a custom property "Fastner Type" (
+										Element:code
+											property_id
+											513). It's worth noting that properties have an order - here we'll make shoe size the first property and fastening the second.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For shoe size, we can pick a scale. There are three available -
+										Element:em
+											UK
+											,
+										Element:em
+											US/Canada
+											, and
+										Element:em
+											EU
+											.
+										Element:em
+											US/Canada
+											has
+										Element:code
+											scale_id
+											19. We can find corresponding values in the
+										Element:code
+											possible_values
+											array which have a
+										Element:code
+											scale_id
+											of 19 - "0 (Baby)" through to "13.5 (Youth)". We'll make tiny shoes - size 0 (
+										Element:code
+											value_id
+											1396) and 0.5 (
+										Element:code
+											value_id
+											1397) only.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For the custom property, we have to specify our own values. We'll call the property "Fastener type" and give it the values "Hook and loop" and "Ribbon laces".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the Inventory Management part of the listing process on the website, we ask whether price, quantity, or SKU each vary based on a given property. In other words, you can have one price regardless of what variations are chosen, or have the price depend on size, or have it depend on size and fastener. (And so on for quantity and SKU.) We'll make things suitably complex here and say that price depends on fastener while quantity depends on size.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											So this gives us the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Size
+										Element:th
+											Fastener
+										Element:th
+											Price
+										Element:th
+											Quantity
+										Element:tr
+										Element:td
+											0
+										Element:td
+											Hook and loop
+										Element:td
+											$42.00
+										Element:td
+											10
+										Element:tr
+										Element:td
+											0
+										Element:td
+											Ribbon laces
+										Element:td
+											$40.00
+										Element:td
+											10
+										Element:tr
+										Element:td
+											0.5
+										Element:td
+											Hook and loop
+										Element:td
+											$42.00
+										Element:td
+											5
+										Element:tr
+										Element:td
+											0.5
+										Element:td
+											Ribbon laces
+										Element:td
+											$40.00
+										Element:td
+											5
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We take our listing and add inventory:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											$property_size = 18107358732; $property_fastener = 513; $sizes = [ [ 'property_id' => $property_size, 'value_ids' => [1396], 'scale_id' => 19, ], [ 'property_id' => $property_size, 'value_ids' => [1397], 'scale_id' => 19, ], ]; $fasteners = [ [ 'property_id' => $property_fastener, 'property_name' => 'Fastener Type', 'values' => ['Hook and loop'], ], [ 'property_id' => $property_fastener, 'property_name' => 'Fastener Type', 'values' => ['Ribbon laces'], ], ]; $products = [ [ 'property_values' => [$sizes[0], $fasteners[0]], 'sku' => '', 'offerings' => [ [ 'price' => 42.00, 'quantity' => 10, 'is_enabled' => 1 ] ] ], [ 'property_values' => [$sizes[0], $fasteners[1]], 'sku' => '', 'offerings' => [ [ 'price' => 40.00, 'quantity' => 10, 'is_enabled' => 1 ] ] ], [ 'property_values' => [$sizes[1], $fasteners[0]], 'sku' => '', 'offerings' => [ [ 'price' => 42.00, 'quantity' => 5, 'is_enabled' => 1 ] ] ], [ 'property_values' => [$sizes[1], $fasteners[1]], 'sku' => '', 'offerings' => [ [ 'price' => 40.00, 'quantity' => 5, 'is_enabled' => 1 ] ] ], ]; $inventory_uri = sprintf( '%s/listings/%d/inventory', $etsy_base, $listing_id ); $data = $oauth->fetch( $inventory_uri, [ 'products' => json_encode($products), 'price_on_property' => [$property_fastener], 'quantity_on_property' => [$property_size], 'sku_on_property' => [] ], OAUTH_HTTP_METHOD_POST );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There is an element of repetition in some of this! This is conscious and deliberate in order to reduce the complexity of the API (fewer rules like "if you set the price here then we'll infer the price over here" etc.). Our assumption is that code is good at managing repetition, and you're best placed to make decisions about complexity in your own code.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that this endpoint will validate that the data sent is consistent with the linkages you've specified. So for example, if you say that price doesn't vary on any properties and then send offerings with different prices, the API will throw an error.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Updating a listing's variations
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you need to update a listing's variations - adding or removing a property, adding or removing values, or changing then you'll need to basically follow the same process as creating the inventory in the previous example. Again, this reduces the complexity of the API and therefore the chance of surprising you (and your users) with unexpected side effects.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You may find it efficient to get the inventory blob, edit it, and then re-submit it.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Changing the quantity of an existing offering
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two options for changing the quantity of an existing offering - supplying a specific quantity and supplying a delta.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Supplying a delta is intended to allow developers to manage cases such as "I sold one pair of shoes in my shop so reduce the quantity available on Etsy by 1" or "I just got a delivery of 100 more beads so increase my inventory" without running afoul of the race condition where a sale on Etsy happens between the "get the current quantity" call, computing the new quantity, and the "set the new quantity" call. (Note that
+										Element:code
+											quantity_delta
+											isn't valid for creating
+										Element:em
+											new
+											inventory records, only updating existing ones.)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Alternatively, sellers may simply supply an absolute quantity for you to apply and you can just set it.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											$inventory_uri = sprintf( '%s/listings/%d/inventory', $etsy_base, $listing_id ); $inventory = $oauth->fetch( $inventory_uri, null, OAUTH_HTTP_METHOD_GET ); foreach ($inventory['products'] as $product) { if ($product['property_values'][0]['value_ids'][0] == 1396 && $product['property_values'][1]['values'][0] == 'Hook and loop' ) { $product_id = $product['product_id']; $offering_id = $product['offerings'][0]['offering_id']; $offering_uri = sprintf( '%s/listings/%d/products/%d/offerings/%d', $etsy_base, $listing_id, $product_id, $offering_id ); $oauth->fetch( $offering_uri, [ 'quantity_delta' => -1 ], OAUTH_HTTP_METHOD_PUT ); break; } });
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Adding, updating, or removing listing attributes
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As with our product properties, we need to look up the available attributes by the
+										Element:code
+											taxonomy_id
+											of our listing, but this time filter them by "
+										Element:code
+											supports_attributes
+											". In the case of our shoes example, we have
+										Element:em
+											Primary Color
+											,
+										Element:em
+											Holiday
+											,
+										Element:em
+											Occasion
+											,
+										Element:em
+											Secondary Color
+											, and
+										Element:em
+											Kids' Shoe Size
+											. (We've already used shoe size as a variable property, so we can't use that one as a listing-level attribute.) Let's say these ones are white with some red on them.
+										Element:em
+											Primary Color
+											has a
+										Element:code
+											property_id
+											of 200 and
+										Element:em
+											White
+											has a
+										Element:code
+											value_id
+											of 10.
+										Element:em
+											Secondary Color
+											has a
+										Element:code
+											property_id
+											of 18107419236 and
+										Element:em
+											Red
+											has a
+										Element:code
+											value_id
+											of 9.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											$primary_color_uri = sprintf( '%s/listings/%d/attributes/200', $etsy_base, $listing_id ); $inventory = $oauth->fetch( $primary_color_uri, [ 'value_ids' => [10], ], OAUTH_HTTP_METHOD_PUT ); $secondary_color_uri = sprintf( '%s/listings/%d/attributes/18107419236', $etsy_base, $listing_id ); $inventory = $oauth->fetch( $secondary_color_uri, [ 'value_ids' => [9], ], OAUTH_HTTP_METHOD_PUT );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Updating an attribute is exactly the same as creating it - a PUT on the relevant attribute URI.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Deleting is simply a DELETE on the relevant attribute URI.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Rollout plan
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We know you need time to update your code to take account of these changes. Although the changes detailed above look rather complex, hopefully in most cases they won't need a great deal of work to integrate, but will give you some interesting new capabilities.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We can't commit to exact dates, but here's a plan for how we expect to roll this out, and approximately when these phases will happen. We'll aim to give you as much notice of dates as we can, when we have them.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Phase 1: Seller Prototype
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is already in progress. Some sellers have been invited to join a closed prototype of the tools we've been building to manage inventory. More sellers are being invited and this will likely continue until the end of 2016.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Due to the fact that writing listings using the API would potentially destroy inventory records, sellers in the prototype cannot use third-party apps that request the
+										Element:code
+											listings_w
+											scope. If your users have tokens with this scope and it is not necessary for your app, you may consider requesting only the needed scopes and suggesting that users in the prototype group deactivate your app in their
+										Element:a
+											Apps settings page
+											and authorize your app again.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Phase 2: Documentation
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you're reading this, phase 2 has started! This documentation should hopefully give you a good sense of what's changing, how it's changing, and what you'll need to do to make use of it. We value your feedback, and we'll do our best to accommodate any requests you make, but we can't commit to making substantial changes to the API in the short term, particularly before full launch.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Phase 3: Developer preview
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Approximately 2-3 weeks after Phase 1 (mid-November 2016) we should be ready to open up the new API endpoints, but they will only work on the account associated with your API key. Please see our
+										Element:a
+											Testing Policies
+											for information about working with a test shop and listings.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that the changes will apply to listings in all categories, rather than being phased in category by category.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Phase 4: Seller preview
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Early in January 2017, we'll arrange to allow sellers in the prototype group to authorize apps to write listings. We'll work with you on a system for identifying apps that are compatible with the new API and signal that to sellers.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This phase is your opportunity to test things out in production.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Phase 5: Launch
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At some point in the first quarter of 2017, Inventory Management tools are scheduled for launch to all sellers. At this point, we'll throw the switch on the new APIs, disable deprecated endpoints, and we'll be live.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Developers Home
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Discussion
+										Element:li
+										Element:a
+											API Terms of Use
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Your Developer Account
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Register as a developer
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Looking for Etsy Apps?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Check out our new
+							Element:br
+							Element:a
+								App Gallery
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It's the best way to find cool and useful tools built upon Etsy's API.
+						Node:
+						(type) c
+						(layer)2
+							Element:img

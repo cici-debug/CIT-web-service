@@ -1,0 +1,897 @@
+Node:
+(type) c
+(layer)0
+	Element:section
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Working with Notifications API
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Create Push Notification Campaigns based on Events/User Properties
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment your users and send them push notifications using the below documented API request
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Endpoint
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A request to send push notifications is an HTTP URL of the following form:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST https://api.clevertap.com/1/targets/create.json
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All requests should include your CleverTap Account ID and CleverTap Account Passcode in the request headers keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+										Element:br
+										Element:code
+											Content-Type
+											header must be specified as
+										Element:code
+											application/json
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted payload with the following keys:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														name
+														– The name of your campaign which will reflect in your CleverTap dashboard
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														title
+														– Title content of your push notification message which is sent to the user
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														body
+														– Body content of your push notification message which is sent to the user
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														devices
+														– Inputs must be an array, the valid inputs here are; android, ios, windows
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														when
+														– This key entails when you want to send out push notifications, valid inputs are now (to send the notification right away) or YYYYMMDD HH:MM to schedule the notification for a particular date and time
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														where
+														– Allows filtering of target base by user properties and actions. Send empty object (
+													Element:code
+														{}
+														) to target entire user base.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:mark
+														This endpoint is throttled to 1 request per second. If you wish to send notifications based on user identity, please check the
+													Element:a
+														push to user profiles endpoint
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Optional parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														event_name
+														– Allows you to target users based on an event they have performed. Present within
+													Element:code
+														where
+														clause
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														from & to
+														– Date range within which users should have performed the event you have specified in
+													Element:code
+														event_name
+														, input values have to be formatted as integer YYYYMMDD. Present within
+													Element:code
+														where
+														clause
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+														Refer here for documentation on advanced queries, their structure, and examples.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														Notification Sent
+														event is supported here. Further information about the event is available in the special events section on the above link.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														estimate_only
+														– if this is set to true the request will return an estimated reach of the campaign i.e the number of users who will get the notification when you send it out
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:mark
+														Setting
+													Element:code
+														estimate_only
+														to true will only estimate (and not create) the campaign
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:mark
+														Add
+													Element:code
+														"mutable-content": "true"
+														in
+													Element:code
+														platform_specific: ios
+														to trigger your iOS 10 Notification Service and/or Content App Extensions.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example payload
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "name": "My API Campaign", "estimate_only": true, "where": { "event_name": "App Launched", "from": 20150101, "to": 20150303, "common_profile_properties": { "profile_fields": [ { "Key": "Customer Type", "value": "Platinum" } ] } }, "content": { "title": "Hi!", "body": "How are you doing today?", "platform_specific": { "windows": { "deep_link": "example.com", "Key": "Value_windows" }, "ios": { "mutable-content": "true", "deep_link": "example.com", "sound_file": "example.caf", "category": "application category//Books", "badge_count": 1, "Key": "Value_ios" }, "android": { "background_image": "http://example.jpg", "default_sound": true, "deep_link": "example.com", "large_icon": "http://example.png", "Key": "Value_android" } } }, "devices": [ "android", "ios", "windows" ], "when": "now" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "status": "success", "id": 1457433898, "estimates": { "android": 10, "ios": 30, "windows": 5 } }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											HTTP Response Codes
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											200
+											Successful request
+										Element:br
+										Element:code
+											400
+											Bad Request. Some mandatory parameter was missing
+										Element:br
+										Element:code
+											429
+											Too many requests were made concurrently.
+										Element:br
+										Element:code
+											500
+											Server Error
+										Element:br
+										Element:mark
+											Currently, we return HTTP error code: 429 when you make more than 3 concurrent requests. Please try again after 10 minutes
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Send Notifications based on User Identity
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using this API, as listed below you can send notifications to your users based on their Facebook ID, Google Plus ID, Email ID, Identity or CleverTap ID.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All requests should include your CleverTap Account ID and CleverTap Account Passcode in the request headers keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+										Element:br
+										Element:code
+											Content-Type
+											header must be specified as
+										Element:code
+											application/json
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Endpoint
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The endpoint to send notifications to individual users is hosted at
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Select Platform
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											▼
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Push
+										Element:li
+										Element:a
+											Email
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST https://api.clevertap.com/1/send/push.json
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST https://api.clevertap.com/1/send/email.json
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted payload with the following keys:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														FBID
+														,
+													Element:code
+														GPID
+														,
+													Element:code
+														Email
+														,
+													Element:code
+														Identity
+														,
+													Element:code
+														objectid
+														– You can use one more of these identifiers to target your users (array list of upto a 1000 entries)
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tag Groups
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														tag_group
+														– Each message can be tagged into a tag group, and the stats (sent/viewed/clicked/converted) will be shown against each tag group in the CleverTap dashboard
+													Element:br
+													Element:mark
+														You can create at most 20 tags
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If not specified, the stats will be shown against “Not Tagged”.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Optional parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														respect_frequency_caps
+														– Specify false, if you don’t want the notification to honor frequency caps.
+													Element:br
+													Element:mark
+														respect_frequency_caps field defaults to true
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														platform_specific
+														– You can set key-value pairs, image links and deep links for specific platforms, acceptable platforms are
+													Element:code
+														android
+														,
+													Element:code
+														ios
+														,
+													Element:code
+														windows
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example payload
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														Select Platform
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														▼
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Push
+													Element:li
+													Element:a
+														Email
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "to": { "FBID": [ "102029292929388", "114342342453463" ], "GPID": [ "1928288389299292" ], "Email": [ "john@doe.com", "jane@doe.com" ], "Identity": [ "JohnDoe" ], "objectId": [ "_asdnkansdjknaskdjnasjkndja", "-adffajjdfoaiaefiohnefwprjf" ] }, "tag_group": "my tag group", "respect_frequency_caps": false, "content": { "title": "Welcome", "body": "Hello world!", "platform_specific": { "windows": { "deep_link": "example.com", "key": "value_windows" }, "ios": { "deep_link": "example.com", "sound_file": "example.caf", "category": "notification category", "badge_count": 1, "key": "value_ios" }, "android": { "background_image": "http://example.jpg", "default_sound": true, "deep_link": "example.com", "large_icon": "http://example.png", "key": "value_android" } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "to": { "FBID": [ "102029292929388", "114342342453463" ], "GPID": [ "1928288389299292" ], "Email": [ "john@doe.com", "jane@doe.com" ], "Identity": [ "JohnDoe" ], "objectId": [ "_asdnkansdjknaskdjnasjkndja", "-adffajjdfoaiaefiohnefwprjf" ] }, "tag_group": "my tag group", "respect_frequency_caps": false, "content": { "subject": "Welcome", "body": "<div>Your HTML content for the email</div>" } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Responses
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Success
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status": "success", "message": "Added to queue for processing" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:mark
+														A success response implies payload validity and addition to processing queue. Message delivery is handled by the provider (push or email) and is subject to valid recipient ID
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Fail
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status": "fail", "error": "<error message here>", "code": <error code here> }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Error codes
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	21 – to is a mandatory field
+																Element:br
+																	84 – Invalid recipients”
+																Element:br
+																	73 – “respect_frequency_caps” must be a Boolean
+																Element:br
+																	78 – Invalid JSON payload
+																Element:br
+																	89 – Unexpected error, please try again
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:mark
+																	This API supports up to 1000 requests per second. To bypass the limit, please batch your requests. Up to 1000 users can be specified in each request.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											HTTP Response Codes
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											200
+											Successful request
+										Element:br
+										Element:code
+											400
+											Bad Request. Some mandatory parameter was missing
+										Element:br
+										Element:code
+											500
+											Server Error
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Stop Scheduled API Campaigns
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Campaigns scheduled using the API can be stopped using the below documented API request
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Endpoint
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A stop schedule campaign request is an HTTP URL of the following form:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST https://api.clevertap.com/1/targets/stop.json
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every request to the API should include your CleverTap Account ID and CleverTap Account Passcode in the request headers keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted request which has to have the following key:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											id
+											– CleverTap ID of the scheduled campaign which you want to stop, you can find this id in your CleverTap dashboard under the push section.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example Request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "id": 1457432766 }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status": "success" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								View Statistics of Push Campaigns
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can retrieve campaign statistics using the below documented API request.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Endpoint:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A view statistics request is an HTTP URL of the following form :
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											POST https://api.clevertap.com/1/targets/result.json
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All requests should include your CleverTap Account ID and CleverTap Account Passcode in the request headers
+										Element:br
+											keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											respectively.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted payload has to have the following key:
+										Element:br
+										Element:code
+											id
+											– CleverTap Campaign ID of the campaign whose statistics you want to view, you can find this ID in your CleverTap dashboard under the
+										Element:em
+											Push
+											section
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "id": 1457432766 }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "result": { "clicked": 28, "sent": 82 }, "status": "success" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Errors
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If the campaign whose
+													Element:code
+														id
+														you have specified has not been completed, you can expect the following response:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "error": "This target hasn't been completed", "status": "fail" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied

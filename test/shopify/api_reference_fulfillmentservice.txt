@@ -1,0 +1,817 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					FulfillmentService
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					A
+				Element:strong
+					Fulfillment Service
+					is a third party warehouse that prepares and ships orders on behalf of the store owner. Fulfillment services charge a fee to package and ship items and update product inventory levels. Some well known fulfillment services with Shopify integrations include: Amazon, Shipwire, and Rakuten.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Using the Fulfillment Service API, you can register, edit and delete a new fulfillment service. When you register a new fulfillment service, you will need to expose the two following GET endpoints rooted in the
+				Element:code
+					:
+				Element:a
+					callback_url
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:code
+					fetch_tracking_numbers
+					: Where Shopify can retrieve
+				Element:strong
+					tracking numbers
+					for orders.
+				Element:li
+				Element:code
+					fetch_stock
+					: Where Shopify can retrieve
+				Element:strong
+					inventory levels
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					A sample Shopify request for tracking numbers:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Once per hour Shopify will make a request to this endpoint if there are any completed fulfillments awaiting tracking numbers from the remote fulfillment service.
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:pre
+					GET /fetch_tracking_numbers
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:p
+					Get tracking numbers for orders
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:pre
+					order_names
+				Element:td
+				Element:p
+					The order names we require tracking numbers for (i.e. #1001)
+				Element:tr
+				Element:td
+				Element:pre
+					shop
+				Element:td
+				Element:p
+					The shop's myshopify url
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Get a list of tracking numbers for the following order IDs.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											http://myapp.com/fetch_tracking_numbers.json?order_names[]=#1001&order_names[]=#1002&order_names[]=#1003
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "tracking_numbers": { "#1001": "qwerty", "#1002": "asdfg", "#1003": "zxcvb" }, "message": "Successfully received the tracking numbers", "success": true }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											A sample Shopify request for inventory levels:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Shopify will make a request for the inventory of an individual SKU when the product is set up initially or is changed in the Shop's Admin. A request for all inventory data will happen once every hour to keep our system up to date with the remote fulfillment service.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:pre
+											GET /fetch_stock
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:p
+											Get inventory levels
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:pre
+											sku
+										Element:td
+										Element:p
+											The SKU for the Product Variant we need stock levels for
+										Element:tr
+										Element:td
+										Element:pre
+											shop
+										Element:td
+										Element:p
+											The shop's myshopify url
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Get inventory levels for a particular SKU.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											https://myapp.com/fetch_stock.json?sku=123&shop=testshop.myshopify.com
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{"123": 1000}
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Get inventory levels for all SKUs.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											https://myapp.com/fetch_stock.json?shop=testshop.myshopify.com
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{"123": 1000, "456": 500}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to be notified about new fulfillments you should subscribe your application to the
+										Element:code
+											fulfillments/create
+											webhook. This webhook fires every time an order is marked "fulfilled", and the data is sent to a URL that you registered and stored in JSON format. You can read more about webhooks
+										Element:a
+											here
+											. After receiving and processing the webhook your service should make a
+										Element:a
+											request
+											to "complete" the fulfillment. You can also update the fulfillment via the API with other information like tracking_numbers rather than waiting for Shopify to ask for them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also integrate the Fulfillment Service API to subscribe to the
+										Element:code
+											fulfillments/update
+											. This webhook fires every time a request comes in to get an update on a fulfillment.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											View an open sourced
+										Element:a
+											Fulfillment Integration App
+											that demonstrates how to use the Fulfillment API.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting fulfillments permissions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Add the
+							Element:code
+								write_fulfillments
+								permission to your
+							Element:a
+								requested scopes
+								.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What you can do with FulfillmentService
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Shopify API lets you do the following with the FulfillmentService resource. More detailed versions of these general actions may be available:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								GET /admin/fulfillment_services.json?scope=all
+							Element:span
+								Receive a list of all FulfillmentServices
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								POST /admin/fulfillment_services.json
+							Element:span
+								Create a new FulfillmentService
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								GET /admin/fulfillment_services/#{id}.json
+							Element:span
+								Receive a single FulfillmentService
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								PUT /admin/fulfillment_services/#{id}.json
+							Element:span
+								Modify an existing FulfillmentService
+							Element:li
+							Element:a
+							Element:span
+							Element:span
+								DELETE /admin/fulfillment_services/#{id}.json
+							Element:span
+								Remove a FulfillmentService from the database
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								FulfillmentService properties
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+								callback_url
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"callback_url"
+							Element:span
+								:
+							Element:span
+								"http://myapp.com"
+							Element:span
+							Element:p
+								States the URL endpoint that Shopify needs to retrieve inventory and tracking updates. This field is necessary if either inventory_management or tracking_support is set to "true".
+							Element:tr
+							Element:td
+								format
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"format"
+							Element:span
+								:
+							Element:span
+								"json"
+							Element:span
+							Element:p
+								Specifies the format of the API output. Valid values are json and xml.
+							Element:tr
+							Element:td
+								handle
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"handle"
+							Element:span
+								:
+							Element:span
+								"my_fulfillment_service"
+							Element:span
+							Element:p
+								A human-friendly unique string for the fulfillment service generated from its title.
+							Element:tr
+							Element:td
+								inventory_management
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"inventory_management"
+							Element:span
+								:
+							Element:span
+								true
+							Element:span
+							Element:p
+								States if the fulfillment service tracks product inventory and provides updates to Shopify. Valid values are "true" and "false".
+							Element:tr
+							Element:td
+								name
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"name"
+							Element:span
+								:
+							Element:span
+								"My Fulfillment Service"
+							Element:span
+							Element:p
+								The name of the fulfillment service as seen by merchants and their customers.
+							Element:tr
+							Element:td
+								provider_id
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"provider_id"
+							Element:span
+								:
+							Element:span
+								null
+							Element:span
+							Element:p
+								A unique identifier for the fulfillment service provider.
+							Element:tr
+							Element:td
+								requires_shipping_method
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"requires_shipping_method"
+							Element:span
+								:
+							Element:span
+								true
+							Element:span
+							Element:p
+								States if the fulfillment service requires products to be physically shipped. Valid values are "true" and "false".
+							Element:tr
+							Element:td
+								tracking_support
+							Element:td
+							Element:pre
+							Element:code
+							Element:span
+							Element:span
+								"tracking_support"
+							Element:span
+								:
+							Element:span
+								true
+							Element:span
+							Element:p
+								States if the fulfillment service provides tracking numbers for packages. Valid values are "true" and "false".
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Endpoints
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								GET
+								/admin/fulfillment_services.json
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+								scope
+							Element:td
+							Element:ul
+							Element:li
+								current_client - Returns fulfillment providers that have been created by the app sending the request (default)
+							Element:li
+								all - Returns all the fulfillment providers
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								List all of the shop's fulfillment services
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /admin/fulfillment_services.json?scope=all
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK { "fulfillment_services": [ { "id": 61629186, "name": "shipwire", "handle": "shipwire", "email": null, "include_pending_stock": false, "service_name": "Shipwire", "inventory_management": true, "tracking_support": true, "provider_id": 1 }, { "id": 755357713, "name": "Shipwire App", "handle": "shipwire-app", "email": null, "include_pending_stock": false, "requires_shipping_method": false, "service_name": "Shipwire App", "inventory_management": true, "tracking_support": true, "provider_id": null } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								List your app's fulfillment services
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /admin/fulfillment_services.json
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK { "fulfillment_services": [ { "id": 755357713, "name": "Shipwire App", "handle": "shipwire-app", "email": null, "include_pending_stock": false, "requires_shipping_method": false, "service_name": "Shipwire App", "inventory_management": true, "tracking_support": true, "provider_id": null } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								POST
+								/admin/fulfillment_services.json
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To create a fulfillment service, you can also use a cURL request that uses that
+							Element:code
+								fulfillment_service.json
+								payload:
+						Node:
+						(type) c
+						(layer)2
+							Element:figure
+							Element:pre
+							Element:code
+								curl -X POST -d @fulfillment_service.json -H"Accept:application/json" -H"Content-Type:application/json" -H"X-Shopify-Access-Token:THE_TOKEN_GOES_HERE" https://AUTHORIZED_SHOP.myshopify.com/admin/fulfillment_services
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Where
+							Element:code
+								THE_TOKEN_GOES_HERE
+								is replaced by the OAuth token given to you by Shopify and
+							Element:code
+								https://AUTHORIZED_SHOP.myshopify.com/admin/fulfillment_services
+								is replaced by the authorized shop's URL.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Create a fulfillment service
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /admin/fulfillment_services.json
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "fulfillment_service": { "name": "MarsFulfillment", "callback_url": "http:\/\/google.com", "inventory_management": true, "tracking_support": true, "requires_shipping_method": true, "format": "json" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 201 Created { "fulfillment_service": { "id": 1061774487, "name": "MarsFulfillment", "handle": "marsfulfillment", "email": null, "include_pending_stock": false, "requires_shipping_method": true, "service_name": "Mars Fulfillment", "inventory_management": true, "tracking_support": true, "provider_id": null } }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								GET
+								/admin/fulfillment_services/755357713.json
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Get a single fulfillment service by its ID
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /admin/fulfillment_services/#{id}.json
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK { "fulfillment_service": { "id": 755357713, "name": "Shipwire App", "handle": "shipwire-app", "email": null, "include_pending_stock": false, "requires_shipping_method": false, "service_name": "Shipwire App", "inventory_management": true, "tracking_support": true, "provider_id": null } }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								PUT
+								/admin/fulfillment_services/755357713.json
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Update a fulfillment service
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT /admin/fulfillment_services/#{id}.json
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "fulfillment_service": { "id": 755357713, "inventory_management": false } }
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK { "fulfillment_service": { "id": 755357713, "name": "Shipwire App", "handle": "shipwire-app", "email": null, "include_pending_stock": false, "requires_shipping_method": false, "service_name": "Shipwire App", "inventory_management": false, "tracking_support": true, "provider_id": null } }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								DELETE
+								/admin/fulfillment_services/755357713.json
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Destroy a fulfillment service
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								DELETE /admin/fulfillment_services/#{id}.json
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								View Response
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK {}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								How helpful was this page?
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								1
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								2
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								3
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								4
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								5
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+							Element:span
+								Select an option
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+							Element:span
+								What was good or bad about this page?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								This page was printed on 20 Mar 2017
+								. For the latest version, please go to
+							Element:a
+								https://help.shopify.com/api/reference/fulfillmentservice/
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:a
+								About
+							Element:a
+								Careers
+							Element:a
+								Blog
+							Element:a
+								Press and Media
+							Element:a
+								Enterprise
+							Element:a
+								Sitemap
+							Element:h3
+								Online store
+							Element:a
+								Sell online
+							Element:a
+								Features
+							Element:a
+								Examples
+							Element:a
+								Website editor
+							Element:a
+								Online retail
+							Element:a
+								Ecommerce website
+							Element:a
+								Themes
+							Element:a
+								Shopping cart
+							Element:a
+								Ecommerce hosting
+							Element:a
+								Mobile commerce
+							Element:a
+								Ecommerce software
+							Element:h3
+								Point of sale
+							Element:a
+								Point of sale
+							Element:a
+								Features
+							Element:a
+								Hardware
+							Element:a
+								POS software
+							Element:h3
+								Support
+							Element:a
+								24/7 support
+							Element:a
+								Shopify Help Center
+							Element:a
+								Forums
+							Element:a
+								API documentation
+							Element:a
+								Free tools
+							Element:h3
+								Shopify
+							Element:a
+								Contact
+							Element:a
+								Partner program
+							Element:a
+								Affiliate program
+							Element:a
+								App developers
+							Element:a
+								Investors
+							Element:a
+								Accessibility
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+							Element:svg
+							Element:svg
+							Element:a
+								Terms of Service
+							Element:a
+								Privacy Policy

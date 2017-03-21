@@ -1,0 +1,1082 @@
+Node:
+(type) c
+(layer)0
+	Element:section
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Understanding CleverTap Query Language
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The CleverTap Query Language (CQL) can be used to analyze all your event data, identify groups of users, and also target them using our APIs. It can be used with:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					The
+				Element:a
+					profile
+					/
+				Element:a
+					event
+					export APIs to obtain raw data
+				Element:li
+					The
+				Element:a
+					counts API
+					to obtain dashboard counts for events, profiles, properties and trends
+				Element:li
+					The
+				Element:a
+					campaign creation API
+					to target these users through push notifications (as part of the “where” clause)
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Understanding query language
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								CQL is expressed as a JSON formatted payload in the API request body.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In general, the base query should have an
+							Element:code
+								event_name
+								, and
+							Element:code
+								from
+								&
+							Element:code
+								to
+								dates formatted as integers in YYYYMMDD format.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Base query
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "event_name": "App Launched", "from": 20150810, "to": 20151025 }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Additional filters are possible on top of the base query, such as:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											event property filters
+										Element:li
+											session property filters
+										Element:li
+											common profile property filters
+										Element:li
+											advanced event filters (did-none, did-any, did-all…)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:mark
+											Event and session property based filters are applied directly to the base query.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When specifying common profile property or advanced event based filters, the base query can be omitted for target creation & people export APIs, and defaults to all events over the past 364 days.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:mark
+											Base event query is mandatory for the event export API in all cases.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Understanding query operators & values
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								CQL supports
+							Element:code
+								(key, operator, value)
+								combinations to filter results.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								All value fields must be primitives (integer, double, or string), or array(s) of primitives
+							Element:li
+								Boolean fields must be passed as string, with value “True” or “False”.
+							Element:li
+								When the value is a String, the operator can be either `equals`, `not_equals` or `contains`.
+							Element:li
+								In case of numeric values, the operator can be one of `equals`, `greater_than`, `greater_than_equals`, `less_than` or `less_than_equals`
+							Element:li
+								For lists, the operator is applied as an `OR` on all values.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Event property filters
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Event property filters enable developers to query for User Profiles or Events based on custom event properties.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "event_name": "choseNewFavoriteFood", "event_properties": [ { "name": "value", "operator": "contains", "value": "pizza" } ], "from": 20150810, "to": 20151025 }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Session property filters
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Session property filters enable developers to query for User Profiles or User Events that exhibit certain kind of session information. The following session property filters are currently supported:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:mark
+								All the parameters mentioned below are optional. CQL supports querying on any combinations of these parameters
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								utm_source
+								– The
+							Element:code
+								utm_source
+								of the session. You are required the set the value to a known utm_source. Must be String
+							Element:li
+							Element:code
+								utm_medium
+								– The
+							Element:code
+								utm_medium
+								of the session. You are required to set the value to a known utm_medium. Must be String
+							Element:li
+							Element:code
+								utm_campaign
+								– The
+							Element:code
+								utm_campaign
+								of the session. You are required to set the value to a know utm_campaign. Must be String
+							Element:li
+							Element:code
+								session_referrer
+								– The
+							Element:code
+								session_referrer
+								of the session. You are required to set the value to a known session_referrer. Must be String
+							Element:li
+							Element:code
+								session_source
+								– The
+							Element:code
+								session_source
+								of the session. Possible values are
+							Element:code
+								Direct
+								,
+							Element:code
+								Others
+								,
+							Element:code
+								Search
+								,
+							Element:code
+								Social
+								,
+							Element:code
+								Email
+								,
+							Element:code
+								UnAvailable
+								,
+							Element:code
+								Batch
+								. Must be String
+							Element:li
+							Element:code
+								first_time
+								– filters whether the user performed the event for the first time. Accepted value is
+							Element:code
+								"True"
+								, or left blank. Must be String
+							Element:li
+							Element:code
+								time_of_day
+								– Time of day of the event. Possible values must be an Array of Strings (size 2), containing the start and end time range in 24 hour “HH:MM” format
+							Element:li
+							Element:code
+								day_of_month
+								– Day of month when the event was raised. Value field can be an integer between 1 and 31, or an array of possible integer values
+							Element:li
+							Element:code
+								day_of_week
+								– Day of week when the event was raised. Value field can be a string denoting day of week (
+							Element:code
+								Sunday
+								,
+							Element:code
+								Monday
+								,…
+							Element:code
+								Saturday
+								), or an array of possible string values
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:mark
+								Session property filters are not supported with
+							Element:code
+								Notification Sent
+								event.
+							Element:mark
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "event_name": "choseNewFavoriteFood", "session_properties": [ { "name": "first_time", "value": "True" }, { "name": "time_of_day", "value": [ "22:30", "22:35" ] } ], "from": 20150810, "to": 20151025 }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Common profile properties
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Common property filters enable developers to query for people or events that map with certain profile specific information. The following common profile property filters are currently supported:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:mark
+								All the parameters mentioned below are optional. We support querying on any combinations of these parameters
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:code
+											app_fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Supports filtering on
+										Element:code
+											OS Version
+											,
+										Element:code
+											Version
+											(refers to app version),
+										Element:code
+											SDK Version
+											,
+										Element:code
+											Make
+											and
+										Element:code
+											Model
+											of device.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "common_profile_properties": { "app_fields": [ { "name": "Make", "operator": "contains", "value": "Apple" } ] } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:code
+											profile_fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Supports querying
+										Element:strong
+											custom profile fields
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:mark
+											Profile properties such as
+										Element:code
+											Name
+											,
+										Element:code
+											Email
+											,
+										Element:code
+											Identity
+											,
+										Element:code
+											Phone
+											etc are not supported. To download based on email/identity, refer
+										Element:a
+											here
+											. To send push based on identity, refer
+										Element:a
+											here
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "common_profile_properties": { "profile_fields": [ { "name": "language", "operator": "equals", "value": "en" } ] } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:code
+											demographics
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Supports filtering on
+										Element:code
+											Gender
+											,
+										Element:code
+											Age
+											,
+										Element:code
+											Education
+											, and
+										Element:code
+											Employed
+											. Possible values are listed below
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											—
+										Element:code
+											Gender
+											– Possible values are
+										Element:code
+											Unknown
+											,
+										Element:code
+											Male
+											and
+										Element:code
+											Female
+										Element:br
+											—
+										Element:code
+											Age
+											– Possible values are
+										Element:code
+											Unknown
+											,
+										Element:code
+											Kid
+											,
+										Element:code
+											Youth
+											,
+										Element:code
+											Young_Adult
+											,
+										Element:code
+											Adult
+											and
+										Element:code
+											Senior
+											where Kid refers to age < 18 years, Youth is 18-24, Young_Adult is 25-40, Adult is 41-60 and Senior is > 60 years
+										Element:br
+											—
+										Element:code
+											Education
+											– Possible values are
+										Element:code
+											Unknown
+											,
+										Element:code
+											School
+											,
+										Element:code
+											College
+											, and
+										Element:code
+											Graduate
+										Element:br
+											—
+										Element:code
+											Employed
+											– Possible values are
+										Element:code
+											Unknown
+											,
+										Element:code
+											Yes
+											and
+										Element:code
+											No
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "common_profile_properties": { "demographics": [ { "name": "Education", "operator": "equals", "value": [ "College", "Graduate" ] }, { "name": "Gender", "value": "Female" } ] } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:code
+											technographics
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Supports filtering on
+										Element:code
+											Platform
+											,
+										Element:code
+											Platform Type
+											,
+										Element:code
+											Device
+											,
+										Element:code
+											OS
+											and
+										Element:code
+											Browser
+											. Possible values are listed below
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											—
+										Element:code
+											Platform
+											– Possible values are
+										Element:code
+											WebApp
+											,
+										Element:code
+											AndroidApp
+											,
+										Element:code
+											iOSApp
+											and
+										Element:code
+											WindowsApp
+										Element:br
+											—
+										Element:code
+											Platform Type
+											– Possible values are
+										Element:code
+											WebApp
+											,
+										Element:code
+											MobileApp
+										Element:br
+											—
+										Element:code
+											Device
+											– Possible values are
+										Element:code
+											Desktop
+											,
+										Element:code
+											Mobile
+											,
+										Element:code
+											Tablet
+											and
+										Element:code
+											TV
+										Element:br
+											—
+										Element:code
+											OS
+											– Possible values are
+										Element:code
+											Others
+											,
+										Element:code
+											Android
+											,
+										Element:code
+											iOS
+											,
+										Element:code
+											Windows
+											,
+										Element:code
+											Mac
+											,
+										Element:code
+											BlackBerry
+											and
+										Element:code
+											Linux
+										Element:br
+											—
+										Element:code
+											Browser
+											– Possible values are
+										Element:code
+											Others
+											,
+										Element:code
+											Firefox
+											,
+										Element:code
+											Chrome
+											,
+										Element:code
+											Seamonkey
+											,
+										Element:code
+											Safari
+											,
+										Element:code
+											Opera
+											,
+										Element:code
+											IE
+											and
+										Element:code
+											UCBrowser
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "common_profile_properties": { "technographics": [ { "name": "Device", "operator": "equals", "value": [ "Mobile", "Tablet" ] }, { "name": "Platform", "value": "AndroidApp" } ] } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:code
+											reachability
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Support filtering on the following:
+										Element:br
+											—
+										Element:code
+											has_token
+											(whether the user has a device token)
+										Element:br
+											—
+										Element:code
+											has_email
+											(whether the user has an email address associated)
+										Element:br
+											—
+										Element:code
+											MSG-push
+											(
+										Element:code
+											False
+											indicates that the user has unsubscribed from push notifications)
+										Element:br
+											—
+										Element:code
+											MSG-email
+											(
+										Element:code
+											False
+											indicates that the user has unsubscribed from email notifications)
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "common_profile_properties": { "reachability": [ { "name": "has_token", "value": "True" } ] } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:code
+											geo_fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Supports filtering on geo location info. Must be formatted as one or more Array(s) of Strings, each of size 3, in [
+										Element:code
+											Country
+											,
+										Element:code
+											Region
+											,
+										Element:code
+											City
+											] format
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "common_profile_properties": { "geo_fields": [ [ "India", "Maharashtra", "Mumbai" ], [ "United States", "New York", "New York City" ] ] } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:code
+											geo_radius
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Supports filtering on geo radius. Must be formatted as one or more Array(s) of numbers (Int/Double), each of size 3, in [
+										Element:code
+											Latitude
+											,
+										Element:code
+											Longitude
+											,
+										Element:code
+											Radius
+											] format
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Radius is expressed in kilometers
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "common_profile_properties": { "geo_radius": [ [ 35, 42.5, 5.2 ], [ 77.6, 76.2, 11 ] ] } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Advanced queries
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Query with did none block
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To segment users who performed NONE of the specified action(s) within the given range.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "advanced_query": { "did_none": [ { "event_name": "Charged", "from": 20151010, "to": 20151011, "event_properties": [ { "name": "Amount", "operator": "equals", "value": 100 } ] }, { "event_name": "App Launched", "from": 20151011, "to": 20151012 } ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Query with did all block
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To segment users who performed ALL of the specified action(s) within the given range.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "advanced_query": { "did_all": [ { "event_name": "Charged", "from": 20151010, "to": 20151011, "event_properties": [ { "name": "Feedback", "operator": "contains", "value": "excellent" } ] }, { "event_name": "App Launched", "from": 20151011, "to": 20151012, "operator": "equals", "value": 10 } ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note: The operator and value are optional within each internal event block. Default values for the same are “greater_than_equals” and 1 respectively.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Query with did any block
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To segment users who performed ANY of the specified action(s) within the given range.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "advanced_query": { "did_any": { "any_events": [ { "event_name": "Charged", "from": 20151010, "to": 20151011, "event_properties": [ { "name": "Amount", "operator": "equals", "value": 100 } ] }, { "event_name": "App Launched", "from": 20151011, "to": 20151012 } ], "operator": "equals", "value": 10 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note: The operator and value are for the entire “any_events” block, and are resolved for the entire combination of events present within. They are optional, with default values being “greater_than_equals” and 1 respectively.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sample queries
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Basic event query
+							Element:li
+							Element:a
+								Query with event/session properties
+							Element:li
+							Element:a
+								Query with common profile properties
+							Element:li
+							Element:a
+								Query with did none block
+							Element:li
+							Element:a
+								Query with did all block
+							Element:li
+							Element:a
+								Query with did any block
+							Element:li
+							Element:a
+								Sample hybrid query
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Special events
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Notification Sent
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											Notification Sent
+											is a special system event that can be used to obtain information about users receiving notifications through CleverTap. It supports filtering by the event properties
+										Element:code
+											Campaign ID
+											(integer ID of the campaign shown on the dashboard) and
+										Element:code
+											Campaign Type
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											Campaign Type
+											can have the following possible values (passed as string or array of string) –
+										Element:code
+											"Mobile Push - Android"
+											,
+										Element:code
+											"Mobile Push - iOS"
+											,
+										Element:code
+											"Mobile Push - Windows"
+											,
+										Element:code
+											"Email"
+											,
+										Element:code
+											"Facebook Audiences"
+											,
+										Element:code
+											"SMS"
+											,
+										Element:code
+											"Web Push - Chrome"
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											Notification Sent
+											event is available for filtering on the
+										Element:a
+											user profile download API
+											and the
+										Element:a
+											push campaign API
+											(as part of the
+										Element:code
+											where
+											clause).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Filtering by session properties is not supported for the
+										Element:code
+											Notification Sent
+											event as it is a system event.

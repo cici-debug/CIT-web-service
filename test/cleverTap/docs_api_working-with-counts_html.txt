@@ -1,0 +1,1774 @@
+Node:
+(type) c
+(layer)0
+	Element:section
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Working with Counts API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Counts API can be used to programmatically retrieve dashboard counts for events, profiles, properties, trends, and real-time stats.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Event Counts API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This endpoint is used to retrieve counts for a particular event in a specified duration (along with optional filters).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request & Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every request to the API should include a JSON formatted query as POST payload, along with your CleverTap Account ID and CleverTap Account Passcode as request headers keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											Content-Type
+											header must be specified as
+										Element:code
+											application/json
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Endpoint
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The request to get event counts is an HTTP URL of the following form:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														POST https://api.clevertap.com/1/counts/events.json
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted request with the following parameters
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														event_name
+														– The name of the event which has been performed by the users whose events you want to download
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														from
+														&
+													Element:code
+														to
+														– Date range within which users should have performed the event you have specified in
+													Element:code
+														event_name
+														, input values have to be formatted as integers in format
+													Element:code
+														YYYYMMDD
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Optional Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+														Refer here for documentation on advanced queries, their structure, and examples.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "event_name": "choseNewFavoriteFood", "event_properties": [ { "name": "value", "operator": "contains", "value": "piz" } ], "from": 20150810, "to": 20151025 }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response would be a JSON object containing the key
+										Element:code
+											status
+											, which may be
+										Element:code
+											success
+											,
+										Element:code
+											partial
+											or
+										Element:code
+											fail
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											success
+											, there would be an additional
+										Element:code
+											count
+											key with a numeric value of the count for the specified query.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											fail
+											, there would be an additional
+										Element:code
+											error
+											key with a a string value, and an appropriate HTTP status code.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											partial
+											, there would be an additional
+										Element:code
+											req_id
+											key with a long integer value for the request ID for subsequent querying.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Partial response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "req_id": 384649162721759, "status": "partial" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subsequent request using request ID
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														GET https://api.clevertap.com/1/counts/events.json?req_id=<your_request_id_here>
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You would receive a
+													Element:code
+														partial
+														response until the query completes executing fully, following which you would receive a
+													Element:code
+														success
+														response along with the count if the query was successful, or the
+													Element:code
+														fail
+														response with the appropriate error string and HTTP status code.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Success response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status": "success", "count": 7138 }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Profile Counts API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This endpoint is used to retrieve count of profiles qualifying for a specific query.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request & Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every request to the API should include a JSON formatted query as POST payload, along with your CleverTap Account ID and CleverTap Account Passcode as request headers keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											Content-Type
+											header must be specified as
+										Element:code
+											application/json
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Endpoint
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The request to get event counts is an HTTP URL of the following form:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														POST https://api.clevertap.com/1/counts/profiles.json
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted request with the following parameters
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														No mandatory parameters. An empty payload ({}) will return count of all profiles.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Optional Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														event_name
+														– The name of the event which has been performed by the users whose events you want to download
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														from
+														&
+													Element:code
+														to
+														– Date range within which users should have performed the event you have specified in
+													Element:code
+														event_name
+														, input values have to be formatted as integers in format
+													Element:code
+														YYYYMMDD
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+														Refer here for documentation on advanced queries, their structure, and examples.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "event_name": "choseNewFavoriteFood", "event_properties": [ { "name": "value", "operator": "contains", "value": "piz" } ], "from": 20150810, "to": 20151025 }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response would be a JSON object containing the key
+										Element:code
+											status
+											, which may be
+										Element:code
+											success
+											,
+										Element:code
+											partial
+											or
+										Element:code
+											fail
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											success
+											, there would be an additional
+										Element:code
+											count
+											key with a numeric value of the count for the specified query.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											fail
+											, there would be an additional
+										Element:code
+											error
+											key with a a string value, and an appropriate HTTP status code.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											partial
+											, there would be an additional
+										Element:code
+											req_id
+											key with a long integer value for the request ID for subsequent querying.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Partial response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "req_id": 384649162721759, "status": "partial" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subsequent request using request ID
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														GET https://api.clevertap.com/1/counts/profiles.json?req_id=<your_request_id_here>
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You would receive a
+													Element:code
+														partial
+														response until the query completes executing fully, following which you would receive a
+													Element:code
+														success
+														response along with the count if the query was successful, or the
+													Element:code
+														fail
+														response with the appropriate error string and HTTP status code.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Success response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status": "success", "count": 7138 }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Real-time Counts API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This endpoint can be used to retrieve real-time count of active users (last 5 minutes), along with split by
+							Element:code
+								user_type
+								,
+							Element:code
+								session_source
+								,
+							Element:code
+								browser
+								,
+							Element:code
+								os
+								,
+							Element:code
+								device
+								for active and new users if required.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request & Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With your request you can optionally specify certain parameters within JSON body to retrieve counts (split by specified parameter type).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every request to the API should include your CleverTap Account ID and CleverTap Account Passcode in the request header keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											Content-Type
+											header must be specified as
+										Element:code
+											application/json
+											if payload is present.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Endpoint
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The request to get event counts is an HTTP URL of the following form:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														POST https://api.clevertap.com/1/now.json
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted request with the following parameters
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														No mandatory parameters. An empty payload ({}) will return real-time
+													Element:code
+														count
+														of active users.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Optional Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														user_type
+														– Boolean. If set to true, will return the split of users by type. Can be
+													Element:code
+														new
+														,
+													Element:code
+														repeat
+														,
+													Element:code
+														addressable
+														or
+													Element:code
+														customer
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														session_source
+														– Boolean. If set to true, will return the split of users by session source. Can be
+													Element:code
+														direct
+														,
+													Element:code
+														search
+														,
+													Element:code
+														social
+														,
+													Element:code
+														others
+														or
+													Element:code
+														unavailable
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														browser
+														– Boolean. If set to true, will return the split of users by browser.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														os
+														– Boolean. If set to true, will return the split of users by OS.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														device
+														– Boolean. If set to true, will return the split of users by device type. Can be
+													Element:code
+														desktop
+														,
+													Element:code
+														mobile
+														, or
+													Element:code
+														tablet
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														new
+														– Boolean. Can be used along with some of the above (
+													Element:code
+														session_source
+														,
+													Element:code
+														browser
+														,
+													Element:code
+														os
+														,
+													Element:code
+														device
+														) to additionally obtain split of
+													Element:code
+														new
+														users.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All parameters are optional.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "user_type": true, "session_source": true, "browser": true, "os": true, "device": true, "new": true }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response to this request will be a JSON object containing
+										Element:code
+											status
+											(
+										Element:code
+											success
+											/
+										Element:code
+											fail
+											).
+										Element:br
+											In case of a successful response when no payload was provided:
+										Element:br
+											–
+										Element:code
+											count
+											will contain the count of active users in real-time
+										Element:br
+											–
+										Element:code
+											last_processed_ts
+											will be the UNIX epoch timestamp of last processed event in the account
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "status": "success", "count": 214, "last_processed_ts": 1486536600 }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is a sample response with all optional parameters set to true.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "status": "success", "count": 214, "user_type": { "new": 58, "repeat": 25, "addressable": 38, "customer": 93 }, "session_source": { "direct": 122, "others": 115, "search": 18, "social": 2, "email": 1, "unavailable": 4 }, "browser": { "others": 4, "firefox": 2, "chrome": 52, "ie": 3, "mobileapp": 201 }, "os": { "others": 2, "android": 196, "ios": 35, "windows": 25, "mac": 3, "linux": 2 }, "device": { "desktop": 32, "mobile": 230, "tablet": 1 }, "new": { "session_source": { "direct": 18, "others": 50, "search": 12, "social": 2, "email": 1, "unavailable": 3 }, "browser": { "others": 1, "firefox": 0, "chrome": 36, "ie": 3, "mobileapp": 47 }, "os": { "others": 0, "android": 67, "ios": 2, "windows": 15, "mac": 2, "linux": 1 }, "device": { "desktop": 18, "mobile": 68, "tablet": 1 } }, "last_processed_ts": 1486536600 }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											copy
+										Element:b
+											Copied
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											fail
+											, there would be an additional
+										Element:code
+											error
+											key with a a string value, and an appropriate HTTP status code.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Top Property Counts API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This endpoint is used to retrieve counts for most/least frequently occurring properties for a particular event in a specified duration (along with optional filters).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request & Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every request to the API should include a JSON formatted query as POST payload, along with your CleverTap Account ID and CleverTap Account Passcode as request headers keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											Content-Type
+											header must be specified as
+										Element:code
+											application/json
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Endpoint
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The request to get top property counts is an HTTP URL of the following form:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														POST https://api.clevertap.com/1/counts/top.json
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted request with the following parameters
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														event_name
+														– The name of the event which has been performed by the users whose events you want to download
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														from
+														&
+													Element:code
+														to
+														– Date range within which users should have performed the event you have specified in
+													Element:code
+														event_name
+														, input values have to be formatted as integers in format
+													Element:code
+														YYYYMMDD
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														groups
+														– a parent object containing information about properties for which breakdown is required. The endpoint can be used to obtain analysis of multiple properties in one request. Each property object is referenced by a unique key within the groups object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														property_type
+														– The type of property for which top breakdown is required. Can be
+													Element:code
+														event_properties
+														,
+													Element:code
+														session_properties
+														,
+													Element:code
+														profile_fields
+														,
+													Element:code
+														app_fields
+														,
+													Element:code
+														demographics
+														,
+													Element:code
+														technographics
+														,
+													Element:code
+														reachability
+														or
+													Element:code
+														geo_fields
+														. Must be present inside each individual group
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														name
+														– Name of the property for which top breakdown is required. Must be present along with
+													Element:code
+														property_type
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The payload structure will be detailed through an example.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Optional Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														top_n
+														– The number of top values required for a given property. Can be specified along with
+													Element:code
+														property_type
+														and
+													Element:code
+														name
+														. Defaults to 10 if absent
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														order
+														–
+													Element:code
+														desc
+														or
+													Element:code
+														asc
+														. Sort order by property value count. Defaults to
+													Element:code
+														desc
+														if absent
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+														Refer here for documentation on advanced queries, their structure, and examples.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Valid
+													Element:code
+														property_type
+														and
+													Element:code
+														name
+														combinations
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														event_properties
+														– all event properties for the specified
+													Element:code
+														event_name
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														profile_fields
+														– all custom profile fields for the account
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														session_properties
+														–
+													Element:code
+														utm_source
+														,
+													Element:code
+														utm_medium
+														,
+													Element:code
+														utm_campaign
+														,
+													Element:code
+														session_referrer
+														,
+													Element:code
+														session_source
+														,
+													Element:code
+														time_of_day
+														(granularity up to hour of day)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														app_fields
+														– all app fields
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														demographics
+														– all demographics fields
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														technographics
+														– all technographics fields
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														reachability
+														– all reachability fields
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														geo_fields
+														–
+													Element:code
+														country
+														,
+													Element:code
+														region
+														,
+													Element:code
+														city
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+														Refer here for documentation on properties and their definitions.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "event_name": "Charged", "from": 20161229, "to": 20170129, "groups": { "foo": { "property_type": "event_properties", "name": "Amount" }, "bar": { "property_type": "profile_fields", "name": "Customer Type", "top_n": 2, "order": "asc" } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response would be a JSON object containing the key
+										Element:code
+											status
+											, which may be
+										Element:code
+											success
+											,
+										Element:code
+											partial
+											or
+										Element:code
+											fail
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											success
+											, the JSON object would also contain the property breakdown(s) filtered the specified query.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											fail
+											, there would be an additional
+										Element:code
+											error
+											key with a a string value, and an appropriate HTTP status code.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											partial
+											, there would be an additional
+										Element:code
+											req_id
+											key with a long integer value for the request ID for subsequent querying.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Partial response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "req_id": 384649162721759, "status": "partial" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subsequent request using request ID
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														GET https://api.clevertap.com/1/counts/top.json?req_id=<your_request_id_here>
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You would receive a
+													Element:code
+														partial
+														response until the query completes executing fully, following which you would receive a
+													Element:code
+														success
+														response if the query was successful, or the
+													Element:code
+														fail
+														response with the appropriate error string and HTTP status code.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Success response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status": "success", "foo": { "NUMBER": { "0-100": 10, "100-200": 9, "200-300": 8, "300-400": 7, "400-500": 6, "500-600": 5, "600-700": 4, "700-800": 3, "800-900": 2, "900-1000": 1 } }, "bar": { "STR": { "Gold": 5, "Silver": 10 } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Each property breakdown is referenced by the unique key assigned to it while querying. Within each property breakdown, there are separate datatype objects denoting the datatype that the property’s values have been provided.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Datatypes can be
+													Element:code
+														STR
+														,
+													Element:code
+														NUMBER
+														,
+													Element:code
+														ENUM
+														, or
+													Element:code
+														DATE
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														NUMBER
+														and
+													Element:code
+														DATE
+														breakdowns are ‘
+													Element:code
+														-
+														‘ separated ranges.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														DATE
+														values are in UNIX epoch format.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Counts are present within the datatype object for each property breakdown.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Trends API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This endpoint is used to retrieve daily/weekly/monthly event trends in a specified duration (along with optional filters).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request & Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every request to the API should include a JSON formatted query as POST payload, along with your CleverTap Account ID and CleverTap Account Passcode as request headers keyed with
+										Element:code
+											X-CleverTap-Account-Id
+											and
+										Element:code
+											X-CleverTap-Passcode
+											, respectively.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											Content-Type
+											header must be specified as
+										Element:code
+											application/json
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Endpoint
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The request to get event counts is an HTTP URL of the following form:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														POST https://api.clevertap.com/1/counts/trends.json
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Payload
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSON formatted request with the following parameters
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														event_name
+														– The name of the event which has been performed by the users whose events you want to download
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														from
+														&
+													Element:code
+														to
+														– Date range within which users should have performed the event you have specified in
+													Element:code
+														event_name
+														, input values have to be formatted as integers in format
+													Element:code
+														YYYYMMDD
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														groups
+														– a parent object containing information about trends whose breakdown is required. The endpoint can be used to obtain analysis of multiple trends in one request. Each trend object is referenced by a unique key within the groups object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														trend_type
+														– can be
+													Element:code
+														daily
+														,
+													Element:code
+														weekly
+														or
+													Element:code
+														monthly
+														. Must be present inside each individual group
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The payload structure will be detailed through an example.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Optional Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														unique
+														– Boolean. If set to true, returns trends of profiles instead of events
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+														Refer here for documentation on advanced queries, their structure, and examples.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "event_name": "UTM Visited", "from": 20161224, "to": 20170103, "unique": false, "groups": { "foo": { "trend_type": "daily" }, "bar": { "trend_type": "weekly" }, "foobar": { "trend_type": "monthly" } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response would be a JSON object containing the key
+										Element:code
+											status
+											, which may be
+										Element:code
+											success
+											,
+										Element:code
+											partial
+											or
+										Element:code
+											fail
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											success
+											, the JSON object would also contain the trend breakdown(s) filtered the specified query.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											fail
+											, there would be an additional
+										Element:code
+											error
+											key with a a string value, and an appropriate HTTP status code.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											status
+											is
+										Element:code
+											partial
+											, there would be an additional
+										Element:code
+											req_id
+											key with a long integer value for the request ID for subsequent querying.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Partial response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "req_id": 384649162721759, "status": "partial" }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subsequent request using request ID
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														GET https://api.clevertap.com/1/counts/trends.json?req_id=<your_request_id_here>
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You would receive a
+													Element:code
+														partial
+														response until the query completes executing fully, following which you would receive a
+													Element:code
+														success
+														response if the query was successful, or the
+													Element:code
+														fail
+														response with the appropriate error string and HTTP status code.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Success response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "status": "success", "foo": { "20161224": 10, "20161225": 10, "20161226": 10, "20161227": 10, "20161228": 10, "20161229": 10, "20161230": 10, "20161231": 10, "20170101": 10, "20170102": 10, "20170103": 10 }, "bar": { "201652": 80, "201701": 30 }, "foobar": { "201612": 80, "201701": 30 } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														copy
+													Element:b
+														Copied
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Each trend is referenced by the unique key assigned to it while querying.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														daily
+														trend keys are in
+													Element:code
+														YYYYMMDD
+														format
+													Element:br
+													Element:code
+														weekly
+														trend keys are in
+													Element:code
+														YYYYWW
+														format, where
+													Element:code
+														WW
+														refers to week of year
+													Element:br
+													Element:code
+														monthly
+														trend keys are in
+													Element:code
+														YYYYMM
+														format
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Debugging
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														HTTP Response Codes
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														200
+														Successful request
+													Element:br
+													Element:code
+														400
+														Bad Request. Some mandatory parameter was missing
+													Element:br
+													Element:code
+														429
+														Too many requests were made concurrently.
+													Element:br
+													Element:code
+														500
+														Server Error
+													Element:br
+													Element:code
+														503
+														Service Unavailable. Please retry later
+													Element:br
+													Element:mark
+														Currently, we return 429 when you make more than 3 concurrent requests. Please try again after 10 minutes in case you receive 429 HTTP response code

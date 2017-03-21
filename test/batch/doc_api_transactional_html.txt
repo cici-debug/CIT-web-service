@@ -1,0 +1,916 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Transactional API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Transactional API is made for
+				Element:strong
+					1-to-1 interactions
+					. It allows you to push a specific user ID or to a group of IDs
+				Element:em
+					(device token, install ID or custom user ID)
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Use it to send action-oriented or time-sensitive push notifications.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:strong
+					Action-oriented notifications
+					: New message, friend request, reached credit limit, user's turn in a game, etc.
+				Element:li
+				Element:strong
+					Time-sentitive notifications
+					: Delivered order, delayed flight, canceled train, etc.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Request structure
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Route
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Transactional API exposes a POST send endpoint:
+										Element:code
+											https://api.batch.com/1.1/BATCH_API_KEY/transactional/send
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is a valid cURL example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -H "Content-Type: application/json" -H "X-Authorization: batch_rest_api_key" -X POST -d "@payload.json" "https://api.batch.com/1.1/batch_api_key/transactional/send"
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:th
+											Key
+										Element:th
+											Description
+										Element:tr
+										Element:td
+										Element:span
+										Element:span
+											batch_rest_api_key
+										Element:td
+											Your company REST API key. It gives you access to our APIs. You can find it in ⚙ Settings → General.
+										Element:tr
+										Element:td
+										Element:span
+										Element:span
+											batch_api_key
+										Element:td
+											Your app's API key. It allows you to choose the app you want to push. Each app has a different API key. You can find it in ⚙ Settings → General.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Headers
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to authenticate with the API, you need to provide your
+										Element:strong
+											company REST API Key
+											as the value of the
+										Element:code
+											X-Authorization
+											header.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Post data
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The body of the request must contain a
+										Element:strong
+											valid JSON payload
+											with all the parameters you chose to add: Targeting, recurrence and more.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's see the parameters in detail.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Id
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											group_id
+										Element:td
+										Element:strong
+											String
+											-
+										Element:em
+											Required
+											Name of your campaign, useful for analytics purposes
+										Element:i
+											(see Analytics → Notifications → Transactional)
+											. The group_id shouldn't be unique, it's a key to group your transactional push analytics.
+										Element:br
+											You can use the letters a-z, A-Z, the numbers 0-9, underscores and hyphens.
+										Element:em
+											E.g.
+										Element:code
+											{"group_id":"Welcome_campaign"}
+										Element:tr
+										Element:td
+										Element:code
+											priority
+										Element:td
+										Element:strong
+											String
+											-
+										Element:em
+											Optional
+											Defines the priority of your message on iOS
+										Element:i
+											(APNS)
+											and Android
+										Element:i
+											(GCM)
+											.
+										Element:br
+											Acceptable values include:
+										Element:code
+											normal
+											or
+										Element:code
+											high
+											.
+										Element:br
+											Default value on iOS is high. Default value on Android is normal.
+										Element:br
+											On Android, use the high priority if you have a messaging/voip app and if you notice delivery issues due to native
+										Element:i
+											(Doze)
+											or constructor related
+										Element:i
+											(Samsung Smart Manager, etc)
+											energy saving features. High priority Android notifications can drain your user's battery faster since they 'wake up' the device and open a network connection.
+										Element:em
+											E.g.
+										Element:code
+											{"priority":"high"}
+										Element:tr
+										Element:td
+										Element:code
+											gcm_collapse_key
+										Element:td
+										Element:strong
+											Object
+											-
+										Element:em
+											Optional - Android only
+											Defines how notifications are managed when an offline device goes online
+										Element:i
+											(enabled by default)
+											.
+										Element:br
+											If enabled, the device will only show the most recent notification. If disabled, it will show all the notifications received when the device was offline. You should disable the collapse key if all your notifications matter
+										Element:i
+											(E.g. messages, etc)
+											. You can use up to 3 different collapse keys if you want users to get only one notification of each kind when coming online
+										Element:i
+											(E.g. marketing messages, alert, etc)
+											.
+										Element:em
+											E.g.
+										Element:code
+											{"enabled":true,"key":"default"}
+										Element:tr
+										Element:td
+										Element:code
+											recipients
+										Element:td
+										Element:strong
+											Object
+											-
+										Element:em
+											Required
+											An object containing who you want to push, by tokens or Custom IDs.
+										Element:br
+											Supports up to
+										Element:b
+											10,000 push tokens
+											/custom IDs/Install IDs.
+										Element:br
+											One of the three parameters must be included.
+										Element:tr
+										Element:td
+										Element:code
+											tokens
+										Element:td
+										Element:strong
+											Array of strings
+											- An array containing the push tokens to push.
+										Element:em
+											E.g.
+										Element:code
+											{"tokens":["USER_PUSH_TOKEN"]}
+										Element:tr
+										Element:td
+										Element:code
+											custom_ids
+										Element:td
+										Element:strong
+											Array of strings
+											- An array containing the custom user IDs to push.
+										Element:em
+											E.g.
+										Element:code
+											{"custom_ids":["USER_CUSTOM_ID"]}
+										Element:tr
+										Element:td
+										Element:code
+											install_ids
+										Element:td
+										Element:strong
+											Array of strings
+											- An array containing the installation IDs to push. It should be the
+										Element:b
+											unmodified
+											installation ID given by the SDK's user module.
+										Element:em
+											E.g.
+										Element:code
+											{"install_ids":["USER_INSTALL_ID"]}
+										Element:tr
+										Element:td
+										Element:code
+											message
+										Element:td
+										Element:strong
+											Object
+											-
+										Element:em
+											Required
+											An object containing the message to be delivered.
+										Element:tr
+										Element:td
+										Element:code
+											title
+										Element:td
+										Element:strong
+											String
+											-
+										Element:i
+											Optional
+											. Title of the push notification. On
+										Element:b
+											iOS
+											, the title will only appear on the Apple Watch or in the notification center
+										Element:i
+											(since iOS 8)
+											.
+										Element:em
+											E.g.
+										Element:code
+											{"title":"Don't give up!"}
+										Element:tr
+										Element:td
+										Element:code
+											body
+										Element:td
+										Element:strong
+											String
+											-
+										Element:i
+											Required
+											. Body text of the push notification.
+										Element:em
+											E.g.
+										Element:code
+											{"body":"Just keep training, you'll get better"}
+										Element:tr
+										Element:td
+										Element:code
+											media
+										Element:td
+										Element:strong
+											Object
+											-
+										Element:em
+											Optional
+											An object containing an icon, a picture, an audio or a video file's URL.
+										Element:em
+											E.g.
+										Element:code
+											{"media":{"icon":"http://mydomain.com/icon.png","picture":"http://mydomain.com/pic.png"}}
+										Element:tr
+										Element:td
+										Element:code
+											icon
+										Element:td
+										Element:strong
+											String
+											-
+										Element:strong
+											Android
+											- URL of the icon file. The file must be a PNG or JPG image, with a minimum width of 192px and must be hosted on an HTTPS server that responds to HEAD requests. It must not be larger than 5MB.
+										Element:tr
+										Element:td
+										Element:code
+											picture
+										Element:td
+										Element:strong
+											String
+											-
+										Element:strong
+											iOS 10+ / Android
+											- URL of the picture file. The file must be a PNG or JPG image with a width of 1250px and a ratio of 2:1. It must be hosted on an HTTPS server that correctly responds to HEAD requests and must not be larger than 5MB.
+										Element:br
+										Element:strong
+											Note:
+											On iOS, make sure your server complies to
+										Element:a
+											App Transport Security
+											or that you’ve added the appropriate exceptions in your app and app extension. Here is how a push with an image attachement looks:
+										Element:a
+											Example
+											.
+										Element:tr
+										Element:td
+										Element:code
+											audio
+										Element:td
+										Element:strong
+											String
+											-
+										Element:strong
+											iOS 10+
+											- URL of the audio file. The file must be a MP3 file hosted on an HTTPS server that responds to HEAD requests. It must not be larger than 10MB. Here is how a push with an audio attachement looks:
+										Element:a
+											Example
+											.
+										Element:tr
+										Element:td
+										Element:code
+											video
+										Element:td
+										Element:strong
+											String
+											-
+										Element:strong
+											iOS 10+
+											- URL of the video file. The file must be a MPEG-4 file hosted on an HTTPS server that responds to HEAD requests. It must not be larger than 30MB. Here is how a push with a video attachement looks:
+										Element:a
+											Example
+											.
+										Element:tr
+										Element:td
+										Element:code
+											deeplink
+										Element:td
+										Element:strong
+											String
+											-
+										Element:em
+											Optional
+											A URL that points to a specific part of your app
+										Element:i
+											(i.e. The news you mention in your notification, etc)
+											. The deeplink URL is usually be a link based on a URL scheme that you specify within your app, but can be a relative one if you decide to read it manually.
+										Element:em
+											E.g.
+										Element:code
+											{"deeplink":"recipe-app://recipes/desserts/peach-pie"}
+										Element:tr
+										Element:td
+										Element:code
+											sandbox
+										Element:td
+										Element:strong
+											Boolean
+											-
+										Element:em
+											Optional
+											Flag specifying whether the APNS sandbox should be used. No effect for Android applications or Custom IDs. Default: false.
+										Element:em
+											E.g.
+										Element:code
+											{"sandbox":true}
+										Element:tr
+										Element:td
+										Element:code
+											wp_template
+										Element:td
+										Element:strong
+											String
+											-
+										Element:em
+											Optional
+											Flag specifying what Windows Toast template should be used. Use "legacy" if you push Windows 8.1 or Windows Phone 8.1, "generic" for UWP (Windows 10). Default: "legacy".
+										Element:em
+											E.g.
+										Element:code
+											{"wp_template":"generic"}
+										Element:tr
+										Element:td
+										Element:code
+											custom_payload
+										Element:td
+										Element:strong
+											String
+											-
+										Element:em
+											Optional (only available on paid plans)
+											A JSON string that can contain additional parameters that your application can handle when receiving push notifications if configured to do so. The only forbidden key is
+										Element:code
+											com.batch
+											.
+										Element:br
+											Format is
+										Element:code
+											{"x":"y"}
+											.
+										Element:tr
+										Element:td
+										Element:code
+											landing
+										Element:td
+										Element:strong
+											Object
+											-
+										Element:em
+											Optional
+											An object describing the landing message. This will display a landing view allowing you to have complex interactions following a push notification. The landing message object will be described further below
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is how a minimal and valid JSON payload looks like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "group_id": "welcome", "recipients": { "tokens": ["USER_PUSH_TOKEN"] }, "message": { "title": "Hello!", "body": "How's it going?" }, "custom_payload": "{\"tag\":\"wake up push\", \"landing_screen\":\"greeting\"}" }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														The landing message object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A landing message must have the following format.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Id
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:code
+														theme
+													Element:td
+													Element:strong
+														String
+														-
+													Element:em
+														Required
+														The code of the theme to use for your landing view
+													Element:em
+														E.g.
+													Element:code
+														{"theme":"dark_base_theme"}
+													Element:tr
+													Element:td
+													Element:code
+														image
+													Element:td
+													Element:strong
+														String
+														-
+													Element:em
+														Optional
+														The url of the image to use if the theme contains one
+													Element:em
+														E.g.
+													Element:code
+														{"image":"https://d1v3v59tzaau1a.cloudfront.net/medias/img/landing-samples/fly.15569dd6.jpg"}
+													Element:tr
+													Element:td
+													Element:code
+														image_description
+													Element:td
+													Element:strong
+														String
+														-
+													Element:em
+														Optional
+														The description of the image used for accessibility purposes
+													Element:em
+														E.g.
+													Element:code
+														{"image_description":"Boeing 747"}
+													Element:tr
+													Element:td
+													Element:code
+														tracking_id
+													Element:td
+													Element:strong
+														String
+														-
+													Element:em
+														Optional
+														A tracking ID that you will receive in your application if set
+													Element:em
+														E.g.
+													Element:code
+														{"tracking_id":"OPEA20161005"}
+													Element:tr
+													Element:td
+													Element:code
+														header
+													Element:td
+													Element:strong
+														String
+														-
+													Element:em
+														Optional
+														The text of the header
+													Element:em
+														E.g.
+													Element:code
+														{"header":"News"}
+													Element:tr
+													Element:td
+													Element:code
+														title
+													Element:td
+													Element:strong
+														String
+														-
+													Element:em
+														Optional
+														The text of the title
+													Element:em
+														E.g.
+													Element:code
+														{"title":"Update to the latest version!"}
+													Element:tr
+													Element:td
+													Element:code
+														body
+													Element:td
+													Element:strong
+														String
+														-
+													Element:em
+														Optional
+														The text of the body
+													Element:em
+														E.g.
+													Element:code
+														{"body":"Lots of bug and security fixes"}
+													Element:tr
+													Element:td
+													Element:code
+														actions
+													Element:td
+													Element:strong
+														Array of objects
+														-
+													Element:em
+														Required
+														A list of actions available in the landing message. The action object will be described further below
+												Node:
+												(type) c
+												(layer)4
+													Element:blockquote
+													Element:p
+													Element:strong
+														Note
+													Element:br
+														If your theme contains the close button, the
+													Element:code
+														actions
+														array is not strictly required.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														The action object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Each action in the landing message must be defined as follows.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Id
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:code
+														action
+													Element:td
+													Element:strong
+														String
+														-
+													Element:em
+														Required
+														The action name. Must match with the actions you register in your mobile application. Not strictly required, if null the close action will be used
+													Element:em
+														E.g.
+													Element:code
+														{"action":"show_article"}
+													Element:tr
+													Element:td
+													Element:code
+														label
+													Element:td
+													Element:strong
+														String
+														-
+													Element:em
+														Required
+														The label of the call to action
+													Element:em
+														E.g.
+													Element:code
+														{"label":"Show"}
+													Element:tr
+													Element:td
+													Element:code
+														args
+													Element:td
+													Element:strong
+														Object
+														-
+													Element:em
+														Optional
+														An object containing arbitrary data that will be passed to your action as is
+													Element:em
+														E.g.
+													Element:code
+														{"args":{"id":4,"category":"sports"}}
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Responses
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Success
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the POST to the API endpoint is successful you will receive an
+										Element:strong
+											HTTP 201
+											confirmation and
+										Element:strong
+											a unique token
+											representing the transaction.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{"token":"110e8400-e29b-11d4-b543-446655440000"}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please keep this token: It will be useful for upcoming features, and it will also help in getting faster support.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											If you don't receive the notification after a successful POST, make sure your app is not opened in the foreground
+										Element:em
+											(iOS)
+											and check again your integration.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Failure
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the POST data does not meet the API requirements you will receive an actionable error message. Contact us at
+										Element:a
+											support@batch.com
+											if you need further support.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											AUTHENTICATION_INVALID
+											(Http status code: 401, Error code: 10)
+										Element:li
+										Element:code
+											ROUTE_NOT_FOUND
+											(Http status code: 404, Error code: 20)
+										Element:li
+										Element:code
+											MISSING_PARAMETER
+											(Http status code: 400, Error code: 30)
+										Element:li
+										Element:code
+											MALFORMED_PARAMETER
+											(Http status code: 400, Error code: 31)
+										Element:li
+										Element:code
+											MALFORMED_JSON_BODY
+											(Http status code: 400, Error code: 32)
+										Element:li
+										Element:code
+											SERVER_ERROR
+											(Http status code: 500, Error code: 1)
+										Element:li
+										Element:code
+											MAINTENANCE_ERROR
+											(Http status code: 503, Error code: 2)
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Can I do a single API request for both iOS and Android?
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Batch manages iOS and Android notifications separately to take advantage of the features that each OS has
+													Element:em
+														(e.g. silent push notifications, GCM collapse key, etc)
+														. This is why you will need to call the Transactional API once per OS.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Our APIs are asynchronous and respond very fast. Batch will send a push notification, provided that a valid device token is tied to the custom user ID you are targeting. However, if the custom user ID does not exist for the app you targeted, the call will fail silently.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														My device doesn't seem to receive any notifications
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here are some suggestions in case your device doesn't receive any notifications:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:strong
+														Invalid token
+														: Make sure the device token you are targeting is still valid using the Debug tool (
+													Element:a
+														iOS
+														/
+													Element:a
+														Android
+														).
+													Element:li
+													Element:strong
+														Wrong environment
+														: On iOS, try adding
+													Element:code
+														{"sandbox":true}
+														to your json payload.
+													Element:li
+													Element:strong
+														Invalid custom user ID
+														: Make sure the custom user ID (
+													Element:a
+														iOS
+														/
+													Element:a
+														Android
+														) was registered by Batch for the OS you are targeting using the Debug tool (
+													Element:a
+														iOS
+														/
+													Element:a
+														Android
+														).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you are still having issues receiving notifications, please take a look at our troubleshooting sections
+													Element:em
+														(
+														.
+													Element:a
+														iOS
+														/
+													Element:a
+														Android
+														)

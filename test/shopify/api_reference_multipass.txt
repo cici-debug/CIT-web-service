@@ -1,0 +1,1345 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Multipass
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Let's say you are the owner of a successful website forum. All of your users must log in to the forum to contribute. Members of your forum can then purchase a forum t-shirt through your Shopify store. Unfortunately, your users have to log in to the forum first and then log in to your Shopify store before they can purchase a t-shirt.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Multipass login is for store owners who have a separate website and a Shopify store. It redirects users from the website to the Shopify store and seamlessly logs them in with the same email address they used to sign up for the original website. If no account with that email address exists yet, one is created. There is no need to synchronize any customer databases.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Shopify Plus
+														The Multipass login feature is
+												Node:
+												(type) c
+												(layer)4
+													Element:strong
+														only
+														available to
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														Shopify Plus Customers
+														.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Implementation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								1. Enable Multipass login through your shop admin
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Log in to your shop admin and go to the
+							Element:a
+								Settings > Checkout page
+								. Scroll down to the
+							Element:strong
+								Customer Accounts
+								section and ensure that you have either
+							Element:strong
+								Accounts are optional
+								selected or
+							Element:strong
+								Accounts are required
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Select
+							Element:strong
+								Enable Multipass
+								. Once enabled, a
+							Element:strong
+								secret
+								will be shared with you. You will need the secret in order to generate tokens to log your customers into your Shopify store. Make sure you keep your secret private.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								2. Encode your customer information using JSON
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The customer information is represented as a hash which must contain at least the email address of the customer and a current timestamp (in ISO8601 encoding). You can also include the customer's first name, last name or several
+								A minimal example, containing all required fields, might look like this:
+							Element:a
+								shipping addresses
+								. Optionally, you can include an IP address of the customer's current browser session, that makes the token valid only for requests originating from this IP address.
+						Node:
+						(type) c
+						(layer)2
+							Element:figure
+								An example containing some optional fields might look like this:
+							Element:pre
+							Element:code
+							Element:span
+								{
+							Element:span
+								email:
+							Element:span
+								"bob@shopify.com"
+							Element:span
+								,
+							Element:span
+								created_at:
+							Element:span
+								"2013-04-11T15:16:23-04:00"
+							Element:span
+								,
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:figure
+							Element:pre
+							Element:code
+							Element:span
+								{
+							Element:span
+								email:
+							Element:span
+								"bob@shopify.com"
+							Element:span
+								,
+							Element:span
+								created_at:
+							Element:span
+								"2013-04-11T15:16:23-04:00"
+							Element:span
+								,
+							Element:span
+								first_name:
+							Element:span
+								"Bob"
+							Element:span
+								,
+							Element:span
+								last_name:
+							Element:span
+								"Bobsen"
+							Element:span
+								,
+							Element:span
+								tag_string:
+							Element:span
+								"canadian, premium"
+							Element:span
+								,
+							Element:span
+								identifier:
+							Element:span
+								"bob123"
+							Element:span
+								,
+							Element:span
+								remote_ip:
+							Element:span
+								"107.20.160.121"
+							Element:span
+								,
+							Element:span
+								return_to:
+							Element:span
+								"http://yourstore.com/some_specific_site"
+							Element:span
+								,
+							Element:span
+								addresses:
+							Element:span
+								[{
+							Element:span
+								address1:
+							Element:span
+								"123 Oak St"
+							Element:span
+								,
+							Element:span
+								city:
+							Element:span
+								"Ottawa"
+							Element:span
+								,
+							Element:span
+								country:
+							Element:span
+								"Canada"
+							Element:span
+								,
+							Element:span
+								first_name:
+							Element:span
+								"Bob"
+							Element:span
+								,
+							Element:span
+								last_name:
+							Element:span
+								"Bobsen"
+							Element:span
+								,
+							Element:span
+								phone:
+							Element:span
+								"555-1212"
+							Element:span
+								,
+							Element:span
+								province:
+							Element:span
+								"Ontario"
+							Element:span
+								,
+							Element:span
+								zip:
+							Element:span
+								"123 ABC"
+							Element:span
+								,
+							Element:span
+								province_code:
+							Element:span
+								"ON"
+							Element:span
+								,
+							Element:span
+								country_code:
+							Element:span
+								"CA"
+							Element:span
+								,
+							Element:span
+								default:
+							Element:span
+								true
+							Element:span
+								}]
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can attribute tags to your customer by setting "tag_string" to a list of comma separated one-word values. These tags will override any tags that you may have already attributed to this customer.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At Shopify, we use email addresses as unique identifiers for customers of a shop. If your site uses other identifiers (such as usernames), or if it is possible that two different users of your site registered with the same email address, you
+							Element:strong
+								must
+								set the unique identifier in the "identifier" field to avoid security problems. If the email address is always unique, you don't need to set the "identifier" field.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want your users to see a specific page of your Shopify store, you can use the "return_to" field for that.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								3. Encrypt the JSON data using AES
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To generate a valid multipass login token, you need the secret given to you in your Shopify admin. The secret is used to derive two cryptographic keys — one for encryption and one for signing. This key derivation is done through the use of the
+							Element:a
+								SHA-256 hash
+								function (the first 128 bit are used as encryption key and the last 128 bit are used as signature key).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The encryption provides confidentiality. It makes sure that no one can read the customer data. As encryption cipher, we use the
+							Element:a
+								AES algorithm
+								(128 bit key length, CBC mode of operation, random initialization vector).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								4. Sign the encrypted data using HMAC
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The signature (also called message authentication code) provides authenticity. It makes sure that the multipass token is authentic and hasn't been tampered with. We use the
+							Element:a
+								HMAC algorithm
+								with a SHA-256 hash function and we sign the encrypted JSON data from step 2 (not the plaintext JSON data from step 1).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								5. Base64 encode the binary data
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The multipass login token now consists of the 128 bit initialization vector, a variable length ciphertext, and a 256 bit signature (in this order). This data is encoded using base64 (URL-safe variant, RFC 4648).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								6. Redirect your customer to your Shopify store
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you have the token, you should trigger a HTTP GET request to your Shopify store.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:pre
+							Element:span
+								GET
+								/account/login/multipass/insert_token_here
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When the request is successful (e.g. the token is valid and not expired), the customer will be logged in to your Shopify store.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The multipass token is only valid within a very short timeframe and each token can only be used once. For those reasons, you should not generate tokens in advance for rendering them into your HTML sites. You should create a redirect URL which generates tokens on-the-fly when needed and then automatically redirects the browser.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Example implementation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following shows a basic example implementation of the token generation in the Ruby language.
+						Node:
+						(type) c
+						(layer)2
+							Element:figure
+							Element:pre
+							Element:code
+							Element:span
+								require
+							Element:span
+								"openssl"
+							Element:span
+								require
+							Element:span
+								"base64"
+							Element:span
+								require
+							Element:span
+								"time"
+							Element:span
+								require
+							Element:span
+								"json"
+							Element:span
+								class
+							Element:span
+								ShopifyMultipass
+							Element:span
+								def
+							Element:span
+								initialize
+							Element:span
+								(
+							Element:span
+								multipass_secret
+							Element:span
+								)
+							Element:span
+								### Use the Multipass secret to derive two cryptographic keys,
+							Element:span
+								### one for encryption, one for signing
+							Element:span
+								key_material
+							Element:span
+								=
+							Element:span
+								OpenSSL
+							Element:span
+								::
+							Element:span
+								Digest
+							Element:span
+								::
+							Element:span
+								Digest
+							Element:span
+								.
+							Element:span
+								new
+							Element:span
+								(
+							Element:span
+								"sha256"
+							Element:span
+								).
+							Element:span
+								digest
+							Element:span
+								(
+							Element:span
+								multipass_secret
+							Element:span
+								)
+							Element:span
+								@encryption_key
+							Element:span
+								=
+							Element:span
+								key_material
+							Element:span
+								[
+							Element:span
+								0
+							Element:span
+								,
+							Element:span
+								16
+							Element:span
+								]
+							Element:span
+								@signature_key
+							Element:span
+								=
+							Element:span
+								key_material
+							Element:span
+								[
+							Element:span
+								16
+							Element:span
+								,
+							Element:span
+								16
+							Element:span
+								]
+							Element:span
+								end
+							Element:span
+								def
+							Element:span
+								generate_token
+							Element:span
+								(
+							Element:span
+								customer_data_hash
+							Element:span
+								)
+							Element:span
+								### Store the current time in ISO8601 format.
+							Element:span
+								### The token will only be valid for a small timeframe around this timestamp.
+							Element:span
+								customer_data_hash
+							Element:span
+								[
+							Element:span
+								"created_at"
+							Element:span
+								]
+							Element:span
+								=
+							Element:span
+								Time
+							Element:span
+								.
+							Element:span
+								now
+							Element:span
+								.
+							Element:span
+								iso8601
+							Element:span
+								### Serialize the customer data to JSON and encrypt it
+							Element:span
+								ciphertext
+							Element:span
+								=
+							Element:span
+								encrypt
+							Element:span
+								(
+							Element:span
+								customer_data_hash
+							Element:span
+								.
+							Element:span
+								to_json
+							Element:span
+								)
+							Element:span
+								### Create a signature (message authentication code) of the ciphertext
+							Element:span
+								### and encode everything using URL-safe Base64 (RFC 4648)
+							Element:span
+								Base64
+							Element:span
+								.
+							Element:span
+								urlsafe_encode64
+							Element:span
+								(
+							Element:span
+								ciphertext
+							Element:span
+								+
+							Element:span
+								sign
+							Element:span
+								(
+							Element:span
+								ciphertext
+							Element:span
+								))
+							Element:span
+								end
+							Element:span
+								private
+							Element:span
+								def
+							Element:span
+								encrypt
+							Element:span
+								(
+							Element:span
+								plaintext
+							Element:span
+								)
+							Element:span
+								cipher
+							Element:span
+								=
+							Element:span
+								OpenSSL
+							Element:span
+								::
+							Element:span
+								Cipher
+							Element:span
+								::
+							Element:span
+								Cipher
+							Element:span
+								.
+							Element:span
+								new
+							Element:span
+								(
+							Element:span
+								"aes-128-cbc"
+							Element:span
+								)
+							Element:span
+								cipher
+							Element:span
+								.
+							Element:span
+								encrypt
+							Element:span
+								cipher
+							Element:span
+								.
+							Element:span
+								key
+							Element:span
+								=
+							Element:span
+								@encryption_key
+							Element:span
+								### Use a random IV
+							Element:span
+								cipher
+							Element:span
+								.
+							Element:span
+								iv
+							Element:span
+								=
+							Element:span
+								iv
+							Element:span
+								=
+							Element:span
+								cipher
+							Element:span
+								.
+							Element:span
+								random_iv
+							Element:span
+								### Use IV as first block of ciphertext
+							Element:span
+								iv
+							Element:span
+								+
+							Element:span
+								cipher
+							Element:span
+								.
+							Element:span
+								update
+							Element:span
+								(
+							Element:span
+								plaintext
+							Element:span
+								)
+							Element:span
+								+
+							Element:span
+								cipher
+							Element:span
+								.
+							Element:span
+								final
+							Element:span
+								end
+							Element:span
+								def
+							Element:span
+								sign
+							Element:span
+								(
+							Element:span
+								data
+							Element:span
+								)
+							Element:span
+								OpenSSL
+							Element:span
+								::
+							Element:span
+								HMAC
+							Element:span
+								.
+							Element:span
+								digest
+							Element:span
+								(
+							Element:span
+								"sha256"
+							Element:span
+								,
+							Element:span
+								@signature_key
+							Element:span
+								,
+							Element:span
+								data
+							Element:span
+								)
+							Element:span
+								end
+							Element:span
+								end
+							Element:span
+								customer_data
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								email:
+							Element:span
+								"bob@shopify.com"
+							Element:span
+								,
+							Element:span
+								remote_ip:
+							Element:span
+								"107.20.160.121"
+							Element:span
+								}
+							Element:span
+								token
+							Element:span
+								=
+							Element:span
+								ShopifyMultipass
+							Element:span
+								.
+							Element:span
+								new
+							Element:span
+								(
+							Element:span
+								"multipass secret from shop admin"
+							Element:span
+								).
+							Element:span
+								generate_token
+							Element:span
+								(
+							Element:span
+								customer_data
+							Element:span
+								)
+							Element:span
+								.
+							Element:span
+								.
+							Element:span
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following shows a basic example implementation of the token generation in PHP.
+						Node:
+						(type) c
+						(layer)2
+							Element:figure
+							Element:pre
+							Element:code
+							Element:span
+								<?php
+							Element:span
+								date_default_timezone_set
+							Element:span
+								(
+							Element:span
+								"UTC"
+							Element:span
+								);
+							Element:span
+								class
+							Element:span
+								ShopifyMultipass
+							Element:span
+								{
+							Element:span
+								private
+							Element:span
+								$encryption_key
+							Element:span
+								;
+							Element:span
+								private
+							Element:span
+								$signature_key
+							Element:span
+								;
+							Element:span
+								public
+							Element:span
+								function
+							Element:span
+								__construct
+							Element:span
+								(
+							Element:span
+								$multipass_secret
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								// Use the Multipass secret to derive two cryptographic keys,
+							Element:span
+								// one for encryption, one for signing
+							Element:span
+								$key_material
+							Element:span
+								=
+							Element:span
+								hash
+							Element:span
+								(
+							Element:span
+								"sha256"
+							Element:span
+								,
+							Element:span
+								$multipass_secret
+							Element:span
+								,
+							Element:span
+								true
+							Element:span
+								);
+							Element:span
+								$this
+							Element:span
+								->
+							Element:span
+								encryption_key
+							Element:span
+								=
+							Element:span
+								substr
+							Element:span
+								(
+							Element:span
+								$key_material
+							Element:span
+								,
+							Element:span
+								0
+							Element:span
+								,
+							Element:span
+								16
+							Element:span
+								);
+							Element:span
+								$this
+							Element:span
+								->
+							Element:span
+								signature_key
+							Element:span
+								=
+							Element:span
+								substr
+							Element:span
+								(
+							Element:span
+								$key_material
+							Element:span
+								,
+							Element:span
+								16
+							Element:span
+								,
+							Element:span
+								16
+							Element:span
+								);
+							Element:span
+								}
+							Element:span
+								public
+							Element:span
+								function
+							Element:span
+								generate_token
+							Element:span
+								(
+							Element:span
+								$customer_data_hash
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								// Store the current time in ISO8601 format.
+							Element:span
+								// The token will only be valid for a small timeframe around this timestamp.
+							Element:span
+								$customer_data_hash
+							Element:span
+								[
+							Element:span
+								"created_at"
+							Element:span
+								]
+							Element:span
+								=
+							Element:span
+								date
+							Element:span
+								(
+							Element:span
+								"c"
+							Element:span
+								);
+							Element:span
+								// Serialize the customer data to JSON and encrypt it
+							Element:span
+								$ciphertext
+							Element:span
+								=
+							Element:span
+								$this
+							Element:span
+								->
+							Element:span
+								encrypt
+							Element:span
+								(
+							Element:span
+								json_encode
+							Element:span
+								(
+							Element:span
+								$customer_data_hash
+							Element:span
+								));
+							Element:span
+								// Create a signature (message authentication code) of the ciphertext
+							Element:span
+								// and encode everything using URL-safe Base64 (RFC 4648)
+							Element:span
+								return
+							Element:span
+								strtr
+							Element:span
+								(
+							Element:span
+								base64_encode
+							Element:span
+								(
+							Element:span
+								$ciphertext
+							Element:span
+								.
+							Element:span
+								$this
+							Element:span
+								->
+							Element:span
+								sign
+							Element:span
+								(
+							Element:span
+								$ciphertext
+							Element:span
+								)),
+							Element:span
+								'+/'
+							Element:span
+								,
+							Element:span
+								'-_'
+							Element:span
+								);
+							Element:span
+								}
+							Element:span
+								private
+							Element:span
+								function
+							Element:span
+								encrypt
+							Element:span
+								(
+							Element:span
+								$plaintext
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								// Use a random IV
+							Element:span
+								$iv
+							Element:span
+								=
+							Element:span
+								openssl_random_pseudo_bytes
+							Element:span
+								(
+							Element:span
+								16
+							Element:span
+								);
+							Element:span
+								// Use IV as first block of ciphertext
+							Element:span
+								return
+							Element:span
+								$iv
+							Element:span
+								.
+							Element:span
+								openssl_encrypt
+							Element:span
+								(
+							Element:span
+								$plaintext
+							Element:span
+								,
+							Element:span
+								"AES-128-CBC"
+							Element:span
+								,
+							Element:span
+								$this
+							Element:span
+								->
+							Element:span
+								encryption_key
+							Element:span
+								,
+							Element:span
+								OPENSSL_RAW_DATA
+							Element:span
+								,
+							Element:span
+								$iv
+							Element:span
+								);
+							Element:span
+								}
+							Element:span
+								private
+							Element:span
+								function
+							Element:span
+								sign
+							Element:span
+								(
+							Element:span
+								$data
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								return
+							Element:span
+								hash_hmac
+							Element:span
+								(
+							Element:span
+								"sha256"
+							Element:span
+								,
+							Element:span
+								$data
+							Element:span
+								,
+							Element:span
+								$this
+							Element:span
+								->
+							Element:span
+								signature_key
+							Element:span
+								,
+							Element:span
+								true
+							Element:span
+								);
+							Element:span
+								}
+							Element:span
+								}
+							Element:span
+								$customer_data
+							Element:span
+								=
+							Element:span
+								array
+							Element:span
+								(
+							Element:span
+								"email"
+							Element:span
+								=>
+							Element:span
+								"bob@shopify.com"
+							Element:span
+								,
+							Element:span
+								"remote_ip"
+							Element:span
+								=>
+							Element:span
+								"127.0.0.1"
+							Element:span
+								);
+							Element:span
+								$multipass
+							Element:span
+								=
+							Element:span
+								new
+							Element:span
+								ShopifyMultipass
+							Element:span
+								(
+							Element:span
+								"multipass secret from shop admin"
+							Element:span
+								);
+							Element:span
+								$token
+							Element:span
+								=
+							Element:span
+								$multipass
+							Element:span
+								->
+							Element:span
+								generate_token
+							Element:span
+								(
+							Element:span
+								$customer_data
+							Element:span
+								);
+							Element:span
+								?>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								To view a node.js module for Shopify Multipass, called Multipassify,
+							Element:a
+								click here.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Security considerations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We highly encourage you to always set the "remote_ip" field in the customer data hash, so that only the intended browser can use the token. We also encourage you to send tokens to the browser using secure HTTPS connections.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should make sure that registering new accounts at your main website requires validation of the email address which is used. Otherwise, someone could sign up to your main site using somebody else's email address, thus getting access to his customer account in your Shopify store.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								FAQ
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:p
+							Element:strong
+								I have a huge customer database. How do I synchronize this with Shopify so that I can use multipass login?
+							Element:p
+								You don't need to synchronize anything. As soon as you redirect a customer using multipass, we will automatically create a customer account for them in your Shopify store (if one doesn't exist yet).
+							Element:li
+							Element:p
+							Element:strong
+								Some of my customers have already placed orders on Shopify. How do I update those customers so they can login through multipass?
+							Element:p
+								You can use the
+							Element:a
+								Update Customer API
+								to set the
+							Element:strong
+								multipass_identifier
+								for the customer. You will need to use the identifier with all your multipass requests for those customer accounts
+							Element:li
+							Element:p
+							Element:strong
+								My secret was leaked. What do I do now?
+							Element:p
+								If your secret ever leaks, it can be revoked in your shop admin and a new one can be generated. This will make all of the old URLs invalid. You should do this as quickly as possible since everybody who knows the secret can potentially access every customer account!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								How helpful was this page?
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								1
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								2
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								3
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								4
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								5
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+							Element:span
+								Select an option
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+							Element:span
+								What was good or bad about this page?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								This page was printed on 20 Mar 2017
+								. For the latest version, please go to
+							Element:a
+								https://help.shopify.com/api/reference/multipass/
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:a
+											About
+										Element:a
+											Careers
+										Element:a
+											Blog
+										Element:a
+											Press and Media
+										Element:a
+											Enterprise
+										Element:a
+											Sitemap
+										Element:h3
+											Online store
+										Element:a
+											Sell online
+										Element:a
+											Features
+										Element:a
+											Examples
+										Element:a
+											Website editor
+										Element:a
+											Online retail
+										Element:a
+											Ecommerce website
+										Element:a
+											Themes
+										Element:a
+											Shopping cart
+										Element:a
+											Ecommerce hosting
+										Element:a
+											Mobile commerce
+										Element:a
+											Ecommerce software
+										Element:h3
+											Point of sale
+										Element:a
+											Point of sale
+										Element:a
+											Features
+										Element:a
+											Hardware
+										Element:a
+											POS software
+										Element:h3
+											Support
+										Element:a
+											24/7 support
+										Element:a
+											Shopify Help Center
+										Element:a
+											Forums
+										Element:a
+											API documentation
+										Element:a
+											Free tools
+										Element:h3
+											Shopify
+										Element:a
+											Contact
+										Element:a
+											Partner program
+										Element:a
+											Affiliate program
+										Element:a
+											App developers
+										Element:a
+											Investors
+										Element:a
+											Accessibility
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+											Terms of Service
+										Element:a
+											Privacy Policy

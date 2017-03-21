@@ -1,0 +1,578 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					OAuth V2
+				Element:a
+					#
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					While the official OAuth V2 spec offers lots of options, the flow we respect matches
+				Element:a
+					GitHub's
+					and
+				Element:a
+					Facebook's
+					implementation of the
+				Element:code
+					authorization_code
+					flow.
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+				Element:strong
+					A complete OAuth V2 example is available on our
+					Check that out for more detail in a real world example!
+				Element:a
+					Formstack example
+					page.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Initial Setup
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, you'll need to select
+										Element:code
+											OAuth V2
+											or
+										Element:code
+											OAuth V2 (w/refresh)
+											as your auth type, and then provide the following parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We'll automatically create the required
+										Element:code
+											access_token
+											and
+										Element:code
+											refresh_token
+											(optional) auth fields for you. They look something like this in the developer interface -
+										Element:strong
+											the access_token field is required at minimum
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+										Element:strong
+											Hint:
+											Does your app need to change the URL based on the user's subdomain or domain? Simply add another authentication field (right alongside
+										Element:code
+											access_token
+											from the above screenshot) that has the key like
+										Element:code
+											subdomain
+											and then use it like
+										Element:code
+											https://{{subdomain}}.yourwebsite.com/api/token
+											in all your URLs.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											1. Redirecting the User to Your App
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We'll redirect the user to an
+										Element:code
+											authorize_url
+											(provided by you), along with a query string which contains a
+										Element:code
+											redirect_uri
+											(provided by us),
+										Element:code
+											scope
+											(optional, provided by you) and
+										Element:code
+											client_id
+											(provided by you).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											302 <authorize_url>?client_id=<client_id>&scope=<scope>&redirect_uri=https://zapier.com/dashboard/auth/oauth/return/AppIDAPI/
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											2. Redirecting the User Back to Zapier
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After the user clicks allow, you should redirect the user to the
+										Element:code
+											redirect_uri
+											along with a
+										Element:code
+											code
+											parameter in the query string.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+										Element:strong
+											Note:
+										Element:em
+											Don't
+											hardcode the
+										Element:code
+											redirect_uri
+											on your side, as it will change as you deploy new versions of your app. If your app goes global, we'll assign you a permanent ID, but some users may be using older versions even after that point.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											302 <redirect_uri>?code=<code>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We use that
+										Element:code
+											code
+											to make a POST to the
+										Element:code
+											access_token_url
+											(provided by you) along with the
+										Element:code
+											code
+											, matching
+										Element:code
+											redirect_uri
+											(provided by us),
+										Element:code
+											client_id
+											(provided by you), and
+										Element:code
+											client_secret
+											(provided by you) as a form encoded request.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST <access_token_url>
+										Element:span
+											\
+											-H Accept: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											'client_id=<client_id>&
+										Element:span
+											client_secret=<client_secret>&
+										Element:span
+											code=<code>&
+										Element:span
+											grant_type=authorization_code&
+										Element:span
+											redirect_uri=https://zapier.com/dashboard/auth/oauth/return/AppIDAPI/'
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											Zapier will try two ways to get the token: POST with data in querystring, if that returns a
+										Element:code
+											4xx
+											, we will retry a POST with the data in the form-encoded body. You can always override this behavior with the Scripting though!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While we ask for a JSON response, the response can be JSON, XML or query string encoded as where the value you return is
+										Element:code
+											access_token
+											. For example, any of the below are valid responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With
+										Element:code
+											Content-Type: application/json
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"access_token"
+										Element:span
+											:
+										Element:span
+											"1234567890abcdef"
+										Element:span
+											,
+										Element:span
+											"refresh_token"
+										Element:span
+											:
+										Element:span
+											"1234567890abcdef"
+										Element:span
+											// optional
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With
+										Element:code
+											Content-Type: application/xml
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											<AnyRootElem>
+										Element:span
+											<access_token>
+											1234567890abcdef
+										Element:span
+											</access_token>
+										Element:span
+											<refresh_token>
+											1234567890abcdef
+										Element:span
+											</refresh_token>
+										Element:span
+											<!-- optional -->
+										Element:span
+											</AnyRootElem>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With
+										Element:code
+											Content-Type: text/plain
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											access_token=1234567890abcdef&refresh_token=1234567890abcdef
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											We automatically pull and store
+										Element:code
+											access_token
+											and
+										Element:code
+											refresh_token
+											from the JSON, XML, or query string data, but if you want to pull and store more fields, you can set them up in your auth setup under
+										Element:em
+											Extra Requested Fields
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											3. Authorizing Requests to Your App
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, we append the
+										Element:code
+											access_token
+											to the querystring for all requests, as well as in an Authorization header, however, you can use
+										Element:a
+											scripting
+											to modify request parameters as you see fit (IE: place the
+										Element:code
+											access_token
+											in a special header). This is called the
+										Element:code
+											bearer
+											token type.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An example of the default with
+										Element:code
+											access_token_placement
+											set to
+										Element:code
+											header
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET https://api.example.com/v2/tickets.json
+										Element:span
+											\
+											-H Authorization: Bearer 1234567890abcdef
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And now with
+										Element:code
+											access_token_placement
+											set to
+										Element:code
+											querystring
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											GET https://api.example.com/v2/tickets.json?access_token=1234567890abcdef
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											4. Refreshing Tokens (optional)
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Optionally, if your app supports refresh tokens, we natively support that.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You'll need to select
+										Element:code
+											OAuth V2 (w/refresh)
+											and provide us the
+										Element:code
+											refresh_token_url
+											in addition to the previous requirements. When we encounter a
+										Element:code
+											401
+											status code, we'll attempt to refresh like so:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST <refresh_token_url>
+										Element:span
+											\
+											-H Accept: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											'client_id=<client_id>&
+										Element:span
+											client_secret=<client_secret>&
+										Element:span
+											grant_type=refresh_token&
+										Element:span
+											refresh_token=<refresh_token>'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We will only attempt to refresh an access token when we encounter a
+										Element:code
+											401
+											status code from your API.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your API does not signal expired tokens with a
+										Element:code
+											401
+											, use
+										Element:a
+											scripting
+											to manually set the status code header to
+										Element:code
+											401
+											upon conditions of your choosing. Or, you can raise a
+										Element:code
+											RefreshTokenException
+											in your
+										Element:code
+											post_XXXX
+											function call to kick off a new refresh.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The resulting
+										Element:code
+											access_token
+											will be updated in our system and the previous, failed call will be attempted once more.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We prefer and advocate one of two patterns around expiring refresh tokens:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Never expire refresh tokens except on password changes or user revocation.
+										Element:li
+											In the last 10% window of a refresh token's life (IE: last 9 days of a 90 day lifetime), give a brand new refresh_token along with the normal access_token refresh.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We fully support each pattern. While option 1 is definitely more common, option 2 works very nicely and has the effect of eventually cleaning up unused oauth tokens.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you cannot adhere to one of the above patterns and you app requires manual refresh of tokens on a regular basis, you should check for this condition and notify users via scripting. With
+										Element:code
+											throw new ExpiredAuthException('Your reason.');
+											, the current call is interrupted, the zap is turned off (to prevent more calls with expired auth), and a predefined email is sent out informing the user to refresh the credentials.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Some Examples
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We highly recommend looking at each of
+										Element:a
+											GitHub's
+											,
+										Element:a
+											Facebook's
+											and
+										Element:a
+											Podio's
+											(with refresh tokens) authentication documentation for some great examples of how OAuth V2 can be implemented. Our system is designed to match their industry standard implementation pattern.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											↑ Was this documentation useful?
+										Element:strong
+											A complete OAuth V2 example is available on our
+											Check that out for more detail in a real world example!
+										Element:a
+											Formstack example
+											page.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Can't find what you're looking for? We'd love to help.
+										Element:a
+											Yes
+										Element:a
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Send us a message
+											. Get Help
+									Node:
+									(type) c
+									(layer)3
+										Element:noscript
+										Element:img

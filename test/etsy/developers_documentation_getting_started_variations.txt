@@ -1,0 +1,1271 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Working with Variations
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As of October, 2012, Etsy listings may contain options that buyers can select from when adding to cart and checking out ("Listing Variations".) These options are simple key=>value pairs, where the key refers to a
+							Element:code
+								and the value refers to a
+							Element:a
+								Variations_Property
+							Element:code
+								. Sellers use Listing Variations to offer different options within the same listing (e.g., different sizes and colors.) Buyers will need to choose from the options while purchasing the item.
+							Element:a
+								Variations_Option
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Listing with Variations are also qualified by one or more
+							Element:code
+								— attributes like sizing scale (US, EU, JP, inches, centimeters, etc.) and recipient (Women, Men, Children, etc.) that help put the Variations option in context.
+							Element:a
+								Variations_PropertyQualifiers
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Whereas variation properties can have multiple values associated with them, qualifier properties can have only one. Also, whereas variation properties can be associated with any user-defined value, qualifiers will only accept certain values. The full list of qualifier values is too extensive to publish in this document. To find legal qualifier values, see
+							Element:code
+								.
+							Element:a
+								Variations_PropertySet
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								See the end of this document
+								for a full list of properties.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Listing Details
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When browsing a listing, buyers may specify a variation from those available in order to add to cart. The variation properties and their options are exposed on the
+							Element:code
+								as
+							Element:a
+								Listing
+							Element:code
+								(which indicates whether or not the listing has variations) and
+							Element:a
+								has_variations
+							Element:code
+								, a list of
+							Element:a
+								Variations
+							Element:code
+								. Alternately, variations are available as a resource:
+							Element:a
+								Variations_Property
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+							Element:strong
+								GET
+								/v2/listings/:listing_id/variations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								association is only available using the
+							Element:a
+								Variations
+							Element:code
+								and
+							Element:a
+								getListing
+							Element:code
+								methods. In all other contexts, it will return
+							Element:a
+								getTransaction
+							Element:code
+								400 Bad Request
+								. The
+							Element:code
+								field, however, is available in all contexts.
+							Element:a
+								has_variations
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								International Content
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								We do not offer sellers the ability to enter custom translations of Variations data at this time.
+								This means that any custom Variation property names and custom option values entered by sellers will always be displayed in the seller's primary shop language. We are still evaluating the best way to make Variations available in all languages.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								However, all standard property names and suggested option values provided by Etsy are translated into the languages that Etsy offers as site languages. Variations-related API methods respond to the standard
+							Element:code
+								language
+								parameter, like all Etsy API methods.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Cart
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								NOTE:
+								Buyers using the Etsy website must choose from available Variations when adding items to their Cart. This requirement is not yet enforced in the API, to protect backwards-compatibility with existing apps. This may change in the future, so it's strongly suggested that you add support for Variations to your apps as soon as possible.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When a listing with variations is
+							Element:code
+								, it is represented by the combination of
+							Element:a
+								added to the cart
+							Element:code
+								listing_id
+								and a dictionary of
+							Element:code
+								property_id
+								/
+							Element:code
+								value_id
+								pairs (see
+							Element:code
+								and
+							Element:a
+								Variations_Property
+							Element:code
+								).
+							Element:a
+								Variations_Option
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+							Element:strong
+								POST
+								/v2/users/:user_id/carts
+							Element:span
+								listing_id=12345&selected_variations={100:300}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The updated
+							Element:code
+								is returned in the response.
+							Element:a
+								Cart
+							Element:code
+								has been updated to include four new fields:
+							Element:a
+								CartListing
+							Element:code
+								listing_customization_id
+								,
+							Element:code
+								variations_available
+								,
+							Element:code
+								has_variations
+								and
+							Element:code
+								.
+							Element:code
+							Element:a
+								selected_variations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The combination of selected variations results in a
+							Element:code
+								listing_customization_id
+								, a unique identifier used as a fingerprint to further work with cart listings (e.g. when
+							Element:code
+								or
+							Element:a
+								updating
+							Element:code
+								a listing from the cart).
+							Element:a
+								removing
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								NOTE:
+								in the event that a selected variation is no longer valid for a listing (i.e. the seller edited or removed the variation since being added to the cart), two things happen:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								The parent
+							Element:code
+								will have a
+							Element:a
+								CartListing
+							Element:code
+								purchase_state
+								of
+							Element:code
+								edited
+								(rather than the typical value
+							Element:code
+								valid
+								)
+							Element:li
+								The
+							Element:code
+								will have a value of
+							Element:a
+								Variations_SelectedProperty
+							Element:code
+								false
+								for the
+							Element:code
+								is_valid
+								property
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this case the listing needs to be removed and re-added to the cart with a valid variation.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Purchase History
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Variations selected by the buyer on a purchased listing are available on the
+							Element:code
+								property of the
+							Element:code
+							Element:a
+								variations
+							Element:code
+								resource.
+							Element:a
+								Transaction
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Managing Variations of Listings
+								Up to two properties can be defined for a listing, either selected from a list of pre-defined properties or as defined by a seller. Two interfaces are provided for adding variations to a listing:
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:code
+								and
+							Element:a
+								createListingVariations
+						Node:
+						(type) c
+						(layer)2
+							Element:code
+								.
+							Element:a
+								createListingVariation
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Bulk Variation Editing
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The bulk interface allows multiple Variations to be set at once. Variations data is passed as a JSON array of objects, each with the following fields:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Field
+													Element:th
+														Type
+													Element:th
+														Notes
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:code
+														property_id
+													Element:td
+													Element:code
+														int
+													Element:td
+														One of the allowed Variations Property IDs, see
+													Element:a
+														Property Reference
+														.
+													Element:tr
+													Element:td
+													Element:code
+														value
+													Element:td
+													Element:code
+														string
+													Element:td
+														Option value for this Variation, see
+													Element:code
+														for validation rules.
+													Element:a
+														Variations_Option
+													Element:tr
+													Element:td
+													Element:code
+														is_available
+													Element:td
+													Element:code
+														boolean
+													Element:td
+														Boolean flag to control availability. When false, buyers will see "Out of Stock" next to the option, and will not be able to add the option to their cart or purchase it.
+													Element:tr
+													Element:td
+													Element:code
+														price
+													Element:td
+													Element:code
+														int
+													Element:td
+														Price of this variation. When set, buyers will see this price next to the option. Currently, you're restricted to set price on only one property_id.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here's a very simple example that sets two options for the
+													Element:code
+														Color
+														property:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+													Element:strong
+														POST
+														/v2/listings/:listing_id/variations
+													Element:span
+														variations=[ {"property_id":200, "value":"Black", "is_available":true, "price": 100}, {"property_id":200, "value":"White", "is_available":true, "price": 110} ]
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This interface also allows for the ability to set custom property names and specify any property qualifiers. For example, to describe a pizza with
+													Element:em
+														diameter
+														in
+													Element:em
+														inches
+														and a custom
+													Element:em
+														Topping
+														property:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+													Element:strong
+														POST
+														/v2/listings/:listing_id/variations
+													Element:span
+														variations=[ {"property_id":504, "value":"8", "is_available":true, "price": 100}, {"property_id":504, "value":"12", "is_available":true, "price": 105}, {"property_id":513, "value":"Pepperoni", "is_available":true}, {"property_id":513, "value":"Mushrooms", "is_available":true} ]&diameter_scale=341&custom_property_names={"513":"Topping"}
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Qualifier values are provided by
+													Element:code
+														and are dependent on the listing’s chosen category.
+													Element:a
+														Variations_PropertySet
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Single Variation Editing
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+													Element:strong
+														POST
+														/v2/listings/:listing_id/variations/:property_id
+													Element:span
+														property_id=100&value=Black
+													Element:strong
+														POST
+														/v2/listings/:listing_id/variations/:property_id
+													Element:span
+														property_id=100&value=White
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The source for the values used for
+													Element:code
+														property_id
+														and
+													Element:code
+														value
+														is discussed below.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Properties and Property Sets
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A Listing can be assigned any combination of properties and values. But, certain properties are suggested conditional on the listing's category. The complete list of eligible properties is called a
+										Element:code
+											. A PropertySet exposes 4 pieces of data:
+										Element:a
+											Variations_PropertySet
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											properties
+											— a dictionary of properties that are available as variations
+										Element:li
+										Element:code
+											qualifying_properties
+											— a dictionary of properties that are used to add specificity to one or more variation properties
+										Element:li
+										Element:code
+											options
+											— a dictionary of available property options for any of the qualifying properties
+										Element:li
+										Element:code
+											qualifier
+											— a recursive data-structure indicating the property options available for qualifying_properties, and the nested qualifiers available for each option
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Any
+										Element:code
+											in the
+										Element:a
+											property
+										Element:code
+											properties
+											list is currently available to the listing as potential variations. Any property in
+										Element:code
+											qualifying_properties
+											are supported, for a finite set of options, to add specificity to a given property from the list of properties. This relationship and the options available for these properties are described in the
+										Element:code
+											qualifiers
+											data structure.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											qualifiers
+											data structure is keyed by
+										Element:code
+											property_id
+											, which corresponds to an entry in the
+										Element:code
+											properties
+											list to be described. From there, a
+										Element:code
+											will have a
+										Element:a
+											qualifier
+										Element:code
+											property_id
+											, which will point to a
+										Element:code
+											, and a set of options available for that
+										Element:a
+											qualifying property
+										Element:code
+											. Each option can then potentially specify another set of qualifiers, keyed off of option id in the
+										Element:a
+											qualifying property
+										Element:code
+											results
+											dictionary, recursing the data structure.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											NOTE:
+											The qualifier
+										Element:code
+											recipient_id
+											points to the same data point as the existing field
+										Element:code
+											on Listings. Setting one will overwrite the value of the other. When using Variations, it's recommended to avoid setting
+										Element:a
+											recipient
+										Element:code
+											recipient
+											in favor of the
+										Element:code
+											recipient_id
+											qualifier, using one of the values suggested by
+										Element:code
+											. This will ensure that the Listing's Variations data is ready for future search integration.
+										Element:a
+											Variations_PropertySet
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We strongly suggest that you use the suggested properties and options whenever possible. We may use these values in search at a later date.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Property Set Example
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The output from
+										Element:code
+											is quite extensive and can be difficult to interpret. Let's walk through the output step by step to see how it works. First of all, here's the basic skeleton of the response for the
+										Element:a
+											getPropertySet
+										Element:code
+											Clothing > TShirt
+											category (#69153027):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:strong
+											GET
+											/v2/property_sets?category_id=69153027
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Response
+																Element:a
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	{ "count": 1, "results": [ { "property_set_id": 2, "properties": { "100": { ... }, "200": { ... } }, "qualifying_properties": { "266817057": { ... }, "300": { ... } }, "options": { ... }, "qualifiers": { "100": [ ... ] } } ], "params": { "category_id": "69153027" }, "type": "Variations_PropertySet", "pagination": {} }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The first field,
+																Element:code
+																	property_set_id
+																	, is purely informational and can be ignored. The second field,
+																Element:code
+																	properties
+																	, lists all suggested Properties for this Category, keyed by
+																Element:code
+																	property_id
+																	. The third field,
+																Element:code
+																	qualifying_properties
+																	lists the optional properties that can be used to narrow down the list of suggested Option values. The fourth field,
+																Element:code
+																	options
+																	is a dictionary of fixed strings that are used to populate the suggested option values. They'll be referred to by numeric ID elsewhere in the API output. Finally, the field
+																Element:code
+																	qualifiers
+																	explains how to drill down into the suggested Option values.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Let's look at the
+																Element:code
+																	properties
+																	field:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	"properties": { "100": { "property_id": 100, "name": "Size", "input_name": null, "label": null, "param": null, "default_option": null, "description": "Size", "is_custom": false, "title": "Size:" }, "200": { "property_id": 200, "name": "Color", "input_name": null, "label": null, "param": null, "default_option": null, "description": "Color", "is_custom": false, "title": "Color:" } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The two suggested properties are
+																Element:code
+																	Size
+																	(#100) and
+																Element:code
+																	Color
+																	(#200). Of course, other Properties can be added to the Listing, but these two are the most useful for future search integration. The other fields in the
+																Element:code
+																	Property
+																	interface can be used to build a UI.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The
+																Element:code
+																	qualifying_properties
+																	section follows the same format as
+																Element:code
+																	properties
+																	. Of special note is the
+																Element:code
+																	param
+																	field, which points to the param to use when setting values for these qualifiers using
+																Element:code
+																	:
+																Element:a
+																	createListingVariations
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	"qualifying_properties": { "266817057": { "property_id": 266817057, "name": "Recipient", "input_name": "property[recipient]", "label": "Who is it for?", "param": "recipient_id", "default_option": "Select a recipient...", "description": "Recipient", "is_custom": false, "title": "Recipient:" }, "300": { "property_id": 300, "name": "Sizing Scale", "input_name": "property[sizing_scale]", "label": "What scale are your sizes in?", "param": "sizing_scale", "default_option": "Select a scale...", "description": "Sizing Scale", "is_custom": false, "title": "Sizing Scale:" } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Let's skip ahead to the
+																Element:code
+																	qualifiers
+																	field. This is the most complex part of the response, and also the most useful. (For clarity's sake, we've trimmed down the size of the response here.)
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	"qualifiers": { "100": [ { "property_id": 266817057, "results": { "266817085": [ { "property_id": 300, "results": null, "options": [ 301, 303 ] } ] }, "aliases": { "266817081": 266817085, "266817083": 266817085, "266817073": 266817079, }, "options": [ 266817081, 266817083, 266817073, 266817085, 266817079, 266817077, 266817059, 266817071, 266817067, 266817069, 266817061, 266817065 ] } ] }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The fact that the only key in
+																Element:code
+																	qualifiers
+																	is
+																Element:code
+																	100
+																	tells us that all of the information here will affect the
+																Element:code
+																	Size
+																	property. Beneath that is a struct with three fields,
+																Element:code
+																	property_id
+																	,
+																Element:code
+																	results
+																	and
+																Element:code
+																	options
+																	. The first
+																Element:code
+																	property_id
+																	value,
+																Element:code
+																	266817057
+																	maps to the
+																Element:code
+																	Recipient
+																	property listed earlier in the response. Within
+																Element:code
+																	options
+																	is a list of possible values for
+																Element:code
+																	Recipient
+																	. Each value's string representation can be found in the
+																Element:code
+																	options
+																	field that we saw earlier in the response. The
+																Element:code
+																	results
+																	and
+																Element:code
+																	aliases
+																	fields lists instructions to be taken when specific values for
+																Element:code
+																	Recipient
+																	are chosen. In general, each option maps to a recursive struct with more information. Some options map to the same struct as others; these IDs are mapped to their equivalents in
+																Element:code
+																	aliases
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:strong
+																	NOTE:
+																	it's always correct to set the most specific property option on a Listing, even if it's listed as an equivalent to something more general in
+																Element:code
+																	aliases
+																	(e.g.:
+																Element:code
+																	Women
+																	vs.
+																Element:code
+																	Unisex
+																	. Use
+																Element:code
+																	Women
+																	when appropriate.)
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	To make this a little clearer, let's step through the information in the example:
+															Node:
+															(type) c
+															(layer)5
+																Element:ol
+																Element:li
+																	The first
+																Element:code
+																	property_id
+																	,
+																Element:code
+																	266817057
+																	indicates that a
+																Element:code
+																	Recipient
+																	menu is shown if the seller chooses
+																Element:code
+																	Size
+																Element:li
+																	The
+																Element:code
+																	Recipient
+																	menu is populated with values from
+																Element:code
+																	options
+																	(the subarray
+																Element:code
+																	qualifiers[100].options
+																	, not the main
+																Element:code
+																	options
+																	field.)
+																Element:li
+																	If the buyer chooses
+																Element:code
+																	Baby Girls
+																	from the menu (
+																Element:code
+																	266817083
+																	) we follow
+																Element:code
+																	aliases
+																	to
+																Element:code
+																	266817085
+																	(which maps to
+																Element:code
+																	Babies
+																	).
+																Element:li
+																	The next qualifying property,
+																Element:code
+																	300
+																	maps to
+																Element:code
+																	Sizing Scale
+																Element:li
+																	We repeat the process: display a
+																Element:code
+																	Sizing Scale
+																	menu with values taken from
+																Element:code
+																	options
+																	, and allow the seller to choose one. These options happen to map to "Alpha" and "Months", two common sizing systems for infant clothing.
+																Element:li
+																	At this point, there are no more recursive structs to follow, so we're done.
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Example UI
+																Element:a
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Here's what the above example looks like on Etsy:
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Once you've collected the suggested Properties and Qualifiers for a category, you're ready to pull suggested Options and display modifiers from the API.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Suggested Options for Properties
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For a given property and associated qualifiers, we provide a pre-defined list of
+										Element:code
+											for standard variants such as color and size. Using our example from the previous section:
+										Element:a
+											options
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:strong
+											GET
+											/v2/property_options/suggested?property_id=100&recipient_id=266817083&sizing_scale=303
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Response
+																Element:a
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	"count": 9, "results": [ { "property_option_id": 101, "name": "Newborn", "formatted_name": "Newborn" }, { "property_option_id": 102, "name": "0-3 Months", "formatted_name": "0-3 Months" }, { "property_option_id": 103, "name": "3-6 Months", "formatted_name": "3-6 Months" }, (etc...) ]
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	See the
+																Element:code
+																	for a full list of parameters available for specifying qualifiers.
+																Element:a
+																	documentation
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Depending on the category and specific qualifiers in use, the
+																Element:code
+																	formatted_name
+																	field may be decorated with a standard prefix or suffix. For example, the women's US dress size
+																Element:code
+																	12
+																	will display as "US 12 - Women". You won't generally need to worry about these display rules, but if necessary, they can be accessed using
+																Element:code
+																	.
+																Element:a
+																	getPropertyOptionModifier
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Property Reference
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following table lists available properties and qualifiers:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Property ID
+										Element:th
+											Property Name
+										Element:th
+											Property Type
+										Element:th
+											Notes
+										Element:tbody
+										Element:tr
+										Element:td
+											200
+										Element:td
+											Color
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											513
+										Element:td
+											Custom 1
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											514
+										Element:td
+											Custom 2
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											515
+										Element:td
+											Device
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											504
+										Element:td
+											Diameter
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											501
+										Element:td
+											Dimensions
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											502
+										Element:td
+											Fabric
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											500
+										Element:td
+											Finish
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											503
+										Element:td
+											Flavor
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											505
+										Element:td
+											Height
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											506
+										Element:td
+											Length
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											507
+										Element:td
+											Material
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											508
+										Element:td
+											Pattern
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											509
+										Element:td
+											Scent
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											510
+										Element:td
+											Style
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											100
+										Element:td
+											Size
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											511
+										Element:td
+											Weight
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											512
+										Element:td
+											Width
+										Element:td
+											variation
+										Element:td
+										Element:tr
+										Element:td
+											302
+										Element:td
+											Diameter Scale
+										Element:td
+											qualifier
+										Element:td
+										Element:tr
+										Element:td
+											303
+										Element:td
+											Dimensions Scale
+										Element:td
+											qualifier
+										Element:td
+										Element:tr
+										Element:td
+											304
+										Element:td
+											Height Scale
+										Element:td
+											qualifier
+										Element:td
+										Element:tr
+										Element:td
+											305
+										Element:td
+											Length Scale
+										Element:td
+											qualifier
+										Element:td
+										Element:tr
+										Element:td
+											266817057
+										Element:td
+											Recipient
+										Element:td
+											qualifier
+										Element:td
+											(This property ID is intentionally out-of-sequence with the others.)
+										Element:tr
+										Element:td
+											300
+										Element:td
+											Sizing Scale
+										Element:td
+											qualifier
+										Element:td
+										Element:tr
+										Element:td
+											301
+										Element:td
+											Weight Scale
+										Element:td
+											qualifier
+										Element:td
+										Element:tr
+										Element:td
+											306
+										Element:td
+											Width Scale
+										Element:td
+											qualifier
+										Element:td
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Developers Home
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Discussion
+										Element:li
+										Element:a
+											API Terms of Use
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Your Developer Account
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Register as a developer
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Looking for Etsy Apps?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Check out our new
+							Element:br
+							Element:a
+								App Gallery
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It's the best way to find cool and useful tools built upon Etsy's API.
+						Node:
+						(type) c
+						(layer)2
+							Element:img

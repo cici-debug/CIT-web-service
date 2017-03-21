@@ -1,0 +1,1135 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Shopify Query Language
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Visits schema
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The query language of the Analytics API is called
+				Element:strong
+					ShopifyQL
+					. A valid ShopifyQL query consists of parts similar to a valid SQL request. Let's look at an example:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					SHOW sum(pageview_count) FROM visits SINCE -7d UNTIL -1d
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This query will fetch the total pageviews for the last 7 days. The result would look something like:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tr
+				Element:td
+					sum_pageview_count
+				Element:td
+					282778
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Fetching data (SHOW)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are a number of ways to select, filter and aggregate data using ShopifyQL.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Columns
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each schema is comprised of many columns.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											SHOW utm_campaign_name, utm_campaign_term, utm_campaign_source
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Aggregation Functions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A number of functions exist to aid with gathering or aggregating data.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:th
+											function
+										Element:th
+											description
+										Element:tr
+										Element:td
+											sum
+										Element:td
+											returns the summation of rows scanned
+										Element:tr
+										Element:td
+											min
+										Element:td
+											returns the minimum value of rows scanned
+										Element:tr
+										Element:td
+											max
+										Element:td
+											returns the maximum value of rows scanned
+										Element:tr
+										Element:td
+											count
+										Element:td
+											returns the count of objects
+										Element:tr
+										Element:td
+											DISTINCT
+										Element:td
+											returns the unique count of rows
+										Element:tr
+										Element:td
+											avg
+										Element:td
+											returns the average value of rows scanned
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Aliases
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Commonly used aggregation expressions are provided as named aliases.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											SHOW total_pageviews
+											vs
+										Element:code
+											SHOW sum(pageview_count)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Named aliases on the
+										Element:code
+											visits
+											schema:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Definition
+										Element:tr
+										Element:td
+											avg_duration
+										Element:td
+											number
+										Element:td
+											avg(duration)
+										Element:tr
+										Element:td
+											total_pageviews
+										Element:td
+											number
+										Element:td
+											sum(pageview_count)
+										Element:tr
+										Element:td
+											total_purchases
+										Element:td
+											number
+										Element:td
+											sum(purchase_count)
+										Element:tr
+										Element:td
+											total_sessions
+										Element:td
+											number
+										Element:td
+											count(pageview_count)
+										Element:tr
+										Element:td
+											total_visitors
+										Element:td
+											number
+										Element:td
+											count(DISTINCT user_token)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Result columns can be explicitly labeled with expression AS label, otherwise a label derived from the expression will be assigned which can often be a bit unwieldy.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											SHOW sum(pageview_count) AS pageviews
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Aggregate Conditions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											ShopifyQL provides support for conditions within the
+										Element:code
+											SHOW
+											statement. These can be used to filter rows from inclusion into aggregation functions. Aggregate conditions make it possible to get results back in a single query that would usually require two or more.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+											sum
+										Element:span
+											(
+										Element:span
+											IF
+										Element:span
+											page_path
+										Element:span
+											==
+										Element:span
+											''
+										Element:span
+											THEN
+										Element:span
+											pageview_count
+										Element:span
+											)
+										Element:span
+											AS
+										Element:span
+											home_pageviews
+										Element:span
+											,
+										Element:span
+											sum
+										Element:span
+											(
+										Element:span
+											IF
+										Element:span
+											page_path
+										Element:span
+											!=
+										Element:span
+											''
+										Element:span
+											THEN
+										Element:span
+											pageview_count
+										Element:span
+											)
+										Element:span
+											AS
+										Element:span
+											other_pageviews
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Selecting schemas (FROM)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Schemas are selected by the key word
+							Element:code
+								FROM
+								. This works in a similar fashion to SQL. The following query is using the
+							Element:code
+								visits
+								schema:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								SHOW sum(pageview_count) FROM visits
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Filtering (WHERE)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								WHERE
+								clause indicates the condition or conditions that rows must satisfy to be selected.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Unlike aggregate conditions, which only filter for one column of the result.
+							Element:code
+								WHERE
+								conditions filter for all columns that will be returned.
+							Element:code
+								WHERE
+								clauses can simplify queries, such as below:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using aggregate conditions
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+							Element:span
+								SHOW
+							Element:span
+								sum
+							Element:span
+								(
+							Element:span
+								IF
+							Element:span
+								((
+							Element:span
+								cancelled_at
+							Element:span
+								==
+							Element:span
+								NULL
+							Element:span
+								)
+							Element:span
+								AND
+							Element:span
+								((
+							Element:span
+								deleted_at
+							Element:span
+								==
+							Element:span
+								NULL
+							Element:span
+								)
+							Element:span
+								AND
+							Element:span
+								(
+							Element:span
+								financial_status
+							Element:span
+								!=
+							Element:span
+								""
+							Element:span
+								)))
+							Element:span
+								THEN
+							Element:span
+								discounted
+							Element:span
+								)
+							Element:span
+								AS
+							Element:span
+								total_discounted
+							Element:span
+								,
+							Element:span
+								sum
+							Element:span
+								(
+							Element:span
+								IF
+							Element:span
+								((
+							Element:span
+								cancelled_at
+							Element:span
+								==
+							Element:span
+								NULL
+							Element:span
+								)
+							Element:span
+								AND
+							Element:span
+								((
+							Element:span
+								deleted_at
+							Element:span
+								==
+							Element:span
+								NULL
+							Element:span
+								)
+							Element:span
+								AND
+							Element:span
+								(
+							Element:span
+								financial_status
+							Element:span
+								!=
+							Element:span
+								""
+							Element:span
+								)))
+							Element:span
+								THEN
+							Element:span
+								gift_card
+							Element:span
+								)
+							Element:span
+								AS
+							Element:span
+								total_gift_card
+							Element:span
+								,
+							Element:span
+								sum
+							Element:span
+								(
+							Element:span
+								IF
+							Element:span
+								((
+							Element:span
+								cancelled_at
+							Element:span
+								==
+							Element:span
+								NULL
+							Element:span
+								)
+							Element:span
+								AND
+							Element:span
+								((
+							Element:span
+								deleted_at
+							Element:span
+								==
+							Element:span
+								NULL
+							Element:span
+								)
+							Element:span
+								AND
+							Element:span
+								(
+							Element:span
+								financial_status
+							Element:span
+								!=
+							Element:span
+								""
+							Element:span
+								)))
+							Element:span
+								THEN
+							Element:span
+								(
+							Element:span
+								shipping
+							Element:span
+								+
+							Element:span
+								(
+							Element:span
+								subtotal_price
+							Element:span
+								+
+							Element:span
+								tax_added
+							Element:span
+								)))
+							Element:span
+								AS
+							Element:span
+								total_sales
+							Element:span
+								FROM
+							Element:span
+								orders
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using
+							Element:code
+								WHERE
+								clauses:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+							Element:span
+								SHOW
+							Element:span
+								sum
+							Element:span
+								(
+							Element:span
+								discounted
+							Element:span
+								)
+							Element:span
+								AS
+							Element:span
+								total_discounted
+							Element:span
+								,
+							Element:span
+								sum
+							Element:span
+								(
+							Element:span
+								gift_card
+							Element:span
+								)
+							Element:span
+								AS
+							Element:span
+								total_gift_card
+							Element:span
+								,
+							Element:span
+								sum
+							Element:span
+								(
+							Element:span
+								shipping
+							Element:span
+								+
+							Element:span
+								subtotal_price
+							Element:span
+								+
+							Element:span
+								tax_added
+							Element:span
+								)
+							Element:span
+								AS
+							Element:span
+								total_sales
+							Element:span
+								FROM
+							Element:span
+								orders
+							Element:span
+								WHERE
+							Element:span
+								cancelled_at
+							Element:span
+								==
+							Element:span
+								NULL
+							Element:span
+								AND
+							Element:span
+								deleted_at
+							Element:span
+								==
+							Element:span
+								NULL
+							Element:span
+								AND
+							Element:span
+								financial_status
+							Element:span
+								!=
+							Element:span
+								""
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Valid operators are:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								!=
+							Element:li
+							Element:code
+								==
+							Element:li
+							Element:code
+								IN
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Grouping data
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Grouping by results (BY)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											BY
+											statement can be used to group the result-set by one or more columns. In the following example, we use the BY clause to group data based on day. Note that there is no row for 2016-02-01. This is because there is no data for that day. This behaviour differs from that of the OVER clause explained below.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Total pageviews by day (last 7 days)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											SHOW sum(pageview_count) BY day(timestamp) FROM visits SINCE -7d UNTIL -1d
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:th
+											page_path
+										Element:th
+											sum_pageview_count
+										Element:tr
+										Element:td
+											"2016-01-30T00:00:00-05:00"
+										Element:td
+											69910
+										Element:tr
+										Element:td
+											"2016-01-31T00:00:00-05:00"
+										Element:td
+											33611
+										Element:tr
+										Element:td
+											"2016-02-02T00:00:00-05:00"
+										Element:td
+											18139
+										Element:tr
+										Element:td
+											"2016-02-03T00:00:00-05:00"
+										Element:td
+											22225
+										Element:tr
+										Element:td
+											"2016-01-28T00:00:00-05:00"
+										Element:td
+											49897
+										Element:tr
+										Element:td
+											"2016-01-29T00:00:00-05:00"
+										Element:td
+											59655
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Grouping with backfill (OVER)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Similarly to
+										Element:code
+											BY
+											the
+										Element:code
+											OVER
+											clause can also be used to group result sets. The difference is that missing rows will be backfilled. In the following example, we use the OVER clause to group data based on day. Note that there is a backfilled row for 2016-02-01.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Total pageviews per day (last 7 days)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											SHOW sum(pageview_count) OVER day(timestamp) FROM visits SINCE -7d UNTIL -1d
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:th
+											day_timestamp
+										Element:th
+											sum_pageview_count
+										Element:tr
+										Element:td
+											"2016-01-30T00:00:00-05:00"
+										Element:td
+											69910
+										Element:tr
+										Element:td
+											"2016-01-31T00:00:00-05:00"
+										Element:td
+											33611
+										Element:tr
+										Element:td
+											"2016-02-01T00:00:00-05:00"
+										Element:td
+											0
+										Element:tr
+										Element:td
+											"2016-02-02T00:00:00-05:00"
+										Element:td
+											18139
+										Element:tr
+										Element:td
+											"2016-02-03T00:00:00-05:00"
+										Element:td
+											22225
+										Element:tr
+										Element:td
+											"2016-01-28T00:00:00-05:00"
+										Element:td
+											49897
+										Element:tr
+										Element:td
+											"2016-01-29T00:00:00-05:00"
+										Element:td
+											59655
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is also possible to combine
+										Element:code
+											BY
+											and
+										Element:code
+											OVER
+											queries.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Total pageviews by browser per day (last 7 days)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											SHOW sum(pageview_count) OVER day(timestamp) BY ua_browser FROM visits SINCE -7d UNTIL -1d
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:th
+											day_timestamp
+										Element:th
+											ua_browser
+										Element:th
+											sum_pageview_count
+										Element:tr
+										Element:td
+											"2016-01-31T00:00:00-05:00"
+										Element:td
+											"Opera Mini"
+										Element:td
+											0
+										Element:tr
+										Element:td
+											"2016-01-31T00:00:00-05:00"
+										Element:td
+											"Sogou Explorer"
+										Element:td
+											28
+										Element:tr
+										Element:td
+											"2016-01-31T00:00:00-05:00"
+										Element:td
+											"UC Browser"
+										Element:td
+											4
+										Element:tr
+										Element:td
+											"2016-01-31T00:00:00-05:00"
+										Element:td
+											"Maxthon"
+										Element:td
+											6
+										Element:tr
+										Element:td
+											"2016-01-31T00:00:00-05:00"
+										Element:td
+											"Amazon Silk"
+										Element:td
+											2
+										Element:tr
+										Element:td
+											"2016-01-31T00:00:00-05:00"
+										Element:td
+											"Iceweasel"
+										Element:td
+											0
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Time Functions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A number of time functions exist:
+										Element:code
+											day
+											,
+										Element:code
+											month
+											,
+										Element:code
+											week
+											and
+										Element:code
+											year
+											. These can be used in conjuction with
+										Element:code
+											BY
+											or
+										Element:code
+											OVER
+											to bucket data into a specific period.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											SHOW sum(pageview_count) OVER month(timestamp) AS month
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This will bucket pageview counts per month. Note that only some types of properties (generally only time related ones) can be backfilled.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Time Range (SINCE/UNTIL)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When writing ShopifyQL queries, the use of time/date constraints is strongly recommended. Not including the
+							Element:code
+								SINCE
+								and
+							Element:code
+								UNTIL
+								clauses will result in a query that scans a shops entire dataset, which can include years of data and take quite a long time.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Explicit dates are supported, such as
+							Element:code
+								2016-01-28
+								. There is also support for relative dates.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:th
+								key
+							Element:th
+								unit
+							Element:tr
+							Element:td
+								d
+							Element:td
+								day eg: SINCE -7d
+							Element:tr
+							Element:td
+								w
+							Element:td
+								week eg: SINCE -3w
+							Element:tr
+							Element:td
+								m
+							Element:td
+								month eg: SINCE -2m
+							Element:tr
+							Element:td
+								y
+							Element:td
+								year eg: SINCE -1y
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that
+							Element:code
+								SINCE
+								will be taken from the beginning of the day, while
+							Element:code
+								UNTIL
+								will be to the end of the day.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example. Assume today is
+							Element:code
+								2016-02-04
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								SINCE -7d UNTIL -1d
+								would be equivalent to
+							Element:code
+								SINCE 2016-01-28 UNTIL 2016-02-03
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								How helpful was this page?
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								1
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								2
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								3
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								4
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+								5
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+							Element:span
+								Select an option
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:label
+							Element:span
+								What was good or bad about this page?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								This page was printed on 20 Mar 2017
+								. For the latest version, please go to
+							Element:a
+								https://help.shopify.com/api/reference/shopify-ql/
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:a
+											About
+										Element:a
+											Careers
+										Element:a
+											Blog
+										Element:a
+											Press and Media
+										Element:a
+											Enterprise
+										Element:a
+											Sitemap
+										Element:h3
+											Online store
+										Element:a
+											Sell online
+										Element:a
+											Features
+										Element:a
+											Examples
+										Element:a
+											Website editor
+										Element:a
+											Online retail
+										Element:a
+											Ecommerce website
+										Element:a
+											Themes
+										Element:a
+											Shopping cart
+										Element:a
+											Ecommerce hosting
+										Element:a
+											Mobile commerce
+										Element:a
+											Ecommerce software
+										Element:h3
+											Point of sale
+										Element:a
+											Point of sale
+										Element:a
+											Features
+										Element:a
+											Hardware
+										Element:a
+											POS software
+										Element:h3
+											Support
+										Element:a
+											24/7 support
+										Element:a
+											Shopify Help Center
+										Element:a
+											Forums
+										Element:a
+											API documentation
+										Element:a
+											Free tools
+										Element:h3
+											Shopify
+										Element:a
+											Contact
+										Element:a
+											Partner program
+										Element:a
+											Affiliate program
+										Element:a
+											App developers
+										Element:a
+											Investors
+										Element:a
+											Accessibility
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+										Element:svg
+										Element:svg
+										Element:a
+											Terms of Service
+										Element:a
+											Privacy Policy

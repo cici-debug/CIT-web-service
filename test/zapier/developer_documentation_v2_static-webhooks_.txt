@@ -1,0 +1,439 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Static Webhooks
+				Element:a
+					#
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Static webhooks are a very simple version of webhooks wherein the user of your service will have to take action to enable a webhook. Usually, this is done copying a url that Zapier provides during the Zap setup process (like
+				Element:code
+					https://zapier.com/hooks/catch/123/n/456789/
+					). We would prefer you use
+				Element:a
+					REST hooks
+					but that usually requires extra code and a full REST API.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					While Static webhooks are very useful for rapid prototyping, we don't generally accept apps for inclusion in the Zapbook that are solely Static webhooks. Users can use our built in Webhook app to do the same things that a purely Static webhook app can do. You should look at
+				Element:a
+					REST Hooks
+					as the next step after you've proved the concept privately with Static webhooks.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:em
+					To get a taste of how static webhooks work, check out our built-in
+				Element:a
+					generic webhook service
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Setup the Webhooks
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To get started simply create a new trigger on your app, choosing static webhook as the type. You can follow the
+										Element:a
+											Hubspot example
+											to see a detailed walk through of how to do this.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once defined in your app, static webhook triggers will appear like this to users when they create a Zap:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Using the Webhooks
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For as long as the Zap exists, requests made to that URL will be associated with your app and the user. That means requests made during the setup process (while the Zap is paused) will still get stored, making it easier for users to debug. However, requests will
+										Element:strong
+											not
+											trigger any actions until the Zap is turned on.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Also, it is important to know that by default, we do our best to inspect and pull out all relevant information in a request. If you use
+										Element:a
+											scripting
+											to further refine the hook data, you'll see it passed in as
+										Element:code
+											bundle.cleaned_request
+											. For example, a request might have a
+										Element:code
+											cleaned_request
+											similar to:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST https://zapier.com//hooks/catch/123/n/456789/?hello
+										Element:span
+											=
+											world
+										Element:span
+											\
+											-H Content-Type: application/x-www-form-urlencoded
+										Element:span
+											\
+											-d
+										Element:span
+											'some_json=%7B%22foo%22%3A%22hooray!%22%7D&some_xml=%3Cbar%3Eyay!%3C%2Fbar%3E'
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"queryset"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"hello"
+										Element:span
+											:
+										Element:span
+											"world"
+										Element:span
+											,
+										Element:span
+											},
+										Element:span
+											"some_json"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"foo"
+										Element:span
+											:
+										Element:span
+											"hooray!"
+										Element:span
+											},
+										Element:span
+											"some_xml"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"bar"
+										Element:span
+											:
+										Element:span
+											"yay!"
+										Element:span
+											}
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Of course, more simplistic examples like straight JSON or XML are handled as you'd expect.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Catching Single Objects vs. Lists
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some webhooks send single objects, while some are batched as lists of objects for efficiency reasons. Though Zapier supports both, we highly recommend using
+										Element:a
+											scripting
+											if you are dealing with batched lists. We do our best via
+										Element:code
+											cleaned_request
+											to interpret lists where possible, but if your list is hidden in a subkey, we won't capture it properly.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, a generically supported list:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST https://zapier.com//hooks/catch/123/n/456789/?hello
+										Element:span
+											=
+											world
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											'[{"name":"bryan","age":27},{"name":"mike","age":23}]'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Would result in two triggers...
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"name"
+										Element:span
+											:
+										Element:span
+											"bryan"
+										Element:span
+											,
+										Element:span
+											"age"
+										Element:span
+											:
+										Element:span
+											27
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											...and...
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"name"
+										Element:span
+											:
+										Element:span
+											"mike"
+										Element:span
+											,
+										Element:span
+											"age"
+										Element:span
+											:
+										Element:span
+											23
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Notice that the query string
+										Element:code
+											hello=world
+											is ignored? That is because we assumed the data list was more important and we didn't want to maim the data contained therein.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Check out an example where we would ignore a subkeyed list:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST https://zapier.com//hooks/catch/123/n/456789/?hello
+										Element:span
+											=
+											world
+										Element:span
+											\
+											-H Content-Type: application/json
+										Element:span
+											\
+											-d
+										Element:span
+											'{"data":[{"name":"bryan","age":27},{"name":"mike","age":23}]}'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Because the list isn't at the root, by default, we'll interpret this as a single object. That means we'll only trigger once for this object:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"queryset"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"hello"
+										Element:span
+											:
+										Element:span
+											"world"
+										Element:span
+											,
+										Element:span
+											},
+										Element:span
+											"some_json"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"name"
+										Element:span
+											:
+										Element:span
+											"bryan"
+										Element:span
+											,
+										Element:span
+											"age"
+										Element:span
+											:
+										Element:span
+											27
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											"name"
+										Element:span
+											:
+										Element:span
+											"mike"
+										Element:span
+											,
+										Element:span
+											"age"
+										Element:span
+											:
+										Element:span
+											23
+										Element:span
+											}
+										Element:span
+											]
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is where you'd need to break out
+										Element:a
+											scripting
+											to do some refinement. Check out the examples we provide in the
+										Element:a
+											scripting examples
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Testing Webhooks
+										Element:a
+											#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Normally, a user will just log back into your service and force an event by performing the action that causes a webhook to be emitted. This can be a little annoying to the user during setup, so alternatively you can send a
+											↑ Was this documentation useful?
+										Element:code
+											X-Hook-Test: true
+											and we will
+										Element:em
+											never
+											trigger an action for real, we'll just cache the payload for our UI. This means when the user enables webhooks in your app, just send some sample data across.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Can't find what you're looking for? We'd love to help.
+										Element:a
+											Yes
+										Element:a
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Send us a message
+											. Get Help
+									Node:
+									(type) c
+									(layer)3
+										Element:noscript
+										Element:img
