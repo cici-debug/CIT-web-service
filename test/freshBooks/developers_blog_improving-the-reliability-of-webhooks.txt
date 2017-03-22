@@ -1,0 +1,217 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Improving the reliability of WebHooks
+					by Shey Sewani on February 16/2011
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					At FreshBooks we dog food our API and WebHooks, which is how we noticed a curiosity in our implementation. Repeater, our WebHooks engine, is designed to retry a WebHook if the endpoint URI is temporarily inaccessible, i.e., it receives a non 200-series response code– unfortunately, Repeater didn’t repeat.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					In its original implementation, Repeater maintained an internal priority queue of all WebHooks that must be retried, and a pool of threads which work on items in the queue. This implementation supported prioritization of first time WebHooks over retries as well as exponential back off for each subsequent retry; however, this scheme suffers from two major drawbacks. Firstly, the priority queue is maintained within memory and all retries are lost if Repeater is restarted, likely during upgrades; secondly, it uses multi-threaded code which is hard to debug and maintain.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Given that Repeater was not performing one of its fundamental operations consistently, and RabbitMQ is better suited for durable queues, we decided to replace the internal priority queue with a simple queue on RabbitMQ. We also replaced the pool of workers with a newer version of Sparkplug which supports multiple processes out of the box. In the new implementation, Repeater attempts to post a WebHook to a URI, if the attempt fails, the attempt, and all related information is inserted into a second queue. Then, a slightly modified version of Repeater reads the message off of the queue, sleeps for ‘N’ seconds and attempts to post the WebHook again. If the message fails, it is reinserted into the same queue; this process is repeated ‘K’ times after which the attempt is discarded.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The new implementation was deployed into production several months ago. It is more reliable, easier to maintain and test. While Repeater no longer supports exponential back-off, we gained the ability to introspect the retry queue in production. More importantly we no longer lose the retry queue upon an upgrade or restart.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

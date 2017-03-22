@@ -1,0 +1,37 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Reading OTPs automatically on Android
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								On the Android OS it is possible to access the incoming SMS from an app and to read the OTP (One-Time Password) directly instead of asking the user to type it. This improves the customer experience and speeds up the OTP authentication process. It also increases the conversion rates, since you will remove an extra step that might have otherwise interrupted the authentication or registration process. You will find below some sample code that you can integrate into your Android app in order to read the OTP from the incoming SMS automatically.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								/** * * @author tyntec * * Interface that is used to handle received SMS by a * dedicated android receiver object * */ private interface IMessageReceiver { /** * Called for each SMS received * * @param from originating phone number * @param text message text */ void onMessage(String from, String text); } /** * Method that is called when user wants to pass and authorization * @param v */ private void onAuthButtonClick(View v) { setUiInitialState(); // Get a phone number from either android app widget or settings String phoneNumber = getPhoneNumber(); // Send auth request based on phone number sendAuthRequest( phoneNumber ); // Show a message or start an indication of the auth processing notifyUserRequestSended(); } /** * This method must be called before the application exit */ private void unregisterReceiver() { if (receiver == null) return; getApplicationContext().unregisterReceiver(receiver); receiver = null; } /** * Registers special receiver object in the Android‘s infrastructure and * configures the object to forward received messages into the app. */ private void registerReceiver() { IntentFilter ifilter = new IntentFilter(); // Use number higher than 999 if you want to be able to stop processing and not to put // auth messages into the inbox. ifilter.setPriority(1000); ifilter.addAction("android.provider.Telephony.SMS_RECEIVED"); // Create and hold the receiver. We need to unregister on shutdown receiver = createReceiver(); getApplicationContext().registerReceiver( receiver, ifilter ); } private SmsReceiver createReceiver() { return new SmsReceiver(new IMessageReceiver() { @Override public void onMessage(String from, String text) { processMessage(from, text); } }); } /** * Method that is called on every SMS receive. * It needs to accept only valid originating phone number * @param from originating phone number * @param text message text */ private void processMessage(String from, String text) { if (isValidSender(from)) // Auth procedure performAuth(text); } /** * Class for receiving SMS * Required to be as a separate object for the Android‘s infrastructure. * Once SMS received it forwards it to IMessageReceiver object passed in the class‘s constructor * @author tyntec * */ public class SmsReceiver extends BroadcastReceiver { private static final String SMS_EXTRA_NAME = "pdus"; private final IMessageReceiver messageReceiver; public SmsReceiver(IMessageReceiver messageReceiver) { if ( messageReceiver == null ) throw new IllegalArgumentException("messageReceiver"); this.messageReceiver = messageReceiver; } @Override /** * Method that handles SMSs. * It iterates over all the messages and forward each method to IMessageReceiver object. */ public void onReceive(Context context, Intent intent) { Bundle extras = intent.getExtras(); if ( extras != null ) { Object[] smsExtra = (Object[]) extras.get( SMS_EXTRA_NAME ); for ( int i = 0; i < smsExtra.length; ++i ) { SmsMessage sms = SmsMessage.createFromPdu((byte[])smsExtra[i]); String body = sms.getMessageBody().toString(); String address = sms.getOriginatingAddress(); messageReceiver.onMessage(address, body); } } // Uncomment this if you do not want the SMS put into the inbox (for priority > 999) // this.abortBroadcast(); } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:center
+							Element:ul
+							Element:li
+							Element:a
+								Contact
+							Element:li
+							Element:a
+								Imprint
+							Element:li
+							Element:a
+								Disclaimer

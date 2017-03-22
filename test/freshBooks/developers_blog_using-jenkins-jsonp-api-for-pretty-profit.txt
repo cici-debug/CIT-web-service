@@ -1,0 +1,269 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Using Jenkin’s JSONP API for pretty profit
+					by Mark on April 11/2011
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					In a previous post Corey talked about how we’re using Hudson (now known as
+				Element:a
+					Jenkins
+					) to manage our automated builds and display build status on a monitor looming above all the developers. As our internal portfolio of projects has grown our existing statusboard has gotten long in the tooth. I recently took the time to re-design and re-implement our statusboard’s front end so it can display more information in a more consistent manner.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					In the previous iteration we were using the Jenkins Radiator view plugin to provide project build statuses. For this iteration, I decided we could have a more seamless display by using Jenkins’ JSONP API. Jenkins not only provides great features, it also exposes most of them through XML, JSON, and JSONP APIs. I used the JSONP API, as our statusboard isn’t hosted on the same domain/virtual machine as our Jenkins server.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Jenkins’ JSON APIs support two ways of digging information out of it. The first is the
+				Element:code
+					depth
+					parameter, this allows you to give an integer of how ‘deep’ of information you want from Jenkins. Unfortunately for me the information I wanted was at a depth of 2, which also resulted in 1.3MB of JSON data, making it a bit unwieldy to consume. Thankfully Jenkins also supports a
+				Element:code
+					tree
+					parameter that allows you to selectively pull data out regardless of its depth.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					There are some tricks to using the tree mode of Jenkins’ JSON API. The first is that you have to know
+				Element:strong
+					exactly
+					what you want. If you don’t know the exact keys that contain the data you want, you can’t get it. Also you can’t do anything like a * selector for a subtree. Each and every key you want needs to be part of your query. I ended up using the following query, which gave me all the information I needed to build our statusboard:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					http://builds.internaldomain.com/api/json?tree=jobs[name,color,buildable,healthReport[description,score,iconUrl],builds[changeSet[items[msg,user]]]]
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This query gives the following things:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					The job name and colour, which are self explanatory.
+				Element:li
+					The healthReport, which contains useful information like how many tests are passing/exist for projects that create xunit reports. It also includes coverage statistics for python projects. Generating coverage reports with PHPUnit is unreasonably slow for the whole application, so we’ve turned it off.
+				Element:li
+					The builds key contains a list of the changeSets with the messages and user who did the change set. This is used to blame people when they inevitably break the build.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This is all the information I needed to update our statusboard. This information is munged and passed through some Mustache templates to generate our build status. The display updates periodically by polling the JSONP endpoint. The previous version of our statusboard used the
+				Element:a
+					Radiator
+					plugin to generate the build statuses and display them. For this iteration we only use radiator to control what displays on the build status.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The display is built entirely in Javascript, leveraging CSS3 and HTML5 to make it a bit slicker than before. Flot was used to generate the pie graphs, and everything else is basic HTML and CSS3 tricks. At the end of the day our statusboard ended up looking like:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					So far feedback from the team has been largely positive, as information is easier to read and there is more information to look at. As we all know developers like simple shapes and bright colours, and the new statusboard has both.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

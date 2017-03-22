@@ -1,0 +1,34 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					OMNI channel: Introduction
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+					**OMNI channel** is messaging solution that enables you to communicate with your users through various messaging channels. Infobip resolves all of the technical complexities, providing you with a turnkey solution for delivering custom textual messages and rich content. Leverage your communication options with OMNI messaging and engage your users over various channels: - **SMS** - **VOICE** - **PARSECO** - **VIBER** - **EMAIL** - **FACEBOOK** - **PUSH** [block:api-header] { "type": "basic", "title": "How it works" } [/block] # OMNI scenario **OMNI scenario** has to be defined before you start sending messages to users. This scenario is used to define the flow of how the message will be sent. Since we support various communication channels, you'll have to define steps and the order of those steps in your scenario flow. Below is an example showing how to create a scenario with steps and the order of those steps in the scenario flow: [block:code] { "codes": [ { "code": "POST /omni/1/scenarios HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nContent-Type: application/json\n\n{\n \"name\":\"My first scenario\",\n \"flow\": [\n {\n \"from\": \"InfoSMS\",\n \"channel\": \"SMS\"\n },\n {\n \"from\": \"256\",\n \"channel\": \"PARSECO\"\n },\n {\n \"from\": \"41793026727\",\n \"channel\": \"VOICE\"\n },\n {\n \"from\": \"DemoViberApplication\",\n \"channel\": \"VIBER\"\n },\n {\n \"from\": \"DemoFBMessengerApplication\",\n \"channel\": \"FACEBOOK\"\n },\n {\n \"from\": \"your@email.com\",\n \"channel\": \"EMAIL\"\n },\n {\n \"from\": \"233623e3c860b49ec69a464834343481-8bj4el4a-256d-23fd-56ad-b5bc3d568b53\",\n \"channel\": \"PUSH\"\n }\n ],\n \"default\": true\n}", "language": "json" } ] } [/block] When sending a message, the Infobip platform will attempt to send the message based on the order of steps in your scenario flow. If a user can't receive the message with a specific scenario channel, the fail-over mechanism will be triggered and the message will be sent over the next step. [block:callout] { "type": "info", "title": "Note:", "body": "You must have a default scenario with at least one step in the scenario flow. If you want to use **Viber** as a communication channel, please [contact us](mailto:api@infobip.com) for service setup." } [/block] When creating steps in the scenario flow, you need to define a **`from`** parameter that represents sender of the specific channel. Note that for **Parseco** you have to use your Parseco channel ID and for **Viber** your Viber service ID, that are provided by Infobip. **Find out more details about OMNI scenarios in our [API Scenario specification](doc:omni-create-scenario).** # Sending OMNI message After creating the first scenario, you are ready to send your OMNI messages through defined communication channels. There are two API methods that can be used for sending messages, simple and advanced. The **simple** API method enables you to send a single textual message over various channels. This functionality is useful when you need to send a generic text and to have a fail-over mechanism: [block:code] { "codes": [ { "code": "POST /omni/1/text HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nContent-Type: application/json\n\n{ \n \"destinations\":[ \n { \n \"to\":{\n \"phoneNumber\": \"41793026727\",\n \"emailAddress\": \"email@example.com\"\n }\n }\n ],\n \"text\": \"A long time ago in a galaxy far, far away...\"\n}", "language": "json" } ] } [/block] On the other hand, you can use an **advanced** API method when you want to send custom content over a specific communication channel. [block:code] { "codes": [ { "code": "POST /omni/1/advanced HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nContent-Type: application/json\n\n{ \n\t\"bulkId\":\"BULK-ID-123-xyz\",\n \"scenarioKey\":\"AD9E01A5DC7BEE2C2B828D208182A611\", \n \"destinations\":[ \n \t{ \n \t\"messageId\":\"MESSAGE-ID-123-xyz\",\n \"to\":\"41793026727\"\n },\n { \n \t\"to\":\"41793026731\"\n }\n ],\n \"sms\": {\n \t\"text\": \"This is custom SMS text. Over SMS I can send a text with 160 characters.\"\n },\n \"viber\": {\n \t\"text\": \"But if I use Viber, my message text will have capacity of 1.000 characters.\"\n },\n \"parseco\": {\n \t\"text\": \"Parseco is great because this channel has no limitation on the message lenght.\"\n },\n \"facebook\": {\n \t\"text\": \"If I use Facebook comunication channel, message text will have the capacity of 1.000 characters.\"\n },\n \"voice\": {\n \t\"text\": \"And with Voice, my user will receive voice message converted from text.\"\n },\n \"email\":{\n \"text\":\"Email combines together the longest possible message length and a nice subject.\",\n \"subject\": \"And here goes the nice email subject\"\n },\n \"push\": {\n \t\"text\": \"this PUSH message will pop up on your mobile device.\"\n },\n}", "language": "json" } ] } [/block] Depending on the channel you're using, you can specify various text length: [block:parameters] { "data": { "h-0": "Channel", "h-1": "Text length", "0-0": "SMS", "0-1": "Max 160 characters for one message", "1-0": "Viber", "1-1": "Max 1.000 characters", "3-0": "Parseco", "3-1": "Unlimited", "4-0": "Voice", "4-1": "Unlimited", "5-0": "Email", "5-1": "Unlimited", "6-0": "PUSH", "6-1": "Max 4.000 characters", "2-0": "Facebook Messenger", "2-1": "Max 1.000 characters" }, "cols": 2, "rows": 7 } [/block] [block:callout] { "type": "info", "title": "Note:", "body": "When sending OMNI messages, you can specify the scenario you're using by setting the **`scenarioKey`** parameter. If you don't specify this parameter the OMNI message will be sent over the **default** scenario." } [/block] **Find out more details on how to send [Single OMNI message](doc:omni-send-simple-message) or how to [Customize your content for the specific channel](doc:omni-send-advanced-message) in our API endpoint specifications.**
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subscribe to our newsletter
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript

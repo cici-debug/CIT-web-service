@@ -1,0 +1,639 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Browse Bundles
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Each application using the Wurl API has access to curated selections of video Series named "Bundles". Developers often use Bundles to create a guide that allows users to browse by category (Bundle). Our API makes it easy to create an app to:
+			Node:
+			(type) c
+			(layer)1
+				Element:ol
+				Element:li
+					Browse Bundles
+				Element:li
+					Drill down to browse the Series in each Bundle
+				Element:li
+					Drill down further to review & play the video Episodes in each Series.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The steps below provide a sample of how to make API requests to build a simple guide in your application.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Prerequisites
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To run through the following steps, you will need to have created an
+							Element:em
+								application
+								and have an
+							Element:em
+								access token
+								. The
+							Element:a
+								Getting Started Guide
+								provides steps on how to do that.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Get the Bundles
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The first step is to request the root url of the API.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								https://api.wurl.com/api?format=json&access_token=YOUR_TOKEN
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+								Setting the
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Authorization
+								header in your http client relieves you of the need to constantly construct URLs to add the access token.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The response will contain a
+							Element:em
+								links
+								array:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ ... "links": [ { "rel": [ "urn:x-resource:name:bundles" ], "href": "https://api.wurl.com/api/bundles" } ... ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your app should parse the JSON and iterate the
+							Element:em
+								links
+								collection looking for the rel named
+							Element:em
+								bundles
+								("urn:x-resource:name:bundles").
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you have found the
+							Element:em
+								bundles
+								link, request the URL specified in the
+							Element:em
+								href
+								attribute of the link.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								https://api.wurl.com/api/bundles?format=json&access_token=YOUR_TOKEN
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The response will contain an
+							Element:em
+								entities
+								array that lists all the bundles you have available. The abbreviated response below shows an example
+							Element:em
+								bundle
+								entity:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "rel": [ "urn:x-resource:schema:https://api.wurl.com/schemas/bundles.json" ], "class": [ "bundles", "collection", "wurl-bundles" ], "entities": [ { "rel": [ "item", "urn:x-resource:name:bundle", "urn:x-resource:schema:https://api.wurl.com/schemas/bundle.json" ], "class": [ "bundle", "wurl-bundle" ], "properties": { "id": 56, "title": "Featured Videos", "slug": "Featured_US", "description": "Featured series for US market", "primaryLanguage": "en", "category": "Mix", "totalItems": 15 }, "entities": [ { "rel": [ "top-series", "urn:x-resource:schema:https://api.wurl.com/schemas/series.json" ], "class": [ "series", "wurl-series" ], "properties": {...} "entities": [...] "actions": [...] "links": [...] }, { "rel": [ "urn:x-resource:name:items", "bundle-items" ], "href": "https://api.wurl.com/api/bundles/56/items", "class": [ "link", "collection", "bundle-items", "wurl-bundle-items" ] } ], "links": [ { "rel": [ "self" ], "href": "https://api.wurl.com/api/bundles/56" }, { "rel": [ "up" ], "href": "https://api.wurl.com/api/bundles" } ] }, ], "links": [ { "rel": [ "self" ], "href": "https://api.wurl.com/api/bundles" }, { "rel": [ "up" ], "href": "https://api.wurl.com/api" } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As you iterate the
+							Element:em
+								entities
+								collection of the
+							Element:em
+								bundles
+								response, you can extract the
+							Element:em
+								title
+								property of each
+							Element:em
+								bundle
+								and use that for displaying a summary of the categories of content in your application's interface.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Drill into a Bundle
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Let's chose to drill into and display the
+							Element:em
+								bundle
+								displayed in the previous section's code sample.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:em
+								bundle
+								entity contains it's own
+							Element:em
+								entities
+								array. The
+							Element:em
+								entities
+								array contains a few of the top series in the
+							Element:em
+								bundle
+								as a sample of what the bundle contains. The
+							Element:em
+								entities
+								array also contains an entity link to the items for the bundle. Search for the item in the
+							Element:em
+								entities
+								array with the rel
+							Element:em
+								items
+								("urn:x-resource:name:items").
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Since the
+							Element:em
+								items
+								entity contains the
+							Element:em
+								href
+								attribute, it is an
+							Element:a
+								Embedded Link Sub Entity
+								. Extract the URL in the
+							Element:em
+								href
+								attribute and request it:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								https://api.wurl.com/api/bundles/56/items?format=json&access_token=YOUR_TOKEN
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:em
+								items
+								response is a
+							Element:em
+								collection
+								of
+							Element:em
+								BundleItems
+								. We list the first
+							Element:em
+								BundleItem
+								below:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "rel": [ "urn:x-resource:schema:https://api.wurl.com/schemas/bundle_items.json" ], "class": [ "bundle-items", "bundle_items", "collection", "wurl-bundle-items" ], "properties": { "bundleId": 56, "totalItems": 15, "currentCount": 15 }, "entities": [ { "rel": [ "bundle-item", "item", "urn:x-resource:name:bundle_item", "urn:x-resource:schema:https://api.wurl.com/schemas/bundle_item.json" ], "class": [ "bundle_item", "wurl-bundle-item" ], "properties": { "id": 1980, "bundleId": 56, "position": 20 }, "entities": [ { "rel": [ "series", "urn:x-resource:name:series", "urn:x-resource:schema:https://api.wurl.com/schemas/series.json" ], "class": [ "series", "wurl-series" ], "properties": { "id": 342903, "description": "The Worldwide Leader in Sports", "channelsRank": 83.9662798639226, "pubDate": "2014-01-15T09:31:35Z", "title": "ESPN", "thumbnails": { "default": { "url": "http://static0.channels.com/thumbnails/assets/youtube-com/feeds/167-2215/342903/Uploads-by-ESPN--jpg" } }, "totalEpisodes": 2026, "matchesApp": true, "link": "http://www.youtube.com/channel/UCiWLfSweyRNmLpgEHekhoAg/videos" } ... } ... ] ... }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Each
+							Element:em
+								bundle item
+								contains a
+							Element:a
+								full embedded
+								Series entity.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As you iterate the
+							Element:em
+								bundle item
+								you will likely want to extract the
+							Element:em
+								series
+								("urn:x-resource:name:series") to display the
+							Element:em
+								title
+								,
+							Element:em
+								thumbnail
+								, and other properties for display in your application's interface.
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:p
+							Element:span
+								Wurl, Inc.
+							Element:br
+							Element:span
+								Palo Alto, California
+							Element:br
+							Element:a
+								info@wurl.com
+							Element:br
+							Element:span
+								650.470.7550
+							Element:p
+								© Wurl
+							Element:ul
+							Element:li
+								Wurl
+							Element:li
+							Element:a
+								Home
+							Element:li
+							Element:a
+								About
+							Element:li
+							Element:a
+								Blog
+							Element:li
+							Element:a
+								Team
+							Element:li
+							Element:a
+								Legal
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:a
+							Element:li
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Developer
+				Element:ul
+				Element:li
+				Element:a
+					Blog
+				Element:li
+				Element:a
+					API Status
+				Element:li
+				Element:a
+					Support
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Browse Bundles
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Each application using the Wurl API has access to curated selections of video Series named "Bundles". Developers often use Bundles to create a guide that allows users to browse by category (Bundle). Our API makes it easy to create an app to:
+			Node:
+			(type) c
+			(layer)1
+				Element:ol
+				Element:li
+					Browse Bundles
+				Element:li
+					Drill down to browse the Series in each Bundle
+				Element:li
+					Drill down further to review & play the video Episodes in each Series.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The steps below provide a sample of how to make API requests to build a simple guide in your application.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Prerequisites
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					To run through the following steps, you will need to have created an
+				Element:em
+					application
+					and have an
+				Element:em
+					access token
+					. The
+				Element:a
+					Getting Started Guide
+					provides steps on how to do that.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Get the Bundles
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The first step is to request the root url of the API.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					https://api.wurl.com/api?format=json&access_token=YOUR_TOKEN
+			Node:
+			(type) c
+			(layer)1
+				Element:i
+					Setting the
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+					Authorization
+					header in your http client relieves you of the need to constantly construct URLs to add the access token.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The response will contain a
+				Element:em
+					links
+					array:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ ... "links": [ { "rel": [ "urn:x-resource:name:bundles" ], "href": "https://api.wurl.com/api/bundles" } ... ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Your app should parse the JSON and iterate the
+				Element:em
+					links
+					collection looking for the rel named
+				Element:em
+					bundles
+					("urn:x-resource:name:bundles").
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Once you have found the
+				Element:em
+					bundles
+					link, request the URL specified in the
+				Element:em
+					href
+					attribute of the link.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					https://api.wurl.com/api/bundles?format=json&access_token=YOUR_TOKEN
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The response will contain an
+				Element:em
+					entities
+					array that lists all the bundles you have available. The abbreviated response below shows an example
+				Element:em
+					bundle
+					entity:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "rel": [ "urn:x-resource:schema:https://api.wurl.com/schemas/bundles.json" ], "class": [ "bundles", "collection", "wurl-bundles" ], "entities": [ { "rel": [ "item", "urn:x-resource:name:bundle", "urn:x-resource:schema:https://api.wurl.com/schemas/bundle.json" ], "class": [ "bundle", "wurl-bundle" ], "properties": { "id": 56, "title": "Featured Videos", "slug": "Featured_US", "description": "Featured series for US market", "primaryLanguage": "en", "category": "Mix", "totalItems": 15 }, "entities": [ { "rel": [ "top-series", "urn:x-resource:schema:https://api.wurl.com/schemas/series.json" ], "class": [ "series", "wurl-series" ], "properties": {...} "entities": [...] "actions": [...] "links": [...] }, { "rel": [ "urn:x-resource:name:items", "bundle-items" ], "href": "https://api.wurl.com/api/bundles/56/items", "class": [ "link", "collection", "bundle-items", "wurl-bundle-items" ] } ], "links": [ { "rel": [ "self" ], "href": "https://api.wurl.com/api/bundles/56" }, { "rel": [ "up" ], "href": "https://api.wurl.com/api/bundles" } ] }, ], "links": [ { "rel": [ "self" ], "href": "https://api.wurl.com/api/bundles" }, { "rel": [ "up" ], "href": "https://api.wurl.com/api" } ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					As you iterate the
+				Element:em
+					entities
+					collection of the
+				Element:em
+					bundles
+					response, you can extract the
+				Element:em
+					title
+					property of each
+				Element:em
+					bundle
+					and use that for displaying a summary of the categories of content in your application's interface.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Drill into a Bundle
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Let's chose to drill into and display the
+				Element:em
+					bundle
+					displayed in the previous section's code sample.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The
+				Element:em
+					bundle
+					entity contains it's own
+				Element:em
+					entities
+					array. The
+				Element:em
+					entities
+					array contains a few of the top series in the
+				Element:em
+					bundle
+					as a sample of what the bundle contains. The
+				Element:em
+					entities
+					array also contains an entity link to the items for the bundle. Search for the item in the
+				Element:em
+					entities
+					array with the rel
+				Element:em
+					items
+					("urn:x-resource:name:items").
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Since the
+				Element:em
+					items
+					entity contains the
+				Element:em
+					href
+					attribute, it is an
+				Element:a
+					Embedded Link Sub Entity
+					. Extract the URL in the
+				Element:em
+					href
+					attribute and request it:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					https://api.wurl.com/api/bundles/56/items?format=json&access_token=YOUR_TOKEN
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The
+				Element:em
+					items
+					response is a
+				Element:em
+					collection
+					of
+				Element:em
+					BundleItems
+					. We list the first
+				Element:em
+					BundleItem
+					below:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "rel": [ "urn:x-resource:schema:https://api.wurl.com/schemas/bundle_items.json" ], "class": [ "bundle-items", "bundle_items", "collection", "wurl-bundle-items" ], "properties": { "bundleId": 56, "totalItems": 15, "currentCount": 15 }, "entities": [ { "rel": [ "bundle-item", "item", "urn:x-resource:name:bundle_item", "urn:x-resource:schema:https://api.wurl.com/schemas/bundle_item.json" ], "class": [ "bundle_item", "wurl-bundle-item" ], "properties": { "id": 1980, "bundleId": 56, "position": 20 }, "entities": [ { "rel": [ "series", "urn:x-resource:name:series", "urn:x-resource:schema:https://api.wurl.com/schemas/series.json" ], "class": [ "series", "wurl-series" ], "properties": { "id": 342903, "description": "The Worldwide Leader in Sports", "channelsRank": 83.9662798639226, "pubDate": "2014-01-15T09:31:35Z", "title": "ESPN", "thumbnails": { "default": { "url": "http://static0.channels.com/thumbnails/assets/youtube-com/feeds/167-2215/342903/Uploads-by-ESPN--jpg" } }, "totalEpisodes": 2026, "matchesApp": true, "link": "http://www.youtube.com/channel/UCiWLfSweyRNmLpgEHekhoAg/videos" } ... } ... ] ... }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Each
+				Element:em
+					bundle item
+					contains a
+				Element:a
+					full embedded
+					Series entity.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					As you iterate the
+				Element:em
+					bundle item
+					you will likely want to extract the
+				Element:em
+					series
+					("urn:x-resource:name:series") to display the
+				Element:em
+					title
+					,
+				Element:em
+					thumbnail
+					, and other properties for display in your application's interface.
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+				Element:ul
+				Element:li
+					Wurl
+				Element:li
+				Element:a
+					Home
+				Element:li
+				Element:a
+					About
+				Element:li
+				Element:a
+					Blog
+				Element:li
+				Element:a
+					Team
+				Element:li
+				Element:a
+					Legal
+				Element:ul
+				Element:li
+					Help
+				Element:li
+				Element:a
+					Contact Support
+				Element:li
+				Element:a
+					Status
+				Element:p
+				Element:span
+					Wurl, Inc.
+				Element:br
+				Element:span
+					Palo Alto, California
+				Element:br
+				Element:a
+					info@wurl.com
+				Element:br
+				Element:span
+					650.470.7550
+				Element:p
+					© Wurl

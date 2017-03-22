@@ -1,0 +1,35 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Getting SMS logs
+					Your sent SMS message history.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+					Logs with sent SMS message history can be requested for all messages by using a single request: `GET https://api.infobip.com/sms/1/logs`. Unlike delivery reports, these logs can be requested as many times as you want. Let's see what happens when you request all of your logs, without any query parameter: [block:code] { "codes": [ { "code": "GET /sms/1/logs HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nAccept: application/json", "language": "json" } ] } [/block] As a response, you will get the following result: [block:code] { "codes": [ { "code": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{ \n \"results\":[ \n { \n \"bulkId\":\"bafdeb3d-719b-4cce-8762-54d47b40f3c5\",\n \"messageId\":\"07e03aae-fabc-44ad-b1ce-222e14094d70\",\n \"to\":\"41793026727\",\n \"from\":\"InfoSMS\",\n \"text\":\"Test SMS.\",\n \"sentAt\":\"2015-02-23T17:41:11.833+0100\",\n \"doneAt\":\"2015-02-23T17:41:11.843+0100\",\n \"smsCount\":1,\n \"mccmnc\":\"22801\",\n \"price\":{ \n \"pricePerMessage\":0.01,\n \"currency\":\"EUR\"\n },\n \"status\":{ \n \"groupId\":3,\n \"groupName\":\"DELIVERED\",\n \"id\":5,\n \"name\":\"DELIVERED_TO_HANDSET\",\n \"description\":\"Message delivered to handset\"\n },\n \"error\":{ \n \"groupId\":0,\n \"groupName\":\"OK\",\n \"id\":0,\n \"name\":\"NO_ERROR\",\n \"description\":\"No Error\",\n \"permanent\":false\n }\n },\n { \n \"bulkId\":\"06479ba3-5977-47f6-9346-fee0369bc76b\",\n \"messageId\":\"1f21d8d7-f306-4f53-9f6e-eddfce9849ea\",\n \"to\":\"41793026727\",\n \"from\":\"InfoSMS\",\n \"text\":\"Test SMS.\",\n \"sentAt\":\"2015-02-23T17:40:31.773+0100\",\n \"doneAt\":\"2015-02-23T17:40:31.787+0100\",\n \"smsCount\":1,\n \"mccmnc\":\"22801\",\n \"price\":{ \n \"pricePerMessage\":0.01,\n \"currency\":\"EUR\"\n },\n \"status\":{ \n \"groupId\":3,\n \"groupName\":\"DELIVERED\",\n \"id\":5,\n \"name\":\"DELIVERED_TO_HANDSET\",\n \"description\":\"Message delivered to handset\"\n },\n \"error\":{ \n \"groupId\":0,\n \"groupName\":\"OK\",\n \"id\":0,\n \"name\":\"NO_ERROR\",\n \"description\":\"No Error\",\n \"permanent\":false\n }\n }\n ]\n}", "language": "json" } ] } [/block] Logs carry similar information as delivery reports, with some added fields. If you need detailed information regarding these response fields, check out this [page](doc:message-logs). [block:callout] { "type": "warning", "title": "Important:", "body": "**SMS logs are available for the last 48 hours!**" } [/block] [block:callout] { "type": "info", "title": "Difference between logs and Delivery reports", "body": "**Logs** should be used for statistical analysis only.\n\n**Delivery reports** should be used for **message delivery status information purposes**. They can be collected over the **API call** or received in **real time** over **HTTP forward method** by supplying your `notifyUrl` when sending a message. \n\nHTTP forward method is the most efficient way to access delivery reports since each delivery report is forwarded to your address **as soon as status becomes available** and it is the recommended method for collecting message status information.\n\nAdvanced tutorial: [Delivery reports vs. Logs](/docs/logs-vs-delivery-reports)" } [/block] Since this logs example was for all the messages you have sent over the Infobip platform for the last **48 hours**, you might need some filters to search through them. The filters you can use are: |Parameter|Type|Description| |-|-|-| |*from*|String|Sender address.| |*to*|String|Destination address.| |*bulkId*|String[]|Bulk ID for which logs are requested.| |*messageId*|String[]|Message ID for which logs are requested.| |*generalStatus*|String|Sent SMS status.| |*sentSince*|Date|Lower limit on date and time of sending SMS.| |*sentUntil*|Date|Upper limit on date and time of sending SMS.| |*limit*|int|Max number of messages in returned logs. Default value is **50**.| |*mcc*|String|Mobile country code.| |*mnc*|String|Mobile network code.| Now, let's try getting **logs with "from", "to" and "limit" as filters**: [block:code] { "codes": [ { "code": "GET /sms/1/logs?from=InfoSMS&to=41793026727&limit=1 HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nAccept: application/json", "language": "json" } ] } [/block] The response will be: [block:code] { "codes": [ { "code": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{ \n \"results\":[ \n { \n \"bulkId\":\"82d1d36e-e4fb-4194-8b93-caeb053bd327\",\n \"messageId\":\"fc0cbfb8-7a72-40da-a76d-e2c2d9400835\",\n \"to\":\"41793026727\",\n \"from\":\"InfoSMS\",\n \"text\":\"Test SMS.\",\n \"sentAt\":\"2015-02-23T17:42:05.390+0100\",\n \"doneAt\":\"2015-02-23T17:42:05.390+0100\",\n \"smsCount\":1,\n \"mccmnc\":\"22801\",\n \"price\":{ \n \"pricePerMessage\":0,\n \"currency\":\"EUR\"\n },\n \"status\":{ \n \"groupId\":5,\n \"groupName\":\"REJECTED\",\n \"id\":6,\n \"name\":\"REJECTED_NETWORK\",\n \"description\":\"Network is forbidden\",\n \"action\":\"Contact account manager\"\n },\n \"error\":{ \n \"groupId\":0,\n \"groupName\":\"OK\",\n \"id\":0,\n \"name\":\"NO_ERROR\",\n \"description\":\"No Error\",\n \"permanent\":false\n }\n }\n ]\n}", "language": "json" } ] } [/block] ------ #### **Next: ** [Number Lookup](doc:number-context) Find out how to keep your mobile numbers database up to date.
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subscribe to our newsletter
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript

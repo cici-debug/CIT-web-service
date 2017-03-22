@@ -1,0 +1,865 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Identities endpoints
+							Element:a
+								¶
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Following a User
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For purposes of this discussion:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Your User
+								: Refers to the user currently authenticated via your Session Token
+							Element:li
+							Element:strong
+								Followed Users
+								: Refers to users “followed” by Your User as defined below.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Define Following
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A User is Followed if:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Your User has ever been in a Conversation with the other user
+							Element:li
+								Your User has explicitly followed the other user (or a request sent on their behalf of Your User to follow the other user is sent via Client API or Server API)
+							Element:li
+								Your User has not explicitly unfollowed the other user (or a request sent on their behalf using Client API or Server API)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A Followed User has the following behaviors from the perspective of Your User:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								The Followed User is returned in any request listing users followed by Your User
+							Element:li
+								WebSocket Change Events will be delivered to Your User for any changes to
+							Element:a
+								Identity
+								objects for any Followed Users
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Rationale
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are a few goals served by Following a user:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Improved Rendering: While many applications will just use the
+							Element:code
+								display_name
+								and
+							Element:code
+								avatar_url
+								that comes with each Message to display the sender of the Message, some applications may need additional information when rendering users. To accomplish this, and to minimize the amount of on-demand fetching of users, your application can load the full Identity objects for all of the user’s the current user is following.
+							Element:li
+								On having a cache of user data, that cache needs to be maintained in the event of any changes (i.e. a user changes their Avatar)
+							Element:li
+								For applications that don’t already maintain a list of users your user can talk to, there are advantages to using this existing cache of data to drive any user lists. Useful for example when selecting users to create a Conversation with or add a user to an existing Conversation.
+							Element:li
+								Using information outside of
+							Element:code
+								display_name
+								for rendering the user in a User List or next to their Messages. For example, there may be information in the
+							Element:a
+								Identity
+							Element:code
+								metadata
+								property that affects how they are rendered (blue for admin, red for novice users, etc…)
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Endpoint Details
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Method
+							Element:th
+								HTTP request
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:a
+								Get Followed Identities
+							Element:td
+							Element:code
+								GET /identities
+							Element:td
+								Get Followed
+							Element:a
+								Identity
+								objects
+							Element:tr
+							Element:td
+							Element:a
+								Get Followed Users
+							Element:td
+							Element:code
+								GET /following
+							Element:td
+								Get Followed User IDs
+							Element:tr
+							Element:td
+							Element:a
+								Get an Identity
+							Element:td
+							Element:code
+								GET /identities/:user_id
+							Element:td
+								Returns a single
+							Element:a
+								Identity
+								object
+							Element:tr
+							Element:td
+							Element:a
+								Is User Followed
+							Element:td
+							Element:code
+								GET /following/users/:user_id
+							Element:td
+								Test if the user is followed
+							Element:tr
+							Element:td
+							Element:a
+								Follow a User
+							Element:td
+							Element:code
+								PUT /following/users/:user_id
+							Element:td
+								Add this user_id to the list of Followed Users
+							Element:tr
+							Element:td
+							Element:a
+								Follow Multiple Users
+							Element:td
+							Element:code
+								POST /following/users
+							Element:td
+								Add the specified User IDs to the list of Followed Users
+							Element:tr
+							Element:td
+							Element:a
+								Unfollow a User
+							Element:td
+							Element:code
+								DELETE /following/users/:user_id
+							Element:td
+								Remove this user from the list of Followed Users
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Get Followed Identities
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Get an array of Followed
+							Element:a
+								Identity
+								objects.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								page_size
+							Element:td
+								integer
+							Element:td
+							Element:em
+								(optional)
+								Number of results to return; 500 is default
+							Element:tr
+							Element:td
+							Element:code
+								from_id
+							Element:td
+								string
+							Element:td
+							Element:em
+								(optional)
+								Get the Identities
+							Element:em
+								after
+								this ID. Can be passed as a Layer URI
+							Element:q
+								layer:///identities/userId
+								or simply a user_id
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								GET
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/identities
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+							Element:span
+								"page_size=500&from_id=1234"
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X GET \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/identities?page_size=500&from_id=1234
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Request successful
+								| Status: 200 (OK)
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								[
+							Element:span
+								,
+							Element:a
+								Identity
+							Element:span
+								]
+							Element:a
+								Identity
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Get Followed Users
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Get an array of Followed User IDs.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								page_size
+							Element:td
+								integer
+							Element:td
+							Element:em
+								(optional)
+								undefined
+							Element:tr
+							Element:td
+							Element:code
+								from_id
+							Element:td
+								string
+							Element:td
+							Element:em
+								(optional)
+								Get the User IDs logically sorted
+							Element:em
+								after
+								this ID. Can be passed as a Layer URI
+							Element:q
+								layer:///identities/userId
+								or simply a user_id
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								GET
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/following
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+							Element:span
+								"page_size=500&from_id=1234"
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X GET \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/following?page_size=500&from_id=1234
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Request successful
+								| Status: 200 (OK)
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								[
+							Element:span
+								"1234"
+								,
+							Element:span
+								"777"
+								,
+							Element:span
+								"999"
+								]
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Get an Identity
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Returns an
+							Element:a
+								Identity
+								object of a single user of this app.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This method takes no parameters.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								GET
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/identities/:user_id
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X GET \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/identities/<user_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Request successful
+								| Status: 200 (OK)
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+							Element:span
+							Element:a
+								Identity
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Is User Followed
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Returns a 204 or 404 to indicate if the user is followed or not.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This method takes no parameters.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								GET
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/following/users/:user_id
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X GET \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/following/users/<user_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								User is Followed
+							Element:br
+							Element:q
+								Status: 204 (No Content)
+							Element:br
+								(Empty body)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								User is
+								| Status: 404 (Not Found)
+							Element:strong
+								not
+								Followed
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"id"
+								:
+							Element:span
+								"not_found"
+								,
+							Element:span
+								"code"
+								:
+							Element:span
+								102
+								,
+							Element:span
+								"message"
+								:
+							Element:span
+								"A user identity with the specified identifier could not be found."
+								,
+							Element:span
+								"url"
+								:
+							Element:span
+								"https://developer.layer.com/docs/client/rest#not_found"
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The user_id was not found in the list of users followed by your user
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Follow a User
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This method takes no parameters.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								PUT
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/following/users/:user_id
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X PUT \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/following/users/<user_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Participant followed successfully
+							Element:br
+							Element:q
+								Status: 204 (No Content)
+							Element:br
+								(Empty body)
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Follow Multiple Users
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								data
+							Element:td
+								string[]
+							Element:td
+								Array of User IDs
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								POST
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/following/users
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								[
+							Element:span
+								"1234"
+								,
+							Element:span
+								"777"
+								,
+							Element:span
+								"999"
+								]
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X POST \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/following/users\ -d '["1234","777","999"]'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Request Accepted
+							Element:br
+							Element:q
+								Status: 202 (Accepted)
+							Element:br
+								(Empty body)
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Unfollow a User
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A user can be removed from the list of Followed Users. Note that after unfollowing a user they may be implicitly refollowed if they join another Conversation together.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This method takes no parameters.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								DELETE
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/following/users/:user_id
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X DELETE \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/following/users/<user_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								User Unfollowed
+							Element:br
+							Element:q
+								Status: 204 (No Content)
+							Element:br
+								(Empty body)
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Receipts
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Typing Indicators

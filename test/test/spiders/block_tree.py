@@ -117,6 +117,8 @@ def construct_and_save_tree(body, url, name):
 		if False == find_h:
 			layer += 1
 
+	# print "num of layer" + str(layer)
+
 	for ele in body.iter():
 		if None == this_tree_node:
 			new_tree_node = insert_node(tree_root, "c", 0)
@@ -157,6 +159,23 @@ def construct_and_save_tree(body, url, name):
 		filename = url.split("com/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")
 	elif -1 != url.find("io/"):
 		filename = url.split("io/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+	elif -1 != url.find("net/"):
+		filename = url.split("net/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+	elif -1 != url.find("tv/"):
+		filename = url.split("tv/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+	elif -1 != url.find("ly/"):
+		filename = url.split("ly/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+	elif -1 != url.find("co/"):
+		filename = url.split("co/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+	elif -1 != url.find("edu/"):
+		filename = url.split("edu/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+	elif -1 != url.find("info/"):
+		filename = url.split("info/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+	elif -1 != url.find("org/"):
+		filename = url.split("org/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+	elif -1 != url.find("ch/"):
+		filename = url.split("ch/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+	
 	else:
 		filename = url.replace("/", "_")
 	if not os.path.exists(os.getcwd() + "\\" + name):

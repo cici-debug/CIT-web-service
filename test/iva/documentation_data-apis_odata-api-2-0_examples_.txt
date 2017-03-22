@@ -1,0 +1,837 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:span
+					Examples
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:aside
+													Element:h4
+														Search Documentation
+													Element:label
+														Search for:
+													Element:h4
+														Documentation Menu
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Use the queries below to form a better understanding of the types of meta-data you can access via IVA’s OData API 2.0. Here is a list of common queries that will return an abundance of meata-data to support the trailers on your site.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The OData 2.0 API is very flexible and allows you to join many tables to perform complex queries. The more complex the query, the more resources it takes to process the request. There is a hard timeout of 30 seconds on queries for this API. To make your queries run faster, consider limiting the number of results to 100 records at a time.
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														We have found LINQPad to be a useful tool to help visualize the data and to run queries against the database.
+													Element:i
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														Download
+														this free program and read our
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														instructions
+														for setting it up.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example Ingest Query
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This example is a good starting point for anyone looking to ingest IVA’s back catalog of video assets and meta-data. Each implementation is unique so there may be additional filters you wish to apply or data points you want to include. If there is a specific query you would like help with, email our
+										Element:a
+											support team
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											(from v in VideoAssets.expand("EntertainmentProgram, EntertainmentProgram/AlternateIds/AlternateIdType,VideoAssetScreenCapture, CountryTarget,LanguageSpoken, LanguageSubtitled, MediaType,Encodes, RegionRestrictions, Descriptions") where (v.ExpirationDate is nothing or v.ExpirationDate > datetime.now) and v.RequiresIVAPlayer = false and v.OkToEncodeAndServe = true and v.WarningFlag = false and v.AllowAds = true and ((v.LanguageSpokenId = 0 and v.LanguageSubtitledId = -1) or (v.LanguageSubtitledId = 0 and v.LanguageSpokenId > 0)) select v).skip(0).take(250)
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/VideoAssets()?$filter=cast((cast(ExpirationDate eq null,'Edm.Boolean') or ExpirationDate gt datetime'2015-06-18T21:18:04.6407898-04:00') and cast(RequiresIvaPlayer eq false,'Edm.Boolean') and cast(OkToEncodeAndServe eq true,'Edm.Boolean') and cast(WarningFlag eq false,'Edm.Boolean') and cast(AllowAds eq true,'Edm.Boolean') and cast(cast(LanguageSpokenId,'Edm.Int32') eq 0 and cast(LanguageSubtitledId,'Edm.Int32') eq -1 or cast(LanguageSubtitledId,'Edm.Int32') eq 0 and cast(LanguageSpokenId,'Edm.Int32') gt 0,'Edm.Boolean'),'Edm.Boolean')&$skip=0&$top=500&$expand=EntertainmentProgram, EntertainmentProgram/AlternateIds/AlternateIdType,VideoAssetScreenCapture, CountryTarget,LanguageSpoken, LanguageSubtitled, MediaType,Encodes, RegionRestrictions, Descriptions&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example Update Query
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After you have ingested the data about IVA’s back catalog of video assets, be sure to run updates on new and changed records in the future. The example below will show you only the programs that have been modified since a certain date.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											((from v in VideoAssets.expand("EntertainmentProgram, EntertainmentProgram/AlternateIds/AlternateIdType,VideoAssetScreenCapture, CountryTarget,LanguageSpoken, LanguageSubtitled, MediaType,Encodes, RegionRestrictions, Descriptions") _where (v.EntertainmentProgram.AlternateIds.Any(function (y) y.DateAdded >= datetime.now.adddays(-5)) or v.EntertainmentProgram.DateModified > datetime.now.adddays(-3)) _select v).skip(0).take(100))
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/VideoAssets()?$filter=EntertainmentProgram/AlternateIds/any(y:cast(y/DateAdded ge datetime'2015-06-19T15:14:43.7815117-04:00','Edm.Boolean')) or EntertainmentProgram/DateModified gt datetime'2015-06-21T15:14:43.7815117-04:00'&$skip=0&$top=100&$expand=EntertainmentProgram, EntertainmentProgram/AlternateIds/AlternateIdType,VideoAssetScreenCapture, CountryTarget,LanguageSpoken, LanguageSubtitled, MediaType,Encodes, RegionRestrictions, Descriptions&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example to get the most relevant program meta data and video assets using “expand”.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											OData allows you to join or expand additional related entities. The following example will return the most commonly used meta-data that can be joined from the VideoAssets and EntertainmentProgram entities.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											(From e in EntertainmentPrograms.expand("Copyrightholder, Country, Director, AlternateIds/AlternateIdType, ProgramToPerformerMaps/Performer ,RelatedEntertainmentPrograms/RelatedEntertainmentPrograms/RelatedEntertainmentPrograms,ReleaseEvents, TitleAkas,VideoAssets, VideoAssets/VideoAssetScreenCapture, VideoAssets/Encodes, VideoAssets/CountryTarget, VideoAssets/LanguageSpoken, VideoAssets/LanguageSubtitled, VideoAssets/MediaType, VideoAssets/Captions, VideoAssets/RegionRestrictions") where e.PublishedId > 0 select e).skip(3000).take(100)
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/EntertainmentPrograms()?$filter=Publishedid gt 0&$skip=3000&$top=100&$expand=Copyrightholder, Country, Director, AlternateIds/AlternateIdType, ProgramToPerformerMaps/Performer ,RelatedEntertainmentPrograms/RelatedEntertainmentPrograms/RelatedEntertainmentPrograms,ReleaseEvents, TitleAkas,VideoAssets, VideoAssets/VideoAssetScreenCapture, VideoAssets/Encodes, VideoAssets/CountryTarget, VideoAssets/LanguageSpoken, VideoAssets/LanguageSubtitled, VideoAssets/MediaType, VideoAssets/Captions, VideoAssets/RegionRestrictions&Developerid=B43BF933-5CB5-434A-B0A8-717FC149FBED
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											JSON vs. XML Response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Depending on your preference, IVA’s OData API can return XML or JSON. By default the API will return XML. To get a JSON response add the parameter “format=json”.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/EntertainmentPrograms()?$filter=Publishedid gt 0&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											JSONP supported with the “$callback” feature
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JSONP is script tag injection, passing the response from the server in to a user specified function. The following example shows the callback feature. Callback along with the format=json will allow you to pass the API request results back to a function(cb) and allows for cross domain JSON requests.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/ReleaseEvents()?$top=1&$format=json&$callback=cb&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Paging Example
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default the OData API returns up to 500 records at a time. When requesting more than 500 records write a query to page through the data or get the next set. Below is an example demonstrating one way to do paging using “Top” and “Skip”. Continue the pattern to get all the records.. IVA recommends using a smaller number(100 or so) and page through the results.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											(From v in VideoAssets where v.MediaId = 0 select v).skip(1500).take(100)
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											api.internetvideoarchive.com/2.0/DataService/VideoAssets()?$filter=MediaId eq 0&$skip=1500&$top=100&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Additional examples
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											URL to get first set of records 1 – 500
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/EntertainmentPrograms?$top=500
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											URL to get second set of records 501 – 1000
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/EntertainmentPrograms?$top=500&$skip=500
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											URL to get third set of records 1001 – 1500
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/EntertainmentPrograms?$top=500&$skip=1000
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Finding assets for a US based Audience
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											IVA captures international versions of trailers as well as the US versions. The example below filters video assets based on language to give you only assets that would be suitable for an English speaking audience.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											(from v in VideoAssets.expand("EntertainmentProgram/AlternateIds, EntertainmentProgram, MediaType, Encodes, VideoAssetScreenCapture") where v.MediaId = 0 _and ((v.LanguageSpokenId = 0 and v.LanguageSubtitledId = -1) or (v.LanguageSubtitledId = 0 and v.LanguageSpokenId > 0))select v).skip(1000).take(100)
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/VideoAssets()?$filter=MediaId eq 0 and (cast(LanguageSpokenId,'Edm.Int32') eq 0 and cast(LanguageSubtitledId,'Edm.Int32') eq -1 or cast(LanguageSubtitledId,'Edm.Int32') eq 0 and cast(LanguageSpokenId,'Edm.Int32') gt 0)&$skip=1000&$top=100&$expand=EntertainmentProgram/AlternateIds, EntertainmentProgram, MediaType, Encodes, VideoAssetScreenCapture&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Finding video assets matched to a particular data provider.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											IVA’s video assets are matched to top tier data providers such as Gracenote, Rovi, IMDB, RedBee, etc. Customers of these data providers can have their ID’s exposed through the API(special access needed). Not using one of these providers, IVA is also matched to additional data sources that are made public through the API. The following example demonstrates how you can filter based on alternate id type allowing you to match video assets to programs with data from The Movie Database.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											(From x In VideoAssets.Where(Function(x) x.EntertainmentProgram.AlternateIds.Any(Function(y) y.IDType = 68)) where x.PublishedId > -1 select x. Title, x.Publishedid, x.ExpirationDate, x.OkToEncodeAndServe, x.EntertainmentProgram.AlternateIds).skip(10000).take(100)
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/VideoAssets()?$filter=EntertainmentProgram/AlternateIds/any(y:y/IDType eq 68) and Publishedid gt -1&$skip=10000&$top=100&$expand=EntertainmentProgram/AlternateIds&$select=Title,Publishedid,ExpirationDate,OkToEncodeAndServe,EntertainmentProgram/AlternateIds/*&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Movies releasing in theatres
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											IVA captures release event information for movies, TV, and video games. Use the dates in the release events table in the API to determine if a program released in the past, recently, or will be released in the future. The example below shows movies coming soon based off the current date.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											from re in ReleaseEvents.expand("EntertainmentProgram") where re.ReleaseDate >= #6/1/2015# and re.ReleaseDate < #7/1/2017# and re.ReleaseTypeId = 0 select re
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/ReleaseEvents()?$filter=ReleaseDate ge datetime'2015-06-01' and ReleaseDate lt datetime'2017-07-01' and ReleaseTypeId eq 0&$expand=EntertainmentProgram&Developerid=B43BF933-5CB5-434A-B0A8-717FC149FBED
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Dynamic movie lists
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use the query below to get back programs and video assets for the following dynamic lists:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											ID: 5100 – IVA’s Most Anticipated Movies Coming Soon
+										Element:li
+											ID: 5101 – Most Popular Movies Releasing This Weekend
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											from v in ListToProgramMaps.expand("VideoAsset/EntertainmentProgram/AlternateIds") where v.TitleListId = 5100 select v
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/ListToProgramMaps()?$filter=TitleListId eq 5100&$expand=VideoAsset/EntertainmentProgram/AlternateIds&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											List all HD screen captures for a particular performer (ID 8143, Tom Cruise)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											IVA tags performers in each screen capture that we create. In this example you can pass an IVA performer ID to get back a list of images the performer is tagged. In order to use these images you need a paid subscription. Use the published ID of the video asset in the response with IVA’s
+										Element:a
+											Custom Stills Service
+											. The response contains the source width and height of the master image. If you plan on using a 4×3 image change the query below to return the width and height of the 4×3 master image.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											(from p in PerformerMappingToHdPhotos where p.PerformerId = 8143 and p.HdTitlePhoto.AspectRatioId = "16x9" order by p.HdTitlePhoto.publishedId select new with {p.HdTitlePhoto.publishedId, p.HdTitlePhoto.Width, p.HdTitlePhoto.Height} )
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/PerformerMappingToHdPhotos()?$filter=PerformerId eq 8143 and HdTitlePhoto/AspectRatioId eq '16x9'&$orderby=HdTitlePhoto/publishedId&$expand=HdTitlePhoto&$select=HdTitlePhoto/publishedId,HdTitlePhoto/Width,HdTitlePhoto/Height&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Get single performer photo URL (public)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											IVA does offer one free 320×240 image of the performer. Use the example below to get the image URL.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											from o in PerformerScreenCaptures where o.PerformerId = 8143 select o
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/PerformerScreenCaptures()?$filter=PerformerId eq 8143&Developerid=B43BF933-5CB5-434A-B0A8-717FC149FBED
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Find video assets based on source quality
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											IVA receives video from over 1200 suppliers. Each supplier has different standards of video quality that they make available. IVA asks for and uses the highest quality available from the sources to make our mezzanine files and encode the video assets into our standardized formats. Developers can filter by the source video width to help determine the quality. The example below looks at video assets with a source width greater than 1000 and only at video assets related to movies.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											from v in VideoAssets where v.SourceWidth > 1000 and (v.MediaId = 0 or v.MediaId = 5 or v.MediaId = 6 or v.MediaId = 10 or v.MediaId = 20) select v
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/VideoAssets()?$filter=cast(SourceWidth,'Edm.Int32') gt 1000 and (MediaId eq 0 or MediaId eq 5 or MediaId eq 6 or MediaId eq 10 or MediaId eq 20)&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Select All EntertainmentPrograms where the MovieCategory = Drama
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This simple example returns programs with the movie category of Drama.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											From o In EntertainmentPrograms where o.MovieCategory.Category = "Drama" Select o
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/EntertainmentPrograms()?$filter=MovieCategory/Category eq 'Drama'&Developerid=B43BF933-5CB5-434A-B0A8-717FC149FBED
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Query to get a matching table to ingest IVA Published ID’s based on Title, First Released Year and Director Name
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This example looks at the main program for movies only. Modify this query to get all the related video assets.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											(From o In VideoAssets where o.DefaultVideoAsset = "true" and o.OkToEncodeAndServe = true and o.MediaId = 0 Select o.PublishedId, o.Title, o.EntertainmentProgram.FirstReleasedYear, o.EntertainmentProgram.Director.FullName).skip(2000).take(100)
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/VideoAssets()?$filter=((DefaultVideoAsset eq 'true') and (OkToEncodeAndServe eq true)) and (MediaId eq 0)&$skip=2000&$top=100&$expand=EntertainmentProgram,EntertainmentProgram/Director&$select=Publishedid,Title,EntertainmentProgram/FirstReleasedYear,EntertainmentProgram/Director/FullName&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Search by title using a string (like)
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Example of a basic title search. IVA recommends working with a data provider we are matched to and using their ID’s to match to IVA’s video assets.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											from e in EntertainmentPrograms where e.Title.contains("Dark Knight") select e
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/EntertainmentPrograms()?$filter=substringof('Dark Knight',Title)&developerid=B43BF933-5CB5-434A-B0A8-717FC149FBED
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+									Node:
+									(type) c
+									(layer)3
+																		Node:
+																		(type) c
+																		(layer)6
+																			Element:footer
+																			Element:img
+																			Element:span
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:span
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:a
+																			Element:img
+																			Element:span
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:span
+																				Phone: +1 856 310 1981
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:br
+																				Fax: +1 856 310 1956 E-mail Us:
+																			Element:a
+																				support@internetvideoarchive.com
+																			Element:h6
+																				RECENT BLOG POSTS
+																			Element:ul
+																			Element:li
+																			Element:a
+																				IVA Trailers of the Week – First Contact
+																			Element:span
+																				March 15, 2017
+																			Element:li
+																			Element:a
+																				Video Hack Day 3
+																			Element:span
+																				March 14, 2017
+																			Element:li
+																			Element:a
+																				AdQ Announcement
+																			Element:span
+																				March 13, 2017
+																			Element:h6
+																				MORE LINKS
+																			Element:ul
+																			Element:li
+																			Element:a
+																				Developers
+																			Element:li
+																			Element:a
+																				Contact Us
+																			Element:li
+																			Element:a
+																				Privacy Policy
+																			Element:li
+																			Element:a
+																				Charts
+																			Element:li
+																			Element:a
+																				Client Login
+																			Element:li
+																			Element:a
+																				Legacy Documentation
+																			Element:h6
+																				EVENTS
+																				»
+																			Element:a
+																				Mar. 11-12, Video Hack Day 3, New York City
+																				»
+																			Element:a
+																				Apr. 24-27, NAB Show, Las Vegas, NV
+																			Element:h6
+																				SUBMIT CONTENT
+																			Element:ul
+																			Element:li
+																			Element:a
+																				Movie
+																			Element:li
+																			Element:a
+																				TV
+																			Element:li
+																			Element:a
+																				Video Game
+																			Element:span
+																				© Copyright Internet Video Archive LLC.

@@ -1,0 +1,594 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Application Billing
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Why waste time building your own billing system when you can use FreshBooks and get back to what you’d rather be doing? You can add FreshBooks recurring billing to your applications very easily through the
+				Element:a
+					FreshBooks API
+					. Set up subscriptions, accept credit cards, and monitor payments with a few lines of code.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Managing subscriptions to FreshBooks centers around creating recurring profiles. The same functionality available in the web application found on the
+							Element:strong
+								Invoice
+								tab under the
+							Element:strong
+								Recurring
+								subtab is available through the
+							Element:a
+								FreshBooks API
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								FreshBooks recurring profiles create and send invoices automatically for you so you don’t have to manage them yourself. FreshBooks recurring profiles do some interesting tricks:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Automatically send recurring invoices monthly, yearly, or as little or often as you would like.
+							Element:li
+								Automatically charge your client’s credit card whenever you generate an invoice.
+							Element:li
+								Rack up charges. Add or remove line items or a subscription at any time.
+							Element:li
+								Send invoices by email or through the post.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting up a basic subscription
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The foundation of all application billing in FreshBooks relies on setting up a basic subscription. Follow these simple steps to get started.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Create a client through
+							Element:a
+								Client.create
+								. Store the
+							Element:strong
+								client_id
+								in the response code.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Create a recurring profile using
+							Element:a
+								Recurring.create
+								for the client_id. If you do not specify a
+							Element:strong
+								date
+								, the first invoice will be sent immediately.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Store the
+							Element:strong
+								client_id
+								and
+							Element:strong
+								recurring_id
+								with the client record in your own database to make them easy to reference in future API calls.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Letting FreshBooks capture credit cards
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want to accept credit card payments but you do not want to take on the burden and liability of having credit cards pass through your system, you can use FreshBooks to capture credit cards for you. Make sure you have one of our
+							Element:a
+								auto-bill capable payment gateways
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When creating a subscription, do not specify the
+							Element:strong
+								date
+								. A new invoice will be created immediately. The
+							Element:strong
+								invoice_id
+								will be sent in the response.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note: You may want to set a
+							Element:strong
+								return_uri
+								on the recurring profile so your customers will be returned back to your application after they pay your invoice.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then, get the invoice details for the invoice_id using
+							Element:a
+								Invoice.get
+								. Redirect your customer’s user agent to the
+							Element:strong
+								Invoice.links.client_view
+								URL. Your customers can then pay the invoice from there with your credit card.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If your customers choose to, they can set themselves up to be automatically charged for all future invoices from there.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Capturing credit cards on your website or application
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you feel comfortable with the security implications of taking credit cards in your application, you can pass them to FreshBooks when
+							Element:a
+								creating a recurring profile
+								. Just provide the
+							Element:strong
+								section.
+							Element:code
+								<autobill/>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After you pass the credit card information to FreshBooks, we recommend you destroy the data. FreshBooks will store the credit card information on our secure servers so you are not burdened with the liability of managing credit card information. If you are capturing credit cards on your website, we strongly recommend you do so over HTTPS, an encrypted protocol. Here are instructions on how to set up HTTPS in
+							Element:a
+								Apache
+								and
+							Element:a
+								IIS
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Make sure you have one of our
+							Element:a
+								auto-bill capable payment gateways
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Charging your customer’s credit card for a one-time invoice
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want to charge your customer’s credit card just for one transaction, follow the instructions above but create a subscription for today with only 1
+							Element:strong
+								occurrences
+								and provide the
+							Element:strong
+								section.
+							Element:code
+								<autobill/>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Only one invoice will be created and their credit card will be charged only once. If you don’t specify a
+							Element:strong
+								date
+								on the recurring profile, the invoice will be created immediately and their credit card will be charged immediately.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting notified of payment
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can be notified when a payment arrives by registering a
+							Element:a
+								Webhook
+								for the
+							Element:strong
+								Payment.create
+								event. Then using the Webhook’s
+							Element:strong
+								object_id
+								as the
+							Element:strong
+								payment_id
+								, call
+							Element:a
+								Payment.get
+								to get the
+							Element:strong
+								invoice_id
+								and
+							Element:strong
+								client_id
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Checking if a client should be suspended
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can determine if a client is in arrears by calling
+							Element:a
+								Invoice.list
+								with their
+							Element:strong
+								client_id
+								and with the special ‘unpaid’
+							Element:strong
+								status
+								filter. If you have a policy of letting clients pay late, you can limit the list to only old unpaid invoices with the
+							Element:strong
+								date_to
+								filter.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also automatically be notified when an account is past due by subscribing to the
+							Element:strong
+								invoice.pastdue.1, invoice.pastdue.2, and invoice.pastdue.3
+								series of
+							Element:a
+								Webhooks
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Suspending and cancelling a subscription
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can suspend a subscription by calling
+							Element:a
+								Recurring.update
+								and setting the
+							Element:strong
+								stopped
+								field to 1. To resume the subscription, update it and set the
+							Element:strong
+								stopped
+								field to 0.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To cancel a subscription, delete the recurring profile using
+							Element:a
+								Recurring.delete
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Coupons
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can fulfill coupons on subscriptions by either
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Adding a
+							Element:strong
+								discount
+								to the recurring profile to give a percentage discount
+							Element:li
+								Adding a negative value line item to the recurring profile to give a cash discount (e.g. -$10.00)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Because you can modify a recurring profile at any time, you can remove the discount later and future invoices and payments will be for the full amount.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In fact it’s easy to manage one-time discounts. First, create a recurring profile that starts immediately by not providing a
+							Element:strong
+								date
+								on the recurring profile, and put the discount on that profile. An invoice will immediately be generated with the discount. Then immediately update the recurring profile with
+							Element:a
+								Recurring.update
+								to remove the discount from future invoices.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Racking up charges
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can modify a FreshBooks recurring profile at any time. The next invoice generated will reflect the profile as of the moment it is generated.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If your customers rack up charges throughout the billing period, you can keep track of charges to date on the FreshBooks recurring profile. First, get the existing profile with
+							Element:a
+								Recurring.get
+								. Add a line item to the XML you get and submit it back to
+							Element:a
+								Recurring.update
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Don’t forget to empty the recurring profile at the start of a billing period. You can either set a scheduled event (e.g. a cron job) on your own server to do this, or you can be notified when each invoice is created and empty the invoice then.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To be notified, create a
+							Element:a
+								Webhook
+								for the
+							Element:strong
+								Invoice.create
+								event. When you get the Webhook notification, call
+							Element:a
+								Invoice.get
+								using the Webhook
+							Element:strong
+								object_id
+								as the
+							Element:strong
+								invoice_id
+								. You can then get the
+							Element:strong
+								recurring_id
+								from the invoice. We recommend for robustness using both a scheduled job and a Webhook notification. If for any reason your server is down and does not receive the Webhook notification, the scheduled task can run at a predictable time and empty the recurring profile.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

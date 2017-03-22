@@ -1,0 +1,1723 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Conversations endpoints
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Method
+							Element:th
+								HTTP request
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:a
+								Get all conversations
+							Element:td
+							Element:code
+								GET /conversations
+							Element:td
+								Get all conversations
+							Element:tr
+							Element:td
+							Element:a
+								Get a conversation
+							Element:td
+							Element:code
+								GET /conversations/:conversation_uuid
+							Element:td
+								Get a single conversation
+							Element:tr
+							Element:td
+							Element:a
+								Create a conversation
+							Element:td
+							Element:code
+								POST /conversations
+							Element:td
+								Start a new conversation
+							Element:tr
+							Element:td
+							Element:a
+								Update participants
+							Element:td
+							Element:code
+								PATCH /conversations/:conversation_uuid
+							Element:td
+								Add or remove participants
+							Element:tr
+							Element:td
+							Element:a
+								Update metadata
+							Element:td
+							Element:code
+								PATCH /conversations/:conversation_uuid
+							Element:td
+								Change metadata values
+							Element:tr
+							Element:td
+							Element:a
+								Delete a conversation
+							Element:td
+							Element:code
+								DELETE /conversations/:conversation_uuid
+							Element:td
+								Mark a conversation as deleted
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Get all conversations
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Get the first page of conversations (most recent 100, by default)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											page_size
+										Element:td
+											integer
+										Element:td
+										Element:em
+											(optional)
+											Number of results to return; 100 is default and max
+										Element:tr
+										Element:td
+										Element:code
+											from_id
+										Element:td
+											string
+										Element:td
+										Element:em
+											(optional)
+											Get the Conversations logically sorted
+										Element:em
+											after
+											this ID (by default, this corresponds to Conversations chronologically before this ID). Can be passed as a Layer URI
+										Element:q
+											layer:///conversations/uuid
+											or simply a UUID
+										Element:tr
+										Element:td
+										Element:code
+											sort_by
+										Element:td
+											string
+										Element:td
+										Element:em
+											(optional)
+											Either
+										Element:code
+											created_at
+											to sort by Conversation creation time (newest first), or
+										Element:code
+											last_message
+											to sort by most recently sent message (newest first)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											HTTP request:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											GET
+									Node:
+									(type) c
+									(layer)3
+										Element:b
+											/conversations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+											"sort_by=last_message&page_size=50&from_id=layer:///conversations/UUID"
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X GET \ -H 'Accept: application/vnd.layer+json; version=1.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/conversations?sort_by=last_message&page_size=50&from_id=layer:///conversations/UUID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Possible responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Request successful
+											| Status: 200 (OK)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											[
+										Element:span
+											,
+										Element:a
+											Conversation
+										Element:span
+											]
+										Element:a
+											Conversation
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Discussion
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response will include a header indicating the total number of results available to page through:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Layer-Count: 4023
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+										Element:strong
+											Note
+										Element:p
+											Conversations in which you used to be a participant will be listed by this endpoint. You will only see messages and metadata up to the point where you stopped being a participant. The
+										Element:code
+											participants
+											property will be empty (
+										Element:code
+											[]
+											) if you are no longer a participant.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sorting
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default sort is by
+										Element:code
+											created_at
+											. This is done because this is a fixed ordering, so that paging can be done without Conversations moving around while paging. This means developers do not need to worry about missed Conversations and changes in ordering of already loaded results. However, the
+										Element:code
+											sort_by
+											parameter allows you to request a sort by most recently active conversations instead. If a conversation does not yet have any messages, it is sorted using its
+										Element:code
+											created_at
+											. This means that a Conversation without any messages can be sorted ahead of a Conversation that has not been active recently.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you sort by
+										Element:code
+											last_message
+											, the results can change while paging. We recommend the following to deal with this:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											If you have a
+										Element:a
+											WebSocket connection
+											and receive a message creation event for a Conversation, that Conversation is now the most recent.
+										Element:ul
+										Element:li
+											If the Conversation is already loaded, move it to the top of your list. If it is not loaded,
+										Element:a
+											load it
+											and insert it at the top of your list.
+										Element:li
+											Alternatively, if you always need to maintain a correctly sorted list, you can listen for all update events on a WebSocket connection that change a Conversation’s
+										Element:code
+											last_message
+											property.
+										Element:ul
+										Element:li
+											If the Conversation isn’t yet loaded, load it. If it is loaded, the
+										Element:code
+											last_message
+											may have changed, so it must be sorted into the correct position in the list.
+										Element:li
+											Any Conversation creation events on a WebSocket connection will make the new Conversation the most recent, and it should be inserted at the top of the list. This is true even if the new Conversation doesn’t have any messages.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Get a conversation
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This method takes no parameters.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											HTTP request:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											GET
+									Node:
+									(type) c
+									(layer)3
+										Element:b
+											/conversations/:conversation_uuid
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X GET \ -H 'Accept: application/vnd.layer+json; version=1.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/conversations/<conversation_uuid>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Possible responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Request successful
+											| Status: 200 (OK)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+										Element:a
+											Conversation
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Create a conversation
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											participants
+										Element:td
+											string[]
+										Element:td
+											Array of user IDs (strings) identifying initial participants
+										Element:tr
+										Element:td
+										Element:code
+											distinct
+										Element:td
+											boolean
+										Element:td
+											Whether this Conversation should be distinct
+										Element:tr
+										Element:td
+										Element:code
+											metadata
+										Element:td
+											object
+										Element:td
+										Element:em
+											(optional)
+											Arbitrary key/value pairs representing the initial metadata
+										Element:tr
+										Element:td
+										Element:code
+											id
+										Element:td
+											string
+										Element:td
+										Element:em
+											(optional)
+											UUID or Layer ID, used for deduplication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											HTTP request:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											POST
+									Node:
+									(type) c
+									(layer)3
+										Element:b
+											/conversations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"participants"
+											: [
+										Element:span
+											"1234"
+											,
+										Element:span
+											"5678"
+											],
+										Element:span
+											"distinct"
+											:
+										Element:span
+											false
+											,
+										Element:span
+											"metadata"
+											: {
+										Element:span
+											"background_color"
+											:
+										Element:span
+											"#3c3c3c"
+											} }
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X POST \ -H 'Accept: application/vnd.layer+json; version=1.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/conversations\ -d '{"participants":["1234","5678"],"distinct":false,"metadata":{"background_color":"#3c3c3c"}}'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Possible responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Conversation created successfully
+											| Status: 201 (Created)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+										Element:a
+											Conversation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Duplicate conversation already exists
+											| Status: 409 (Conflict)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"id"
+											:
+										Element:span
+											"id_in_use"
+											,
+										Element:span
+											"code"
+											:
+										Element:span
+											111
+											,
+										Element:span
+											"message"
+											:
+										Element:span
+											"The requested Conversation already exists"
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"http://docs.layer.com/reference/client_api#create-a-conversation"
+											,
+										Element:span
+											"data"
+											: {
+										Element:span
+											"id"
+											:
+										Element:span
+											"layer:///conversations/74a676c4-f697-45c4-b3bc-3e48bd2e372c"
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"https://api.layer.com/conversations/74a676c4-f697-45c4-b3bc-3e48bd2e372c"
+											,
+										Element:span
+											"messages_url"
+											:
+										Element:span
+											"https://api.layer.com/conversations/74a676c4-f697-45c4-b3bc-3e48bd2e372c/messages"
+											,
+										Element:span
+											"created_at"
+											:
+										Element:span
+											"2015-10-10T22:51:12.010Z"
+											,
+										Element:span
+											"last_message"
+											:
+										Element:span
+											null
+											,
+										Element:span
+											"participants"
+											: [
+										Element:span
+											"1234"
+											,
+										Element:span
+											"5678"
+											],
+										Element:span
+											"distinct"
+											:
+										Element:span
+											false
+											,
+										Element:span
+											"unread_message_count"
+											:
+										Element:span
+											0
+											,
+										Element:span
+											"metadata"
+											: {
+										Element:span
+											"background_color"
+											:
+										Element:span
+											"#3c3c3c"
+											} } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Matching distinct conversation
+											| Status: 200 (OK)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+										Element:a
+											Conversation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Partially matching distinct conversation
+											| Status: 409 (Conflict)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"id"
+											:
+										Element:span
+											"conflict"
+											,
+										Element:span
+											"code"
+											:
+										Element:span
+											108
+											,
+										Element:span
+											"message"
+											:
+										Element:span
+											"The requested Distinct Conversation was found but had metadata that did not match your request."
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"https://developer.layer.com/api.md#creating-a-conversation"
+											,
+										Element:span
+											"data"
+											: {
+										Element:span
+											"id"
+											:
+										Element:span
+											"layer:///conversations/f3cc7b32-3c92-11e4-baad-164230d1df67"
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"https://api.layer.com/conversations/f3cc7b32-3c92-11e4-baad-164230d1df67"
+											,
+										Element:span
+											"created_at"
+											:
+										Element:span
+											"2014-09-15T04:44:47+00:00"
+											,
+										Element:span
+											"participants"
+											: [
+										Element:span
+											"1234"
+											,
+										Element:span
+											"5678"
+											],
+										Element:span
+											"distinct"
+											:
+										Element:span
+											true
+											,
+										Element:span
+											"metadata"
+											: {
+										Element:span
+											"background_color"
+											:
+										Element:span
+											"#3c3c3c"
+											} } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Participant blocked
+											| Status: 422 (undefined)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"id"
+											:
+										Element:span
+											"particiant_blocked"
+											,
+										Element:span
+											"code"
+											:
+										Element:span
+											"110"
+											,
+										Element:span
+											"message"
+											:
+										Element:span
+											"The conversation could not be created because at least one participant is blocked"
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"https://developer.layer.com/api.md#creating-a-conversation"
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Websocket request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"type"
+											:
+										Element:span
+											"request"
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"method"
+											:
+										Element:span
+											"Conversation.create"
+											,
+										Element:span
+											"request_id"
+											:
+										Element:span
+											"fred.flinstone.3"
+											,
+										Element:span
+											"data"
+											: {
+										Element:span
+											"participants"
+											: [
+										Element:span
+											"1234"
+											,
+										Element:span
+											"5678"
+											],
+										Element:span
+											"distinct"
+											:
+										Element:span
+											false
+											,
+										Element:span
+											"metadata"
+											: {
+										Element:span
+											"background_color"
+											:
+										Element:span
+											"#3c3c3c"
+											} } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Success
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"name"
+											:
+										Element:span
+											"Success"
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"type"
+											:
+										Element:span
+											"response"
+											,
+										Element:span
+											"counter"
+											:
+										Element:span
+											16
+											,
+										Element:span
+											"timestamp"
+											:
+										Element:span
+											"2015-01-19T09:15:43+00:00"
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"request_id"
+											:
+										Element:span
+											"fred.flinstone.3"
+											,
+										Element:span
+											"method"
+											:
+										Element:span
+											"Conversation.create"
+											,
+										Element:span
+											"success"
+											:
+										Element:span
+											true
+											,
+										Element:span
+											"data"
+											:
+										Element:span
+											} } }
+										Element:a
+											Conversation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Error
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"name"
+											:
+										Element:span
+											"Error"
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"type"
+											:
+										Element:span
+											"response"
+											,
+										Element:span
+											"counter"
+											:
+										Element:span
+											18
+											,
+										Element:span
+											"timestamp"
+											:
+										Element:span
+											"2015-01-19T09:15:43+00:00"
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"request_id"
+											:
+										Element:span
+											"fred.flinstone.3"
+											,
+										Element:span
+											"method"
+											:
+										Element:span
+											"Conversation.create"
+											,
+										Element:span
+											"success"
+											:
+										Element:span
+											false
+											,
+										Element:span
+											"data"
+											: {
+										Element:span
+											"code"
+											:
+										Element:span
+											110
+											,
+										Element:span
+											"id"
+											:
+										Element:span
+											"particiant_blocked"
+											,
+										Element:span
+											"message"
+											:
+										Element:span
+											"The conversation could not be created because at least one participant is blocked"
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"https://developer.layer.com/api.md#creating-a-conversation"
+											} } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Deduplication error
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"name"
+											:
+										Element:span
+											"Deduplication error"
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"type"
+											:
+										Element:span
+											"response"
+											,
+										Element:span
+											"counter"
+											:
+										Element:span
+											18
+											,
+										Element:span
+											"timestamp"
+											:
+										Element:span
+											"2015-01-19T09:15:43+00:00"
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"request_id"
+											:
+										Element:span
+											"fred.flinstone.3"
+											,
+										Element:span
+											"method"
+											:
+										Element:span
+											"Conversation.create"
+											,
+										Element:span
+											"success"
+											:
+										Element:span
+											false
+											,
+										Element:span
+											"data"
+											: {
+										Element:span
+											"id"
+											:
+										Element:span
+											"id_in_use"
+											,
+										Element:span
+											"code"
+											:
+										Element:span
+											111
+											,
+										Element:span
+											"message"
+											:
+										Element:span
+											"The requested Conversation already exists"
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"http://docs.layer.com/reference/client_api#create-a-conversation"
+											,
+										Element:span
+											"data"
+											:
+										Element:span
+											} } } }
+										Element:a
+											Conversation
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Discussion
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Conversations can be specified as
+										Element:a
+											distinct
+											at creation time.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When attempting to create a new Distinct Conversation, your request may match an existing Distinct Conversation, if one of the following is true:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											The
+										Element:code
+											metadata
+											property was not included in the new request
+										Element:li
+											The
+										Element:code
+											metadata
+											property was included with a value of
+										Element:q
+											null
+											in the new request
+										Element:li
+											The
+										Element:code
+											metadata
+											property is identical to the current
+										Element:code
+											metadata
+											of the matching distinct Conversation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If one of these is true, you will receive the existing Conversation. If none of these conditions are true, we will return an error. This allows you to determine how you want to handle the difference in the Conversation metadata.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Update participants
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											operation
+										Element:td
+											string
+										Element:td
+											The type of operation, one of
+										Element:q
+											add
+											or
+										Element:q
+											remove
+										Element:tr
+										Element:td
+										Element:code
+											property
+										Element:td
+											string
+										Element:td
+											The property to change; can use
+										Element:code
+											.
+											to access nested properties
+										Element:tr
+										Element:td
+										Element:code
+											value
+										Element:td
+											string
+										Element:td
+											object
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											HTTP request:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											PATCH
+									Node:
+									(type) c
+									(layer)3
+										Element:b
+											/conversations/:conversation_uuid
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											[ {
+										Element:span
+											"operation"
+											:
+										Element:span
+											"add"
+											,
+										Element:span
+											"property"
+											:
+										Element:span
+											"participants"
+											,
+										Element:span
+											"value"
+											:
+										Element:span
+											"user3"
+											}, {
+										Element:span
+											"operation"
+											:
+										Element:span
+											"remove"
+											,
+										Element:span
+											"property"
+											:
+										Element:span
+											"participants"
+											,
+										Element:span
+											"value"
+											:
+										Element:span
+											"user2"
+											} ]
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X PATCH \ -H 'Accept: application/vnd.layer+json; version=1.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/vnd.layer-patch+json' \ https://api.layer.com/conversations/<conversation_uuid>\ -d '[{"operation":"add","property":"participants","value":"user3"},{"operation":"remove","property":"participants","value":"user2"}]'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Possible responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Participants updated successfully
+										Element:br
+										Element:q
+											Status: 204 (No Content)
+										Element:br
+											(Empty body)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Discussion
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+										Element:strong
+											Note
+										Element:p
+											Updating the participants of a Distinct Conversation will make it a Non-Distinct Conversation
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Update metadata
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can change or delete metadata by key, or replace the entire structure
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											operation
+										Element:td
+											string
+										Element:td
+											The type of operation, one of
+										Element:q
+											set
+											, or
+										Element:q
+											delete
+										Element:tr
+										Element:td
+										Element:code
+											property
+										Element:td
+											string
+										Element:td
+											The property to change; can use
+										Element:code
+											.
+											to access nested properties
+										Element:tr
+										Element:td
+										Element:code
+											value
+										Element:td
+											string
+										Element:td
+											object
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											HTTP request:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											PATCH
+									Node:
+									(type) c
+									(layer)3
+										Element:b
+											/conversations/:conversation_uuid
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											[ {
+										Element:span
+											"operation"
+											:
+										Element:span
+											"set"
+											,
+										Element:span
+											"property"
+											:
+										Element:span
+											"metadata.a.b.count"
+											,
+										Element:span
+											"value"
+											:
+										Element:span
+											"42"
+											}, {
+										Element:span
+											"operation"
+											:
+										Element:span
+											"set"
+											,
+										Element:span
+											"property"
+											:
+										Element:span
+											"metadata.a.b.word_of_the_day"
+											,
+										Element:span
+											"value"
+											:
+										Element:span
+											"Aglet"
+											} ]
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X PATCH \ -H 'Accept: application/vnd.layer+json; version=1.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/vnd.layer-patch+json' \ https://api.layer.com/conversations/<conversation_uuid>\ -d '[{"operation":"set","property":"metadata.a.b.count","value":"42"},{"operation":"set","property":"metadata.a.b.word_of_the_day","value":"Aglet"}]'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Possible responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Metadata updated successfully
+										Element:br
+										Element:q
+											Status: 204 (No Content)
+										Element:br
+											(Empty body)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Discussion
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The example above uses a dot (
+										Element:code
+											.
+											) to access nested keys. This example will create or set the
+										Element:code
+											count
+											and
+										Element:code
+											word_of_the_day
+											properties of
+										Element:code
+											b
+											to
+										Element:q
+											“42”
+											, and
+										Element:q
+											“Aglet”
+											, respectively. It will create intermediate structures as needed to accomplish this (objects
+										Element:code
+											a
+											and
+										Element:code
+											b
+											will be created if they don’t exist).
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+										Element:strong
+											Note
+										Element:p
+											Only string values are allowed in metadata, so the value
+										Element:em
+											42
+											must be passed as a string.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is also possible to replace the entire metadata structure:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											[ {
+										Element:span
+											"operation"
+											:
+										Element:span
+											"set"
+											,
+										Element:span
+											"property"
+											:
+										Element:span
+											"metadata"
+											,
+										Element:span
+											"value"
+											: {
+										Element:span
+											"a"
+											:
+										Element:span
+											"b"
+											}} ]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This increases the chance of conflicts if other clients are changing metadata at the same time. As a result, we recommend avoiding doing this.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Delete a conversation
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											mode
+										Element:td
+											string
+										Element:td
+											Possible values are
+										Element:code
+											all_participants
+											or
+										Element:code
+											my_devices
+										Element:tr
+										Element:td
+										Element:code
+											leave
+										Element:td
+											boolean
+										Element:td
+											Deleting a Conversation without leaving will cause the Conversation to return if more Messages are sent. Only applies to
+										Element:code
+											mode = my_devices
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											HTTP request:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											DELETE
+									Node:
+									(type) c
+									(layer)3
+										Element:b
+											/conversations/:conversation_uuid
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X DELETE \ -H 'Accept: application/vnd.layer+json; version=1.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/conversations/<conversation_uuid>?mode=all_participants
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Possible responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Conversation deleted
+										Element:br
+										Element:q
+											Status: 204 (No Content)
+										Element:br
+											(Empty body)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											No Conversation with that ID
+											| Status: 404 (Not Found)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"id"
+											:
+										Element:span
+											"not_found"
+											,
+										Element:span
+											"code"
+											:
+										Element:span
+											102
+											,
+										Element:span
+											"message"
+											:
+										Element:span
+											"A Conversation with the specified identifier could not be found."
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"https://developer.layer.com/reference/api#conversations"
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The specified Conversation may have already been deleted, or never existed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Access denied
+											| Status: 403 (Forbidden)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"id"
+											:
+										Element:span
+											"access_denied"
+											,
+										Element:span
+											"code"
+											:
+										Element:span
+											101
+											,
+										Element:span
+											"message"
+											:
+										Element:span
+											"You are no longer a participant in the specified Conversation."
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"https://developer.layer.com/reference/api#conversations"
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The user is not currently a participant with permission to delete the Conversation. If the user was never a participant, a
+										Element:q
+											404
+											will be returned instead.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Messages

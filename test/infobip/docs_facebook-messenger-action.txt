@@ -1,0 +1,35 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Action
+					Actions allow you to configure inbound messages delivery method.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+					[Sending messages](/docs/send-single-facebook-messenger-message) to your users over API is quite simple. When it comes to [receiving incoming messages](/docs/receive-facebook-message) from your users, you can choose between two methods: * **Http forward method** - allows you to receive messages from your subscribers in real-time * **Pull method** - allows you to fetch new messages from Infobip server over API at your convenience You can choose your preferable method by configuring Action. [block:callout] { "type": "warning", "title": "Important", "body": "The Configuration container must be created before Action since Actions can exist only inside of the Configuration container." } [/block] [block:image] { "images": [ { "image": [ "https://files.readme.io/5cad0c3-fb3.PNG", "fb3.PNG", 497, 92, "#e0d7d6" ], "sizing": "smart", "caption": "" } ] } [/block] Available methods * [List all actions](#list-all-actions) * [Create the new action](#create-new-action) * [Delete an action](#delete-action) ##Action models Different actions have different models, depending on the logic that the action triggers. These models are used as a request and response bodies for GET and POST methods. ### HTTP forward action [block:parameters] { "data": { "h-0": "Property name", "h-1": "Type", "h-2": "Description", "0-0": "key", "0-1": "String", "0-2": "Key of the action.", "1-0": "type", "1-1": "String", "1-2": "Constant value - \"HTTP_FORWARD\"", "2-0": "forwardUrl", "2-1": "String", "2-2": "URL that the received message will be forwarded to.", "3-0": "callbackData", "3-1": "String", "3-2": "Optional. String that will be forwarded alongside the usual fields posted to forwardUrl." }, "cols": 3, "rows": 4 } [/block] ### Pull action [block:parameters] { "data": { "h-0": "Property name", "h-1": "Type", "h-2": "Description", "0-0": "key", "1-1": "String", "1-0": "type", "0-1": "String", "0-2": "Key of the action.", "1-2": "Constant value - \"PULL\"", "2-0": "callbackData", "2-1": "String", "2-2": "Optional. String that will be forwarded alongside the usual fields posted to forwardUrl." }, "cols": 3, "rows": 3 } [/block] [block:api-header] { "type": "get", "title": "List all actions" } [/block] Returns actions for a given application configuration, if any. ``` https://api.infobip.com/facebook/1/applications/{applicationKey}/configurations/{configurationKey}/actions ``` ###Path params |Parameter|Type|Default value|Description| |-|-|-| |applicationKey|string|-|Application key| |configurationKey|string|-|Configuration key| ###Request example [block:code] { "codes": [ { "code": "GET /facebook/1/applications/{applicationKey}/configurations/{configurationKey}/actions HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "language": "http" } ] } [/block] ### Response [block:code] { "codes": [ { "code": "{\n \"actions\": [\n {\n \"key\": \"{actionKey}\",\n \"type\": \"HTTP_FORWARD\",\n \"forwardUrl\": \"http://www.example.com/webhook?param=param\"\n }\n ]\n}", "language": "json" } ] } [/block] On success, response header HTTP status code will be `200 OK`. |Parameter|Type|Description| |-|-|-| |*actions*|String|List or actions.| |*key*|String|Application key.| |*type*|String|Action type.| |*forwardUrl*|String|Forward URL.| [block:api-header] { "type": "post", "title": "Create new action" } [/block] Creates an action. ``` https://api.infobip.com/facebook/1/applications/{applicationKey}/configurations/{configurationKey}/actions ``` ###Path params |Parameter|Type|Default value|Description| |-|-|-| |applicationKey|string|-|Application key| |configurationKey|string|-|Configuration key| ###Request example: Http forward [block:code] { "codes": [ { "code": "POST /facebook/1/applications/{applicationKey}/configurations/{configurationKey}/actions HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nContent-Type: application/json\n\n{\n \"type\": \"HTTP_FORWARD\",\n \"forwardUrl\": \"https://www.myDomain.com/messageReceiver\",\n \"callbackData\": \"callbackData\"\n}", "language": "json" } ] } [/block] ### Response [block:code] { "codes": [ { "code": "{\n \"key\": \"{actionKey}\",\n \"type\": \"HTTP_FORWARD\",\n \"forwardUrl\": \"https://www.myDomain.com/messageReceiver\",\n \"callbackData\": \"callbackData\"\n}", "language": "json" } ] } [/block] Success response is represented by a HTTP status code `200 OK`. See [action models](#section-action-models) for request and response bodies. Attempt to create a new action when another action is already defined for a configuration will result in status `409 Conflict`. ###Request example: Pull [block:code] { "codes": [ { "code": "POST /facebook/1/applications/{applicationKey}/configurations/{configurationKey}/actions HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nContent-Type: application/json\n\n{\n \"type\": \"PULL\",\n \"callbackData\": \"callbackData\"\n}", "language": "json" } ] } [/block] ### Response [block:code] { "codes": [ { "code": "{\n \"key\": \"{actionKey}\",\n \"type\": \"PULL\",\n \"callbackData\": \"callbackData\"\n}", "language": "json" } ] } [/block] Success response is represented by a HTTP status code `200 OK`. See [action models](#section-action-models) for request and response bodies. Attempt to create a new action when another action is already defined for a configuration will result in status `409 Conflict`. [block:api-header] { "type": "delete", "title": "Delete action" } [/block] Deletes an action. ``` https://api.infobip.com/facebook/1/applications/{applicationKey}/configurations/{configurationKey}/actions/{actionKey} ``` ###Path params |Parameter|Type|Default value|Description| |-|-|-| |applicationKey|string|-|Application key| |configurationKey|string|-|Configuration key| |actionKey|string|-|Action key| ##Request example [block:code] { "codes": [ { "code": "DELETE /facebook/1/applications/{applicationKey}/configurations/{configurationKey}/actions/{actionKey} HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "language": "http" } ] } [/block] Success response is represented by a HTTP status code `204 No Content`. There is no response body.
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subscribe to our newsletter
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript

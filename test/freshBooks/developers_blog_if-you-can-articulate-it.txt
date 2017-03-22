@@ -1,0 +1,315 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					If you can articulate it, you can probably automate it. If you can automate it, it probably won’t rot.
+					by Diana Clarke on April 29/2011
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Every codebase has conventions, business logic, and common pitfalls that need to be communicated between developers; especially to new developers as the team grows. The
+				Element:a
+					Evolve
+					codebase is no exception. I’ve tried a bunch of different communication mediums in the past: verbal on-boarding, wikis, mailing lists, in-line documentation, code review check-lists, etc, but by far the one that works the best is
+				Element:strong
+					having automated tests
+					!
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Tests never forget
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two ways you can define a class in python:
+										Element:a
+											the new way, and the old way
+											. While we agreed as a team to only write new-style classes, every now and then an old-style class would creep in. This wasn’t a big deal until the day an old-style class caused a memory leak. You could get together as a team (again) to re-emphasize the importance of not using old-school classes, and try to remember to retell that story to every new developer, but having already been bitten by this approach, we sought another one. Post retrospective, we wrote a test that walks our source tree, looking for old-style classes, and fails when it encounters one — it was the beginning of a trend.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Humans are… well, human
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We have a number of custom exception classes that are eventually serialized into JSON error responses with a unique
+										Element:code
+											ERRNO
+											. Instead of relying on developers to not accidentally reuse an already claimed
+										Element:code
+											ERRNO
+											, we wrote a test that walks all of our error classes and asserts on their uniqueness.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Let the machine be the bearer of bad news
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You don’t get to 90% code coverage and 4000+ unit tests with a lackadaisical attitude toward testing. We have a test that walks our source tree and fails when it finds a critical path of code that isn’t tested. This test won’t let you commit a new DAO (data access object), for example, without also adding database fixtures and unit tests for the newly accessible database table. It’s the same message (where’s your test?), but feedback prior to commit rather than after the fact during code review always seems to go over better.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Domain specific gotchas
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We have a number of different APIs at FreshBooks that produce JSON and XML representations of our database-backed data. These representations often don’t white-list all database fields, especially if they’re internal-only identifiers. A common mistake we’ve seen a few times now, as new developers create their first DTO (data transport object), is the undesirable white-listing of certain fields. So… we wrote a test that walks all of our DTOs looking for these kinds of fields.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Did you spot the pattern?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											What these tests all have in common, is that they
+										Element:em
+											. Let’s go for one:
+										Element:strong
+											walk
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											class SuperSecretFieldFooWhiteListed(Exception): pass class TestDtoWalker(object): def test_that_certain_fields_are_not_white_listed(self): template = 'some_path.dto.%s.%s' dir = os.path.join(os.path.dirname(__file__), 'some_path', 'dto') src_files = get_files(dir) # make sure this test is somewhat behaving assert len(src_files) > 50 for src_file in src_files: self._assert_fields_not_white_listed(dir, src_file, template) def _assert_fields_not_white_listed(self, dir, src_file, template): class_names = find_class_names(dir, src_file) for class_name in class_names: dto_path = template % (src_file[:-3], class_name) dto_class = import_and_get_class(dto_path) if issubclass(dto_class, ApiDto): dto = dto_class() # We typically do not to white-list certain fields like: # 'foo', 'bar', and 'baz' self._assert_foo_not_white_listed(class_name, dto) self._assert_bar_not_white_listed(class_name, dto) self._assert_baz_not_white_listed(class_name, dto) def _assert_foo_not_white_listed(self, class_name, dto): # Exceptions to the rule, please don't add anymore. exclude = ['OrneryDto', 'DeviantDto', 'WayWardDto'] if class_name in exclude: assert 'foo' in dto.fields, class_name else: if 'foo' in dto.fields: raise SuperSecretFieldFooWhiteListed
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Test the test!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Tests that walk are a great example of tests that need tests themselves.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											@raises(SuperSecretFieldFooWhiteListed) def test_foo_white_list_check_actually_works(self): dir = os.path.dirname(__file__) template = 'test.dto.%s.%s' src_file = 'dto_with_foo_field.py' self._assert_fields_not_white_listed(dir, src_file, template)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let me know if you’re interested in the implementation details for
+										Element:code
+											**find_class_names**
+											and
+										Element:code
+											**import_and_get_class**
+											, and I’ll post them.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

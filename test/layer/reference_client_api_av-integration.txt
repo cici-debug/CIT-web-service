@@ -1,0 +1,63 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Integrating with voice or video providers
+				Element:a
+					¶
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Layer does not provide real-time voice or video capabilities. However, it is easy to integrate third-party providers into a Layer conversation. This guide describes the high-level architecture to achieving such an integration; it is not limited to or targeted at one specific voice or video call provider.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Our goal is to provide a link or similar UI control in the conversation that, when tapped, takes the user into a voice or video call.
+				Element:li
+					Since Layer supports arbitrary message types, this can be implemented as a custom, pre-defined message type. For example, we can create a
+				Element:a
+					message
+					with a single
+				Element:a
+					message part
+					, whose type is
+				Element:code
+					application/voip-link
+					and body is the link to the call.
+				Element:li
+					Your app should recognize the
+				Element:code
+					application/voip-link
+					MIME type, and render the button or message cell you wish to show when receiving a call.
+				Element:li
+					Acquiring the link to the call depends on the API your chose provider offers. Most provider APIs follow similar patterns to integrate:
+				Element:ul
+				Element:li
+					They require an authentication token, or a key/secret pair, used to initialize their client or authenticate an API request. These typically come from the dashboard of your provider.
+				Element:li
+					They provide an SDK method or API call to “create a conference” or “create a meeting”. This usually returns a call ID.
+				Element:li
+					Some providers have a URL format that accepts a call ID and serves as a join link. For example, if your call ID was
+				Element:code
+					call-123
+					, the provider may recognized the URL
+				Element:code
+					https://example.com/join/call-123
+					. If so, you can simply send that link in the
+				Element:code
+					body
+					of the Layer message; the receiving client will be able to open a standard HTTPS link. Otherwise, your chosen provider will typically include a “join conference” SDK method or API endpoint. In that case, you should simply send the call ID in the body of the Layer message, and on the receiving client, call the provider’s SDK method or API endpoint when the user wishes to join the call.
+				Element:li
+					If the provider provides Webhooks or callbacks as the status of the call changes (members join or leave, call ending, etc), you may choose to update the display of the call button or message cell to reflect this status change. In such a case, you may choose to retain a reference to the view rendering the state of the call, and bind it to a data model that represents the state of the call.
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+					Websocket Recovery

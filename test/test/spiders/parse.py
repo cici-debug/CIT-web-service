@@ -9,6 +9,28 @@ def html_parse(site_string):
 	cleaner = Cleaner(style=True, links=True, add_nofollow=True, page_structure=False, safe_attrs_only=False)
 	html = cleaner.clean_html(site)
 	body = html.getroot().cssselect('body')[0]
+	
+	for ele in body.cssselect('.header'):
+		ele.drop_tree()
+	for ele in body.cssselect('#header'):
+		ele.drop_tree()
+	for ele in body.cssselect(".ui-toolkit"):
+		ele.drop_tree()
+	for ele in body.cssselect('#footer'):
+		ele.drop_tree()
+	for ele in body.cssselect('nav'):
+		ele.drop_tree()
+
+
+	#exoscale
+	for ele in body.cssselect('hgroup'):
+		ele.drop_tree()
+	#vircurex
+	for ele in body.cssselect('.banner'):
+		ele.drop_tree()
+	#tyntec
+	for ele in body.cssselect('.bar'):
+		ele.drop_tree()
 	#1linx
 	for ele in body.cssselect('section'):
 		ele.drop_tag()
@@ -20,14 +42,9 @@ def html_parse(site_string):
 	#clever tap
 	for ele in body.cssselect('.doc-article__breadcrumb'):
 		ele.drop_tree()
-	for ele in body.cssselect('#header'):
-		ele.drop_tree()
-	for ele in body.cssselect(".ui-toolkit"):
-		ele.drop_tree()
-	for ele in body.cssselect('#footer'):
-		ele.drop_tree()
-	for ele in body.cssselect('nav'):
-		ele.drop_tree()
+
+
+
 	for ele in body.iter():
 		if 'div' == ele.tag:
 			ele.drop_tag()

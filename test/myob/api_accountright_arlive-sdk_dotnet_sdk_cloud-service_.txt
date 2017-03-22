@@ -1,0 +1,386 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					.NET SDK
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Working with the AccountRight Live API
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:strong
+					Date Updated:
+					Nov 6th 2014
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Cloud Service
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using the SDK with the cloud requires an
+										Element:strong
+											API Key
+											and
+										Element:strong
+											Secret
+											that are known to both AccountRight and your application, please ensure you have completed the
+										Element:a
+											getting started process
+											so you have these ready to go at your disposal.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to the
+										Element:strong
+											APIConfiguration
+											class implemented with the local desktop service example, the SDK requires an
+										Element:strong
+											IOAuthKeyService
+											to deal with the cloud. As touched on with our
+										Element:a
+											SDK key structure
+											pillars, the SDK provides an implementation of a
+										Element:strong
+											SimpleOAuthKeyService
+											for managing OAuth tokens but this won’t store these between sessions.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Taking a look at both our
+										Element:a
+											vb.net
+											and
+										Element:a
+											c#
+											samples consuming the SDK, this code snippet shows setting the developer key, secret and necessary services required for online access:
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											var developerKey = "YOUR API KEY";
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											var developerSecret = "YOUR API SECRET";
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											var configuration = new ApiConfiguration(developerKey, developerSecret, "http://desktop");
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											var oauthService = new OAuthService(configuration);
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											var tokens = oauthService.GetTokens(OAuthLogin.GetAuthorizationCode(configuration));
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											var keystore = new SimpleOAuthKeyService();
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											keystore.OAuthResponse = tokens;
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											// Get Company Files
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											var cfService = new CompanyFileService(configuration, null, keystore);
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											var companyFiles = cfService.GetRange();
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The function
+										Element:strong
+											OAuthLogin.GetAuthorizationCode
+											is a helper class created in the samples that illustrates how to create a form that launches the
+										Element:strong
+											secure.myob.com
+										Element:a
+											my.MYOB
+											login page.
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A user is required to enter their
+										Element:strong
+											my.MYOB
+											credentials from here and sign in, upon signing in a prompt is displayed asking the user to authorise access to your app the very first time OAuth is run.
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once completed, the desktop redirect uri is used to retrieve the access code in the content of the HTML to extract for the purpose of exchanging it for an access token. Source code illustrating the
+										Element:strong
+											OAuthLogin
+											class can be found on GitHub for both
+										Element:a
+											vb.net
+											and
+										Element:a
+											c#
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our samples also incorporate an
+										Element:strong
+											OAuthKeyService
+											class that is used as an example of how to save tokens between sessions using
+										Element:strong
+											. This means an end user only needs to login and complete the OAuth process once (Screenshot of tokens in Isolated Storage).
+										Element:a
+											Windows Isolated Storage
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The SDK then uses the provided
+										Element:strong
+											IOAuthKeyService
+											to manage all subsequent interactions with the OAuth service such as refreshing the token on expiry. This is ideal for a single user integration but if multiple logins are common then it would need to be adapted to facilitate as needed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As this is purely an example, a developer can create their own class or simply adapt the existing
+										Element:strong
+											OAuthKeyService
+											to store tokens in a secure database or another storage method as required.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once again just like the desktop service, calling other API services requires the supplying of company file sign on credentials with the
+										Element:strong
+											CompanyFileCredentials
+											class.
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											new CompanyFileCredentials("Administrator","");
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Express your interest
+										Element:li
+										Element:a
+											MYOB AccountRight API
+										Element:li
+										Element:a
+											MYOB Essentials API
+										Element:li
+										Element:a
+											MYOB EXO API
+										Element:li
+										Element:a
+											MYOBapi Blog
+										Element:li
+										Element:a
+											Google+
+										Element:li
+										Element:a
+											MYOB Corporate
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Support
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											AccountRight API Forums
+										Element:li
+										Element:a
+											EXO API Forums
+										Element:li
+										Element:a
+											MYOB Advanced Developer Forums
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Social
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											MYOBapi on Twitter
+										Element:li
+										Element:a
+											MYOB on Twitter
+										Element:li
+										Element:a
+											MYOBapi on Instagram
+										Element:li
+										Element:a
+											MYOB on GitHub
+										Element:li
+										Element:a
+											Google+
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Copyright © 2015 MYOB Technology Pty Ltd

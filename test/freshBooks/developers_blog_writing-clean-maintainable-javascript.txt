@@ -1,0 +1,417 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Writing Clean Maintainable JavaScript
+					by coe on November 15/2010
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					JavaScript comes with a bit of historical baggage — it’s that thing that you don’t rely on, that thing advertisers use. Perhaps this is why design best practices have, in the worst case, been ignored in JavaScript and, in the best case, lagged behind other languages. I don’t think I’m putting forward anything revolutionary in this post, I just wanted to introduce some of the methodologies I employ to write elegant, maintainable, JavaScript code.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					I recently built Schedgy, a lightweight calendaring application, for scheduling support shifts at FreshBooks. Schedgy allows our support scheduler to drag and drop employees onto the days of a month, indicating the shifts they will be working.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					I am going to use Schedgy to frame the conversation.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											1. Don’t Treat JavaScript Like a Second-Class Citizen
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											I approach a JavaScript problem like I approach any software design problem — I decompose the problem space into a logical domain model. I am in the habit of using John Resig’s
+										Element:a
+											Simple Inheritance Micro Framework
+											. This provides the classical inheritance I crave, having come from Java-land in a past life. Using something like
+										Element:a
+											Mootools
+											, or plain old prototypal inheritance works too — as long as you don’t sit down and hack your code into a single function.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														For Schedgy, I built the following model:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Calendar
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The actual Calendar object — contains Day instances, and encapsulates the logic for flipping between months.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Day
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The days of the month. A calendar maintains a reference to many of these. A day maintains a list of many Users, representing people assigned to a support shift on a given day.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														User
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Represents an employee at FreshBooks — it has their email, their first name, their last name, and various other instance variables. There is one underlying user object for a given employee, which can be referenced by multiple days.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Day Requirements
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														How many people do we need on support on a given day? Do we need at least one developer? This object encapsulates this logic. DayRequirements objects are attached to days.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here’s what the code ended up looking like:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+													Element:a
+														https://github.com/bcoe/schedgy/blob/master/public/javascripts/schedgy.js
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											2. Use MVC
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When writing client-side JavaScript, a common mistake that developers make is tightly coupling the domain model and the view. I’m sure everyone has seen something like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is fragile.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											People accustomed to frameworks like Rails are familiar with using an MVC design pattern to avoid this on the server-side, similar methodologies should be applied on the client-side.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											I have two hammers that I like to use for this:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											1)
+											For large, dynamically generated, chunks of HTML, I use
+										Element:a
+											JSON Template
+											to abstract rendering away from my core models. In Schedgy I use JSON Template for dynamically generated elements, such as the HTML snippet for a user being assigned to a day.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here’s an example:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											2)
+											I use jQuery’s $.data() method to attach references on UI elements back to the underlying domain models. Here’s an example of this in action, from Schedgy:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											I find applying this approach helps create much cleaner code than, for instance, relying on attributes on a DOM Element to drive behaviour.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											3. Unit Test
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											One complaint I’ve heard about unit testing JavaScript is how difficult it is to exercise view logic. If you follow my two tips above, and keep your view logic as separate from your domain model as possible, this complaint quickly becomes moot. Sure, pull in
+										Element:a
+											Selenium
+											for testing your UI. But approach testing your models like you would in any other language.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											I have two tools which I use on a regular basis:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											1)
+										Element:a
+											QUnit
+											is a great unit testing framework, and is tailored towards usage with jQuery. Use QUnit — it runs in any web-browser, and works awesome.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											2)
+											Those familiar with RSpec might find
+										Element:a
+											JSSpec
+											interesting. Under the hood, it’s a bit hacky (relying on eval() and regex to drive its DSL), but, having said this, I love using it. It makes clean readable tests.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here’s a good example of an JSSpec specification from
+										Element:a
+											Endtable
+											, a Couch ORM I have been working on:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Schedgy is open-source if you want to check it out — it works nicely for our use-case, but keep in mind it was build during a FreshBooks HackOff and the code could certainly use some love.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Schedgy on Github
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let me know in the comments if you find this post useful. I wouldn’t mind writing a few more along the same line.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

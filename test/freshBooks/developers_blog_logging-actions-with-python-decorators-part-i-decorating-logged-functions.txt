@@ -1,0 +1,397 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Logging actions with Python decorators Part I: Decorating logged functions
+					by Taavi on April 27/2010
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Python decorators
+					are an elegant way to add common behaviour to your functions in a declarative way, communicating your intent but keeping the details out of your face. One good example of doing this is keeping a log of calls to a function. This is useful in debugging, but also in production, for example to send events to a message queue for additional processing (hello
+				Element:a
+					WebHooks
+					).
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					At FreshBooks, we publish interesting events to our message broker (RabbitMQ) for a variety of consumers. Decoupling message production from message consumption allows us to add new producers or consumers without necessarily having to update the others. To make the logging code less repetitive and onerous, I wrote a decorator to log these interesting events. There are 2 major parts:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					A decorator
+				Element:li
+					A mixin
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The mixin provides the actual logging functionality, while the decorator makes it a pleasure to use.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					So, let’s start with the decorator. It lets you write (fictional) code like this to log the invoiceid in the
+				Element:strong
+					return value
+					by using
+				Element:strong
+					objectid_attr
+					:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					@log_event('Create Invoice', objectid_attr='invoiceid') def create_invoice(self, **attrs): # ... return invoice
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					That would log the ‘Create Invoice’ event and the returned
+				Element:code
+					invoice.invoiceid
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Or how about logging the invoiceid passed in as a
+				Element:strong
+					function argument
+					by using
+				Element:strong
+					objectid_param
+					:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					@log_event('Delete Invoice', objectid_param='invoiceid') def delete_invoice(self, invoiceid, **options): # ... return True
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					That would log the ‘Delete Invoice’ event and the
+				Element:code
+					invoiceid
+					it was called with.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					These examples are trivial, but the decorator remains simple even when you have multiple parameters and start changing their order.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					So, how would we implement this decorator? Wait, let’s back up. What’s a decorator?
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					In Python, functions are
+				Element:a
+					first class
+					, which means that you can pass them around as values to call later. Decorators are functions that take a function as an argument and return another function. The simplest example:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					def before_after(f): def decorator(): print('before') f() print('after') return decorator
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Then we can define our decorated function like this:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					@before_after def hello_world(): print('Hello, world!')
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Or, equivalently without using the
+				Element:code
+					@
+					operator:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					# DO NOT DO THIS! This is the bad old way from before we had @! def hello_world(): print('Hello, world!') hello_world = before_after(hello_world)
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					When we run it, we get:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					hello_world() # prints: # before # Hello, world! # after
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					That’s fancy, but we need to do something a little beefier. We’d like to tell the decorator what event to log. So we need a function that returns a function that takes a function and returns a function!
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Let’s consider a decorator that changes the return value to be N times what it would be otherwise. So:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					@multiply_by(3) def add(a, b): return a + b add(1,2) # returns (1 + 2) * 3 = 9 add(1,3) # returns (1 + 3) * 3 = 12
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Python just wants some function after the
+				Element:code
+					@
+					sign. Whether we give it a function by name, or call a function that returns a function doesn’t matter. We could equivalently write the above by:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					multiply_by_three = multiply_by(3) @multiply_by_three def add(a, b): return a + b
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					We can imagine this sequence of
+				Element:code
+					add()
+					to
+				Element:code
+					multiply_by_three()
+					to
+				Element:code
+					multiply_by()
+					visually:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Of course, changing the return value like that makes addition look broken. With power comes responsibility!
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					So assuming we had a function called
+				Element:code
+					extract_param_by_name()
+					, we could implement an event logging decorator like this:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					from functools import wraps def log_event(event, objectid_attr=None, objectid_param=None): """Decorator to send events to the event log You must pass in the event name, and may pass in some method of obtaining an objectid from the decorated function's parameters or return value. objectid_attr: The name of an attr on the return value, to be extracted via getattr(). objectid_param: A string, specifies the name of the (kw)arg that should be the objectid. """ def wrap(f): @wraps(f) def decorator(*args, **kwargs): self = extract_param_by_name(f, args, kwargs, 'self') value = f(*args, **kwargs) if objectid_attr is not None: event_objectids = getattr(value, objectid_attr) elif objectid_param is not None: event_objectids = extract_param_by_name(f, args, kwargs, objectid_param) else: event_objectids = None self._log_event(event, event_objectids) return value return decorator return wrap
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					We’ll look at
+				Element:code
+					extract_param_by_name()
+					in part II of this post, and take a peek at what a mixin is in part III.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

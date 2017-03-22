@@ -1,0 +1,35 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Getting delivery reports
+					Check if your messages were successfully delivered.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+					After you have sent a couple of messages, you are able to check if they were successfully delivered by making this request: `GET https://api.infobip.com/sms/1/reports` Available **query parameters** are: - **bulkId:** The ID uniquely identifies the sent SMS request. This filter will enable you to receive delivery reports for all the messages using just one request. You will receive a `bulkId` in the response after sending an SMS request, or you can [set your custom one](doc:bulk-id-and-message-id). - **messageId:** The ID that uniquely identifies the message sent. You will receive a `messageId` in the response after sending a message, or you can [set your custom one](doc:bulk-id-and-message-id). - **limit:** The maximum number of delivery reports you want to get. The default value is **50**. Maximum value for this parameter is **10000**. As a response, you will get a collection of unread delivery reports. [block:callout] { "type": "warning", "body": "Delivery reports can only be retrieved one time. Once you retrieve a delivery report, you will not be able to get the same report again by using this endpoint.", "title": "Important:" } [/block] Here is the JSON request example for **getting reports without any query parameter:** [block:code] { "codes": [ { "code": "GET /sms/1/reports HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nAccept: application/json", "language": "json" } ] } [/block] Below you can see the response to delivery reports request: [block:code] { "codes": [ { "code": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{ \n \"results\":[ \n { \n \"bulkId\":\"80664c0c-e1ca-414d-806a-5caf146463df\",\n \"messageId\":\"bcfb828b-7df9-4e7b-8715-f34f5c61271a\",\n \"to\":\"41793026731\",\n \"sentAt\":\"2015-02-12T09:51:43.123+0100\",\n \"doneAt\":\"2015-02-12T09:51:43.127+0100\",\n \"smsCount\":1,\n \"mccMnc\": \"22801\",\n \"price\":{ \n \"pricePerMessage\":0.01,\n \"currency\":\"EUR\"\n },\n \"callbackData\": \"User defined data.\",\n \"status\":{ \n \"groupId\":3,\n \"groupName\":\"DELIVERED\",\n \"id\":5,\n \"name\":\"DELIVERED_TO_HANDSET\",\n \"description\":\"Message delivered to handset\"\n },\n \"error\":{ \n \"groupId\":0,\n \"groupName\":\"OK\",\n \"id\":0,\n \"name\":\"NO_ERROR\",\n \"description\":\"No Error\",\n \"permanent\":false\n }\n },\n { \n \"bulkId\":\"08fe4407-c48f-4d4b-a2f4-9ff583c985b8\",\n \"messageId\":\"12db39c3-7822-4e72-a3ec-c87442c0ffc5\",\n \"to\":\"41793026727\",\n \"sentAt\":\"2015-02-12T09:50:22.221+0100\",\n \"doneAt\":\"2015-02-12T09:50:22.232+0100\",\n \"smsCount\":1,\n \"mccMnc\": \"22801\",\n \"price\":{ \n \"pricePerMessage\":0.01,\n \"currency\":\"EUR\"\n },\n \"callbackData\": \"reset_password\",\n \"status\":{ \n \"groupId\":3,\n \"groupName\":\"DELIVERED\",\n \"id\":5,\n \"name\":\"DELIVERED_TO_HANDSET\",\n \"description\":\"Message delivered to handset\"\n },\n \"error\":{ \n \"groupId\":0,\n \"groupName\":\"OK\",\n \"id\":0,\n \"name\":\"NO_ERROR\",\n \"description\":\"No Error\",\n \"permanent\":false\n }\n }\n ]\n}", "language": "json" } ] } [/block] In a response, you will receive an array of `results` which contain: - `to` represents the recipient's phone number. This way you can connect a delivery report to a phone number. - `bulkId` and `messageId`, the IDs which uniquely identify both the request and sent messages. - `sentAt` and `doneAt` - `smsCount` represents number of messages - `mccMnc` represents mobile country and network code - `price` object with `pricePerMessage` and `currency` parameters - `callbackData` object with user defined data - `status` and `error` objects [block:callout] { "type": "info", "title": "Note:", "body": "If you try making this same request again, you will get an empty set because all delivery reports were read:" } [/block] [block:code] { "codes": [ { "code": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{ \n \"results\":[]\n}", "language": "json" } ] } [/block] If you send a mass number of messages, but you are only interested in seeing the delivery report for only one, just set a query parameter in the request. Append `?messageId=ff4804ef-6ab6-4abd-984d-ab3b1387e852` on the request url, and you will get delivery report only for that message. Besides the **messageId**, you can use [**bulkId**](http://dev.infobip.com/v1/docs/bulk-id-and-message-id) or set the **limit** on the number of reports you wish to retrieve. Here is the JSON request example for getting the reports with query parameter: [block:code] { "codes": [ { "code": "GET /sms/1/reports?messageId=ff4804ef-6ab6-4abd-984d-ab3b1387e852 HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nAccept: application/json", "language": "json" } ] } [/block] The following JSON will be given as a response: [block:code] { "codes": [ { "code": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{ \n \"results\":[ \n { \n \"bulkId\":\"8c20f086-d82b-48cc-b2b3-3ca5f7aca9fb\",\n \"messageId\":\"ff4804ef-6ab6-4abd-984d-ab3b1387e852\",\n \"to\":\"41793026731\",\n \"sentAt\":\"2015-02-12T09:58:20.323+0100\",\n \"doneAt\":\"2015-02-12T09:58:20.337+0100\",\n \"smsCount\":1,\n \"mccMnc\": \"22801\",\n \"price\":{ \n \"pricePerMessage\":0.01,\n \"currency\":\"EUR\"\n },\n \"status\":{ \n \"id\":5,\n \"groupId\":3,\n \"groupName\":\"DELIVERED\",\n \"name\":\"DELIVERED_TO_HANDSET\",\n \"description\":\"Message delivered to handset\"\n },\n \"error\":{ \n \"groupId\":0,\n \"groupName\":\"OK\",\n \"id\":0,\n \"name\":\"NO_ERROR\",\n \"description\":\"No Error\",\n \"permanent\":false\n }\n }\n ]\n}", "language": "json" } ] } [/block] As you can see, that message was successfully delivered without any error. The opposite to one-time delivery reports are **logs** which can be used to see the history for all the messages that you have sent. In the next step of this tutorial, we are going to show you how to get logs using our API. Additionally, you can setup an endpoint on your callback server so you can receive a **[Delivery reports on Notify URL](doc:notify-url)**. ------ ### **Next:** [Getting SMS logs](doc:sms-logs) For more information about delivery reports obtained by using our API, plus a full list of available features, visit the [Documentation page](doc:delivery-reports).
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subscribe to our newsletter
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript

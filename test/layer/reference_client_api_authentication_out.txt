@@ -1,0 +1,1036 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Authentication endpoints
+							Element:a
+								¶
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Introduction
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Every user has to authenticate with Layer before using any Layer functionality. Authenticating with Layer may happen separately from logging into your app (especially if your app has functionality beyond messaging). There is also a corresponding deauthenticate action for authenticated users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Layer implements a federated authentication flow, which means that it’s up to you to verify user login credentials, and then tell Layer that the user should be authenticated. This means that you must provide a custom service to verify user credentials. We do not provide this functionality.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At a high level, there are three main steps in the authentication flow:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								You request a
+							Element:strong
+								nonce
+								from Layer, which is a unique string used to identify a single authentication request.
+							Element:li
+								You send the nonce, along with the user’s login credentials, to your login backend.
+							Element:li
+								If the login credentials are correct, you generate an
+							Element:strong
+								identity token
+								and send it back to Layer.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We will verify your identity token, and if it looks good, we’ll let your app know that it has been authenticated.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+								Nonces are only intended to be used once. Furthermore, they expire 10 minutes after they’ve been generated. For this reason, we recommend you do not store nonces anywhere. If you attempt to use a nonce that has been used or that has expired, the authentication flow will fail.
+							Element:p
+								You can request a nonce at any point, as often as you’d like.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your app can begin the authentication flow at any point before you try to load conversations or send/receive messages. If your app has captured user credentials or identifiers at some other point, the entire flow can occur in the background without any user intervention.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Example
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example uses some pseudo code to simplify. See endpoint
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+							Element:span
+								/* * 1. Get a nonce */
+							Element:span
+								{ xhr({ method:
+							Element:span
+								function
+							Element:span
+								getNonce
+								(
+							Element:span
+								)
+							Element:span
+								"POST"
+								, url:
+							Element:span
+								"https://api.layer.com/nonces"
+								, headers: {
+							Element:span
+								"accept"
+								:
+							Element:span
+								"application/vnd.layer+json; version=2.0"
+								,
+							Element:span
+								"Content-Type"
+								:
+							Element:span
+								"application/json"
+								}, onSuccess:
+							Element:span
+								{ getIdentityToken(data.nonce); } }); }
+							Element:span
+								function
+								(
+							Element:span
+								data
+								)
+							Element:span
+								/* * 2. On receiving a nonce, * Connect to your backend to generate an Identity Token (see below). In addition * to your Layer App ID, User ID, and nonce, you can choose to pass in any other * parameters that make sense (such as a password or your own server's Session Tokens). */
+							Element:span
+								{ xhr({ url:
+							Element:span
+								function
+							Element:span
+								getIdentityToken
+								(
+							Element:span
+								nonce
+								)
+							Element:span
+								'https://myservice.com/identity'
+								, method:
+							Element:span
+								'POST'
+								, data: { nonce: nonce }, onSuccess:
+							Element:span
+								{ getSessionToken(data.identity_token); } }); }
+							Element:span
+								function
+								(
+							Element:span
+								data
+								)
+							Element:span
+								/* * 3. On receiving an Identity Token from your server, get a Session Token from Layer's Server. */
+							Element:span
+								{ xhr({ method:
+							Element:span
+								function
+							Element:span
+								getSessionToken
+								(
+							Element:span
+								identityToken
+								)
+							Element:span
+								"POST"
+								, url:
+							Element:span
+								"https://api.layer.com/sessions"
+								, headers: {
+							Element:span
+								"accept"
+								:
+							Element:span
+								"application/vnd.layer+json; version=2.0"
+								,
+							Element:span
+								"Content-Type"
+								:
+							Element:span
+								"application/json"
+								}, data: { identity_token: identityToken, app_id:
+							Element:span
+								"layer:///app/staging/MY_APP_UUID"
+								}, onSuccess:
+							Element:span
+								{ alert(
+							Element:span
+								function
+								(
+							Element:span
+								data
+								)
+							Element:span
+								"Your Session Token is "
+								+ data.session_token); } }); }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At the end of this process, you have a Session Token that can be used to make authenticated requests to Layer’s services.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Identity token
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The identity token in the code above comes from your server. Your backend should generate this token when you provide it with valid authentication credentials for your users (typically username/email and password, although it can be a phone number or some other identifier as well). Typically, your app would request this information from the user, and pass it to your server. Your server will also need to know your Layer app ID, which you can either hard-code on the server, or pass up from the app. Finally, you will also need to pass up the nonce from the client to your server.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Common mistake
+							Element:p
+								Make sure you are
+							Element:em
+								not
+								modifying or processing the nonce in any way. Note that nonces are already URL-safe. Often, developers will (accidently or otherwise) url-decode the nonce, which results in plus signs (
+							Element:q
+								+
+								) in the nonce being converted into spaces. This breaks the identity token.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								An identity token is a
+							Element:a
+								JSON Web Token
+								that describes the account details of a user within your application. The identity token consists of two parts, both JSON objects — a header (known as a “JOSE Header”) and the account details (known as the “JWT Claims Set”). These two parts are combined into a single string. This is the structure of both parts:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								// JOSE Header { "typ": "JWT", // String: Indicates a MIME Type of application/JWT "alg": "RS256", // String: Indicates the type of algorithm used to sign the token. Must be RS256 "cty": "layer-eit;v=1", // String: Indicates a Content Type of Layer External Identity Token, version 1 "kid": "layer:///keys/cd8c286e-f2e4-11e5-99fe-eecb000000b0" // String: Layer Key ID used to sign the token. } // JWT Claims Set { "iss": "layer:///providers/cf0eb712-d9ab-11e5-b6a9-c01d00006542", // String: The Layer Provider ID "prn": "APPLICATION USER ID", // String: The ID you use to identify the user. Could be a username, email, or user ID value "iat": 1461023254, // Integer: Time the token was generated as an epoch timestamp "exp": 1461023314", // Integer: An arbitrary time in the future when this token should expire. Also an epoch timestamp "nce": "abcNONCE123", // String: The nonce obtained from the client. "first_name" : "Firstname", // Optional String: First name for the user "last_name" : "Lastname", // Optional String: Last name for the user "display_name" : "displayname", // Optional String: The name to show onscreen for the user "avatar_url" : "https://example.com/image.jpg" // Optional String: URL to profile photo for the user }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can get the Authentication Key (used for the
+							Element:code
+								kid
+								field in the header) and the Provider ID (used for the
+							Element:code
+								iss
+								field in the claims) from the
+							Element:a
+								Developer Dashboard
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								You determine when the token becomes invalid by setting the expiration time (
+							Element:code
+								exp
+								field). If we receive your token after this expiration time, authentication will fail. However, it does
+							Element:em
+								not
+								affect any other client behavior — notably, users will
+							Element:em
+								not
+								be logged out when the identity token expires.
+							Element:p
+								We recommend setting the expiration time at least 30 seconds into the future. It doesn’t make sense to set it further than 10 minutes into the future, as the nonce will have expired by that point. It doesn’t make sense to cache/save the identity token in your database for the same reason.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								An identity token is sent back as a securely signed string, which looks nothing like the original JSON. This can be difficult to do correctly. Fortunately, prebuilt JWT libraries are available for many languages:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Node
+							Element:li
+							Element:a
+								Go
+							Element:li
+							Element:a
+								Ruby
+							Element:li
+							Element:a
+								Python
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To make this easier, we provide sample backends:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Node
+								(also available as a
+							Element:a
+								Parse Cloud module
+								)
+							Element:li
+							Element:a
+								Go
+							Element:li
+							Element:a
+								Ruby
+							Element:li
+							Element:a
+								Python
+							Element:li
+							Element:a
+								Scala
+							Element:li
+							Element:a
+								Java
+							Element:li
+							Element:a
+								PHP
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are also third-party libraries that generate identity tokens for you. Note that we cannot provide support for these libraries:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Ruby
+							Element:li
+							Element:a
+								C# .NET
+							Element:li
+							Element:a
+								Layer Token Service
+								— basic web service to test your Layer client
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you built your own library and want to be included in this list, send an email to
+							Element:a
+								support@layer.com
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Best practice
+							Element:p
+								If you have an issue with your identity token, please make sure it is valid before contacting support.
+							Element:p
+								We provide a
+							Element:a
+								validation tool
+								to help you make sure all the parts of your token are valid. To use, generate an identity token from your backend and paste it into the tool. We’ll let you know if it looks good or not.
+							Element:p
+								Note that this tool does not check your token’s expiration time, or whether your nonce has expired.
+							Element:p
+								The validation tool is available from the
+							Element:a
+								Developer Dashboard
+								.
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Endpoints
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Method
+							Element:th
+								HTTP request
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:a
+								Request nonce
+							Element:td
+							Element:code
+								POST /nonces
+							Element:td
+								Obtain a nonce to begin the authentication flow
+							Element:tr
+							Element:td
+							Element:a
+								Request session token
+							Element:td
+							Element:code
+								POST /sessions
+							Element:td
+								Get a session token, used to authenticate future requests
+							Element:tr
+							Element:td
+							Element:a
+								Delete session token
+							Element:td
+							Element:code
+								DELETE /sessions/:token
+							Element:td
+								Logs out clients using the token
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Request nonce
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The client requests a nonce to begin the authentication flow. Nonces expire 10 minutes after they are requested.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								This method does not require authorization.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This method takes no parameters.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								POST
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/nonces
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X POST \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Content-Type: application/json' \ https://api.layer.com/nonces
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Nonce obtained
+								| Status: 201 (Created)
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"nonce"
+								:
+							Element:span
+								"b7a5fba5ad402d072013c1949481c1080860ff32"
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Request session token
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you have your
+							Element:a
+								identity token
+								, you can request a session token.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								This method does not require authorization.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								identity_token
+							Element:td
+								string
+							Element:td
+								Token validating your identity
+							Element:tr
+							Element:td
+							Element:code
+								app_id
+							Element:td
+								string
+							Element:td
+								Your Layer app ID
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								POST
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/sessions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"identity_token"
+								:
+							Element:span
+								"f6179ecb285c669c07415011f17d7a4e59ce1f91.9afd0f5ef6df7bf7eb13e9ada65fa28cf765a51c.450b81833898cb159f3cfc5a9a839187e63683e0"
+								,
+							Element:span
+								"app_id"
+								:
+							Element:span
+								"layer:///apps/production/e49e50aa-ffda-453f-adc8-404f68de84ae"
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X POST \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Content-Type: application/json' \ https://api.layer.com/sessions\ -d '{"identity_token":"f6179ecb285c669c07415011f17d7a4e59ce1f91.9afd0f5ef6df7bf7eb13e9ada65fa28cf765a51c.450b81833898cb159f3cfc5a9a839187e63683e0","app_id":"layer:///apps/production/e49e50aa-ffda-453f-adc8-404f68de84ae"}'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Session token obtained
+								| Status: 201 (Created)
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"session_token"
+								:
+							Element:span
+								"c3ba507fc4fc3c8e0618c4bee3250132e86bd7e9"
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Invalid app ID
+								| Status: 403 (Forbidden)
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"id"
+								:
+							Element:span
+								"invalid_app_id"
+								,
+							Element:span
+								"code"
+								:
+							Element:span
+								2
+								,
+							Element:span
+								"message"
+								:
+							Element:span
+								"The client provided an invalid Layer App ID"
+								,
+							Element:span
+								"url"
+								:
+							Element:span
+								"https://developer.layer.com/reference/api#authentication"
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Invalid identity token
+								| Status: 422 (undefined)
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"id"
+								:
+							Element:span
+								"invalid_property"
+								,
+							Element:span
+								"code"
+								:
+							Element:span
+								105
+								,
+							Element:span
+								"message"
+								:
+							Element:span
+								"Invalid identity token; go to the developer dashboard's authentication tab and use the identity token validation form for more details."
+								,
+							Element:span
+								"url"
+								:
+							Element:span
+								"https://developer.layer.com/"
+								,
+							Element:span
+								"data"
+								: {
+							Element:span
+								"property"
+								:
+							Element:span
+								"identity_token"
+								} }
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Discussion
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A successful response also includes URLs in the
+							Element:code
+								Link
+								header. It is important to use these URLs rather than trying to construct your own.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Link: <https://api.layer.com/conversations>; rel=conversations, <https://api.layer.com/content>; rel=content, <https://api.layer.com/websocket>; rel=websocket
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Possible
+							Element:code
+								rel
+								values:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								conversations
+								: URL to get the first page of conversations
+							Element:li
+							Element:code
+								content
+								: URL for uploading content such as photos or videos
+							Element:li
+							Element:code
+								websocket
+								: URL for establishing a WebSocket connection
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Errors:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A number of errors are possible when requesting a Session Token:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Error message
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								eit_claim_not_found
+							Element:td
+								Invalid claim. Missing fields.
+							Element:tr
+							Element:td
+							Element:code
+								eit_claim_wrong_type
+							Element:td
+								Invalid claim. Wrong value type specified.
+							Element:tr
+							Element:td
+							Element:code
+								eit_expired
+							Element:td
+								Token expired. Check your expiration timestamp found in the
+							Element:code
+								exp
+								field.
+							Element:tr
+							Element:td
+							Element:code
+								eit_header_param_not_found
+							Element:td
+								Invalid header. Missing parameters
+							Element:tr
+							Element:td
+							Element:code
+								eit_header_param_wrong_type
+							Element:td
+								Invalid header. Wrong type
+							Element:tr
+							Element:td
+							Element:code
+								eit_header_param_wrong_value
+							Element:td
+								Invalid header. Should be set to JWT
+							Element:tr
+							Element:td
+							Element:code
+								eit_key_deleted
+							Element:td
+								The Key ID you specified has been deleted. Please use a different key or create a new one.
+							Element:tr
+							Element:td
+							Element:code
+								eit_key_disabled
+							Element:td
+								The Key ID you specified has been disabled. Please use a different key or create a new one.
+							Element:tr
+							Element:td
+							Element:code
+								eit_key_malformed
+							Element:td
+								The Key ID you specified is invalid
+							Element:tr
+							Element:td
+							Element:code
+								eit_key_not_found
+							Element:td
+								Authentication Key in the
+							Element:code
+								kid
+								field is invalid. Make sure you provide a valid Authentication Key (Should start with
+							Element:em
+								layer:///keys/…
+								)
+							Element:tr
+							Element:td
+							Element:code
+								eit_malformed_base64url
+							Element:td
+								Invalid identity token structure. Should be base64-URL-encoded.
+							Element:tr
+							Element:td
+							Element:code
+								eit_malformed_json
+							Element:td
+								Invalid identity token structure. Please refer to our documentation on how to create a valid token.
+							Element:tr
+							Element:td
+							Element:code
+								eit_nonce_not_found
+							Element:td
+								Nonce not found or has expired
+							Element:tr
+							Element:td
+							Element:code
+								eit_not_before
+							Element:td
+								This identity token can not be used before the
+							Element:code
+								iat
+								timestamp.
+							Element:tr
+							Element:td
+							Element:code
+								eit_provider_not_bound_to_app
+							Element:td
+								This Provider ID found in the
+							Element:code
+								iss
+								field is not bound to a valid application.
+							Element:tr
+							Element:td
+							Element:code
+								eit_provider_not_found
+							Element:td
+								A valid Provider ID should be set in the
+							Element:code
+								iss
+								field.
+							Element:tr
+							Element:td
+							Element:code
+								eit_signature_verification_failed
+							Element:td
+								Signature verification failed. This usually means that the token was signed by a different private key which does not match the Authentication Key ID provided in the
+							Element:code
+								kid
+								field.
+							Element:tr
+							Element:td
+							Element:code
+								eit_user_suspended
+							Element:td
+								Provided User ID found in the
+							Element:code
+								prn
+								field has been blacklisted.
+							Element:tr
+							Element:td
+							Element:code
+								eit_wrong_jws_part_count
+							Element:td
+								Invalid identity token structure. Please refer to our documentation on how to create a valid token.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Delete session token
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								This method does not require authorization.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								token
+							Element:td
+								string
+							Element:td
+								Your session token
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								DELETE
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								/sessions/:token
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"token"
+								:
+							Element:span
+								"7Rti7Cl6m3JA4GdjXRcnyBvovv0q-DBHpQdmGUZblKJbGzODoAYW7Z5o_a5bJjqkD_CU_pe9qr11111111111.1-1"
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X DELETE \ -H 'Accept: application/vnd.layer+json; version=2.0' \ -H 'Content-Type: application/json' \ https://api.layer.com/sessions/7Rti7Cl6m3JA4GdjXRcnyBvovv0q-DBHpQdmGUZblKJbGzODoAYW7Z5o_a5bJjqkD_CU_pe9qr11111111111.1-1
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Possible responses:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Session token deleted
+							Element:br
+							Element:q
+								Status: 204 (No Content)
+							Element:br
+								(Empty body)
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Content
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Conversations

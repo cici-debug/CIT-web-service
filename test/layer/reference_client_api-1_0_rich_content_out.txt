@@ -1,0 +1,555 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Rich content endpoints
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Method
+							Element:th
+								HTTP request
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:a
+								Request upload
+							Element:td
+							Element:code
+								POST /content
+							Element:td
+								Request an endpoint to upload content
+							Element:tr
+							Element:td
+							Element:a
+								Send upload
+							Element:td
+							Element:code
+								POST /conversations/:conversation_uuid/messages
+							Element:td
+								Send a message with Rich Content
+							Element:tr
+							Element:td
+							Element:a
+								Refresh URL
+							Element:td
+							Element:code
+								GET /content/:content_id
+							Element:td
+								Get a new
+							Element:code
+								download_url
+								for Rich Content
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request upload
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Message parts can be up to 2KB in size. To send larger content, upload your content to a secure URL provided by requesting an upload.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											Upload-Content-Type
+										Element:td
+											string
+										Element:td
+											HTTP header containing the MIME type of the content to be uploaded
+										Element:tr
+										Element:td
+										Element:code
+											Upload-Content-Length
+										Element:td
+											integer
+										Element:td
+											HTTP header containing the size (in bytes) of the content to be uploaded
+										Element:tr
+										Element:td
+										Element:code
+											Upload-Origin
+										Element:td
+											string
+										Element:td
+										Element:em
+											(optional)
+											HTTP header containing the origin the upload is coming from (for CORS support in browsers)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											HTTP request:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											POST
+									Node:
+									(type) c
+									(layer)3
+										Element:b
+											/content
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X POST \ -H 'Accept: application/vnd.layer+json; version=1.0' \ -H 'Authorization: Layer session-token="TOKEN"' \ -H 'Content-Type: application/json' \ -H 'Upload-Content-Type: image/jpeg' \ -H 'Upload-Content-Length: 10000' \ -H 'Upload-Origin: http://mydomain.com' \ https://api.layer.com/content
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Possible responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Content requested successfully
+											| Status: 201 (Created)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"id"
+											:
+										Element:span
+											"layer:///content/3d0736d9-1a50-4e9a-a9b3-2400caa9e161"
+											,
+										Element:span
+											"download_url"
+											:
+										Element:span
+											null
+											,
+										Element:span
+											"expiration"
+											:
+										Element:span
+											null
+											,
+										Element:span
+											"upload_url"
+											:
+										Element:span
+											"https://www.googleapis.com/upload/storage/v1/b/myBucket/o?uploadType=resumable&upload_id=xa298sd_sdlkj2"
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Discussion
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You must upload your data to the
+										Element:code
+											upload_url
+											in the response before sending a message itself.
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:code
+											POST /content
+											, receive an
+										Element:code
+											upload_url
+											and Content ID
+										Element:li
+											Upload your data to the
+										Element:code
+											upload_url
+											; see
+										Element:a
+											Google Cloud Storage Documentation
+											for more detail
+										Element:li
+											Create a message (
+										Element:code
+											POST /conversations/:conversation_uuid/messages
+											) with the Content ID within a
+										Element:a
+											MessagePart
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+										Element:strong
+											Note
+										Element:p
+											Your content must have completed uploading before you can send the Message
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Send upload
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After your data has finished uploading, you can
+										Element:a
+											send a message
+											, in which one or more parts contain a Content object with the ID of your upload.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											part.content.id
+										Element:td
+											string
+										Element:td
+											Content ID (eg
+										Element:em
+											layer:///content/cbf5f150-2f45-11e5-82f7-0242ac1100e3
+											)
+										Element:tr
+										Element:td
+										Element:code
+											part.content.size
+										Element:td
+											integer
+										Element:td
+											Size of the file that was uploaded; should match the
+										Element:code
+											Upload-Content-Length
+											header
+										Element:tr
+										Element:td
+										Element:code
+											part.mime_type
+										Element:td
+											string
+										Element:td
+										Element:em
+											text/plain
+											,
+										Element:em
+											image/png
+											, or other MIME type describing the message part
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											HTTP request:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											POST
+									Node:
+									(type) c
+									(layer)3
+										Element:b
+											/conversations/:conversation_uuid/messages
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"parts"
+											: [ {
+										Element:span
+											"mime_type"
+											:
+										Element:span
+											"text/plain"
+											,
+										Element:span
+											"body"
+											:
+										Element:span
+											"This is the message."
+											}, {
+										Element:span
+											"mime_type"
+											:
+										Element:span
+											"image/png"
+											,
+										Element:span
+											"content"
+											: {
+										Element:span
+											"id"
+											:
+										Element:span
+											"layer:///content/7a0aefb8-3c97-11e4-baad-164230d1df67"
+											,
+										Element:span
+											"size"
+											:
+										Element:span
+											10001
+											} } ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X POST \ -H 'Accept: application/vnd.layer+json; version=1.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/conversations/<conversation_uuid>/messages\ -d '{"parts":[{"mime_type":"text/plain","body":"This is the message."},{"mime_type":"image/png","content":{"id":"layer:///content/7a0aefb8-3c97-11e4-baad-164230d1df67","size":10001}}]}'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Possible responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Message sent successfully
+											| Status: 201 (Created)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+										Element:a
+											Message
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Refresh URL
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											download_url
+											on a Content object will expire; expiration time can be seen in the
+										Element:a
+											Content
+											object’s
+										Element:code
+											expiration
+											field. You can then request a new
+										Element:code
+											download_url
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:code
+											content_id
+										Element:td
+											string
+										Element:td
+											ID of the Content object to refresh
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											HTTP request:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											GET
+									Node:
+									(type) c
+									(layer)3
+										Element:b
+											/content/:content_id
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X GET \ -H 'Accept: application/vnd.layer+json; version=1.0' \ -H 'Authorization: Layer session-token="<TOKEN>"'' \ -H 'Content-Type: application/json' \ https://api.layer.com/content/<content_id>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Possible responses:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Got content details successfully
+											| Status: 200 (OK)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"id"
+											:
+										Element:span
+											"8a896e15-2908-4d7c-9f4e-d47e18ae2774"
+											,
+										Element:span
+											"download_url"
+											:
+										Element:span
+											"http://google-testbucket.storage.googleapis.com/some/download/path"
+											,
+										Element:span
+											"expiration"
+											:
+										Element:span
+											"2014-09-09T04:44:47+00:00"
+											,
+										Element:span
+											"upload_url"
+											:
+										Element:span
+											null
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Discussion
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											GET
+											request will only work if data was actually uploaded to cloud storage. If you create a Content resource but never uploaded data, this request will fail.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Messages
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Announcements

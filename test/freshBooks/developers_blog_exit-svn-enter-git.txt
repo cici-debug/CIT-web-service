@@ -1,0 +1,448 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Exit SVN, Enter Git
+					by Jason Diller on May 16/2011
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					In a move that was a long time in coming, we recently transitioned our version control system from Subversion to Git.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Impetus
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our development team has been growing rapidly, and we’re not finished growing yet. As a result, we often have several projects and features in development at one time. For maximum flexibility, we’d ideally manage those small projects by developing them on feature branches then merge them into the mainline trunk when they’re ready. That way, any kind of delay in one feature won’t affect any other projects that we have on the go.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We’re also flexible about letting people work from home some of the time, and using a centralized repository like SVN limits developers to working connected when they want to commit code. SVN can also be slow and unreliable over our sometimes crowded office upstream connection. All-in-all, Git is a much faster version control system.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Merge Pain
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														It’s hardly a secret, but merging branches with Subversion is difficult, has a high potential for error, and often causes enough grief that it’s not worth branching in the first place. As a result, people are a lot more likely to commit directly to trunk rather than make a branch where they can commit more often without disturbing others.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Enter Git
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Again, this probably isn’t exactly breaking news at this point, but besides the distributed nature of Git, one of its most often cited features is its cheap and easy branches and pain-free merges. We chose Git over Mercurial other offerings which solve the same problems simply because it is the DVCS that the most of us had other experience with from our work on open-source software and other hobby projects. We have been using it for a while for some of our supporting applications, but hadn’t taken the plunge for our three largest repositories.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Preparing the Team
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some of our team members had never used Git (or indeed, any DVCS) at all, while some of us had been using
+										Element:a
+											Git-SVN
+											for some time. In order to make the transition as smooth as possible, we gave everyone a lot of advance notice that it was happening, and held a “Git for Noobs” session to go over some of the basics.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some good resources we shared with the team:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Git Ready
+											– A free website with loads of articles subdevided into beginner, intermediate, advanced categories.
+										Element:li
+										Element:a
+											Pro Git
+											– Scott Chacon’s book, available free online. We also have the dead-tree version in the office.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Implementation Details
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Central Canonical Respository
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Despite the distributed nature of Git, to maintain sanity, you really need one central repository designated as the canonical one for your team. This should be the repository your continuous integration server uses to create builds/run tests, and it should be the repository you release code from.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We host our central repositories with
+													Element:a
+														Girocco
+														which provides a nice browser-based UI for creating repositories, viewing logs, etc.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Branching Strategy
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Git supports a variety of branching strategies, and some successful ones
+													Element:a
+														have been documented in great detail
+														on the web. We reviewed a bunch of them, and really liked a few, especially the one I linked to above.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Ultimately, we decided to take a page from the product development strategy known as
+													Element:a
+														Minimum Viable Product
+														and minimize the amount of change we would impose on the team all at once. We fully expect to make some refinements to our process over time, but doing a big-bang change that included massive process changes as well as the tools change increased the chances we’d make mistakes, and make the transition more difficult.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Under SVN, ongoing day-to-day development committed to “Trunk”, in preparation for a release, we’d make a new branch for that release (“RC”) and our QA team would go to town making sure everything on the “RC” branch was production ready. Any fixes for bugs found during testing are committed to “Trunk” then merged on to “RC” On release day, our Ops team would take that branch and put it into production.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For Git, we’ve kept the same overall approach for now, but renamed “Trunk” to “Develop.” One drawback to this approach is that bug fixes have to be cherry-picked from the main development branch since we don’t want to merge in any other work. We could avoid cherry-picks by committing bug fixes to the “RC” branch then doing a merge of the release branch back onto “Develop” instead, a change we’ll likely make in the near future.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Master == Production
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We decided to make the “Master” branch equivalent to the code that’s currently in production. That way if a developer wants to investigate some behavior currently happening in production, they can simply check out that branch and run it to see what’s going on.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Importing History
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Everyone agreed (it seems like a no-brainer) that we wanted to import the subversion history so that features like ‘git blame’ would provide useful information and we wouldn’t have to keep a Subversion copy of everything around just to look through history. Thankfully, tools exist that import everything, and do it well.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Indeed, the git-svn tool that is part of current versions of Git can import SVN history, and even rewrite SVN author names into the more verbose “FirstName LastName <email@company.com>” format that Git typically uses, all you have to do is pass it an “Authors” file with the mappings.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We used
+										Element:a
+											svn2git
+											by nirvdrum (Kevin Menard), which wraps git-svn and provides some extra cleanup after the import is complete. Specifically, it converts the SVN branches from remote branches to local branches in the resulting respository, which is something you definintely want.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Make the Switch
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We opted for a big-bang switch rather than a phased-in approach so that we wouldn’t have to maintain two respositories and import changes on an ongoing basis. We chose our “code freeze” day as the date for the switchover, as that is the day our developers should have the least amount of work-in-progress (ideally, none) that they’d have to sort out as part of the switch.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Lessons Learned
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A couple of us stayed late to babysit the migration and make sure everything was imported correctly so that it would be ready when everyone showed up for work the next morning. We learned a couple of things we can share that’ll make your transition easier if you’re doing the same.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:strong
+														Run the import on the same phyiscal box as the SVN server
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Our first attempt used SVN over HTTPS to read the data, but it was slow (despite gigabit ethernet), and eventually timed out, leaving the importation in a half-finished state. We moved over to the actual physical computer that served SVN and used the SVN:// protocol instead. It was much faster, and perfectly reliable.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:strong
+														Get your Authors file right
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We had to restart the importation a couple of times because of typos and omissions in the authors file. Git-Svn will bail out if you give it an authors file but finds a committer that isn’t in the file. If you have a lot of history
+													Element:a
+														like we do
+														, it’ll probably take a while run through, and an error in the Authors file won’t show up until it tries to import a changeset from the affected author. Not a big deal if it’s the first revision, but a pain if if happens 80% of the way through the process.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Onward
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We’ve completed an entire iteration on Git, including one release, so it’s probably safe to call the transition a success. We’ve already seen an uptick in the number of feature branches in use, and the dreaded “#&$*^@! TREE CONFLICTS” hasn’t been heard shouted from the developer pods since, and never will be again.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

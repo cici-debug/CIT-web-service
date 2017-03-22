@@ -1,0 +1,652 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Authentication
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+				Element:strong
+					Date Updated:
+					Sep 4th 2013
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The AccountRight Live API can be used with both desktop and online company files, however the authentication for both is slightly different.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Working locally?
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authentication in the desktop environment
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For desktop files, the authentication process is straightforward, once the user selects a company file to work with, your app asks them to login using a username and password for that particular company file. No further authentication is required.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For any call you make to the API you pass the following header to supply the company file credentials of
+										Element:strong
+											username
+											and
+										Element:strong
+											password
+											which have been BASE 64 encoded.
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											'x-myobapi-cftoken: [Base64Encode(username:password)]'
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The x-myobapi-cftoken expects you to pass it the username and password in a Base 64 Encoded string. Note the username and password must be separated with a : before encoding -
+										Element:a
+											more details here
+											.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Cloud & oauth
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authentication in the cloud environment
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you're working with online files, your app will first need to access the user's
+										Element:strong
+											my.MYOB
+											account before it can access their company files. The MYOB API uses OAuth 2.0 to ensure that access to company files is handled securely.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:strong
+														Getting an Access Code
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The first step for this is getting an access code & you do this by having your app user login to their
+													Element:strong
+														my.MYOB
+														account. Of course because it's OAUTH your app is not allowed to ask for a users
+													Element:strong
+														my.MYOB
+														credentials, instead you redirect them to our
+													Element:strong
+														secure.myob.com
+														login page here:
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														https://secure.myob.com/oauth2/account/authorize?client_id=[YOUR API KEY]&redirect_uri=[URL_ENCODED_REDIRECT_URI]&response_type=code&scope=CompanyFile
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+													Element:strong
+														Note
+														: The redirect URI must match the url you entered when registering for your API Key and must be URL ENCODED.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once the User has authorised your app to access their company files they will be returned to your REDIRECT URL with a
+													Element:strong
+														?code=
+														in the URL. You use this code for the next step
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														State - roundtrip parameter
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A number of developers have asked if we support the
+													Element:code
+														state
+														parameter. The answer is
+													Element:strong
+														YES
+														we do.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you wish to pass an additional identification variable that you want our oauth server to return to you along with the
+													Element:code
+														access code
+														, then simply add
+													Element:code
+														&state=[custom_var]
+														to the url.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+														Read our blog post on passing the state parameter
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:strong
+														Getting an Access Token
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once you have the access code, you make another call to our
+													Element:strong
+														secure.myob.com
+														server to request an access token. (note: we'll return both an Access Token and a Refresh Token).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You do this by POSTing the following parameters:
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														'client_id' // your API Key 'client_secret' // your API Secret 'scope' // this should say CompanyFile 'code' // the Access Code you just got 'redirect_uri' // your redirect URL 'grant_type' // this should say authorization_code
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To this url:
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														https://secure.myob.com/oauth2/v1/authorize
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You may also need to provide an appropriate Content-Type header.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														Content-Type: application/x-www-form-urlencoded
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This will return an Access token to you which you can use when making a call.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example Call
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here's an example, note that the
+													Element:code
+														code
+														and
+													Element:code
+														redirect_uri
+														are both
+													Element:code
+														url_encoded
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														code=Wvof%21IAA[[TRUNCATED_FOR_READABILITY]]luF&redirect_uri=http%3A%2F%2Flocalhost%2Fmyob_redirect%2F&client_id=[[MY_API_KEY]]&scope=CompanyFile&client_secret=[[MY_SECRET]]&grant_type=authorization_code
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Note
+														: while the data is formatted into a URL Query String you
+													Element:strong
+														do not
+														pass the information via the URL (that would be a GET request), you
+													Element:strong
+														must
+														pass the query string in the
+													Element:strong
+														body
+														and
+													Element:strong
+														POST
+														this to
+													Element:code
+														https://secure.myob.com/oauth2/v1/authorize
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If the URL you are trying to POST to looks like:
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														you are trying to
+													Element:code
+														https://secure.myob.com/oauth2/v1/authorize?code=Wvof%21IAA[[TRUNCATED_FOR_READABILITY]]luF&redirect_uri=http%3A%2F%2Flocalhost%2Fmyob_redirect%2F&client_id=[[MY_API_KEY]]&scope=CompanyFile&client_secret=[[MY_SECRET]]&grant_type=authorization_code
+												Node:
+												(type) c
+												(layer)4
+													Element:strong
+														GET
+														and this will fail.
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:strong
+														Refreshing an Access Token
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Access tokens have a limited life span and when you receive one you'll also receive an Expiry Time for it and a Refresh Token. Once your access token expires it can no longer be used to access the API. So you'll need to trigger a refresh. You do this by POSTing the following parameters:
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														'client_id' // your API Key 'client_secret' // your API Secret 'refresh_token' // your refresh token 'grant_type' // this should say refresh_token
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To this url:
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														https://secure.myob.com/oauth2/v1/authorize
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Note
+														: while the data is formatted into a URL Query String you
+													Element:strong
+														do not
+														pass the information via the URL (that would be a GET request), you
+													Element:strong
+														must
+														pass the query string in the
+													Element:strong
+														body
+														and
+													Element:strong
+														POST
+														this to
+													Element:code
+														https://secure.myob.com/oauth2/v1/authorize
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If the URL you are trying to POST to looks like:
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														you are trying to
+													Element:code
+														https://secure.myob.com/oauth2/v1/authorize?code=Wvof%21IAA[[TRUNCATED_FOR_READABILITY]]luF&redirect_uri=http%3A%2F%2Flocalhost%2Fmyob_redirect%2F&client_id=[[MY_API_KEY]]&scope=CompanyFile&client_secret=[[MY_SECRET]]&grant_type=authorization_code
+												Node:
+												(type) c
+												(layer)4
+													Element:strong
+														GET
+														and this will fail.
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:strong
+														Making a call
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once you have your tokens you can make any call to the API by simply passing the following headers along with any call to the API
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														'Authorization: Bearer [ACCESS TOKEN]' 'x-myobapi-cftoken: [Base64Encode(username:password)]' 'x-myobapi-key: [API KEY]' 'x-myobapi-version: v2'
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For more details on the headers used for our API go to our
+													Element:a
+														Headers documentation page
+														.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Note:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Even though OAuth authentication takes care of logging in to the user’s
+										Element:strong
+											my.MYOB
+											account, the user will still need to enter a company file user ID and password before they can access individual company files linked to their
+										Element:strong
+											my.MYOB
+											account.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You'll notice above the
+										Element:strong
+											x-myobapi-cftoken
+											requires a base 64 encoding of the company file
+										Element:strong
+											username
+											and
+										Element:strong
+											password
+											- exactly the same as if you were doing it on the desktop.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Helpers
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code samples to help you
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We've prepared some code to help get you up and running:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											PHP - sample oauth integration
+											, and a
+										Element:a
+											php oauth class you can use in your projects
+										Element:li
+										Element:a
+											Windows Mobile app - oauth code flow
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Extra Reading
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For more information about OAuth authentication, see the
+										Element:a
+											OAuth website
+											.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Express your interest
+										Element:li
+										Element:a
+											MYOB AccountRight API
+										Element:li
+										Element:a
+											MYOB Essentials API
+										Element:li
+										Element:a
+											MYOB EXO API
+										Element:li
+										Element:a
+											MYOBapi Blog
+										Element:li
+										Element:a
+											Google+
+										Element:li
+										Element:a
+											MYOB Corporate
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Support
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											AccountRight API Forums
+										Element:li
+										Element:a
+											EXO API Forums
+										Element:li
+										Element:a
+											MYOB Advanced Developer Forums
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Social
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											MYOBapi on Twitter
+										Element:li
+										Element:a
+											MYOB on Twitter
+										Element:li
+										Element:a
+											MYOBapi on Instagram
+										Element:li
+										Element:a
+											MYOB on GitHub
+										Element:li
+										Element:a
+											Google+
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Copyright © 2015 MYOB Technology Pty Ltd

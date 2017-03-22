@@ -693,7 +693,7 @@ class aylienSpider(scrapy.Spider):
             yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
 
 ########################CATEGORY MESSAGING#####################
-#
+# (01) IN USE
 class hoiioSpider(scrapy.Spider):
     name = "hoiio"
     def start_requests(self):
@@ -718,6 +718,995 @@ class hoiioSpider(scrapy.Spider):
         for href in response.css('a::attr(href)').extract():
             new_url = response.urljoin(href)
             yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (02) IN USE
+class clockWorkSpider(scrapy.Spider):
+    name = "clockWork"
+    def start_requests(self):
+        urls = [
+            "https://www.clockworksms.com/doc/",
+        ]
+        base_url = "https://www.clockworksms.com/doc"
+        file_name = "clockWork"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (03) IN USE
+class pushOverSpider(scrapy.Spider):
+    name = "pushOver"
+    def start_requests(self):
+        urls = [
+            "https://pushover.net/api",
+        ]
+        base_url = "https://pushover.net/api"
+        file_name = "pushOver"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (04) IN USE
+class trumpiaSpider(scrapy.Spider):
+    name = "trumpia"
+    def start_requests(self):
+        urls = [
+            "http://trumpia.com/api/docs/rest/overview.php",
+        ]
+        base_url = "http://trumpia.com/api/docs/rest"
+        file_name = "trumpia"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (05) IN USE
+class infobipSpider(scrapy.Spider):
+    name = "infobip"
+    def start_requests(self):
+        urls = [
+            "https://dev.infobip.com/docs/",
+        ]
+        base_url = "https://dev.infobip.com/docs"
+        file_name = "infobip"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (06) IN USE
+class sendibleSpider(scrapy.Spider):
+    name = "sendible"
+    def start_requests(self):
+        urls = [
+            "https://sendible.gelato.io/docs/versions/1.0.1",
+        ]
+        base_url = "https://sendible.gelato.io/docs/versions/1.0.1"
+        file_name = "sendible"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (07) IN USE
+class iPSpider(scrapy.Spider):
+    name = "iP1"
+    def start_requests(self):
+        urls = [
+            "http://api.ip1sms.com/Help",
+        ]
+        base_url = "http://api.ip1sms.com/Help"
+        file_name = "iP1"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (08) IN USE
+class tyntecSpider(scrapy.Spider):
+    name = "tyntec"
+    def start_requests(self):
+        urls = [
+            "https://docs.tyntec.com/en/content/sms/rest_api",
+        ]
+        base_url = "https://docs.tyntec.com/en/content"
+        file_name = "tyntec"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (09) IN USE
+class layerSpider(scrapy.Spider):
+    name = "layer"
+    def start_requests(self):
+        urls = [
+            "https://docs.layer.com/reference/client_api/introduction",
+        ]
+        base_url = "https://docs.layer.com/reference/client_api"
+        file_name = "layer"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (10) IN USE
+class hSenidSpider(scrapy.Spider):
+    name = "hSenid"
+    def start_requests(self):
+        urls = [
+            "https://devspace.hsenidmobile.com/code/java/sms/",
+            "https://devspace.hsenidmobile.com/code/php/sms/",
+            "https://devspace.hsenidmobile.com/code/python/sms/",
+            "https://devspace.hsenidmobile.com/code/net/sms/",
+            "https://devspace.hsenidmobile.com/code/nodejs/sms/"
+        ]
+        base_url = "https://devspace.hsenidmobile.com/code"
+        file_name = "hSenid"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+
+########################CATEGORY VIDEO######################### 
+# (01) IN USE
+class ivaSpider(scrapy.Spider):
+    name = "iva"
+    def start_requests(self):
+        urls = [
+            "http://www.internetvideoarchive.com/documentation/video-api/"
+        ]
+        base_url = "http://www.internetvideoarchive.com/documentation"
+        file_name = "iva"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (02) IN USE
+class vhxSpider(scrapy.Spider):
+    name = "vhx"
+    def start_requests(self):
+        urls = [
+            "http://dev.vhx.tv/docs/api/"
+        ]
+        base_url = "http://dev.vhx.tv/docs/api"
+        file_name = "vhx"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (03) IN USE
+class embedSpider(scrapy.Spider):
+    name = "embed"
+    def start_requests(self):
+        urls = [
+            "http://docs.embed.ly/docs/"
+        ]
+        base_url = "http://docs.embed.ly/docs"
+        file_name = "embed"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (04) IN USE
+class webPurifySpider(scrapy.Spider):
+    name = "webPurify"
+    def start_requests(self):
+        urls = [
+            "https://www.webpurify.com/video-moderation/documentation/"
+        ]
+        base_url = "https://www.webpurify.com/video-moderation/documentation/"
+        file_name = "webPurify"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (05) IN USE
+class raptSpider(scrapy.Spider):
+    name = "rapt"
+    def start_requests(self):
+        urls = [
+            "http://docs.raptmedia.com/api/"
+        ]
+        base_url = "http://docs.raptmedia.com/api"
+        file_name = "rapt"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (06) IN USE
+class toWatchListSpider(scrapy.Spider):
+    name = "toWatchList"
+    def start_requests(self):
+        urls = [
+            "https://towatchlist.com/api"
+        ]
+        base_url = "https://towatchlist.com/api"
+        file_name = "toWatchList"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (07) IN USE
+class wurlSpider(scrapy.Spider):
+    name = "wurl"
+    def start_requests(self):
+        urls = [
+            "http://developers.wurl.com/pages/overview"
+        ]
+        base_url = "http://developers.wurl.com/pages"
+        file_name = "wurl"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (08) IN USE
+class hostStreamSellSpider(scrapy.Spider):
+    name = "hostStreamSell"
+    def start_requests(self):
+        urls = [
+            "https://www.hoststreamsell.com/secure_videos/apidetails"
+        ]
+        base_url = "https://www.hoststreamsell.com/secure_videos/apidetails"
+        file_name = "hostStreamSell"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (09) IN USE
+class coconutSellSpider(scrapy.Spider):
+    name = "coconut"
+    def start_requests(self):
+        urls = [
+            "http://coconut.co/docs/"
+        ]
+        base_url = "http://coconut.co/docs"
+        file_name = "coconut"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (10) IN USE
+class toutSpider(scrapy.Spider):
+    name = "tout"
+    def start_requests(self):
+        urls = [
+            "http://developer.tout.com/docs"
+        ]
+        base_url = "http://developer.tout.com/docs"
+        file_name = "tout"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+
+########################CATEGORY FINANCIAL##################### 
+# (01) IN USE
+class btcESpider(scrapy.Spider):
+    name = "btcE"
+    def start_requests(self):
+        urls = [
+            "https://btc-e.com/api/documentation"
+        ]
+        base_url = "https://btc-e.com/api/documentation"
+        file_name = "btcE"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (02) IN USE
+class coinDeskSpider(scrapy.Spider):
+    name = "coinDesk"
+    def start_requests(self):
+        urls = [
+            "http://www.coindesk.com/api/"
+        ]
+        base_url = "http://www.coindesk.com/api/"
+        file_name = "coinDesk"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (03) IN USE
+class bitStampSpider(scrapy.Spider):
+    name = "bitStamp"
+    def start_requests(self):
+        urls = [
+            "https://www.bitstamp.net/api/"
+        ]
+        base_url = "https://www.bitstamp.net/api/"
+        file_name = "bitStamp"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (04) IN USE
+class freshBooksSpider(scrapy.Spider):
+    name = "freshBooks"
+    def start_requests(self):
+        urls = [
+            "https://www.freshbooks.com/developers"
+        ]
+        base_url = "https://www.freshbooks.com/developers"
+        file_name = "freshBooks"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (05) IN USE
+class blinkSaleSpider(scrapy.Spider):
+    name = "blinkSale"
+    def start_requests(self):
+        urls = [
+            "https://www.blinksale.com/api/"
+        ]
+        base_url = "https://www.blinksale.com/api/"
+        file_name = "blinkSale"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (06) IN USE
+class vircurexSpider(scrapy.Spider):
+    name = "vircurex"
+    def start_requests(self):
+        urls = [
+            "https://vircurex.com/welcome/api"
+        ]
+        base_url = "https://vircurex.com/welcome/api"
+        file_name = "vircurex"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (07) IN USE
+class myobSpider(scrapy.Spider):
+    name = "myob"
+    def start_requests(self):
+        urls = [
+            "http://developer.myob.com/api/accountright/v2/"
+        ]
+        base_url = "http://developer.myob.com/api/accountright"
+        file_name = "myob"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (08) IN USE
+class cryptoCoinChartsSpider(scrapy.Spider):
+    name = "cryptoCoinCharts"
+    def start_requests(self):
+        urls = [
+            "http://www.cryptocoincharts.info/tools/api"
+        ]
+        base_url = "http://www.cryptocoincharts.info/tools/api"
+        file_name = "cryptoCoinCharts"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (09) IN USE
+class kwayisiSpider(scrapy.Spider):
+    name = "kwayisi"
+    def start_requests(self):
+        urls = [
+            "https://dev.kwayisi.org/apis/forex/",
+            "https://dev.kwayisi.org/apis/gse/"
+        ]
+        base_url = "https://dev.kwayisi.org/apis/"
+        file_name = "kwayisi"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (10) IN USE
+class krakenSpider(scrapy.Spider):
+    name = "kraken"
+    def start_requests(self):
+        urls = [
+            "https://www.kraken.com/help/api"
+        ]
+        base_url = "https://www.kraken.com/help/api"
+        file_name = "kraken"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+
+########################CATEGORY CLOUD##################### 
+# (01) IN USE
+class herokuSpider(scrapy.Spider):
+    name = "heroku"
+    def start_requests(self):
+        urls = [
+            "https://devcenter.heroku.com/articles/heroku-connect-api"
+        ]
+        base_url = "https://devcenter.heroku.com/articles/heroku-connect-api"
+        file_name = "heroku"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (02) IN USE
+class rackSpaceSpider(scrapy.Spider):
+    name = "rackSpace"
+    def start_requests(self):
+        urls = [
+            "https://developer.rackspace.com/docs/cloud-servers/v2/"
+        ]
+        base_url = "https://developer.rackspace.com/docs/cloud-servers/v2/"
+        file_name = "rackSpace"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (03) IN USE
+class zeitSpider(scrapy.Spider):
+    name = "zeit"
+    def start_requests(self):
+        urls = [
+            "https://zeit.co/api"
+        ]
+        base_url = "https://zeit.co/api"
+        file_name = "zeit"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (04) IN USE
+class exoscaleSpider(scrapy.Spider):
+    name = "exoscale"
+    def start_requests(self):
+        urls = [
+            "https://community.exoscale.ch/api/"
+        ]
+        base_url = "https://community.exoscale.ch/api/"
+        file_name = "exoscale"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (05) IN USE
+class hyperGlanceSpider(scrapy.Spider):
+    name = "hyperGlance"
+    def start_requests(self):
+        urls = [
+            "https://support.hyperglance.com/support/solutions/articles/11000004649-hyperglance-api-documentation"
+        ]
+        base_url = "https://support.hyperglance.com/support/solutions/articles/11000004649-hyperglance-api-documentation"
+        file_name = "hyperGlance"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (06) IN USE
+class dockerSpider(scrapy.Spider):
+    name = "docker"
+    def start_requests(self):
+        urls = [
+            "https://docs.docker.com/apidocs/docker-cloud/"
+        ]
+        base_url = "https://docs.docker.com/apidocs/docker-cloud/"
+        file_name = "docker"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (07) IN USE
+class tinkerModeSpider(scrapy.Spider):
+    name = "tinkerMode"
+    def start_requests(self):
+        urls = [
+            "http://dev.tinkermode.com/docs/api"
+        ]
+        base_url = "http://dev.tinkermode.com/docs/api"
+        file_name = "tinkerMode"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (08) IN USE
+class platformSpider(scrapy.Spider):
+    name = "platform9"
+    def start_requests(self):
+        urls = [
+            "http://docs.platform9.com/"
+        ]
+        base_url = "http://docs.platform9.com/"
+        file_name = "platform9"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (09) IN USE
+class brightBoxSpider(scrapy.Spider):
+    name = "brightBox"
+    def start_requests(self):
+        urls = [
+            "https://api.gb1.brightbox.com/1.0/",
+        ]
+        base_url = "https://api.gb1.brightbox.com/1.0/"
+        file_name = "brightBox"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        # for href in response.css('a::attr(href)').extract():
+        #     new_url = response.urljoin(href)
+        #     yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+# (10) IN USE
+class happyFoxSpider(scrapy.Spider):
+    name = "happyFox"
+    def start_requests(self):
+        urls = [
+            "http://www.happyfox.com/developers/api/1.1/"
+        ]
+        base_url = "http://www.happyfox.com/developers/api/1.1"
+        file_name = "happyFox"
+        visited_urls = []
+        for url in urls:
+            yield scrapy.Request(url=url, meta={"name": file_name, "v_urls": visited_urls, "b_url": base_url}, callback=self.parse)
+
+    def parse(self, response):
+        if response.url in response.meta["v_urls"]:
+            return
+        response.meta["v_urls"].append(response.url)
+        if -1 == str(response.url).find(str(response.meta["b_url"])):
+            return
+        site = response.css('html').extract_first()
+        body = parse.html_parse(site)
+        block_tree.construct_and_save_tree(body, response.url, response.meta["name"])
+        for href in response.css('a::attr(href)').extract():
+            new_url = response.urljoin(href)
+            yield scrapy.Request(url=new_url, meta={"name": response.meta["name"], "v_urls": response.meta["v_urls"], "b_url": response.meta["b_url"]}, callback=self.parse)
+
+
+
 
 
 ###############################################################

@@ -1,0 +1,283 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Git: Not Just Source Control
+					by Jason Diller on April 1/2012
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					At FreshBooks, we
+				Element:a
+					really like git
+					for our source control. Git provides us with easy branch management, reliable source control, and the commands are intuitive. But git’s usefulness isn’t limited to source control. We’ve discovered that git’s elegant interface and potent functionality make it useful for all sorts of applications.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					For example, a couple of months ago our internal Jabber server was down for maintenance and the maintenance window lasted a bit longer than expected (something about Erlang packages and CentOS, I think). I was working on a project with some other developers located dozens of feet apart and we had been collaborating with each other using Jabber to save the walk to each other’s desks. With the Jabber server down, and facing the productivity hit of having to walk across the office, we did what any developer would do and worked around the problem.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Someone said, “well, we already share code using git, why not use that for messages too?” It seemed so obvious once it was put like that. It was dead simple.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					We started out by setting up private message repositories on our local hosts, and a shared project message repository on a central host, then everyone cloned all of the repositories and we set about making the necessary enhancements to our systems to make use git as the transport for a proper messaging system. And then when new people
+				Element:a
+					join the team
+					, they create their own messages repository as well, and clone each of the other developers’ messages repositories. Then they have to clone the project repositories. Then every developer has to clone the newbie’s personal repository before they can send him or her messages. But, git is fast, so no big deal.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Sending a message is simple:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					jason@jason:~$ echo "This project is the bomb, yo" >> team_msg_01 jason@jason:~$ git add team_msg_01 jason@jason:~$ git commit -m "Message about the project being the bomb, yo" jason@jason:~$ git push origin
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Message sent!
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Some people felt that four commands to send a message was too much work, so we rolled up a bit of automation:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					#!/bin/sh # gitmsg.sh # # usage: gitmsg recipient message # # sends 'message' to 'recipient' using git # expects ~/gitmsg/recipient to exist and to be a git repository pushd ~/gitmsg/$1 git pull origin master #use a concatenation of the current username and timestamp for the filename FILENAME=`whoami``date +%s` echo message > $FILENAME git add $FILENAME git commit -m "New message at `date`" git pull --rebase git push origin master popd
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Now sending a message to the project team is a simple one-liner at the terminal prompt:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					jason@jason:~$ ./gitmsg.sh sekret_project "I ate all the m&m's, sorry guys" ~/gitmsg/sekret_project ~ [master dbbe3a0] New message at Thu 29 Mar 2012 08:05:55 EDT 1 files changed, 1 insertions(+), 0 deletions(-) create mode 100644 jason1333022755 Counting objects: 3, done. Delta compression using up to 4 threads. Compressing objects: 100% (2/2), done. Writing objects: 100% (2/2), 305 bytes, done. Total 2 (delta 0), reused 0 (delta 0) Unpacking objects: 100% (2/2), done. To ssh://gitmsgserver/git/sekret_project.git/ d648e38..dbbe3a0 master -> master
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Of course, sending messages is only half the problem, we need to display them too. Since everyone on the FreshBooks dev team always has at least one terminal window open, this part is easy, we just install git hooks to read new messages as they arrive and display them in the terminal window.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					For my private messages repo, I use a local-to-my-computer bare repo that anyone can push messages to, so I need a post-receive hook to display the messages when they arrive:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					#!/bin/bash #gitmsg post-receive hook #install in local message repos to output messages as they arrive # while read line do #get the range of commits passed to the hook START=`echo $line|cut -f1 -d ' '` END=`echo $line|cut -f2 -d ' '` commits=`git rev-list --abbrev-commit $END ^$START` for commit in $commits do #get the author information from the commit from=`git log -n1 --format='%aN'` #get the list of files (messages) in the commit files=`git show --pretty="format:" --name-only $commit` #extract the contents (message) from each file for file in $files do message="Message from $from\n\t`git show $commit:$file`" #find terminals that don't look like they're running an editor editor_terminals=`ps -a|egrep -v "(vi|vim|emacs)\ "|grep tty.*|cut -f2 -d' '|uniq` non_editor_terminals=`ps -a|egrep "(vi|vim|emacs)\ "|grep tty.*|cut -f2 -d' '|uniq` terminals=`comm -3
+				Element:p
+					Of course, each developer maintains their own post-receive hooks so they can tune the notifications however they want. This is what it looks like when I send myself a message using
+				Element:tt
+					gitmsg
+					:
+				Element:p
+					(The terminal on the left is sending the message, and the terminal on the right is receiving it.)
+				Element:p
+				Element:img
+				Element:br
+					Screen Shot
+				Element:p
+					Git is really amazing. Now that it's supplanted our need for Jabber, we're thinking of using it for even more things. Our bug tracker is looking a little long in the tooth, and everyone's had enough of email so those are certainly candidates!
+				Element:p
+					If you've found new uses for this great tool, share them with us in the comments!
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

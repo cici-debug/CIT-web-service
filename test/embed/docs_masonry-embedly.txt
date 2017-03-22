@@ -1,0 +1,18 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Masonry + Embedly
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+					Pinterest like layouts are still popular and work well really well for rich assets like images and videos. If you would like to create your own masonry layout, here's a quick demo using Embedly and [Masonry](http://masonry.desandro.com/). [block:embed] { "html": "<iframe class=\"embedly-embed\" src=\"//cdn.embedly.com/widgets/media.html?url=http%3A%2F%2Fjsfiddle.net%2F45qpxjhj%2F2%2F%3Fheight%3D600%26tabs%3Dresult%2Cjs%2Chtml%2Ccss&src=http%3A%2F%2Fjsfiddle.net%2F45qpxjhj%2F2%2Fembedded%2Fresult%2Cjs%2Chtml%2Ccss%2F&type=text%2Fhtml&key=02466f963b9b4bb8845a05b53d3235d7&schema=jsfiddle\" width=\"600\" height=\"600\" scrolling=\"no\" frameborder=\"0\" allowfullscreen></iframe>", "url": "http://jsfiddle.net/45qpxjhj/2/?height=600&tabs=result,js,html,css", "title": "Edit fiddle - JSFiddle", "favicon": "http://jsfiddle.net/favicon.png" } [/block] The flow is pretty simple, grab the oEmbed data for each URL, create the grid and then call Masonry. Here's the code! [block:code] { "codes": [ { "code": "// The URLs that you want to embed.\nvar urls = [\n 'https://vimeo.com/158773447',\n 'https://www.instagram.com/p/BCizMYGoXYG/',\n 'https://www.youtube.com/watch?v=sGbxmsDFVnE',\n 'https://vine.co/v/ijlT6naE6lT',\n 'https://www.flickr.com/photos/snowyturner/26230731605/in/explore-2016-04-04/',\n 'http://www.theverge.com/2016/3/1/11138904/aston-martin-db11-announced-geneva-motor-show-2016',\n]\n\n$grid = $('.grid');\n\n// Use jQuery Embedly to make the API Calls.\n$.embedly.oembed(urls, {\n key: '1d5c48f7edc34c54bdae4c37b681ea2b' // replace with your API KEY.\n })\n .then(function(oembeds) {\n \t// Iterate over the results and add them to the grid.\n oembeds.forEach(function(oembed) {\n var $item = $('<div class=\"grid-item\"></div>');\n // Video Types.\n if (oembed.type === 'video' || oembed.type === 'rich') {\n // Makes the video responsive.\n $resp = $('<div class=\"resp-media\"></div>');\n var ratio = ((oembed.height / oembed.width) * 100).toPrecision(4) + '%'\n $resp.css({\n paddingBottom: ratio\n });\n\t\t\t\t\n // Add it to and item.\n $resp.html(oembed.html);\n $item.append($resp);\n } else if (oembed.type === 'photo') { // Images\n $item.html('<img src=\"' + oembed.url + '\"/>');\n } else if (oembed.type === 'link') {\n $item.html([\n '<img src=\"' + oembed.thumbnail_url + '\"/>',\n '<h4>' + oembed.title + '</h4>',\n '<p>' + oembed.description + '</p>'\n ].join(''));\n } else {\n \t// error case.\n return false;\n }\n // Add the item to the grid.\n $grid.append($item);\n });\n })\n .then(function() {\n \t// tell masonry to do it's thing.\n $grid.masonry({\n itemSelector: '.grid-item',\n columnWidth: 300\n });\n // layout Masonry after each image loads\n $grid.imagesLoaded().progress( function() {\n $grid.masonry('layout');\n });\n });", "language": "javascript" } ] } [/block] Make sure you include [imagesLoaded](http://imagesloaded.desandro.com/) otherwise you will get overlapping issues with images.
+			Node:
+			(type) c
+			(layer)1
+				Element:footer

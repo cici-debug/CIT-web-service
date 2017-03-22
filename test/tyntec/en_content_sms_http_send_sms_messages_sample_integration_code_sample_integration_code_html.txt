@@ -1,0 +1,49 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Sample integration code
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								HTTP request:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								import java.io.*; import java.net.*; import java.util.*; import java.util.regex.Pattern; import sun.misc.BASE64Encoder; /** * Java-Programm, um über den HTTP-Service von Tyntec Nachrichten zu schicken */ public class HTTPSenderServletCaller { public static void main(String[] args) throws Exception{ String username = args[0]; String password = args[1]; String sender = args[2]; // prefixed with + String receiver = args[3]; // prefixed with +, if number String content = args[4]; String ip = args[5]; String port = args[6]; // Building Request-String from given data StringBuffer dataBuffer = new StringBuffer(); dataBuffer.append("user="); dataBuffer.append(URLEncoder.encode(username, "ISO-8859-1")); dataBuffer.append("password="); dataBuffer.append(URLEncoder.encode(password, "ISO-8859-1")); dataBuffer.append("receiver="); dataBuffer.append(URLEncoder.encode(receiver, "ISO-8859-1")); dataBuffer.append("&content="); dataBuffer.append(URLEncoder.encode(content, "ISO-8859-1")); dataBuffer.append("&sender="); dataBuffer.append(URLEncoder.encode(sender, "ISO-8859-1")); dataBuffer.append("&showMsgIDs=true"); // Creating the connection URL url = new URL("http://" + ip + ":" + port + "/http/send"); URLConnection con = url.openConnection(); con.setDoOutput(true); // Sending the data OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream()); writer.write(dataBuffer.toString()); writer.flush(); // Reading the whole answer from the URL to a string BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream())); StringBuffer output = new StringBuffer(); String line = null; do { line = reader.readLine(); if (line != null) output.append(line); } while (line != null); // Search MessageID, deleting all HTML tags with a regexp Pattern pattern = Pattern.compile(""); String[] responses = pattern.split(output.toString()); // Searching for OK and the text intruducing the IDs List responseList = Arrays.asList(responses); if (responseList.contains("OK")){ int idx = responseList.indexOf("MessageID(s):"); System.out.println("MessageID: " + responses[idx+1]); } else{ System.err.println(„Error: „ + output.toString()); } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								HTTP response:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								import java.io.*; import java.util.*; import java.net.*; import javax.servlet.http.*; public class DeliveryReceiptServlet extends HttpServlet { /** * Handle an incoming POST request. */ public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOExceptin { doGet(req, resp); } /** * Handle an incoming GET request. */ public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException { // TODO: Change this to put the data to the right place. try { // The message ID that was given back on send time String msgID = URLDecoder.decode(req.getParameter("msgid"), "UTF-8"); // The date when the message was delivered to the platform Date submit = new Date(Long.parseLong(req.getParameter("submitdate"))); // The date when the message reached its final state (normally it // reached the handset) Date done = new Date(Long.parseLong(req.getParameter("donedate"))); // One of DELIVRD, FAILED or EXPIRED String stat = URLDecoder.decode(req.getParameter("stat"), "UTF-8"); // Numerical value according to stat String err = URLDecoder.decode(req.getParameter("err"), "UTF-8"); // The first characters of the original message String text = URLDecoder.decode(req.getParameter("text"), "UTF-8"); // The original sender of the message String src = URLDecoder.decode(req.getParameter("sender"), "UTF-8"); // The original receiver of the message String dest = URLDecoder.decode(req.getParameter("receiver"), "UTF-8"); resp.setStatus(HttpServletResponse.SC_OK); } catch (Exception e) { resp.setStatus(HttpServletResponse.SC_BAD_REQUEST); } resp.flushBuffer(); } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:br
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:center
+							Element:ul
+							Element:li
+							Element:a
+								Contact
+							Element:li
+							Element:a
+								Imprint
+							Element:li
+							Element:a
+								Disclaimer

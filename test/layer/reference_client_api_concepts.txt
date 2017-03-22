@@ -1,0 +1,358 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Technical Concepts Overview
+				Element:a
+					¶
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Layer provides hosted infrastructure and services that allow developers to easily integrate messaging into native and web apps. Layer is designed for asynchronous, person-to-person messaging, along with APIs for bot integrations. Layer is fully managed and HIPAA-compliant, and powers a wide range of products across both person-to-person and business-to-consumer use cases.
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					Make sure you read the
+				Element:a
+					Layer Overview
+					first
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					There are four core concepts you should understand:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					In this guide:
+				Element:a
+					Layer services
+					•
+				Element:a
+					Users and identity
+					•
+				Element:a
+					Conversations
+					•
+				Element:a
+					Messages
+					•
+				Element:a
+					MessageParts
+					•
+				Element:a
+					Announcements
+					•
+				Element:a
+					Developer dashboard
+					•
+				Element:a
+					Authentication
+					•
+				Element:a
+					App types
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								1. Production vs staging apps
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you first sign up for Layer, you’ll have a staging app, and a staging
+							Element:em
+								app ID
+								, which looks like this:
+							Element:code
+								layer:///apps/staging/749d6ae6-22b5-11e6-9940-40bc000045d0
+								. Paid accounts get access to a production app and a corresponding production
+							Element:em
+								app ID
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Common mistake
+							Element:p
+								The
+							Element:code
+								staging
+								or
+							Element:code
+								production
+								portion of the app ID is for developer convenience and is ignored by our SDKs. Typically the UUID portion of staging and production IDs only differ in a few characters and may look the same at first glance. Using the wrong ID is a common source of missing content, authentication issues, and incorrect push notification behavior.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Staging apps are meant to be used while you are building your project, but should not be used in production apps with real users. Staging apps provide access to all Layer features, but come with a few technical limitations:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								They are not covered by our platform SLA. We make no guarantees about uptime or data integrity for service apps.
+							Element:li
+								We may disable staging apps from accessing Layer servers if we observe excessive usage or usage patterns that match those of a production app.
+							Element:li
+								We may introduce limits on the number of users or message volume for staging apps in the future.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Production apps are covered by our platform SLA and do not have any usage limitations.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								Conversations and messages created on staging apps cannot be accessed from production apps. The opposite is also true.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								2. User management & Identity provider
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Layer does not handle user management
+								. This means that you do
+							Element:em
+								not
+								have to import or migrate existing users, and users don’t have to register with Layer itself. It also means that we cannot provide lists of users or limit actions to certain users (also known as “user permissions”).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Instead, this functionality should be handled by the rest of your app and server. In particular, you should have a server that contains a database of all your users and provides a way for app users to login, often via a password or session token. Most apps already have a database and server for user management.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sample
+							Element:em
+								Identity Provider
+								implementations are available on
+							Element:a
+								GitHub
+								which generate an
+							Element:a
+								Identity Token
+								, which gets passed to Layer to authenticate the user and optionally provide profile information. Every Layer app must have an identity provider to handle authentication.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											User IDs
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											During the authentication process, you provide Layer with a unique ID for each user. Often, this is the primary ID for the same user in your database. We only require that they be
+										Element:em
+											unique
+											for every user in your app, and
+										Element:em
+											stable
+											, meaning that they can never change.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+										Element:strong
+											Note
+										Element:p
+											Email addresses are a bad choice for user IDs because users may change their email address. It also unnecessarily exposes private information.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You use your user ID for every Layer operation — adding or removing users from conversations, configuring push notifications, etc.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Identities
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We create an
+										Element:em
+											Identity
+											object for every user ID registered with Layer. At a minimum, each Identity object has a
+										Element:code
+											user_id
+											field. During the authentication process, you can optionally provide additional profile details, such as name, email, and a URL for a profile picture (“avatar”). This makes it easy for apps to display a name and photo for message senders.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											However, an Identity is not the same thing as a user:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Identities don’t have to correspond to actual users. For example, you could create a “Admin” identity that is associated with messages broadcasted from your backend.
+										Element:li
+											Identities do not include any built-in concepts of roles or permissions (although you could implement this via identity metadata).
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								3. Conversations, messages, and message parts
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Layer conversations contain a set of participants and an unlimited number of messages.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								Currently there is a limit of 25 participants per conversation. This will be increased soon.
+							Element:p
+								It is in fact possible for a conversation to have 1 participant (perhaps for a note-to-self use case), or even 0 participants (which can be help with implementing an archival use case).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Each message is sent by a specific user, and can contain an unlimited number of message parts. Messages also keep track of the sent/delivered/read state for each participant in the conversation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Message parts hold the actual contents of a message. They are comprised of a MIME type and
+							Element:code
+								body
+								; the
+							Element:code
+								body
+								can be up to 2 KB in size. Larger payloads should be first uploaded to an external hosting service, such as AWS S3 or Google Cloud Storage; the URL of the uploaded file is sent instead. Our SDKs automatically handle this; if you are using the REST APIs, you will have to handle this yourself.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The MIME type tells your app how to display the contents of the message part. For example, if the message part contains a URL, a MIME type of
+							Element:code
+								text/plain
+								might cause your app to display the URL as text, as if one user had sent a link to another. However, if the MIME type is
+							Element:code
+								image/jpeg
+								, your app might display the image specified by the URL rather than the URL itself.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								Message parts cannot be edited once they’ve been sent. However, a common pattern is to send a URL in a message part, and load the latest data available at the URL before displaying the rest of the message in your app.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								4. Sync & querying
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The WebSDK is a wrapper around the RESTful Client API. The iOS and Android SDKs are different.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The mobile SDKs synchronize all the conversations the authenticated user is a participant in, along with Identity information for each conversation participant and a configurable number of messages in each conversation. This data is downloaded to a SQLite database on disk, and happens in the background.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								Because sync happens in the background, new data may not be immediately available. The SDKs provide methods that notify you when a particular conversation or message has finished syncing to the device.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Syncing all data to a local SQLite database allows users to access all their conversations and messages, even while offline. In addition, if messages are sent while offline, we will save them in the local database, and send them to our server the next time the device establishes a network connection.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Querying is the primary way to get Layer data on mobile. For example, you can display all conversations by issuing a query for all conversations. To display the messages in a conversation, use a query for messages that are part of that conversation.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								Queries are a wrapper around SQL and operate over the local database. They will not return data that has not yet had time to sync. Queries do not load any data from the server, and will never return results that the authenticated user doesn’t have access to (such as conversations the authenticated user is not a part of).
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								REST API overview

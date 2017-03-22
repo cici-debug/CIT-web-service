@@ -1,0 +1,1794 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Pushover Message API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Pushover uses a simple, versioned
+							Element:a
+								REST
+								API to receive messages from your application and send them to devices running our
+							Element:a
+								device clients
+								. To simplify the user registration process and usage of our API, there are no complicated out-of-band authentication mechanisms or per-call signing libraries required, such as OAuth. HTTP libraries available in just about every language, or even from the command line, can be used without any custom modules or extra dependencies needed. See our
+							Element:a
+								FAQ
+								for examples in different programming languages.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To simplify the process of collecting user keys when sending to multiple users, we have a new
+							Element:a
+								Subscription API
+								available.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											TL;DR
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:a
+											Register your application
+											, set its name and upload an icon, and get an API token in return (often referred to as
+										Element:em
+											APP_TOKEN
+											in our documentation and
+										Element:a
+											code examples
+											).
+										Element:li
+											POST an HTTPS request to
+										Element:code
+											https://api.pushover.net/1/messages.json
+											with the following parameters:
+										Element:ul
+											Some optional parameters may be included:
+										Element:li
+										Element:code
+											token
+											(required) - your application's API token
+										Element:li
+										Element:code
+											user
+											(required) - the user/group key (
+										Element:em
+											not
+											e-mail address) of your user (or you), viewable when logged into
+										Element:a
+											our dashboard
+											(often referred to as
+										Element:em
+											USER_KEY
+											in our documentation and
+										Element:a
+											code examples
+											)
+										Element:li
+										Element:code
+											message
+											(required) - your message
+										Element:ul
+										Element:li
+										Element:code
+											device
+											- your user's device name to send the message directly to that device, rather than all of the user's devices (multiple devices may be separated by a comma)
+										Element:li
+										Element:code
+											title
+											- your message's title, otherwise your app's name is used
+										Element:li
+										Element:code
+											url
+											- a
+										Element:a
+											supplementary URL
+											to show with your message
+										Element:li
+										Element:code
+											url_title
+											- a title for your supplementary URL, otherwise just the URL is shown
+										Element:li
+										Element:code
+											priority
+											- send as
+										Element:code
+											-2
+											to generate no notification/alert,
+										Element:code
+											-1
+											to always send as a quiet notification,
+										Element:code
+											1
+											to display as
+										Element:a
+											high-priority
+											and bypass the user's quiet hours, or
+										Element:code
+											2
+											to also require confirmation from the user
+										Element:li
+										Element:code
+											timestamp
+											- a Unix timestamp of your message's date and time to display to the user, rather than the time your message is received by our API
+										Element:li
+										Element:code
+											sound
+											- the name of one of the
+										Element:a
+											sounds
+											supported by device clients to override the user's default sound choice
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That's it. Make sure your application is
+										Element:a
+											friendly to our API servers
+											and you're all set. For more information on each parameter, keep reading or jump to a section at the left.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Need help using our API or found an error in the documentation?
+										Element:a
+											Drop us a line
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Application Registration
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To get started pushing notifications from your application, plugin, web service, server, or anything else, you'll first need to
+											Example Application API Token:
+										Element:a
+											register it
+											(a free process) to get an API token. When registering an app, you'll be able to set its name which will be used as a default title for messages, as well as upload an icon that will appear with each message on device clients.
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											azGDORePK8gMaC0QOYAMyEEuzJnyUi
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Application tokens are case-sensitive, 30 characters long, and may contain the character set
+										Element:code
+											[A-Za-z0-9]
+											. All API calls made on behalf of your application must include this token.
+									Node:
+									(type) c
+									(layer)3
+										Element:strong
+											Note:
+											This is just an example token to show the format and will not work when sending requests to our API server. To get a token that works, you must
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											register
+											an application.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are creating a client-side library, application, or open source project that will be redistributed and installed by end-users, you may want to require each of your users to register their own application rather than including your own API token with the software. See our
+										Element:a
+											FAQ
+											for more information.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Users, Groups, and Devices
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have an API token for your application, you'll need the user key and optional device name for each user to which you are pushing notifications. If a device name is not specified for a user, or the specified device name is no longer enabled/valid, notifications will be sent to all active devices for that user to avoid losing messages. Messages may be addressed to multiple specific devices by joining them with a comma (such as
+										Element:code
+											device
+											=
+										Element:code
+											iphone,nexus5
+											).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Instead of a user key, a user may supply a
+										Element:a
+											group key
+											. Group keys look identical to user keys and from your application's perspective, you do not need to distinguish between them. When sending notifications to a group key, all active users listed in the group will have the notification delivered to them and the response will look the same.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Alternatively, a message may be sent to multiple users in one request by specifying a comma-separated list (with no spaces) of user keys as the
+										Element:code
+											user
+											parameter. These requests are currently limited to 50 users in a single request.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When using group keys or specifying multiple users in a single request, the
+										Element:code
+											device
+											parameter will be ignored. Group users will have their specific device honored according to how they are entered in the group.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As with application API tokens, user keys should be considered private and not disclosed to 3rd parties. Users should be able to update their identifiers and/or device names with your application or service.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Example User Identifier:
+										Element:code
+											uQiRzpo4DXghDmr9QzzfQu27cmVRsG
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Example Group Identifier:
+										Element:code
+											gznej3rKEVAvPUxu9vvNnqpmZpokzF
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Example User Device Name:
+										Element:code
+											droid2
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											User and group identifiers are 30 characters long, case-sensitive, and may contain the character set
+										Element:code
+											[A-Za-z0-9]
+											. Device names are optional, may be up to 25 characters long, and will contain the character set
+										Element:code
+											[A-Za-z0-9_-]
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As an optional step, your application may
+										Element:a
+											verify user or group identifiers
+											after they have been submitted to you. This will ensure that a user has copied his or her identifier properly, that the account is valid, and that there is at least one active device on the account.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Pushing Messages
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Messages must contain a
+										Element:code
+											message
+											parameter that contains the message body and an optional
+										Element:code
+											title
+											parameter. If the title is not specified, the application's name will be shown by default. HTTP and HTTPS URLs included in messages will be automatically parsed by the device clients and shown as clickable links. To include a clickable link outside of your message body, see the
+										Element:a
+											supplemental URL section
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In this example, we will use the application token, user key, and device name above to push a message about a completed process.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using an HTTP library available in your application's language, construct a POST request (not a GET request) to the following URL:
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											https://api.pushover.net/1/messages.json
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											.json
+											suffix requests that the response be in JSON format.
+										Element:code
+											https://api.pushover.net/1/messages.
+											may be used instead to receive an XML response. Note that this does not affect how you send your parameters to our server (which should be in the standard percent-encoding format), only how our server responds. We do not support receiving JSON or XML-encoded parameters.
+										Element:strong
+											xml
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											HTTPS
+										Element:u
+											is required
+											for all API calls, and for security purposes, your application
+										Element:u
+											should enable
+											your HTTP library's TLS/SSL verification. The POST method
+										Element:u
+											is required
+											be used for the API call to push messages.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Include the
+										Element:code
+											token
+											,
+										Element:code
+											user
+											,
+										Element:code
+											device
+											(optional),
+										Element:code
+											title
+											(optional), and
+										Element:code
+											message
+											parameters in the body of the request as standard key-value pairs. Continuing with our example, these parameters would be:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											token
+											=
+										Element:code
+											KzGDORePKggMaC0QOYAMyEEuzJnyUi
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											user
+											=
+										Element:code
+											e9e1495ec75826de5983cd1abc8031
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											device
+											=
+										Element:code
+											droid4
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											title
+											=
+										Element:code
+											Backup finished - SQL1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											message
+											=
+										Element:code
+											Backup of database "example" finished in 16 minutes.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Those parameters would look like this when POSTed as a URL-encoded (also known as percent-encoded) request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /1/messages.json Host: api.pushover.net Content-Type: application/x-www-form-urlencoded Content-Length: 180 token=KzGDORePKggMaC0QOYAMyEEuzJnyUi&user=e9e1495ec75826de5983cd1abc8031&device=droid4&title=Backup+finished+-+SQL1&message=Backup+of+database+%22example%22+finished+in+16+minutes.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That message would appear like this in the Pushover client on an Android device:
+									Node:
+									(type) c
+									(layer)3
+										Element:center
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											HTML/Message Styling
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As of version 2.3 of our device clients, messages can be formatted with HTML tags.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To enable HTML formatting, include an
+										Element:code
+											html
+											parameter set to
+										Element:code
+											1
+											. The normal message content in your
+										Element:code
+											message
+											parameter will then be displayed as HTML.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Due to limitations with notifications on mobile platforms, HTML tags are stripped out when displaying your message as a notification (leaving just the plain text of your message). Once the device client is opened and your message has been downloaded from our server, we display the full HTML version.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											HTML tags currently supported:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											<b>word</b>
+											- display
+										Element:b
+											word
+											in bold
+										Element:li
+										Element:code
+											<i>word</i>
+											- display
+										Element:i
+											word
+											in italics
+										Element:li
+										Element:code
+											<u>word</u>
+											- display
+										Element:u
+											word
+											underlined
+										Element:li
+										Element:code
+											<font color="#0000ff">word</font>
+											- display
+										Element:span
+											word
+											in blue text
+										Element:li
+										Element:code
+											<a href="http://example.com/">word</a>
+											- display
+										Element:a
+											word
+											as a tappable link to
+										Element:tt
+											http://example.com/
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Specifying a Message Time
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Messages are stored on the Pushover servers with a timestamp of when they were initially received through the API. This timestamp is shown to the user, and messages are listed in order of their timestamps. In most cases, this default timestamp is acceptable.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In some cases, such as when messages have been queued on a remote server before reaching the Pushover servers, or delivered to Pushover out of order, this default timestamping may cause a confusing order of messages when viewed on the user's device. For these scenarios, your app may send messages to the API with the
+										Element:code
+											timestamp
+											parameter set to the
+										Element:a
+											Unix timestamp
+											of the original message. For example, sending
+										Element:code
+											timestamp=1331249662
+											would deliver the message with a time of March 8, 2011 17:34:22 CST (but shown relative to the local device's timezone).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:center
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Message Priority
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, messages have normal priority (a
+										Element:code
+											priority
+											of
+										Element:code
+											0
+											). Messages may be sent with a different priority that affects how the message is presented to the user. Please use your best judgement when sending messages to other users and specifying a message priority, as overusing high-priority messages can be annoying or disruptive to users. Specifying a message priority does not affect queueing or routing priority and only affects how device clients display them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Lowest Priority (-2)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When the
+													Element:code
+														priority
+														parameter is specified with a value of
+													Element:code
+														-2
+														, messages will be considered lowest priority and will not generate any notification. On iOS, the application badge number will be increased.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Low Priority (-1)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Messages with a
+													Element:code
+														priority
+														parameter of
+													Element:code
+														-1
+														will be considered low priority and will not generate any sound or vibration, but will still generate a popup/scrolling notification depending on the client operating system. Messages delivered during a user's quiet hours are sent as though they had a priority of (
+													Element:code
+														-1
+														).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Normal Priority (0)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Messages sent without a
+													Element:code
+														priority
+														parameter, or sent with the parameter set to
+													Element:code
+														0
+														, will have the default priority. These messages trigger sound, vibration, and display an alert according to the user's device settings. On iOS, the message will display at the top of the screen or as a modal dialog, as well as in the notification center. On Android, the message will scroll at the top of the screen and appear in the notification center.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If a user has quiet hours set and your message is received during those times, your message will be delivered as though it had a priority of
+													Element:code
+														-1
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														High Priority (1)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Messages sent with a
+													Element:code
+														priority
+														of
+													Element:code
+														1
+														are high priority messages that bypass a user's quiet hours. These messages will always play a sound and vibrate (if the user's device is configured to) regardless of the delivery time. High-priority should only be used when necessary and appropriate.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														High-priority messages are highlighted in red in the device clients.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+												Node:
+												(type) c
+												(layer)4
+													Element:center
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Emergency Priority (2)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Emergency-priority notifications are similar to high-priority notifications, but they are repeated until the notification is acknowledged by the user. These are designed for dispatching and on-call situations where it is critical that a notification be repeatedly shown to the user (or all users of the group that the message was sent to) until it is acknowledged. The first user in a group to acknowledge a message will cancel retries for all other users in the group.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Applications sending emergency notifications are issued a
+													Element:a
+														receipt
+														that can be used to get the status of a notification and find out whether it was acknowledged, or automatically receive a callback when the user has acknowledged the notification.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To send an emergency-priority notification, the
+													Element:code
+														priority
+														parameter must be set to
+													Element:code
+														2
+														and the
+													Element:code
+														retry
+														and
+													Element:code
+														expire
+														parameters must be supplied.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														retry
+														parameter specifies how often (in seconds) the Pushover servers will send the same notification to the user. In a situation where your user might be in a noisy environment or sleeping, retrying the notification (with sound and vibration) will help get his or her attention. This parameter must have a value of at least
+													Element:code
+														30
+														seconds between retries.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														expire
+														parameter specifies how many seconds your notification will continue to be retried for (every
+													Element:code
+														retry
+														seconds). If the notification has not been acknowledged in
+													Element:code
+														expire
+														seconds, it will be marked as expired and will stop being sent to the user. Note that the notification is still shown to the user after it is expired, but it will not prompt the user for acknowledgement. This parameter must have a maximum value of at most
+													Element:code
+														86400
+														seconds (24 hours).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For example, sending a
+													Element:code
+														retry
+														parameter of
+													Element:code
+														60
+														and an
+													Element:code
+														expire
+														parameter of
+													Element:code
+														3600
+														will cause your notification to be retried every 60 seconds for 1 hour.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The optional
+													Element:code
+														callback
+														parameter may be supplied with a publicly-accessible URL that our servers will send a request to when the user has acknowledged your notification.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When your application sends an emergency-priority notification, our API will respond with a
+													Element:code
+														receipt
+														value that can be used to get information about whether the notification has been acknowledged. See our
+													Element:a
+														receipts and callbacks
+														section for more information.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Supplementary URLs
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Pushover device clients automatically turn URLs found in message bodies into clickable links that open in the device's browser (or whichever application is configured to handle them). It may be desirable to include a supplementary URL that is not included in the message text, but available for the user to click on. This URL will be passed directly to the device client, with a URL title of the supplied title (defaulting to the URL itself if no title given). Supplementary URLs can be useful for presenting long URLs in a notification as well as interacting with 3rd party applications.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, if a Pushover application were sending Twitter messages to a user, a supplementary URL may be sent that includes the actual link to the message that would open in the user's browser (e.g.,
+										Element:code
+											http://twitter.com/user/status/12345
+											) or a URL that will perform some action in another application installed on the device (e.g.,
+										Element:code
+											twitter://status?id=12345
+											). The message displayed in the Pushover client would be the actual contents of the Twitter message (with any URLs originally contained in it automatically turned into links), but the supplementary link will be shown underneath it as an option available to the user when the message is highlighted. An example request to our API might have the following parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											token
+											=
+										Element:code
+											KzGDORePKggMaC0QOYAMyEEuzJnyUi
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											user
+											=
+										Element:code
+											e9e1495ec75826de5983cd1abc8031
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											message
+											=
+										Element:code
+											This is a Twitter pic http://twitpic.com/blah
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											title
+											=
+										Element:code
+											Direct message from @someuser
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											url
+											=
+										Element:code
+											twitter://direct_message?screen_name=someuser
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											url_title
+											=
+										Element:code
+											Reply to @someuser
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This message would appear in a Pushover device client like so:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:center
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When the user taps on the notification in Pushover to expand it, the URL will be shown below it with the supplied
+										Element:code
+											url_title
+											parameter, titled "Reply to @someuser", which when clicked, will launch a Twitter application that is set to handle the URL
+										Element:code
+											twitter://direct_message link?screen_name=someuser
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:center
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While there are some standard URL schemes like
+										Element:code
+											tel:
+											and
+										Element:code
+											sms:
+											that will be handled by iOS and Android the same way, others like the
+										Element:code
+											twitter://
+											scheme used above are highly specific to the platform and other applications installed on the device. A list of common URL schemes supported by applications on iOS can be found at
+										Element:a
+											handleopenurl.com
+											, and a list handled natively by Android can be found on
+										Element:a
+											developer.android.com
+											. Since Pushover users may be on different platforms and have different 3rd party applications installed, it is not recommended to use app-specific URL schemes as supplementary URLs in public plugins, websites, and apps.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Due to limitations of the iOS push notification service, supplementary URLs are not able to be shown with push notifications. Notifications in the Notification Center will only show the title and message. The user must tap on the notification or otherwise open the Pushover client, which will perform a sync with our servers, in order to download the attached supplementary URL. Since these URLs are supplementary, they
+										Element:u
+											should not
+											be used as the primary content of your notification. If your notification is just a URL, include it in the message body instead.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Notification Sounds
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Users can choose from 21 different default sounds to play when receiving notifications, rather than our standard Pushover tone. Applications can override a user's default tone choice on a per-notification basis.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When sending notifications through the Pushover API, the
+										Element:code
+											sound
+											parameter may be set to one of the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											pushover
+											- Pushover (default)
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											bike
+											- Bike
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											bugle
+											- Bugle
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											cashregister
+											- Cash Register
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											classical
+											- Classical
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											cosmic
+											- Cosmic
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											falling
+											- Falling
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											gamelan
+											- Gamelan
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											incoming
+											- Incoming
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											intermission
+											- Intermission
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											magic
+											- Magic
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											mechanical
+											- Mechanical
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											pianobar
+											- Piano Bar
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											siren
+											- Siren
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											spacealarm
+											- Space Alarm
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											tugboat
+											- Tug Boat
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											alien
+											- Alien Alarm (long)
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											climb
+											- Climb (long)
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											persistent
+											- Persistent (long)
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											echo
+											- Pushover Echo (long)
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											updown
+											- Up Down (long)
+										Element:a
+										Element:img
+										Element:li
+										Element:code
+											none
+											- None (silent)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If no
+										Element:code
+											sound
+											parameter is specified, the user's default tone will play. If the user has not chosen a custom sound, the standard Pushover sound will play.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In most cases, applications choosing to override the default sound should offer the user the option to pick a sound from the list above. Rather than hard-coding the list of sounds (since more may be added in the future), an API call may be made to retrieve the list of current sounds and their descriptions by sending a GET request to:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											https://api.pushover.net/1/sounds.json?token=
+										Element:em
+											(your app token)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Include your application's token as the
+										Element:code
+											token
+											parameter. This API call returns a
+										Element:code
+											sounds
+											hash with each key being the actual
+										Element:code
+											sound
+											parameter to store for the user and send to our API, with its value describing the sound.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											In addition to the list of sounds from our API, your application
+										Element:u
+											must
+											provide a blank option to the user that will not send the
+										Element:code
+											sound
+											parameter to our API (or send it with a blank value). This will allow the user's default tone to play, rather than being overridden by your application.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response Format
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your POST request to our API was valid, you will receive an HTTP 200 (OK) status, with a JSON object (or XML stanza if you specified a URL ending in
+										Element:code
+											.xml
+											) containing a
+										Element:code
+											status
+											code of
+										Element:code
+											1
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											{"status":1,"request":"647d2300-702c-4b38-8b2f-d56326ae460b"}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If any input was invalid, you will receive an HTTP 4xx status, with a JSON object or XML node containing a
+										Element:code
+											status
+											code of something other than 1, and an
+										Element:code
+											errors
+											array detailing which parameters were invalid.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											{"user":"invalid","errors":["user identifier is invalid"],
+										Element:br
+											"status":0,"request":"5042853c-402d-4a18-abcb-168734a801de"}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you sent a
+										Element:code
+											priority=2
+											notification, you will also receive a
+										Element:code
+											receipt
+											parameter in your response that can be used with our
+										Element:a
+											receipts API
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											request
+											parameter returned from all API calls is a randomly-generated unique token that we have associated with your request. If you need to
+										Element:a
+											contact us
+											about a question or problem with our API, please include this
+										Element:code
+											request
+											parameter that our API returned so we can look up your original request in our logs.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Limitations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Messages are currently limited to
+										Element:code
+											1024
+											4-byte UTF-8 characters, with a title of up to
+										Element:code
+											250
+											characters. Supplementary URLs are limited to
+										Element:code
+											512
+											characters, and URL titles to
+										Element:code
+											100
+											characters.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Applications are currently limited to sending
+										Element:code
+											7,500
+											messages per month, where one message is defined as a successful
+										Element:code
+											messages
+											API call to one user, regardless of the number of devices on that user's account. Messages sent to group keys are counted as one message for each user in the group.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your application needs a higher message limit, please
+										Element:a
+											see our FAQ
+											for pricing information. For open source applications, see our question about
+										Element:a
+											distribution of your API token
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once message limits have been reached, requests will be rejected with a
+										Element:code
+											429
+											HTTP status code. Message limits are reset at
+										Element:code
+											00:00:00 Central Time
+											on the 1st of each month. Per-day and per-month usage statistics can be viewed on each
+										Element:a
+											application's page
+											, as well as through HTTP headers returned in each API call to the
+										Element:code
+											messages
+											endpoint showing your app's monthly message limit (plus any additional purchased capacity), the number of messages sent this month, and the Unix timestamp of when the count will reset.
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											X-Limit-App-Limit: 7500
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											X-Limit-App-Remaining: 7496
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											X-Limit-App-Reset: 1393653600
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to returning headers with each message request, a dedicated API endpoint is available to return these limits in the result body as
+										Element:code
+											limit
+											,
+										Element:code
+											remaining
+											, and
+										Element:code
+											reset
+											. This endpoint can be used by making a
+										Element:code
+											GET
+											request to:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											https://api.pushover.net/1/apps/limits.json?token=
+										Element:em
+											(your app token)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Include your application's token as the
+										Element:code
+											token
+											parameter.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For security purposes, once a message is verified to have been delivered to a device (which happens after the client on the device is opened and a sync over HTTPS is performed, not just after the message is delivered to Apple/Google carrier servers), the message is deleted from the Pushover servers. Messages not verified to have been received will be deleted after
+										Element:code
+											21 days
+											of being sent to carrier servers. Messages are delivered to and stored on each device separately and are not viewable from the Pushover website or any other device, unless those messages have also been pushed to those devices through the API.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Being Friendly to our API
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When creating an application that will use our API, please consider that your message may not go through for various reasons. We might be having temporary technical difficulties, your application might have exceeded its
+										Element:a
+											monthly quota
+											, or the user you are sending to may have deactivated his or her account.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The key to being friendly to our API is to pay attention to how it responds:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											If we issue a 200 HTTP response and the
+										Element:code
+											status
+											parameter in the JSON/XML body is
+										Element:code
+											1
+											, your notification has been received and queued. Well done.
+										Element:li
+											If we issue a 4xx HTTP response, or the
+										Element:code
+											status
+											parameter is not
+										Element:code
+											1
+											, your input was invalid. Either your application is over its quota, your token is invalid, a user is no longer active, etc. Parse the JSON/XML response, noting the
+										Element:code
+											errors
+											array if present, and take the appropriate response for your type of message. The important part is that
+										Element:u
+											repeating your same request will not work, no matter how many times you retry it
+											. Your input needs to be changed or you should stop retrying.
+										Element:li
+											If we issue a 500 or any other HTTP response, you were unable to connect to our API, or you did not get a reply, it means we are having temporary problems. You can repeat your same request again, but no sooner than 5 seconds from your last request.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your application should implement basic rate limiting. Do not send more than 2 concurrent HTTP requests (TCP connections) to our API, or we may do rate limiting on our side which may cause timeouts and refused connections for your IP. To speed up multiple requests, you may send each request in sequence over the same TCP connection using HTTP keep-alive to avoid the overhead of a new TCP connection and TLS negotiation. Do not retry the same request more than once every 5 seconds. If we're having temporary difficulties, flooding our servers with repeated requests will just make the problem worse for everyone.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your application fails to act in a sane manner and ends up flooding our servers, we will be forced to block your IP and/or disable your application and you should feel bad.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											User/Group Verification
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As an optional step in collecting user keys for users of your application, you may verify those keys to ensure that a user has copied them properly, that the account is valid, and that there is at least one active device on the account. User and group identifiers may be verified by POSTing an HTTPS request to:
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											https://api.pushover.net/1/users/validate.json
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Include your application's token as the
+										Element:code
+											token
+											parameter, the user's or group's identifier as the
+										Element:code
+											user
+											parameter, and an optional
+										Element:code
+											device
+											parameter. If the
+										Element:code
+											device
+											parameter is supplied, the verification will apply to that user and device. If the parameter is not supplied, a user will be validated if there is at least one active device on the account.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											validate
+											call returns a
+										Element:a
+											response
+											with
+										Element:code
+											status
+											set to
+										Element:code
+											1
+											if the user is valid, in addition to a
+										Element:code
+											devices
+											array containing the names of the user's active devices. If the user and/or device is not valid,
+										Element:code
+											status
+											will be set to
+										Element:code
+											0
+											, optionally with a parameter detailing a specific error.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Receipts and Callbacks
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Applications sending
+										Element:a
+											emergency-priority
+											notifications will receive a
+										Element:code
+											receipt
+											parameter from our API when a notification has been queued. This parameter is a case-sensitive, 30 character string containing the character set
+										Element:code
+											[A-Za-z0-9]
+											. This receipt can be used to periodically poll our receipts API to get the status of your notification, up to 1 week after your notification has been received.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Submit a GET request (no faster than once every 5 seconds) to:
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											https://api.pushover.net/1/receipts/
+										Element:em
+											(your receipt)
+											.json?token=
+										Element:em
+											(your app token)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Include the receipt in the URL and your application's token as the
+										Element:code
+											token
+											parameter. If the receipt is valid, our API will respond with some integer-valued parameters about your notification:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											status
+											=
+										Element:code
+											1
+										Element:em
+											(indicating your receipt request was successful)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											acknowledged
+											=
+										Element:code
+											1
+										Element:em
+											(1 or 0 whether the user has acknowledged the notification)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											acknowledged_at
+											=
+										Element:code
+											1360019238
+										Element:em
+											(a Unix timestamp of when the user acknowledged, or 0)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											acknowledged_by
+											=
+										Element:code
+											(user key)
+										Element:em
+											(the user key of the user that first acknowledged the notification)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											acknowledged_by_device
+											=
+										Element:code
+											(device name)
+										Element:em
+											(the device name of the user that first acknowledged the notification)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											last_delivered_at
+											=
+										Element:code
+											1360001238
+										Element:em
+											(a Unix timestamp of when the notification was last retried, or 0)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											expired
+											=
+										Element:code
+											1
+										Element:em
+											(1 or 0 whether the expiration date has passed)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											expires_at
+											=
+										Element:code
+											1360019290
+										Element:em
+											(a Unix timestamp of when the notification will stop being retried)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											called_back
+											=
+										Element:code
+											1
+										Element:em
+											(1 or 0 whether our server has called back to your callback URL if any)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											called_back_at
+											=
+										Element:code
+											1360019239
+										Element:em
+											(a Unix timestamp of when our server called back, or 0)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Callback URLs
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Rather than periodically polling our receipts API, you may also include a
+													Element:code
+														callback
+														parameter when submitting your emergency notification. This must be a URL (HTTP or HTTPS) that is reachable from the Internet that our servers will call out to as soon as the notification has been acknowledged. If a callback URL exists, we will submit a POST request to the URL with the following parameters:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														receipt
+														=
+													Element:code
+														(your receipt ID)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														acknowledged
+														=
+													Element:code
+														1
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														acknowledged_at
+														=
+													Element:code
+														1360019238
+													Element:em
+														(a Unix timestamp of when the notification was acknowledged)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														acknowledged_by
+														=
+													Element:code
+														(user key)
+													Element:em
+														(the user key of the user that first acknowledged the notification)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														acknowledged_by_device
+														=
+													Element:code
+														(device name)
+													Element:em
+														(the device name of the user that first acknowledged the notification)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If our API servers do not receive a successful (2xx) HTTP response from your callback URL, we will retry again in one minute.
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Canceling Emergency-Priority Retries
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														An
+													Element:a
+														emergency-priority
+														notification will continue to be sent to devices until it reaches its original
+													Element:code
+														expire
+														value. To cancel an emergency-priority notification early, you can send a POST request to our API:
+												Node:
+												(type) c
+												(layer)4
+													Element:code
+														https://api.pushover.net/1/receipts/
+													Element:em
+														(your receipt)
+														/cancel.json
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Along with your POST request, include your application's API token as the
+													Element:code
+														token
+														parameter.
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														Privacy
+														|
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														Terms of Service
+														|
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														Security
+														Pushover is a trademark and product of
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														Superblock, LLC
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+														Copyright © 2012-2017 Superblock, LLC. All rights reserved.

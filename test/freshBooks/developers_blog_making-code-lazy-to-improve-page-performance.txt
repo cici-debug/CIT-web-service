@@ -1,0 +1,222 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Making code lazy to improve page performance
+					by Mark on October 26/2010
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					As you may or may not know browsers are way faster than they used to be. Nearly everything – bandwidth, client processing power, storage – is cheaper than it was. However, one thing that is still really expensive is interacting with the DOM. Changing and modifying the DOM, especially when those interactions cause page reflows and repaints, can quickly become so costly it ruins the user experience. A perfect example of this are the “comboboxes” we use on invoices, estimates and expenses in FreshBooks. Each time we create a combobox, it inserts content into the DOM. This is a totally reasonable strategy when you are making 1 – 10 of them. However, it becomes a significant bottle neck when you have to do several hundred, as we did when we started working on the expense import feature. Things slowed to a crawl.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Since interacting with and manipulating the DOM was proving to be our bottleneck, the solution was to not interact with it. Or at least, not in big sets of interaction. When we did have to interact with it, we would have to do so in small chunks so we didn’t lock the UI thread in the browser. Locking the UI thread can happen when javascript causes a pile of DOM updates which results in an unresponsive browser, sad customers and possibly warnings about long running scripts. For us, this locking was caused by iterating large sets nodes and manipulating them. For example:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					var nodes = document.getElementsByTagName('a'); for (var j = 0, len = nodes.length; j < len; j++) { nodes[j].changeIt(); } `</pre> In order to make this operation seem ‘faster’ and not lock the UI thread we used a `setTimeout` with a delay of 0, and treating each iteration as separate function call. This gave the UI thread enough time to catch up and avoided the dreaded Beachball of Waiting. <pre>`var nodes = document.getElementsByTagName('a'), j = 0, len = nodes.length; var looper = function() { nodes[j].changeIt(); j++; if (j < len) { setTimeout(looper, 0); } }; looper(); `</pre> This approach does the same work as the above approach, except it does not run the risk of locking the UI thread. Overall, it will run slightly slower than the previous loop, as there is some overhead in the function calls. However, it will feel faster when there are lots of updates to do, as it won’t make the UI totally unresponsive while it works. The second optimization we did to improve performance was delaying DOM manipulation until the very last second. Usually this means doing as little setup work as possible before the user interacts with elements on the page. An example of this was our calendar pickers. Initially each calendar picker was eagerly inserting its content into the DOM when the calendar was initialized. Once re-factored, the calendars only bound the event listeners required to trigger the calendar display. All of the calendar content was built upon the initial activation of the picker itself. This helped contribute to faster feeling pages, as less work was required at page load. Another optimization we made was to remove duplicated content nodes. This primarily affected our combobox tool. Originally each combobox created its own container and all of its own content nodes at page load. After the first round of optimizations, only the container elements were being inserted at page load. This sped things up considerably. However, we were still having issues with page performance on larger pages. Since our combobox tool emulates native select boxes, only one can be open at a time, allowing us to make another optimization. <pre>`var contentNode = document.getElementById('dhtmlx_combo_list'); if (!contentNode) { var contentNode = document.createElement('div'); contentNode.id = 'dhtmlx_combo_list'; document.body.insertBefore(contentNode, document.body.firstChild); }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Originally the above code always created and appended a div element in to the DOM. It now only inserts one if one cannot be found. Since only one combobox is visible at a time, we only need to create one container. When the user goes from one combobox to the next, we empty the container, move it, and populate it with the new content. By doing this, we were able to save 100’s of DOM node insertions and still provide the same experience to the user. This optimization did increase code complexity slightly, as it necessitated we juggle a few more references. But the performance improvements more than justified the additional complexity.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					These three optimization approaches turned what was once a time consuming hog of a page into a usable and almost snappy feeling one. By making our code lazier we were able to greatly improve performance across FreshBooks, without disrupting our customers actions.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

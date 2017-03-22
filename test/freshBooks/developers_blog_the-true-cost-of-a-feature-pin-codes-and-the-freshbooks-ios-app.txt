@@ -1,0 +1,353 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					The True Cost of a Feature: PIN codes and the FreshBooks iOS App
+					by paul on June 26/2013
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					In the world of product development, learning how to say “no” is one of the most difficult yet important skills one can have. While the list of features that could be added to your product is always endless, being able to determine what your product does not do allows for greater focus and attention to detail. Having the confidence to say “no” also means that you can investigate and select the features that will provide the most value for your users, instead of feeling pressured to address every feature request for your application.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					As an example, after the launch of our FreshBooks iOS application last year, some of our customers had concerns about the application’s lack of a PIN code. They feared that this omission raised security issues, and made their business data vulnerable to attack or accidental corruption. As a team we had discussed PIN codes during the design of the application, but ultimately decided against implementing them. In this post I’ll explain the rationale behind our decision, and give an overview of the security measures in iOS that made our decision possible.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											ABOUT PIN CODES
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In mobile applications, PIN codes are passphrases that the user must enter to unlock access to the app. They are typically entered after the application is launched, and function as an initial layer of authentication for applications that connect to an online service. This allows users to leave the application logged into their account with the service while still having a rudimentary method of blocking access for anyone but themselves or other trusted parties. In the case of FreshBooks, this would mean that our users could have a basic level of security without having to log out of the FreshBooks application after each time they used it. This would also result in a speedier launch experience, as they would not incur the cost of the application re-syncing their data each time they had to log in. While these examples make PIN codes seem like a good idea, in practice they do not provide any meaningful additional security for the amount of effort required to properly implement them. Additionally, supporting PIN codes may lead to less-than-ideal experiences for the end user. To see why, let’s step back and examine the true cost of implementing a feature in an application!
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											CAUSE AND EFFECT
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											No application feature exists in isolation; if you offer customer support to your users, then giving your customers additional powers necessitates supporting them in the event that those powers are not correctly used. If we implemented PIN codes in the FreshBooks iOS app, what happens if the user forgets their PIN? How would they regain access to the application? If no additional functionality were implemented, the user would have to delete, then re-download the FreshBooks application, log back into their account on the app, and finally create a new PIN to resume their work. This is obviously not a user-friendly workflow – would the user know that they had to delete the application to regain access, and that doing so would not delete any of their data? Would confused users reach out to FreshBooks customer support, or simply stop using the app altogether?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Looking at the above scenario, our default solution creates its own problem: being able to regain full access to the app after deleting it renders the entire PIN code feature moot. A thief that knew the customer’s FreshBooks login credentials could simply delete the application, then reinstall it to gain access to the customer’s information. As such, the right thing to do would be a user-invoked PIN-reset mechanism in both the application and a server-side component, analogous to mechanisms for resetting a password for a website. The PIN code would need to be stored on a server and associated with the customer’s account or device, so that when the app is reinstalled the PIN code would still need to be entered. This greatly increases the scope of the feature, however, and also increases the testing effort to detect any vulnerabilities that the mechanism may have.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This additional work extends to every area of the company. At FreshBooks we pride ourselves on having amazing in-house customer support. Our support staff would need to be trained on how to handle the situation where a customer has forgotten their PIN, and needs to regain access to the app. How would we verify the customer’s identity? Would we email them a new, random PIN and guide them through the process to set a new one, or would we take them through the aforementioned password-reset process? These processes, and any associated tools, would need to put in place to enable the support representative to get the customer’s app back in working order as soon as possible.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are many other scenarios like the above that would require building additional functionality into the system and creating new processes across the organization, just to support the base feature of PIN codes. Should users be permitted to enter as many incorrect PIN codes as they want, or should the application take some kind of security precaution after a certain number of attempts? If the latter, should the type of precaution (lock access to the application, wipe all local data for the app, etc.) be configurable? All of the above functionality could be developed, but doing so comes at the cost of other features, most importantly ones we believe would provide a larger benefit to a greater portion of our users.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While the above considerations should be taken into account when considering any new feature for an application, we would not have been able to reject adding PIN codes to the app if our customers’ fears were legitimate. Thankfully, however, the design of iOS gave us confidence that adding PIN codes would not result in any more meaningful security in the application. In the remainder of this post I will elaborate on the security measures present in iOS, and what they mean for application developers.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											DATA ENCRYPTION IN iOS
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Starting with the iPhone 3GS, iOS has featured system-wide 256-bit AES encryption to protect all data on the device. At a high level, this encryption is enabled when the device is locked with a passcode, and disabled when the device is unlocked. This means that in order to read the contents of a device, one needs the passcode set by the user, or a brute-force method to try and guess it. iOS has mechanisms to prevent brute-force attacks, however, such as lengthening the wait time between passcode attempts with each successive incorrect attempt, and an optional setting to wipe the contents of the device (render them cryptographically inaccessable) after 10 failed attempts. Apple provides a much more detailed implementation of iOS’ security measures at
+										Element:a
+											this website
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For our purposes, the most important takeaway from this implementation is that once a device is unlocked, all data on the device is fair game. Having a PIN code on the FreshBooks application will not prevent a malicious third party from digging through the contents of the user’s business data if they’re able to unlock the device and connect it to a computer.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											From a user’s perspective, securing a device’s data is simple. All they need to do is enable a Passcode Lock. This can be done within the “Settings” application, following Apple’s directions given
+										Element:a
+											here
+											. While the passcode defaults to a 4-digit number, users can set the “Simple Passcode” option to “off”, allowing them to set a longer passcode that can also include letters and symbols.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											ACCESS CONTROL, THE RIGHT WAY
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to data protection, our customers also requested PIN codes as a way to restrict access to their FreshBooks information on a shared device, with a common scenario we heard involving a device that is shared amongst family members. Obviously the parents wouldn’t want their children accidentally modifying their FreshBooks account, so having a PIN code seems like a logical way to solve the problem. It turns out, however, that iOS has built-in functionality to address this scenario in a more robust fashion.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The “Guided Access” mode, available in iOS 6.0 and above, restricts the device to a single app by disabling the “Home” button and gestures, and can even disable individual controls and functionality within the app.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+										Element:img
+										Element:br
+											The Guided Access configuration screen
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+										Element:img
+										Element:br
+											Individual components, in this case the address bar, can be disabled
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+										Element:img
+										Element:br
+											Other controls still function
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The user cannot leave this mode without entering a passcode, and this passcode is different than the one used to unlock the device itself. Thus, a parent could lock the device to a specific game, and prevent their child from navigating to other applications on the device. More information on Guided Access is available from Apple’s
+										Element:a
+											support article
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to Guided Access, iOS also offers “Restrictions”, where specific functionality can be disabled, while still allowing the user to use multiple different applications on the device. The user can be prevented from installing or deleting apps, purchasing content from the iTunes or App Stores, or even using specific apps like Safari, Camera, or FaceTime. Similar to Guided Access, the user must enter a special passcode to exit this mode. An Apple support article about Restrictions can be found
+										Element:a
+											here
+											.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											FINAL THOUGHTS
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Although PIN codes seem to have an obvious benefit in use in mobile applications, upon closer inspection they provide limited benefits, and can even imply a false level of security. By leveraging iOS’ native device encryption, along with the Guided Access and Restrictions features, we were able to make a strong case that PIN codes would not provide any meaningful value to the FreshBooks iOS application.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We hope this case study enables you to more intelligently evaluate feature requests for your own applications and devote efforts to features that will add true value for your users.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

@@ -1,0 +1,477 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:span
+					Getting Started OData + Video
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:aside
+													Element:h4
+														Search Documentation
+													Element:label
+														Search for:
+													Element:h4
+														Documentation Menu
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This getting started guide is provided as an overview of how to implement the OData 2.0 API + Video. The steps below will link you tospecific documentation and guide you towards getting IVA’s trailer content up and streaming.
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Prerequisites
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								For best results, work with one of the data companies listed
+							Element:a
+								here
+								for getting rich metadata and program information. IVA’s trailers can be linked to your existing data from 3rd Party IDs (like Gracenote, Rovi, IMDB, etc). If you are not working with a data company, it’s fine, you are more than welcome to use our metadata.
+							Element:li
+								PAID or FREE? If you would like to display IVA’s content without ads, want to insert your own advertising, or need more than 500 requests per hour, you will need a subscription to IVA.
+							Element:a
+								Contact sales
+								for more information. Not ready for a subscription just yet? IVA offers limited access to our OData API and allows the use of our Ad Supported Free Trailer Player to display IVA’s content. Either option will allow you access to unlimited video plays.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								STEP 1: Get Access to the Data
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Subscription clients and test accounts are issued developer ID’s by our
+							Element:a
+								customer service
+								team once a test account has been set up. If you are not interested in a subscription, use our free
+							Element:a
+								developer sign-up
+								form and you will be emailed a developer ID.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Subscription:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Developer ID’s associated to your subscription account will have request limits of 3,000 requests per hour. These DeveloperID’s can also be allowed access to 3rd party ID’s (Gracenote, Rovi, TMS, IMDB, etc…) inside the API (3rd party subscription required).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+											* Video requests per hour: Unlimited
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Free:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Developer ID’s not associated to a paid subscription are limited to 500 requests per hour.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+											* Video requests per hour: Unlimited
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								STEP 2: Fetch the data from the OData API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Start by deciding what data is important to you. OData is extremely flexible and able to provide the specific data you need to work with IVA’s contet. Review the
+							Element:a
+								data dictionary
+								for available metadata. Store and update this data as often as possible.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Start with an ingest query to get the current catalog.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											(from v in VideoAssets.expand("EntertainmentProgram, EntertainmentProgram/AlternateIds/AlternateIdType,VideoAssetScreenCapture, CountryTarget,LanguageSpoken, LanguageSubtitled, MediaType,Encodes, RegionRestrictions, Descriptions") _ where (v.ExpirationDate is nothing or v.ExpirationDate > datetime.now) and v.RequiresIVAPlayer = false and v.OkToEncodeAndServe = true and _ v.WarningFlag = false and v.AllowAds = true and ((v.LanguageSpokenId = 0 and v.LanguageSubtitledId = -1) or _ (v.LanguageSubtitledId = 0 and v.LanguageSpokenId > 0)) _ select v).skip(0).take(500)
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/VideoAssets()?$filter=cast((cast(ExpirationDate eq null,'Edm.Boolean') or ExpirationDate gt datetime'2015-06-18T21:18:04.6407898-04:00') and cast(RequiresIvaPlayer eq false,'Edm.Boolean') and cast(OkToEncodeAndServe eq true,'Edm.Boolean') and cast(WarningFlag eq false,'Edm.Boolean') and cast(AllowAds eq true,'Edm.Boolean') and cast(cast(LanguageSpokenId,'Edm.Int32') eq 0 and cast(LanguageSubtitledId,'Edm.Int32') eq -1 or cast(LanguageSubtitledId,'Edm.Int32') eq 0 and cast(LanguageSpokenId,'Edm.Int32') gt 0,'Edm.Boolean'),'Edm.Boolean')&$skip=0&$top=500&$expand=EntertainmentProgram, EntertainmentProgram/AlternateIds/AlternateIdType,VideoAssetScreenCapture, CountryTarget,LanguageSpoken, LanguageSubtitled, MediaType,Encodes, RegionRestrictions, Descriptions &developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b&format=json
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+											Next, set up an update query to retrieve any new or updated video assets. Run your updates as often as possible. IVA recommends limiting your updates to 50 or 100 assets at a time for this update query and paging through to get all results. The following example query will give you all new video assets added or any video assets where data about the program has changed. With OData, you can add additional filters to get back the data that is important to you (example: just movies, or TV clips, game previews, etc).
+										Element:a
+											View Results
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											LINQ
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											((from v in VideoAssets.expand("EntertainmentProgram, EntertainmentProgram/AlternateIds/AlternateIdType,VideoAssetScreenCapture, CountryTarget,LanguageSpoken, LanguageSubtitled, MediaType,Encodes, RegionRestrictions, Descriptions") _ where (v.EntertainmentProgram.AlternateIds.Any(function (y) y.DateAdded >= datetime.now.adddays(-5)) or v.EntertainmentProgram.DateModified > datetime.now.adddays(-3)) _ select v).skip(0).take(100))
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URL
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.internetvideoarchive.com/2.0/DataService/VideoAssets()?$filter=EntertainmentProgram/AlternateIds/any(y:cast(y/DateAdded ge datetime'2015-06-19T15:14:43.7815117-04:00','Edm.Boolean')) or EntertainmentProgram/DateModified gt datetime'2015-06-21T15:14:43.7815117-04:00'&$skip=0&$top=100&$expand=EntertainmentProgram, EntertainmentProgram/AlternateIds/AlternateIdType,VideoAssetScreenCapture, CountryTarget,LanguageSpoken, LanguageSubtitled, MediaType,Encodes, RegionRestrictions, Descriptions&format=json&developerid=dd9a9172-4fbd-469c-bc92-a0955e9bdd6b
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Live Example :
+										Element:a
+											View Results
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+											Be sure to pay extra close attention to the following fields.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											LanguageSpoken – Tells you the language spoken in the trailer.
+										Element:li
+											LanguageSubtitled – Tells you the language subtitled in the trailer. Some movie trailers have many alternate trailers that are spoken in English and subtitled in various different languages. Be sure to handle for those if you do not want to display them.
+										Element:li
+											ExpirationDate – On some assets, mostly related to TV content, the copyright holder will impose an expiration date. Pay close attention to this field to avoid broken links.
+										Element:li
+											OkToEncode AndServe – If set to false the video will not stream and should not be used.
+										Element:li
+											RequiresIVAPlayer – These assets must be played back using the IVA player.
+										Element:li
+											TargetCountry – If a trailer is targeted to a specific country it will be reflected in this value. Anything set to -1 should be considered as the US trailer or for world wide use.
+										Element:li
+											Media Type – Describes the type of video asset (Interview, Behind the Scene, Alternate, etc…).
+										Element:li
+											Sequence – For TV season records this will be the season number and for episodic records this will be the episode number for the season.
+										Element:li
+											Overall Sequence – Applies to the episodic records and will be the overall episode number of the series.
+										Element:li
+											DefaultVideoAsset – If you are displaying multiple trailers for the user to choose, the default video asset should be displayed first. This is the most recent trailer added for a particular program.
+										Element:li
+											AllowAds – In rare instances copyright holders will restrict the use of ads around a particular piece of content. This field denotes whether or not an asset has this restriction.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 3: Video Options
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								IVA offers video options for every platform and device including adaptive bitrates for next generation set top boxes and mobile devices, baseline profile mp4 videos for compatibility with first generation devices and high definition 1080P video for visually stunning video at full screen.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Subscription:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use the published ID’s of the video assets stored in your database with either our
+										Element:a
+											Cross Platform Player
+											or our
+										Element:a
+											Video API
+											to generate direct links to the
+										Element:a
+											video formats
+											of your choice. (HLS, HDS, DASH, HSS, MP4,etc) for use in your own player or in the device’s native player (ex: IOS Media Player).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Free:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use the video asset’s published ID with our Free Trailer Player. The player is loaded inside an iframe and contains IVA’s branded video as well as Pre-Roll advertising.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 4: Other Services
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you require
+							Element:a
+								Closed Captions
+								,
+							Element:a
+								Custom Sized Images
+								, a
+							Element:a
+								Content Management System
+								,
+							Element:a
+								Customizable Cross Platform Player
+								, or the ability to encode, host and serve your own proprietary content,
+							Element:a
+								contact sales
+								.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 5: Documentation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Review these additional pieces of documentation related to the service that fits your needs.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											OData + Video (Subscription)
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											OData Data Dictionary
+										Element:li
+										Element:a
+											OData Examples
+										Element:li
+										Element:a
+											Cross Platform Player
+										Element:li
+										Element:a
+											Video API
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											OData + Video (Free)
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											OData Data Dictionary
+										Element:li
+										Element:a
+											OData Examples
+										Element:li
+										Element:a
+											Free Trailer Player
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+																		Node:
+																		(type) c
+																		(layer)6
+																			Element:footer
+																			Element:img
+																			Element:span
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:span
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:a
+																			Element:img
+																			Element:span
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:span
+																				Phone: +1 856 310 1981
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:br
+																				Fax: +1 856 310 1956 E-mail Us:
+																			Element:a
+																				support@internetvideoarchive.com
+																			Element:h6
+																				RECENT BLOG POSTS
+																			Element:ul
+																			Element:li
+																			Element:a
+																				IVA Trailers of the Week – First Contact
+																			Element:span
+																				March 15, 2017
+																			Element:li
+																			Element:a
+																				Video Hack Day 3
+																			Element:span
+																				March 14, 2017
+																			Element:li
+																			Element:a
+																				AdQ Announcement
+																			Element:span
+																				March 13, 2017
+																			Element:h6
+																				MORE LINKS
+																			Element:ul
+																			Element:li
+																			Element:a
+																				Developers
+																			Element:li
+																			Element:a
+																				Contact Us
+																			Element:li
+																			Element:a
+																				Privacy Policy
+																			Element:li
+																			Element:a
+																				Charts
+																			Element:li
+																			Element:a
+																				Client Login
+																			Element:li
+																			Element:a
+																				Legacy Documentation
+																			Element:h6
+																				EVENTS
+																				»
+																			Element:a
+																				Mar. 11-12, Video Hack Day 3, New York City
+																				»
+																			Element:a
+																				Apr. 24-27, NAB Show, Las Vegas, NV
+																			Element:h6
+																				SUBMIT CONTENT
+																			Element:ul
+																			Element:li
+																			Element:a
+																				Movie
+																			Element:li
+																			Element:a
+																				TV
+																			Element:li
+																			Element:a
+																				Video Game
+																			Element:span
+																				© Copyright Internet Video Archive LLC.

@@ -1,0 +1,525 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Try FreshBooks Free
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								No credit card required. Cancel anytime.
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:p
+								Already have an account?
+							Element:a
+								Log in
+							Element:p
+							Element:a
+								Security Safeguards
+								|
+							Element:a
+								Terms of Service
+								|
+							Element:a
+								Privacy Policy
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											The TechTalksTO Award!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By coe on January 20th, 2012
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											TechTalksTO
+											Â is a series of technical presentations here in Toronto. Throughout 2011 they brought us folks from Mozilla, Twitter, Well.ca and other cool places around the internets. They even put on a fantastic all-day event at the not-too-classy-but-so-cool Toronto Underground Cinema, featuring speakers from Disqus, Github, OpsCode, and more. It was a fantastic event. We had dumplings!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Well, not everyone knows that TechTalksTO is the brainchild of two FreshBooks developers: Shey and Jason. They organized this whole thing, found every speaker and arrange every event. They worked their hearts out producing a series of valuable talks for the Toronto technology community. At FreshBooks we are super inspired by their example. Shey and Jason are both great developers, and great team leads, but clearly they had something more to offer than producing great software â they wanted to help build a community of great software development practice right here in Toronto.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We couldnât be prouder of them. So we gave them a shield. Itâll come in handy during a zombie apocalypse, we figure, and blue goes with everything, right?
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Continue reading
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Manually verifying character representations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By Taavi on December 19th, 2011
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As a part of the
+										Element:a
+											UTF-8 work we’ve been doing
+											, we have to turn HTML entities (numeric and named character references) into UTF-8 byte sequences. As it turns out, browsers don’t do this the way PHP 5.3′s
+										Element:a
+											() function does.
+										Element:code
+											html_entity_decode
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are 4 classes of difference:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:a
+											Surrogate codepoints
+										Element:li
+										Element:a
+											Windows-1252
+											characters in the
+										Element:a
+											ISO-8859-1 dead zone
+										Element:li
+										Element:a
+											Mathematical angle brackets
+										Element:li
+										Element:a
+											U+0000
+											(NUL)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The first we can just ignore. Surrogate codepoints aren’t valid in UTF-8 (if you have them, you’ve actually got
+										Element:a
+											CESU-8
+											), and we’re going to leave them entirely alone. This means that eventually things might get a bit uglier (instead of seeing a replacement character e.g. �, you’ll see the text of the character reference e.g.
+										Element:code
+											&#55000;
+											). This way we’re not destroying data, even if it wasn’t displaying correctly before.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The second is a bit of fun. All the specs say that numeric character references use Unicode codepoint values. But (apparently) a lot of data contain codepoints in the range U+0080 through U+009F inclusive, which are (largely) non-printing control characters. Browsers rewrite numeric character references for the 27 codepoints which are defined in Windows-1252 in that range anyway. For example, the numeric character reference
+										Element:code
+											&#146;
+											looks like…
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Continue reading
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Changing The Engine While You're Driving Down The Highway
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By Owen on October 14th, 2011
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We recently ran into an interesting and difficult problem: how do we change a large, heavily-used table without violating our “avoid downtime if possible” mantra?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following is a slightly expurgated version of the postmortem I sent the rest of the team. Table names have been changed to protect the guilty.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											What Hotfixes?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the Sinistar release’s post-release migrations list, there were two
+										Element:code
+											ALTER TABLE
+											migrations slated to make structural changes to the
+										Element:code
+											customer
+											and
+										Element:code
+											customer_login
+											tables (changing the types of some columns, specifically). When we tested these migrations on a copy of the production system’s data, we discovered that they would have caused those tables to be inaccessible for two and five minutes respectively. Since customers are core to our applications, we determined that this qualified as “downtime” in the release plan.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											I prototyped an alternate approach to the
+										Element:code
+											customer
+											changes (outlined below) intended to make changes to the table without taking the app offline while they were happening. The alternate approach was considerably more complex than the original
+										Element:code
+											ALTER TABLE
+											statement, as well as being considerably slower (~15 minutes for our largest shard, as compared to two minutes); we discussed whether it was worth taking the app offline…
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Continue reading
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											10 free passes to X.commerce Innovate
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By Sunir on October 7th, 2011
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+											I have a great offer for the first 10 people to jump on this deal.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every year
+										Element:a
+											PayPal throws a huge developer conference, Innovate, in San Francisco
+											. This year they have expanded it to launch X.commerce, the new e-commerce platform from eBay, PayPal, Magento, and GSI Commerce.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That conference is next week, October 12-13 in the Moscone Conference Center in San Francisco. I have 10 free passes. Email me —
+										Element:strong
+											sunir@**
+											freshbooks.
+										Element:strong
+											**com
+											— and I’ll send you a coupon code.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And of course I’ll be there representing FreshBooks. If you’re there, I’d love to meet you! Again, shoot me an email —
+										Element:strong
+											sunir@**
+											freshbooks.
+										Element:strong
+											**com
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Continue reading
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Database migrations using triggers in MySQL with MyISAM and replication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By Taavi on October 3rd, 2011
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last year we purchased the book
+										Element:a
+											Refactoring Databases
+											. While the first chapter was preaching to the choir (database migrations are
+										Element:em
+											normal
+											around here), there was one extremely valuable gem:
+										Element:a
+											the use of database triggers to effect seamless data migrations
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The book targets enterprise environments where there are multiple applications accessing the database concurrently, each with release cycles measured in months and years, and regularly scheduled downtime windows. In contrast, FreshBooks has fewer moving parts (and each part is much smaller), release cycles on the order of weeks (sometimes hours!), and no time is good for downtime. We’re used around the world, and it shows in the server activity logs 24/7.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											However, we can still learn a lot from
+										Element:em
+											Refactoring Databases
+											. Methods of performing migrations with staggered application releases over the course of months are equally applicable to a normal web app undergoing a 0-downtime deployment with rolling backend restarts to a new version of the code.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Database triggers are a way of telling the database server to react automatically to some other action, like
+										Element:a
+											If This Then That
+											. The Big Three operations that change data are
+										Element:code
+											INSERT
+											,
+										Element:code
+											UPDATE
+											, and
+										Element:code
+											DELETE
+											. One example use…
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Continue reading
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Newer Posts
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Older Posts
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

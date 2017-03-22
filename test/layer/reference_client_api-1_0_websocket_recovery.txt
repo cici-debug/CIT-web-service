@@ -1,0 +1,648 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Websocket Recovery
+				Element:a
+					¶
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					A lot can go wrong on a network. It could be as simple as a laptop going to sleep, a mobile phone going out of reception, or as ugly as DNS issues. Ultimately, connections are lost, change packets are missed, and apps need to recover and re-sync. The recovery tools provides three services:
+			Node:
+			(type) c
+			(layer)1
+				Element:ol
+				Element:li
+					Detecting that an event has been missed
+				Element:li
+					Detecting that a connection is no longer alive and must be restarted
+				Element:li
+					Requesting missed events
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Detecting Missed Events
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sketchy wifi or mobile connections can cause a connection to be lost and restored without any hint that a message was lost. Some browsers (Chrome in particular) will attempt to restore a connection rather than report a problem with the connection.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To insure that no events are missed, each event contains a counter. The counter is associated with the session rather than the event itself (thus we cannot request an event by its counter).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A given WebSocket connection will get an incrementing counter with each message it receives from the server. When a connection is established, the counter is set to 0. When a connection is recreated, its reset to 0. The first Packet will have a counter value of 0, the next message will have a counter value of 1, etc…
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A client should expect to see the counter increment by one between each packet. If it ever increments by more than one, the client can see that it has missed events, and will request missed packets from the server. If it ever resets to zero, then the client knows that the connection was lost and reconnected automatically.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In the event that the counter has changed by a value other than +1, an
+							Element:code
+								Event.Replay
+								request can be issued.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you are using the Client API from an environment that reliably reports on Websocket Connection Errors, you do not need to ping for conneection errors; this is a Chrome specific issue.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Monitoring Connection Health
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								JavaScript based WebSocket may not always detect that you have lost a connection. Chrome in particular will not detect that a WebSocket has lost a connection. As such, recommended practice is to send “ping” requests through the WebSocket every 30 seconds. Mobile devices and backgrounded tabs may chose to vary this recommendation to preserve battery life. If the WebSocket connection has been lost and you send a ping request, even Chrome will throw a connection error letting you know that there is a problem and that you may be failing to receive Change Packets.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A ping operation is done by sending a
+							Element:code
+								Counter.read
+								request to the server. There are four possible outcomes of this request:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								The connection fails, and the WebSocket throws an error
+							Element:ul
+							Element:li
+							Element:strong
+								Next Step
+								: initiate reconnect logic, and catchup on missed events on reconnecting.
+							Element:li
+								The request fails to return a response (after waiting for 10 seconds, if there is no response, its safe to assume there is a problem).
+							Element:ul
+							Element:li
+							Element:strong
+								Next Step
+								: initiate reconnect logic, and catchup on missed events on reconnecting.
+							Element:li
+								A response containing a counter arrives; the counter is the same as the last packet from the server. All is well.
+							Element:ul
+							Element:li
+							Element:strong
+								Next Step
+								: none.
+							Element:li
+								A response containing a counter arrives; the counter has changed; this means Change Packets were probably missed.
+							Element:ul
+							Element:li
+							Element:strong
+								Next Step
+								: Catchup on missed events
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sending a Ping Request
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following simple script can be used to send the Ping request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+											window
+											.setInterval(
+										Element:span
+											{ mysocket.send(
+										Element:span
+											function
+											(
+										Element:span
+											)
+										Element:span
+											JSON
+											.stringify({
+										Element:span
+											"type"
+											:
+										Element:span
+											"request"
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"method"
+											:
+										Element:span
+											"Counter.read"
+											,
+										Element:span
+											"request_id"
+											:
+										Element:span
+											"fred.flinstone.31"
+											} })); },
+										Element:span
+											30000
+											);
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Connection Error Handling
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If there is a connection problem, your ping request should cause the websocket to realize that and then trigger your onError handler. The following retry logic should continue to call your onError handler until you are back online. Varying the 15 seconds suggested below with some exponential backoff may make sense depending upon your environment.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that this error handler can fire due to your ping requests, but may also fire during the normal lifespan of your Websocket connection.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											mysocket.addEventHandler(
+										Element:span
+											"error"
+											, myErrorHandler);
+										Element:span
+											{
+										Element:span
+											function
+										Element:span
+											myErrorHandler
+											(
+										Element:span
+											err
+											)
+										Element:span
+											// On Error: Wait 15 seconds and then create a new websocket
+										Element:span
+											window
+											.setTimeout(
+										Element:span
+											{ mysocket =
+										Element:span
+											function
+											(
+										Element:span
+											)
+										Element:span
+											new
+											WebSocket(
+										Element:span
+											'wss://websockets.layer.com/?session_token=donuts=='
+											,
+										Element:span
+											'layer-2.0'
+											);
+										Element:span
+											// On successfully opening the websocket, replay missed events
+											mysocket.addEventListener(
+										Element:span
+											"open"
+											,
+										Element:span
+											{
+										Element:span
+											function
+											(
+										Element:span
+											)
+										Element:span
+											// How to implement this is described in the next section
+											replayFrom(lastEvent.timestamp); });
+										Element:span
+											// Bind this new websocket's error handler to this handler
+											mysocket.addEventHandler(
+										Element:span
+											"error"
+											, myErrorHandler); },
+										Element:span
+											15000
+											); }
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+										Element:strong
+											Note
+											If you do NOT have the ping request firing periodically, you may go hours without any Change Packets from the server, nor will there be any clue to your user that they are no longer connected to the server.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Using the Ping Response
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response to a ping will contain the current event counter. Note that the
+										Element:code
+											counter
+											field will increment as a result of this response, but that the
+										Element:code
+											counter
+											value returned in the data field will represent the state of the counter at the time of the request. This means:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											You will get back a
+										Element:code
+											counter
+											field in the
+										Element:code
+											data
+											object, and a second
+										Element:code
+											counter
+											field in the high level response
+										Element:li
+											These two counters will always be different values (
+										Element:code
+											data
+											reports on the counter of the last packet sent to the client, the response reports the counter associated with this response packet).
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"type"
+											:
+										Element:span
+											"response"
+											,
+										Element:span
+											"timestamp"
+											:
+										Element:span
+											"2015-01-19T09:15:43+00:00"
+											,
+										Element:span
+											"counter"
+											:
+										Element:span
+											36
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"request_id"
+											:
+										Element:span
+											"fred.flinstone.31"
+											,
+										Element:span
+											"method"
+											:
+										Element:span
+											"Counter.read"
+											,
+										Element:span
+											"data"
+											: {
+										Element:span
+											"counter"
+											:
+										Element:span
+											35
+											} } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The simplest way to use this response is to focus on the high level counter:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											ws.addEventListener(
+										Element:span
+											'message'
+											, onMessage);
+										Element:span
+											var
+											lastCounter =
+										Element:span
+											-1
+											;
+										Element:span
+											{
+										Element:span
+											function
+										Element:span
+											onMessage
+											(
+										Element:span
+											evt
+											)
+										Element:span
+											var
+											msg =
+										Element:span
+											JSON
+											.parse(evt.data);
+										Element:span
+											var
+											skippedCounter = lastCounter +
+										Element:span
+											1
+											!== msg.counter; lastCounter = msg.counter;
+										Element:span
+											if
+											(skippedCounter) replayEvents(); }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This code snippet works regardless of whether the message received is a new Conversation, a read receipt, or the response to a Ping.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											When Not to Ping
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Ideally, pinging would not be done if any WebSocket messages have been recently received:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+										Element:span
+											var
+											intervalId;
+										Element:span
+											var
+											requestIDCounter =
+										Element:span
+											0
+											;
+										Element:span
+											{
+										Element:span
+											function
+										Element:span
+											restartPing
+											(
+										Element:span
+											)
+										Element:span
+											if
+											(intervalId)
+										Element:span
+											window
+											.clearInterval(intervalId); intervalId =
+										Element:span
+											window
+											.setInterval(
+										Element:span
+											{ ws.send(
+										Element:span
+											function
+											(
+										Element:span
+											)
+										Element:span
+											JSON
+											.stringify({
+										Element:span
+											"type"
+											:
+										Element:span
+											"request"
+											,
+										Element:span
+											"body"
+											: {
+										Element:span
+											"method"
+											:
+										Element:span
+											"Counter.read"
+											,
+										Element:span
+											"request_id"
+											:
+										Element:span
+											"fred.flinstone."
+											+ requestIDCounter++ } })); },
+										Element:span
+											30000
+											); } mysocket.addEventListener(
+										Element:span
+											"message"
+											,
+										Element:span
+											{ restartPing(); });
+										Element:span
+											function
+											(
+										Element:span
+											evt
+											)
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Requesting Missed Events
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A request can be sent to replay events. The result of this request will be to redeliver all Change Packets from the specified timestamp until the present, followed by a Response Packet.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The request involves the following parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Field
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:strong
+								from_timestamp
+							Element:td
+								The timestamp to replay events from.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"type"
+								:
+							Element:span
+								"request"
+								,
+							Element:span
+								"body"
+								: {
+							Element:span
+								"method"
+								:
+							Element:span
+								"Event.replay"
+								,
+							Element:span
+								"request_id"
+								:
+							Element:span
+								"fred.flinstone.1003"
+								,
+							Element:span
+								"data"
+								: {
+							Element:span
+								"from_timestamp"
+								:
+							Element:span
+								"2014-09-09T04:44:47+00:00"
+								} } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that when all events are replayed, some Change Packets you receive may have been previously received, and some care must be taken in processing these:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Processing a Create Packet should verify that you haven’t already created the object
+							Element:li
+								Processing a Delete Packet may find you’ve already deleted the object
+							Element:li
+								Processing a Update Packet may result in no value change if you’ve previously received that event
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When the replay has completed, the server will send the following Response Packet:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"type"
+								:
+							Element:span
+								"response"
+								,
+							Element:span
+								"counter"
+								:
+							Element:span
+								10053
+								,
+							Element:span
+								"timestamp"
+								:
+							Element:span
+								"2014-09-09T04:54:47+00:00"
+								,
+							Element:span
+								"body"
+								: {
+							Element:span
+								"method"
+								:
+							Element:span
+								"Event.replay"
+								,
+							Element:span
+								"request_id"
+								:
+							Element:span
+								"fred.flinstone.1003"
+								,
+							Element:span
+								"success"
+								:
+							Element:span
+								true
+								} }
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Real-time Updates

@@ -1,0 +1,274 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					API Reference
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Docs
+					/
+				Element:a
+					Tutorials
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								HTTP Live Streaming
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+								This tutorial uses the basics we explained in the tutorial
+							Element:a
+								How to encode videos
+								. You should read it first if you haven't yet.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mobile users growth rate has become so high that you have to make your videos perfectly viewable under any conditions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Years ago, Apple released the HLS technology to stream a video with different bitrates so that it can adapt, whether you are using a phone with edge/3G/4G connection or a tablet with WiFi for example.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:i
+											For iOS Developers
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you plan creating an iOS application, Apple requires using HLS if videos are longer than
+										Element:em
+											10 minutes
+											or exceeds
+										Element:em
+											5MB
+											of data in a 5 minutes period.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Create a new config file
+										Element:code
+											coconut.conf
+											and write the usual lines:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											var s3 = s3://accesskey:secretkey@mybucket/video set source = http://media.s3.amazonaws.com/demo.mp4
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Encoding videos for HLS
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											HTTP Live Streaming requires many technical steps that we do for you:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Encoding the videos into multiple formats with different bitrates. The format specs must be MPEG-TS H264 / AAC
+										Element:li
+											Segmenting (splitting) the
+										Element:code
+											ts
+											files in chunks of 10 seconds (default)
+										Element:li
+											Generating a playlist in
+										Element:code
+											m3u8
+											for each variant video
+										Element:li
+											Generating a master playlist in
+										Element:code
+											m3u8
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's see how to do it:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											hls -> $s3/hls/video.m3u8
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, we use the following variants:
+										Element:code
+											aac_64k_22050hz
+										Element:code
+											hls_240p_300k
+										Element:code
+											hls_360p_600k
+										Element:code
+											hls_360p_1000k
+										Element:code
+											hls_480p_1500k
+										Element:code
+											hls_720p
+											At the end of the process, you will find every variant playlists and ts files inside
+										Element:code
+											mybucket/video/hls/
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Super easy, right? Learn more about the
+										Element:a
+											HLS configuration
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											To go further: Closed Captions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As you may know, if you are American, you must provide closed captioning for people who are deaf and hard of hearing. Read this
+										Element:a
+											guide
+											to learn more.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Fortunately for us, Apple added support for closed captions in
+										Element:a
+											WebVTT format
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To demonstrate the use of closed captions, we are going to add English and Spanish captions to our HLS video. Edit the config file like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											var cc_urls = http://mysite.com/subtitle/demo-en.srt,http://mysite.com/subtitle/demo-es.srt var cc_langs = en,es var cc_names = English,Español -> hls = $s3/video/hls/video.m3u8, caption_urls=$cc_urls, caption_languages=$cc_langs, caption_names=$cc_names
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Thanks to
+										Element:code
+											caption_urls
+										Element:code
+											caption_languages
+											and
+										Element:code
+											caption_names
+											, we can handle multiple captions in SRT or WebVTT format separated by comma.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Submitting the config file
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The config file looks like this so far:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											var s3 = s3://accesskey:secretkey@mybucket/video set source = http://media.s3.amazonaws.com/demo.mp4 # we suggest you to use our Webhook Inspector https://app.coconut.co/tools/webhooks # to inspect the POST request we send. Very handy for testing set webhook = http://yourserver.com/webhooks/coconut -> hls = $s3/hls/video.m3u8
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is the curl command to create the job:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl https://api.coconut.co/v1/job \ -u api-key: \ -T coconut.conf
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We provide a number of
+										Element:a
+											client libraries
+											to make requests very easily, so be sure to check them out.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That concludes our tutorial about how to provide HTTP Live Streaming videos for mobile users. If you want to learn more, read the full documentation
+										Element:a
+											here
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the
+										Element:a
+											Next tutorial
+											, we will show you how to manage Webhooks in your application to retrieve all the media URLs and get notified about errors
+										Element:a
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:hr

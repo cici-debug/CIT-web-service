@@ -1,0 +1,485 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Watchlist Guide
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Each of the users of the Wurl system has a personal Watchlist (also known as "follows" list) they can use as a quick jumping point for their preferred content.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The watchlist guide covers the following:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Retrieving the Watchlist
+				Element:li
+					Paging through the Watchlist
+				Element:li
+					Adding to the Watchlist
+				Element:li
+					Removing from the Watchlist
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Retrieving the watchlist
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					To retrieve the watchlist, simply request
+				Element:code
+					/users/me/follows
+					.
+				Element:code
+					me
+					will be interpreted as the user associated with the access token provided.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					$ curl -H 'Authorization: Bearer ccb741c4245b4f5f93a9a4c44af575f6ea1c2d90c9f14ee69aaba4403be11b4e' 'http://api.wurl.com/api/users/me/follows'
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					You will receive a
+				Element:a
+					follows
+					collection, containing a series of individual
+				Element:a
+					follow
+					items.:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "rel":["urn:x-resource:schema:http://api.wurl.com/schemas/follows.json"], "properties":{ "totalItems":30, "currentCount":5 }, "entities":[ // A list of follow entities { "rel":["properties:http://api.wurl.com/schemas/follow.json"], "class":["follow","follow_series"], "properties": { "id":1872, "pubDate":null, "title":"numberphile", "thumbnailLink":"http://static2.channels.com/thumbnails/assets/youtube-com/feeds/no_ids/Uploads-by-numberphile--jpg-v-d2fafc", "followedItemId":394490,"followedItemType":"series"}, "entities":[ {"rel":["urn:x-resource:name:series"], // Information for the series... ] "actions":[ {"name":"unfollow","href":"http://api.wurl.com/api/users/1168/follows/1797","title":"Stop following an item.","method":"DELETE"} ], "links":[ {"rel":["self"],"href":"http://api.wurl.com/api/users/1168/follows/1797"}, {"rel":["up"],"href":"http://api.wurl.com/api/users/1168/follows"}]}], "actions":[ { "name":"follow-series", "href":"http://api.wurl.com/api/users/1168/follows", "title":"Start following a series", "method":"POST", "fields":[{"name":"series_id","type":"text"}] } ], "links":[ {"rel":["self"], "href":"http://api.wurl.com/api/users/1168/follows"}, {"rel":["up"],"href":"http://api.wurl.com/api/users/1168"}, {"rel":["next"],"href":"http://api.wurl.com/api/users/1168/follows?count=5&since=5"} ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The follows collection may be paginated, depending on how many follows a user has.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:em
+					Note
+					- The items in the watchlist can potentially be entities other than
+				Element:a
+					series
+					. Check the class of the items when you render them to insure you are rendering what you want.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Pagination
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The links array may contain
+							Element:em
+								next
+								and
+							Element:em
+								prev
+								links to navigate backwards and forwards in the watchlist. If either link is not present it signifies that there are no further follow entities in the list.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Adding to the Watchlist
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Adding to the watchlist involves grabbing the
+				Element:em
+					follow-series
+					action of a series object and executing the action's request providing any empty parameters.,
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					For example, below you can see an action for
+				Element:em
+					follow-series
+					and its corresponding translation for a curl call:
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Sample follow action
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "name":"follow-series", "href":"http://api.wurl.com/api/users/1168/follows", "title":"Start following a series", "method":"POST", "fields":[{"name":"series_id","type":"text"}] }
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Corresponding Curl for series
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					$ curl -H 'Authorization: Bearer ccb741c4245b4f5f93a9a4c44af575f6ea1c2d90c9f14ee69aaba4403be11b4e' -X POST -F series_id=12345 'http://api.wurl.com/api/users/123/follows'
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The response will contain the information for the new
+				Element:a
+					follow
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "properties":{ "message":"Created", "location":"http://api.wurl.com/api/users/1168/follows/1873" }, "links":[ {"rel":["self"],"href":"http://api.wurl.com/api/users/1168/follows/1873"} ] }
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Removing from the watchlist
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					To remove from the watchlist, use the "unfollow" action on the
+				Element:a
+					follow
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					From the follows example on
+				Element:em
+					Add to Follows
+					above:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -H 'Authorization: Bearer d6add646f9b3fb34249f63d058fc5b5f2d3b7d67085c8bfedfb3aa02a1a78a7c' -X DELETE 'http://api.wurl.com/api/users/1168/follows/1873'
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					A successful delete call returns no content. The HTTP status code will be 204 (No Content).
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+				Element:p
+				Element:span
+					Wurl, Inc.
+				Element:br
+				Element:span
+					Palo Alto, California
+				Element:br
+				Element:a
+					info@wurl.com
+				Element:br
+				Element:span
+					650.470.7550
+				Element:p
+					© Wurl
+				Element:ul
+				Element:li
+					Wurl
+				Element:li
+				Element:a
+					Home
+				Element:li
+				Element:a
+					About
+				Element:li
+				Element:a
+					Blog
+				Element:li
+				Element:a
+					Team
+				Element:li
+				Element:a
+					Legal
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:a
+				Element:li
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Developer
+				Element:ul
+				Element:li
+				Element:a
+					Blog
+				Element:li
+				Element:a
+					API Status
+				Element:li
+				Element:a
+					Support
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Watchlist Guide
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Each of the users of the Wurl system has a personal Watchlist (also known as "follows" list) they can use as a quick jumping point for their preferred content.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The watchlist guide covers the following:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Retrieving the Watchlist
+				Element:li
+					Paging through the Watchlist
+				Element:li
+					Adding to the Watchlist
+				Element:li
+					Removing from the Watchlist
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Retrieving the watchlist
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					To retrieve the watchlist, simply request
+				Element:code
+					/users/me/follows
+					.
+				Element:code
+					me
+					will be interpreted as the user associated with the access token provided.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					$ curl -H 'Authorization: Bearer ccb741c4245b4f5f93a9a4c44af575f6ea1c2d90c9f14ee69aaba4403be11b4e' 'http://api.wurl.com/api/users/me/follows'
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					You will receive a
+				Element:a
+					follows
+					collection, containing a series of individual
+				Element:a
+					follow
+					items.:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "rel":["urn:x-resource:schema:http://api.wurl.com/schemas/follows.json"], "properties":{ "totalItems":30, "currentCount":5 }, "entities":[ // A list of follow entities { "rel":["properties:http://api.wurl.com/schemas/follow.json"], "class":["follow","follow_series"], "properties": { "id":1872, "pubDate":null, "title":"numberphile", "thumbnailLink":"http://static2.channels.com/thumbnails/assets/youtube-com/feeds/no_ids/Uploads-by-numberphile--jpg-v-d2fafc", "followedItemId":394490,"followedItemType":"series"}, "entities":[ {"rel":["urn:x-resource:name:series"], // Information for the series... ] "actions":[ {"name":"unfollow","href":"http://api.wurl.com/api/users/1168/follows/1797","title":"Stop following an item.","method":"DELETE"} ], "links":[ {"rel":["self"],"href":"http://api.wurl.com/api/users/1168/follows/1797"}, {"rel":["up"],"href":"http://api.wurl.com/api/users/1168/follows"}]}], "actions":[ { "name":"follow-series", "href":"http://api.wurl.com/api/users/1168/follows", "title":"Start following a series", "method":"POST", "fields":[{"name":"series_id","type":"text"}] } ], "links":[ {"rel":["self"], "href":"http://api.wurl.com/api/users/1168/follows"}, {"rel":["up"],"href":"http://api.wurl.com/api/users/1168"}, {"rel":["next"],"href":"http://api.wurl.com/api/users/1168/follows?count=5&since=5"} ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The follows collection may be paginated, depending on how many follows a user has.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:em
+					Note
+					- The items in the watchlist can potentially be entities other than
+				Element:a
+					series
+					. Check the class of the items when you render them to insure you are rendering what you want.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Pagination
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The links array may contain
+				Element:em
+					next
+					and
+				Element:em
+					prev
+					links to navigate backwards and forwards in the watchlist. If either link is not present it signifies that there are no further follow entities in the list.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Adding to the Watchlist
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Adding to the watchlist involves grabbing the
+				Element:em
+					follow-series
+					action of a series object and executing the action's request providing any empty parameters.,
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					For example, below you can see an action for
+				Element:em
+					follow-series
+					and its corresponding translation for a curl call:
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Sample follow action
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "name":"follow-series", "href":"http://api.wurl.com/api/users/1168/follows", "title":"Start following a series", "method":"POST", "fields":[{"name":"series_id","type":"text"}] }
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Corresponding Curl for series
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					$ curl -H 'Authorization: Bearer ccb741c4245b4f5f93a9a4c44af575f6ea1c2d90c9f14ee69aaba4403be11b4e' -X POST -F series_id=12345 'http://api.wurl.com/api/users/123/follows'
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The response will contain the information for the new
+				Element:a
+					follow
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "properties":{ "message":"Created", "location":"http://api.wurl.com/api/users/1168/follows/1873" }, "links":[ {"rel":["self"],"href":"http://api.wurl.com/api/users/1168/follows/1873"} ] }
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Removing from the watchlist
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					To remove from the watchlist, use the "unfollow" action on the
+				Element:a
+					follow
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					From the follows example on
+				Element:em
+					Add to Follows
+					above:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -H 'Authorization: Bearer d6add646f9b3fb34249f63d058fc5b5f2d3b7d67085c8bfedfb3aa02a1a78a7c' -X DELETE 'http://api.wurl.com/api/users/1168/follows/1873'
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					A successful delete call returns no content. The HTTP status code will be 204 (No Content).
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+				Element:ul
+				Element:li
+					Wurl
+				Element:li
+				Element:a
+					Home
+				Element:li
+				Element:a
+					About
+				Element:li
+				Element:a
+					Blog
+				Element:li
+				Element:a
+					Team
+				Element:li
+				Element:a
+					Legal
+				Element:ul
+				Element:li
+					Help
+				Element:li
+				Element:a
+					Contact Support
+				Element:li
+				Element:a
+					Status
+				Element:p
+				Element:span
+					Wurl, Inc.
+				Element:br
+				Element:span
+					Palo Alto, California
+				Element:br
+				Element:a
+					info@wurl.com
+				Element:br
+				Element:span
+					650.470.7550
+				Element:p
+					© Wurl

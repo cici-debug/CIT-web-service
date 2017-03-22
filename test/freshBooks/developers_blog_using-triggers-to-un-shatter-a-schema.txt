@@ -1,0 +1,531 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Using triggers to un-shatter a schema
+					by Taavi on April 12/2013
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					We deleted millions of customer database tables and nobody noticed. And that’s a good thing. It just took some thinking (a bit of reading), and 10 months of slow-but-steady work.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Background
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								FreshBooks is a classic multi-tenant application. Customers sign up with us and live in their own little island of data (received invoices and contractors are treated like telephone calls to the next island). When the first version of FreshBooks shipped (and for many years after), every new account creation resulted in a new set of database tables being created. This worked well in the early days. Every time a web page was served by PHP, it would define the names of all the tables that that account needed to access, so you never had to use a WHERE clause to restrict data access to a single account. Early on in an HTTP request we converted an account name (e.g.
+							Element:code
+								yourcompany
+								from
+							Element:code
+								yourcompany.freshbooks.com
+								) into a numeric ID (e.g.
+							Element:code
+								123
+								), and tables were named using that id (e.g.
+							Element:code
+								org123_invoice
+								).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								But times change. FreshBooks grew, and with it our data. By 2010 we were living with MILLIONS of database tables (yes, literally on the order of 1E+6). Databases are designed to deal with a few thousand tables, each with millions of rows, not a few million tables with a handful of rows each! Daily database server backups started to take 18 hours. MySQL stores MyISAM tables as 3 or more files on the filesystem, and 3 times MILLIONS of files takes a very long time for the operating system to open and copy. Per-table metadata overhead was often larger than the data described. Data warehousing was also becoming horribly slow, and we were restricted to analyzing a fraction of our data to keep the impact to a minimum.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We also ran into MySQL design decisions that performed poorly on our schema. MySQL has a
+							Element:a
+								table cache
+								that contains recently used file handles. The documentation suggests that the cache should be larger than the number of tables plus the number of concurrent accesses to those tables (each concurrent reader requires its own handle). However, with millions of tables that’s just not possible. The kernel wouldn’t let us hold that many files open, even if we had enough RAM. When
+							Element:a
+								we got bigger database servers a few years ago
+								, increasing the size of the table cache from 100 000 to 200 000 file handles actually
+							Element:em
+								decreased
+								performance because there’s an
+							Element:em
+								exclusive, global
+								lock held during cache eviction, which is implemented as a naïve LRU. Doubling the size of the cache approximately doubled the time it took to evict the oldest cache entry! That in turn halved the rate at which we could open not-recently-used tables making your first log in of the day slower, and seriously hurt “background” jobs, affecting interactive performance drastically. At the time, we ended up turning the cache size down to 1000 to get reasonable interactive performance through all our workloads.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The “WTF”s from new hires didn’t help either. We had to take action.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								The Schema Transformation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Take a simple association table that described which online payment gateways were allowed for a given invoice for FreshBooks account number 123:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								CREATE TABLE `org123_allowed_gateway` ( `allowed_id` int(11) NOT NULL auto_increment COMMENT 'A synthetic PK', `gateway_id` int(11) default NULL COMMENT 'FK to gateways', `invoice_id` int(11) default NULL COMMENT 'FK to invoices', PRIMARY KEY (`allowed_id`) -- And maybe some indexes, but probably not; there usually isn't enough -- data to make them worthwhile ) ENGINE=MyISAM [DEFAULT CHARSET=latin1](https://www.freshbooks.com/developers/blog/utf-8-is-here);
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Because there’s one per account, we called these “shattered tables” (as compared to the more traditional “sharded tables”).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to use the database server the way it was intended, we wanted to convert it into a table that looked more like:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								CREATE TABLE `invoice_allowed_gateway` ( `account_id` int(11) default NULL COMMENT 'FK to accounts', `allowed_id` int(11) NOT NULL auto_increment COMMENT 'A synthetic PK', `gateway_id` int(11) default NULL COMMENT 'FK to gateways', `invoice_id` int(11) default NULL COMMENT 'FK to invoices', PRIMARY KEY (`account_id`, `allowed_id`), KEY `allowed_id_idx_for_autoincrement` (`allowed_id`), KEY `account_invoice_idx` (`account_id`, `invoice_id`) ) ENGINE=MyISAM [DEFAULT CHARSET=latin1](https://www.freshbooks.com/developers/blog/utf-8-is-here);
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Primary key ordering
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											account_id
+											was the first part of the PK, because (almost) all queries ask for data with a single
+										Element:code
+											account_id
+											value. This index ordering improves the specificity of a query including an
+										Element:code
+											account_id
+											restriction (most accounts had, say, a few hundred invoices; but we had thousands of accounts with
+										Element:code
+											invoice_id = 1
+											!). Because we’re coalescing data from many accounts into one table, there were duplicate
+										Element:code
+											allowed_id
+											values. As an additional transformation, we could have renumbered
+										Element:code
+											allowed_id
+											s, but many of our tables’ PKs
+										Element:em
+											were
+											FKs, so it got messy quickly. We decided that it was not a good idea to do 2 transformations at once because of this added complexity. Consistency is a prerequisite for pretty.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											MySQL and auto_increment with composite primary keys
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The index on
+										Element:code
+											allowed_id
+											told MyISAM that we didn’t want to re-use
+										Element:code
+											auto_increment
+											values if rows were deleted. Without
+										Element:code
+											allowed_id_idx_for_autoincrement
+											MyISAM would use
+										Element:code
+											MAX(allowed_id)+1 WHERE account_id = X
+											, which would re-issue values for
+										Element:code
+											allowed_id
+											if we ever deleted a row with
+										Element:code
+											MAX(allowed_id) GROUP BY account_id
+											. Again, if you have any FK references (particularly in something like an activity log) this can wreak havoc. Remember that MyISAM doesn’t actually have Foreign Keys, so cascading deletes aren’t provided for you. It might be better not to delete rows, but non-repeating
+										Element:code
+											auto_increment
+											values are nice in their own right, too.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SQLAlchemy and autoincrement with composite primary keys
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When using
+										Element:a
+											SQLAlchemy
+											, we had to set
+										Element:code
+											autoincrement=False
+											on the
+										Element:code
+											account_id
+											column definition. If it’s not there, SQLAlchemy will assume that it
+										Element:em
+											is
+										Element:code
+											auto_increment
+											, leading to strange, un-obvious errors.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								The Hard Way
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In early 2010 we bit the bullet and started fixing our schema the hard way. We migrated a few tables this way:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Rewrote all the SQL queries to look at the new table, being
+							Element:strong
+								very careful
+								to add an
+							Element:code
+								account_id = X
+								restriction to the
+							Element:code
+								WHERE
+								clause of the query. This was tricky, particularly when there were joins and/or sub-queries involved.
+							Element:li
+								Primed the database server’s disk cache. Most table data wasn’t in memory at any given time, and IO was the slowest part of this transformation. The first time running a data migration took about 3h for one set of shattered tables. After clearing out the shard table, a second run took only 15 minutes!
+							Element:li
+							Element:strong
+								Then we shut down the website while the migration executed!
+								It sucked for our users, at 15 minutes a pop. At this rate we’d have had bi-weekly downtime for a couple of years before finishing.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								The Easy Way
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’ve read our
+							Element:a
+								previous
+							Element:a
+								posts
+								on using triggers to effect seamless data migrations, you know where this is headed. If you haven’t read them yet, now is a great time.
+							Element:img
+								After fixing the code, database triggers allowed us to create and maintain an up-to-date copy of our data in the desired target form. For each shattered table we:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Created the shard table.
+							Element:li
+								Created triggers on all the shattered tables, so that inserts, updates, and deletes propagated to the shard table. The triggers had to be written so that they couldn’t fail (i.e. used
+							Element:code
+								REPLACE INTO
+								), because the target data wasn’t guaranteed to exist there yet.
+							Element:li
+								Ran a backfill, basically:
+							Element:pre
+								REPLACE INTO invoice_allowed_gateway (account_id, blah, blah) SELECT 123, col1, col2 FROM org123_invoice_allowed_gateway;
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that because the source table did not have an
+							Element:code
+								account_id
+								, we had to provide the literal
+							Element:code
+								123
+								in the query.
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Every time a new account was created with the old shattered tables, an AMQP consumer would add the triggers and run the backfill for the new account. Adding code to do that in the same place as account creation would mean giving the MySQL SUPER privilege to code that doesn’t otherwise need it; it’s an unnecessary security risk. Our shard table is now eventually consistent!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once the new code referencing the shard table had been deployed to production, we dropped the source “shattered” tables at a leisurely pace. (You don’t even need SUPER privilege to drop tables with triggers on them!)
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								The Result
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It seems like old hat to us now, but this particular schema transformation was the first one we tried using triggers. Instead of taking years, it allowed us to completely transform our database in 10 months with no downtime, while at the same time delivering new features and bug fixes to customers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								But, the best part of our final approach is that customers didn’t notice a thing because we did our data transformation without requiring downtime. We were confident in doing it this way because we were able to verify the data transformation before committing to it. On one occasion we
+							Element:em
+								did
+								notice an issue with the transformation and fixed it before the problem could affect customers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Operationally, finally having a “normal” database schema led to many happy outcomes. Memory usage for our Python backends dropped about 25% (on the 12th; I don’t honestly remember what we did on the 16th to improve things further):
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								CPU usage and response time from our Python backends also dropped by about 30%. Given other changes that we’ve made over the years, I suspect that most of this is due to the smaller memory footprint and Python’s circular garbage collector. The more Python objects you have in memory, the harder the GC has to work to find cycles and orphaned weak-references. Python’s GC is an entire topic unto itself, which deserves its own future blog post.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Disk usage on the database servers dropped dramatically, particularly for tables that had very little in them per-account (which is most of them). Consider the on-disk size of a table containing a single integer:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								mysql> CREATE TABLE foo (an INT PRIMARY KEY); mysql> INSERT INTO foo VALUES (1); ... $ ls -l foo* # in bytes -rw-rw---- 1 mysql mysql 8556 Jan 31 12:42 foo.frm -rw-rw---- 1 mysql mysql 7 Jan 31 12:43 foo.MYD -rw-rw---- 1 mysql mysql 2048 Jan 31 12:43 foo.MYI $ tune2fs -l /dev/mapper/VolGroup00-root | grep Block\ size Block size: 4096 $ ls -ls --block-size=4096 foo* # In minimally-addressable filesystem blocks 3 -rw-rw---- 1 mysql mysql 3 Jan 31 12:42 foo.frm 1 -rw-rw---- 1 mysql mysql 1 Jan 31 12:43 foo.MYD 1 -rw-rw---- 1 mysql mysql 1 Jan 31 12:43 foo.MYI
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That’s 20kB to store 32 bits! This overhead adds up quickly both in terms of mostly-empty disk blocks and used inodes. Getting more actual user data per gigabyte of RAM is always a win.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Epilogue
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When I started at FreshBooks, we didn’t think we could actually fix this. It’s been two years to the day since we deployed the last “de-org” code, and a large part of our current dev team doesn’t even know what an “org table” is. And that’s a good thing.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

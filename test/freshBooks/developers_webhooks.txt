@@ -1,0 +1,465 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Webhooks
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					It’s easy to keep your application in sync with a FreshBooks account if you can publish scripts to a public web server. You can subscribe to FreshBooks
+				Element:a
+					Webhooks
+					to receive real-time notifications from FreshBooks to your application.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What are Webhooks?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Webhooks are a "pattern of enabling user-defined callbacks in web applications" (
+							Element:a
+								1
+								). In other words, they are a simple mechanism for sending notifications between APIs using HTTP POST callbacks. Webhooks allow you to specify a URI that you would like FreshBooks to POST information to any time certain events happen in a system. For instance, if you would like to receive a notification every time one of your users creates an invoice in FreshBooks, you can register a callback for the invoice.create method. There are over a dozen
+							Element:a
+								events
+								you can register a callback against. One particularly exciting implication is that together with recent changes to our API, Webhooks allow you to do automated
+							Element:a
+								subscription billing
+								with FreshBooks.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Using WebHooks
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Webhooks can be created in your FreshBooks account by clicking on “My Account” and then “FreshBooks API” and then scrolling down to the “Customize” link in the Webhooks section, or with the FreshBooks API by calling the
+							Element:a
+								callback.create
+								method.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to ensure that you are the true owner of a callback URI being registered, we’ve implemented a very simple verification mechanism. When a callback is first registered, we will automatically (and immediately) send an HTTP POST request containing a unique verification code as well as a unique id for the callback record being verified. Simply send the verification code and the callback id back to us by calling the
+							Element:a
+								callback.verify
+								API method and notifications will begin being sent to your registered callback URI.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The transaction looks something like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Step One:
+								Create a callback using the callback.create API method:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								<request method="callback.create"> <callback> <event>estimate.create</event> <uri>http://example.com/webhooks/ready</uri> </callback> </request>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								FreshBooks will immediately POST to the URI specified in the callback.create request with the following form-urlencoded parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								name:
+								callback.verify
+							Element:strong
+								object_id:
+								An integer identifying the callback
+							Element:strong
+								verifier:
+								A unique verification code
+							Element:strong
+								system:
+								The login URI of the system that generated the event
+							Element:strong
+								user_id:
+								The id of the user who initiated the event
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Step Two:
+								Verify the callback using the callback.verify API method:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								<request method="callback.verify"> <callback> <callback_id>45</callback_id> <verifier>3awmbZMdPtf7vMZGvmJeRB2mYRC9D3UKE</verifier> </callback> </request>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That’s it! Your callback is ready to go. Now, when a user in this system creates an estimate, FreshBooks will send a POST request to
+							Element:a
+								http://example.com/webhooks/ready
+								with the following form-urlencoded parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								name:
+								estimate.create
+							Element:strong
+								object_id:
+								30
+							Element:strong
+								system:
+							Element:a
+								https://2ndsite.freshbooks.com/
+							Element:strong
+								user_id:
+								1
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This means that the user with the id ’1′ in the system ‘
+							Element:a
+								https://2ndsite.freshbooks.com/
+								’ created an estimate with the id ’30′. You can then call the FreshBooks API method estimate.get, passing in estimate id 30 in order to get details about the estimate.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also list and delete callbacks using the
+							Element:a
+								callback.list
+								and
+							Element:a
+								callback.delete
+								API methods.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								NOTE:
+								If you create a callback record before your script is ready to receive the verification code, you can resend the verification code with a call to
+							Element:a
+								callback.resendToken
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Failed Callbacks
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once your Webhooks are set up and verified, you will start receiving events. If FreshBooks receives anything other than a 2xx HTTP response code (likely meaning that your web script has moved, is non-existent, or misconfigured) we will retry the HTTP POST request periodically. After several failures, the message will be dropped and no further delivery attempts will be made.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Example Conversation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following is an example of the HTTP requests and responses involved in creating a Webhook.
+							Element:strong
+								1. Creating the callback using the FreshBooks API.
+							Element:strong
+								Request:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /api/2.1/xml-in HTTP/1.1 Authorization: OAuth ... User-Agent: curl/7.19.4 (universal-apple-darwin10.0) libcurl/7.19.4 OpenSSL/0.9.8k zlib/1.2.3 Host: 2ndsite.freshbooks.com Accept: */* Content-Length: 124 Content-Type: application/x-www-form-urlencoded <request method="callback.create"> <callback> <event>invoice.create</event> <uri>http://www.example.com/webhook</uri> </callback> </request>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Response:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK Date: Wed, 02 Dec 2009 18:26:59 GMT Server: Apache/2.2.8 (EL) X-Powered-By: PHP/5.2.6 Cache-control: private Content-Length: 144 Connection: close Content-Type: application/xml <?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"> <callback_id>1</callback_id> </response>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								2. Verification information is sent to the callback URI.
+							Element:strong
+								Request:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /webhook HTTP/1.1 Host: www.example.com Accept-Encoding: identity Content-Length: 130 content-type: application/x-www-form-urlencoded user-agent: FreshHooks/0.4 (http://developers.freshbooks.com/api/webhooks) name=callback.verify&object_id=1&system=https%3A%2F%2F2ndsite.freshbooks.com&user_id=1&verifier=3bPTNcPgbN76QLgKLSR9XdgQJWvhhN4xrT
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								3. Verifying the callback using the FreshBooks API.
+							Element:strong
+								Request:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /api/2.1/xml-in HTTP/1.1 Authorization: OAuth ... User-Agent: curl/7.19.4 (universal-apple-darwin10.0) libcurl/7.19.4 OpenSSL/0.9.8k zlib/1.2.3 Host: 2ndsite.freshbooks.com Accept: */* Content-Length: 148 Content-Type: application/x-www-form-urlencoded <request method="callback.verify"> <callback> <callback_id>1</callback_id> <verifier>3bPTNcPgbN76QLgKLSR9XdgQJWvhhN4xrT</verifier> </callback> </request>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Response:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HTTP/1.1 200 OK Date: Wed, 02 Dec 2009 20:09:07 GMT Server: Apache/2.2.8 (EL) X-Powered-By: PHP/5.2.6 Cache-control: private Content-Length: 102 Connection: close Content-Type: application/xml <?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"/>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								4. Your first Webhook.
+							Element:strong
+								Request:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /webhook HTTP/1.1 Host: www.example.com Accept-Encoding: identity Content-Length: 86 content-type: application/x-www-form-urlencoded user-agent: FreshHooks/0.4 (http://developers.freshbooks.com/api/webhooks) user_id=1&system=https%3A%2F%2F2ndsite.freshbooks.com&object_id=49&name=invoice.delete
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Response:
+								Entirely up to you! Just send us back an HTTP 2xx response code if everything worked out alright.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								1.
+							Element:a
+							Element:a
+								http://www.slideshare.net/progrium/using-web-hooks
+								(Slide # 21)
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

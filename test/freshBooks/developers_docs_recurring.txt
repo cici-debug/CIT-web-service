@@ -1,0 +1,691 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Recurring
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Staff have access to the API calls listed below if the Invoices tab is enabled for staff. Staff users can only access recurring profiles that belong to clients they are assigned to.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					recurring.create
+				Element:li
+				Element:a
+					recurring.update
+				Element:li
+				Element:a
+					recurring.get
+				Element:li
+				Element:a
+					recurring.delete
+				Element:li
+				Element:a
+					recurring.list
+				Element:li
+				Element:a
+					recurring.lines.add
+				Element:li
+				Element:a
+					recurring.lines.delete
+				Element:li
+				Element:a
+					recurring.lines.update
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Recurring Profile API allows you to create recurring profiles in the FreshBooks application. Recurring profiles can optionally have credit card auto-bill information. Adding credit card auto-billing capabilities to a recurring profile requires the inclusion of an autobill element in the
+				Element:a
+					recurring.create
+					or
+				Element:a
+					recurring.update
+					request bodies. The autobill element will be included in responses to
+				Element:a
+					recurring.get
+					and
+				Element:a
+					recurring.list
+					requests, with information about the auto-bill profile if it is enabled.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					As of January 31st, 2017, FreshBooks will no longer accept raw credit card data via its API. Users wishing to create auto-bills via the API after that point must tokenize their raw credit card data using new tokenization endpoints. Access to these tokenization endpoints will be rolled out throughout December 2016. All existing auto-bill profiles will be seamlessly tokenized as part of the rollout — only new profiles require changes. For more information, see
+				Element:a
+					Changes to Autobills in the FreshBooks API
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Note:
+					This method uses
+				Element:a
+					pagination
+					.
+				Element:strong
+					Note:
+					auto-bill profiles must be in the base currency and are restricted to the credit card types checked on the “Online Payment” settings page. Additionally auto-bill profiles do not accept expired credit cards.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								recurring.create
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Create a new recurring profile. The method arguments are nearly identical to invoice.create, but include five additional fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								occurrences
+								Number of invoices to generate, with zero (0) being infinite
+							Element:li
+							Element:strong
+								frequency
+								Rate at which to generate invoices – can be one of ‘weekly’, ’2 weeks’, ’4 weeks’, ‘monthly’, ’2 months’, ’3 months’, ’6 months’, ‘yearly’, ’2 years’
+							Element:li
+							Element:strong
+								stopped
+								This profile is no longer generating invoices (1 – stopped, 0 – active)
+							Element:li
+							Element:strong
+								send_email
+								Notify client by email each time a new invoice is generated (1 or 0)
+							Element:li
+							Element:strong
+								send_snail_mail
+								Send a copy of your invoice by snail mail, each time it’s generated (1 or 0)
+							Element:li
+							Element:strong
+								autobill
+								Enable credit card auto-billing for this recurring profile.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Other Notes
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														New profiles that start today will be sent immediately.
+													Element:li
+													Element:dl
+													Element:dt
+														The method supports two placeholders in return_uri:
+													Element:dt
+														Placeholder Replaced With
+													Element:dd
+														invoice id:: The generated invoice ID (used for invoice.get)
+													Element:dd
+														invoice number:: The generated invoice number (used in the user interface) These placeholders are case-sensitive.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <request method="recurring.create"> <recurring> <client_id>40</client_id> <!-- Client to generate invoices for --> <!-- Contacts are optional --> <contacts> <contact> <contact_id>23</contact_id> </contact> </contacts> <date>2007-09-23</date> <po_number>2314</po_number> <!-- Purchase order number (Optional) --> <discount>10</discount> <!-- Percent discount (Optional) --> <occurrences>1</occurrences> <!-- Number of invoices to generate; 0 infinite (default 0) --> <frequency>monthly</frequency> <!-- One of 'weekly', '2 weeks', '4 weeks', 'monthly', '2 months', --> <!-- '3 months', '6 months', 'yearly', '2 years' --> <send_email>1</send_email> <!-- Send email notification(Default 1) --> <send_snail_mail>0</send_snail_mail> <!-- Send copy by snail mail (Default 0) --> <currency_code>CAD</currency_code> <!-- Defaults to systems base currency (Optional) --> <language>en</language> <!-- Defaults to the client's language --> <notes>Due upon receipt.</notes> <!-- (Optional) --> <terms>Payment due in 30 days.</terms> <!-- (Optional) --> <first_name>John</first_name> <!-- (Optional) --> <last_name>Smith</last_name> <!-- (Optional) --> <organization>ABC Corp</organization> <!-- (Optional) --> <p_street1></p_street1> <!-- (Optional) --> <p_street2></p_street2> <!-- (Optional) --> <p_city></p_city> <!-- (Optional) --> <p_state></p_state> <!-- (Optional) --> <p_country></p_country> <!-- (Optional) --> <p_code></p_code> <!-- (Optional) --> <vat_name></vat_name> <!-- e.g. 'VAT Number' (Optional) --> <vat_number></vat_number> <!-- If set, shown with vat_name under client address (Optional) --> <return_uri></return_uri> <!-- (Optional) --> <autobill> <!-- (Optional) --> <!-- Case insensitive gateway name from gateway.list (Must be auto-bill capable) --> <gateway_name>Authorize.net</gateway_name> <card> <!-- FreshBooks is phasing out raw card numbers in our API. --> <!-- Card tokens will be required instead as of January 31st, 2017. --> <!-- Token access will be rolled out throughout December 2016. --> <!-- Tokens may be retrieved from our tokenization endpoints. --> <!-- Calls may only include one: a card number or a token. --> <!-- For more information, see our transition document. --> <!-- (see 'Changes to Autobills in the FreshBooks API below) --> <!-- Can include spaces, hyphens and other punctuation marks --> <number>4111 1111 1111 1111</number> <!-- Credit Card token from a FreshBooks tokenization endpoint --> <cc_token>tok_19KvAE2jyvokPAPlbVQb4f3m</cc_token> <name>John Smith</name> <expiration> <month>3</month> <year>2012</year> </expiration> </card> </autobill> <lines> <line> <name>Yard Work</name> <description>Mowed the lawn.</description> <unit_cost>10</unit_cost> <quantity>4</quantity> <tax1_name>GST</tax1_name> <tax2_name>PST</tax2_name> <tax1_percent>8</tax1_percent> <tax2_percent>6</tax2_percent> <type>Time</type> <!-- (Optional) --> <!-- One of 'Item' or 'Time'. If omitted, the line's type defaults to 'Item' --> </line> </lines> </recurring> </request>
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														See
+													Element:a
+														Changes to Autobills in the FreshBooks API
+														for more information about credit card tokens.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"> <recurring_id>21</recurring_id> </response>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								recurring.update
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Update an existing recurring profile. For all elements but autobill, if they are supplied, they will be changed. The autobill element is optional. If it is not passed as part of the request then the recurring.update method will not modify any auto-bill information. The recurring.update method can convert a non auto-bill enabled recurring profile into an auto-bill enabled recurring profile with the inclusion of the autobill element. When updating auto-bill information, all child elements are required. An empty autobill element will turn off auto-billing on a recurring profile and delete all related information.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <request method="recurring.update"> <recurring> <recurring_id>21</recurring_id> <!-- Remaining arguments same as recurring.create --> ... </recurring> </request>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"> </response>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								recurring.get
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Return the details of an existing recurring profile, including auto-bill information if this recurring profile has auto-billing enabled.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <request method="recurring.get"> <recurring_id>20</recurring_id> </request>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"> <recurring> <recurring_id>344</recurring_id> <!-- One of '2y', 'y', '6m', '3m', '2m', 'm', '4w', '2w', 'w' --> <frequency>2y</frequency> <occurrences>0</occurrences> <stopped>0</stopped> <client_id>2</client_id> <contacts> <contact> <contact_id>10</contact_id> </contact> </contacts> <staff_id>1</staff_id> <organization>ABC Corp</organization> <first_name>John</first_name> <last_name>Doe</last_name> <p_street1>123 Fake St.</p_street1> <p_street2>Unit 555</p_street2> <p_city>New York</p_city> <p_state>New York</p_state> <p_country>United States</p_country> <p_code>553132</p_code> <vat_name></vat_name> <vat_number></vat_number> <po_number></po_number> <status></status> <amount>109.89</amount> <currency_code>CAD</currency_code> <language>en</language> <date>2007-06-23</date> <notes></notes> <terms></terms> <discount>0</discount> <return_uri></return_uri> <send_snail_mail>0</send_snail_mail> <send_email>1</send_email> <folder>active</folder> <autobill> <gateway_name>Authorize.Net</gateway_name> <card> <name>John Smith</name> <expiration> <month>03</month> <year>2012</year> </expiration> </card> </autobill> <lines> <line> <line_id>1</line_id> <!-- (Read Only) line id --> <name>Product</name> <description>Sample product item</description> <unit_cost>9.99</unit_cost> <quantity>10</quantity> <amount>99.9</amount> <tax1_name>tax1</tax1_name> <tax2_name></tax2_name> <tax1_percent>10</tax1_percent> <tax2_percent>0</tax2_percent> <type>Item</type> </line> </lines> </recurring> </response>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								recurring.delete
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Delete a recurring profile. Once deleted, it will no longer generate invoices.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <request method="recurring.delete"> <recurring_id>20</recurring_id> </request>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"> </response>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								recurring.list
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Returns a list of recurring profile summaries. Results are ordered by descending recurring_id.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note: A list request that returns no results (i.e. page 999), will return an empty result set, not an error.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note: The response will include an empty autobill tag if the recurring profile does not have auto-billing enabled, otherwise the response will include an autobill element with the gateway name and card element.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								This method uses
+							Element:a
+								pagination
+								.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <request method="recurring.list"> <!-- Filter by client (Optional) --> <client_id>3</client_id> <!-- Return auto-bills dated after this arg (Optional) --> <date_from>2007-01-01</date_from> <!-- Return auto-bills dated before this arg (Optional) --> <date_to>2007-04-01</date_to> <!-- Return invoices modified after this arg (Optional) --> <updated_from>2007-01-01 00:00:00</updated_from> <!-- Return invoices modified before this arg (Optional) --> <updated_to>2007-01-02 00:00:00</updated_to> <!-- Filter auto-bill profiles (Optional) --> <autobill>1</autobill> <!-- Page number to return, default is 1 (Optional) --> <page>1</page> <!-- Number of results per page, default is 25 (Optional) --> <per_page>10</per_page> <!--One of 'active', 'archived', 'deleted' (Optional) --> <folder>active</folder> </request>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"> <recurrings page="1" per_page="10" pages="5" total="48"> <recurring> <recurring_id>00000000001</recurring_id> <!-- One of '2y', 'y', '6m', '3m', '2m', 'm', '4w', '2w', 'w' --> <frequency>m</frequency> <occurrences>0</occurrences> <stopped>1</stopped> <client_id>2</client_id> <contacts> <contact> <contact_id>30</contact_id> </contact> </contacts> <staff_id>1</staff_id> <organization>XYZ Widgets Ltd</organization> <first_name>Joe</first_name> <last_name>Smith</last_name> <p_street1>2770 Dufferin St.</p_street1> <p_street2>Suite 201</p_street2> <p_city>Toronto</p_city> <p_state>Ontario</p_state> <p_country>Canada</p_country> <p_code>M6B 3R7</p_code> <vat_name></vat_name> <vat_number></vat_number> <po_number></po_number> <status></status> <amount>200</amount> <currency_code>CAD</currency_code> <language>en</language> <date>2009-06-08</date> <notes></notes> <terms>Payment due in 30 days.</terms> <discount>0</discount> <return_uri></return_uri> <send_snail_mail>0</send_snail_mail> <send_email>1</send_email> <folder>active</folder> <autobill> <gateway_name>Authorize.Net</gateway_name> <card> <name>John Smith</name> <expiration> <month>03</month> <year>2012</year> </expiration> </card> </autobill> <lines> <line> <line_id>1</line_id> <!-- (Read Only) line id --> <name>Service</name> <description>Monthly Subscription</description> <unit_cost>200</unit_cost> <quantity>1</quantity> <amount>200</amount> <tax1_name></tax1_name> <tax2_name></tax2_name> <tax1_percent>0</tax1_percent> <tax2_percent>0</tax2_percent> <type>Item</type> </line> </lines> </recurring> ... </recurrings> </response>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								recurring.lines.add
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Adds (a) new line(s) to an existing recurring profile.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								One or more lines may be added.
+							Element:li
+								Do not specify line_id for any lines. (Ids will be assigned automatically). Use
+							Element:a
+								recurring.lines.update
+								to change existing lines.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <request method="recurring.lines.add"> <recurring_id>111</recurring_id> <lines> <line> <amount>80</amount> <name>Bacon</name> <description>Bacon ration (1lb)</description> <unit_cost>2</unit_cost> <quantity>40</quantity> <type>Item</type> ... </line> <line> <amount>22.30</amount> <name>Sphygmomanometer</name> <description>Blood pressure cuff</description> <unit_cost>1</unit_cost> <quantity>22.30</quantity> <type>Item</type> ... </line> </lines> </request>
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Note:
+														In most cases, the returned line_ids will correspond to the new lines in the order that they were sent, however, this behavior is not guaranteed and should not be relied on. If you absolutely require the ability to match the created line_ids with the data you sent, you should create each line in its own request, or use some unique value for each line to eliminate any ambiguity.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"> <recurring_id>111</invoice_id> <lines> <line_id>45</line_id> <line_id>46</line_id> </lines> </response>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								recurring.lines.delete
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Deletes a single line from an existing recurring profile.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Only a single line can be deleted per request.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <request method="recurring.lines.delete"> <recurring_id>123</recurring_id> <line_id>2</line_id> </request>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"/>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								recurring.lines.update
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Updates (an) existing line(s) on an existing recurring profile.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								One or more lines may be updated.
+							Element:li
+								Only the provided fields will be updated. All others will be left unchanged.
+							Element:li
+								line_id is mandatory for each line to be updated. Use
+							Element:a
+								recurring.lines.add
+								to create new lines.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <request method="recurring.lines.update"> <recurring_id>99</recurring_id> <lines> <line> <line_id>1</line_id> <amount>100</amount> <quantity>50.00</quantity> <name>Bacon Ration (1lb)</name> <unit_cost>2</unit_cost> ... </line> </lines> </request>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														<?xml version="1.0" encoding="utf-8"?> <response xmlns="https://www.freshbooks.com/api/" status="ok"/>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

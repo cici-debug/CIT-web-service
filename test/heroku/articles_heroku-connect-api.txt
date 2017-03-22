@@ -1,0 +1,1683 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Heroku Connect API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:span
+					Last updated 03 February 2017
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Table of Contents
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Heroku CLI plugin
+										Element:li
+										Element:a
+											Endpoints
+										Element:li
+										Element:a
+											Step 1: Create a Heroku app and Heroku PostgreSQL database
+										Element:li
+										Element:a
+											Step 2: Create the Heroku Connect add-on
+										Element:li
+										Element:a
+											Step 3: Link the connection to your Heroku user account
+										Element:li
+										Element:a
+											Step 4: Retrieve the new connection’s ID
+										Element:li
+										Element:a
+											Step 5: Configure the database key and schema for the connection
+										Element:li
+										Element:a
+											Step 6: Authenticate the connection to your Salesforce Org
+										Element:li
+										Element:a
+											Step 7: Import a mapping configuration
+										Element:li
+										Element:a
+											Step 8: Monitor the connection and mapping status
+										Element:li
+										Element:a
+											Additional endpoints
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Heroku Connect
+											provides an API to automate the creation, maintenance, and monitoring of sync operations between Salesforce and a Heroku PostgreSQL database. This tutorial is an overview that describes how to use the Heroku Connect API to provision a new
+										Element:em
+											connection
+											to synchronize data between a Salesforce org and a Heroku PostgreSQL database.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Heroku CLI plugin
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Heroku provides a very full-featured command-line interface via the
+							Element:a
+								Heroku CLI
+								. A good way to work with the Heroku Connect API is to use the
+							Element:a
+								Heroku Connect CLI plugin
+								in the CLI.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku plugins:install heroku-connect-plugin
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The CLI plugin is useful for scripting Heroku Connect and offers some demonstration on how to make Heroku Connect API calls.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Endpoints
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Heroku Connect operates in both the US and EU regions, with each responding on a different domain. The root API URLs are as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								US: https://connect-us.heroku.com/api/v3
+							Element:li
+								EU: https://connect-eu.heroku.com/api/v3
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The region to use depends on the region of your app. You can see which region your app resides in by using the Heroku CLI.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku info -a <app_name>
+							Element:span
+								=== <app_name>
+							Element:span
+								Git Url: git@heroku.com:<app_name>.git
+							Element:span
+								Web Url: https://<app_name>.herokuapp.com/
+							Element:span
+								Addons: heroku-postgresql:standard-0
+							Element:span
+								herokuconnect:danketsu
+							Element:span
+								…
+							Element:span
+								Region: us
+							Element:span
+								…
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It’s best to reference the appropriate endpoint prefix from a central location that can be easily changed if your needs expand to multiple regions. Examples in this tutorial will assume the US region.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Authentication
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Heroku Connect API requires a Heroku Platform API
+							Element:a
+								direct authorization
+								token. This token is for your own application’s Heroku user only. Heroku Connect does not support API access on behalf of other Heroku customers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Supply this token with the
+							Element:code
+								Authorization
+								header, like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								Authorization: Bearer <token>
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								JSON encoding
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All responses are JSON-encoded, as are
+							Element:code
+								POST
+								/
+							Element:code
+								PATCH
+								request payloads. You must supply the
+							Element:code
+								Content-Type
+								header on all such requests:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								Content-Type: application/json
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Rate limits
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The API is rate-limited at 5,000 requests per connection per day. Attempting to access the API after this limit has been reached will result in
+							Element:code
+								429 Too Many Requests
+								. The response message will also contain information about when to expect to be able to make another API request.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{"message":"Request was throttled. Expected available in 72170 seconds."}
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Compatibility policy
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Heroku Connect API is under regular development, and changes will occur over time. Some changes, such as new endpoints, new input or new payload content, will not affect existing behavior, and may therefore happen at any time. But other changes will modify or remove existing behavior, so to help ensure compatibility with existing applications, we have a policy in place for those incompatible changes.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For stable endpoints, we will communicate any upcoming incompatible changes to all users at least 30 days prior to their deployment. This notification will include the nature of the change, the reasoning behind it, and any applicable steps to be taken to migrate from the old behavior to the new behavior. These details will also be added to this document for the 30-day duration. Once the 30 days have passed, the new behavior will go live and the old behavior will be removed from this document.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Unless otherwise stated, all documented API endpoints are considered stable. Any experimental endpoints or behaviors will be identified as such in this document. Experimental features are made available in order to get feedback from users of the API, and may change at any time, with no guaranteed notice.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The API is currently at version 3. When a new version is released, it will be made available as an experimental feature until it’s ready to replace the existing version. At that time, we will change the base endpoint listed above, and communicate the same 30-day notice as with other features, before removing the old version.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 1: Create a Heroku app and Heroku PostgreSQL database
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll need to have created a Heroku app, and added a Heroku PostgreSQL database add-on to that app. The free database tier is sufficient for basic testing, but you’ll need to upgrade to a paid plan before importing a significant amount of data, in order to avoid reaching the database row limits.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku apps:create <app_name>
+							Element:span
+								$
+							Element:span
+								heroku addons:create heroku-postgresql -a <app_name>
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 2: Create the Heroku Connect add-on
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Use the
+							Element:a
+								Heroku Platform API
+								to add the
+							Element:code
+								herokuconnect
+								add-on to your app, or create the add-on via the CLI:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku addons:create herokuconnect -a <app_name>
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 3: Link the connection to your Heroku user account
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to manipulate the new connection via the Heroku Connect API using your Heroku user token, you need to link the new connection to your Heroku account via this API call:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								POST /users/me/apps/<app_name>/auth
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X POST -H "Authorization: Bearer <token>" https://connect-us.heroku.com/api/v3/users/me/apps/<app_name>/auth
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Or, using the CLI plugin:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku connect:info -a <app_name>
+							Element:span
+								Connection [<connection_id> / <resource_name>] (NEW)
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 4: Retrieve the new connection’s ID
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to configure the new connection, you need to retrieve its ID. There are two ways to go about this.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you use the Heroku Platform API to create the add-on in Step 2 above, its response will contain a UUID for the newly-created resource. That UUID is what Heroku Connect uses as its connection ID, so you can use that value directly as the connection ID within the Heroku Connect API.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Otherwise, you can retrieve the ID by asking for details on all connections (i.e. all
+							Element:code
+								herokuconnect
+								add-on instances) on your app.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								GET /connections?app=<app_name>
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -H "Authorization: Bearer <token>" https://connect-us.heroku.com/api/v3/connections?app=<app_name>
+							Element:span
+								{
+							Element:span
+								"count": 1,
+							Element:span
+								"results": [
+							Element:span
+								{
+							Element:span
+								"id": "<connection_id>",
+							Element:span
+								"name": "<app_name>",
+							Element:span
+								"resource_name": "<resource_name>",
+							Element:span
+								…
+							Element:span
+								}
+							Element:span
+								],
+							Element:span
+								…
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Or, using the CLI plugin:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku connect:info -a <app_name>
+							Element:span
+								Connection [<connection_id> / <resource_name>] (NEW)
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 5: Configure the database key and schema for the connection
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now, configure the connection with the config var name of your database (typically
+							Element:code
+								DATABASE_URL
+								) and an unused schema name in which to place Salesforce data (typically
+							Element:code
+								salesforce
+								).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								PATCH /connections/<connection_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X PATCH -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -d '{"schema_name": "salesforce", "db_key": "DATABASE_URL"}' https://connect-us.heroku.com/api/v3/connections/<connection_id>
+							Element:span
+								{
+							Element:span
+								"id": "<connection_id>",
+							Element:span
+								"name": "<app_name>",
+							Element:span
+								"resource_name": "<resource_name>",
+							Element:span
+								"schema_name": "salesforce",
+							Element:span
+								"db_key": "DATABASE_URL",
+							Element:span
+								…
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Or, using the CLI plugin:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku connect:setup -s salesforce -d DATABASE_URL -a <app_name>
+							Element:span
+								Configuring connection with
+							Element:span
+								{ schema_name: 'salesforce', db_key: 'DATABASE_URL' }
+							Element:span
+								Setup complete
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 6: Authenticate the connection to your Salesforce Org
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now that you’ve established the link to the database, you need to authenticate Heroku Connect to talk to your Salesforce Org. This is done by retrieving the authorization URL, and then having the Salesforce user open this URL to complete the authentication. In a typical application you could retrieve the authorization URL and link it to a button to show to the user.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								POST /connections/<connection_id>/authorize_url
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Available JSON parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								environment
+								:
+							Element:code
+								production
+								,
+							Element:code
+								sandbox
+								, or
+							Element:code
+								custom
+								[defaults to
+							Element:code
+								sandbox
+								]
+							Element:li
+							Element:code
+								domain
+								: specify a custom login domain (if using a
+							Element:code
+								custom
+								environment)
+							Element:li
+							Element:code
+								api_version
+								: specify a Salesforce API version to use [defaults to the latest supported version]
+							Element:li
+							Element:code
+								next
+								: Final URL to redirect the user [defaults to the Heroku Connect dashboard]
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X POST -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -d '{"environment": "production"}' https://connect-us.heroku.com/api/v3/connections/<connection_id>/authorize_url
+							Element:span
+								{"redirect": "https://login.salesforce.com/services/oauth2/authorize?…"}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Or, using the CLI plugin:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku connect:auth -a <app_name>
+							Element:span
+								Auth response https://login.salesforce.com/services/oauth2/authorize?…
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 7: Import a mapping configuration
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now that the connection is set up, the easiest way to create mappings to synchronize data from Salesforce is to import the JSON mapping configuration exported from an existing connection. This endpoint accepts the configuration details either as a standard file upload or as the request body.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								POST /connections/<connection_id>/actions/import
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X POST -H "Authorization: Bearer <token>" -F "config=@config.json" https://connect-us.heroku.com/api/v3/connections/<connection_id>/actions/import
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X POST -H "Authorization: Bearer <token>" -H "Content-Type: application/json" https://connect-us.heroku.com/api/v3/connections/<connection_id>/actions/import -d @config.json
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Or, using the CLI plugin:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku connect:import <exported_config.json> -a <app_name>
+							Element:span
+								Upload complete
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 8: Monitor the connection and mapping status
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Use the connection detail API endpoint with the “deep” argument to retrieve connection status and mapping status information in one call.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								GET /connections/<connection_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Available query string parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								deep
+								:
+							Element:code
+								true
+								will return information about the connection’s mappings, in addition to the connection itself [defaults to
+							Element:code
+								false
+								]
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -H "Authorization: Bearer <token>" https://connect-us.heroku.com/api/v3/connections/<connection_id>?deep=true
+							Element:span
+								{
+							Element:span
+								"id": "<connection_id>",
+							Element:span
+								"name": "<app_name>",
+							Element:span
+								"resource_name": "<resource_name>",
+							Element:span
+								"schema_name": "salesforce",
+							Element:span
+								"db_key": "DATABASE_URL",
+							Element:span
+								"state": "IDLE",
+							Element:span
+								"mappings": [
+							Element:span
+								{
+							Element:span
+								"id": "<mapping_id>",
+							Element:span
+								"object_name": "Account",
+							Element:span
+								"state": "SCHEMA_CHANGED",
+							Element:span
+								…
+							Element:span
+								},
+							Element:span
+								{
+							Element:span
+								"id": "<mapping_id>",
+							Element:span
+								"object_name": "Contact",
+							Element:span
+								"state": "SCHEMA_CHANGED",
+							Element:span
+								…
+							Element:span
+								},
+							Element:span
+								…
+							Element:span
+								]
+							Element:span
+								…
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Or, using the CLI plugin:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku connect:info -a <app_name>
+							Element:span
+								Connection [<connection_id> / <resource_name>] (IDLE)
+							Element:span
+								--> Account (SCHEMA_CHANGED)
+							Element:span
+								--> Contact (SCHEMA_CHANGED)
+							Element:span
+								…
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Additional endpoints
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you have your connection up and running, there are some additional operations available to help maintain the connection.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Pause the connection
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								An active connection can be paused, after which it won’t move any data in either direction.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								POST /connections/<connection_id>/actions/pause
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X POST -H "Authorization: Bearer <token>" https://connect-us.heroku.com/api/v3/connections/<connection_id>/actions/pause
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Or, using the Heroku CLI plugin:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku connect:pause -a <app_name>
+							Element:span
+								Connection [<connection_id> / <resource_name>] paused
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once the connection is paused, it can be resumed using a related endpoint.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								POST /connections/<connection_id>/actions/resume
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X POST -H "Authorization: Bearer <token>" https://connect-us.heroku.com/api/v3/connections/<connection_id>/actions/resume
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Or, using the Heroku CLI plugin:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku connect:resume -a <app_name>
+							Element:span
+								Connection [<connection_id> / <resource_name>] resumed
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Restart the connection
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can restart a connection at any time, which will clear system errors and attempt to sync data again. If the errors have been resolved, this will get the connection back in working order. Otherwise, the connection and its mappings may revert to an error state when errors are next encountered.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								POST /connections/<connection_id>/actions/restart
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X POST -H "Authorization: Bearer <token>" https://connect-us.heroku.com/api/v3/connections/<connection_id>/actions/restart
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Or, using the Heroku CLI plugin:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								heroku connect:restart -a <app_name>
+							Element:span
+								Connection [<connection_id> / <resource_name>] restarted
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Reload a mapping
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If a table in your PostgreSQL database gets out of sync with Salesforce for any reason, you can use the API to clear out the Postgres table and pull fresh data from Salesforce. This requires a mapping ID, which can be obtained by using
+							Element:code
+								deep=true
+								on the connection detail endpoint, as described in Step 8 above.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								POST /mappings/<mapping_id>/actions/reload
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X POST -H "Authorization: Bearer <token>" https://connect-us.heroku.com/api/v3/mappings/<mapping_id>/actions/reload
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This command is not yet implemented in the Heroku CLI plugin.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Get mapping details
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								GET /mappings/<mapping_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -H "Authorization: Bearer <token>" https://connect-us.heroku.com/api/v3/mappings/<mapping_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The response contains configuration details for the mapping, current status and additional URLs for obtaining related information.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								access
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								read_only
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								actively_writing
+							Element:span
+								"
+							Element:span
+								false
+								,
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								config
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								access
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								read_only
+							Element:span
+								"
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								fields
+							Element:span
+								"
+							Element:span
+								: {},
+							Element:span
+								"
+							Element:span
+								CreatedDate
+							Element:span
+								"
+							Element:span
+								: {},
+							Element:span
+								"
+							Element:span
+								Id
+							Element:span
+								"
+							Element:span
+								: {},
+							Element:span
+								"
+							Element:span
+								IsDeleted
+							Element:span
+								"
+							Element:span
+								: {} },
+							Element:span
+								"
+							Element:span
+								SystemModstamp
+							Element:span
+								"
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								indexes
+							Element:span
+								"
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								Id
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								unique
+							Element:span
+								"
+							Element:span
+								false
+								},
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								SystemModstamp
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								unique
+							Element:span
+								"
+							Element:span
+								false
+								} },
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								sf_notify_enabled
+							Element:span
+								"
+							Element:span
+								true
+								,
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								sf_polling_seconds
+							Element:span
+								"
+							Element:span
+								600
+								},
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								connection
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								id
+							Element:span
+								"
+							Element:span
+								},
+							Element:span
+								"
+							Element:span
+								<connection_id>
+							Element:span
+								"
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								counts
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								api_usage
+							Element:span
+								"
+							Element:span
+								0
+								,
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								db
+							Element:span
+								"
+							Element:span
+								0
+								,
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								errors
+							Element:span
+								"
+							Element:span
+								0
+								,
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								pending
+							Element:span
+								"
+							Element:span
+								0
+								,
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								sf
+							Element:span
+								"
+							Element:span
+								0
+								},
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								detail_url
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								<url>
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								id
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								<mapping_id>
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								object_name
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								<object_name>
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								state
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								DATA_SYNCED
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								state_description
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								OK
+							Element:span
+								"
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								times
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								db_poll
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								<date>
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								db_write
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								<date>
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								sf_poll
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								<date>
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								sf_write
+							Element:span
+								"
+							Element:span
+								, }, }
+							Element:span
+								"
+							Element:span
+								<date>
+							Element:span
+								"
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Create a new mapping
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In addition to being able to import an entire configuration at once, you can add a single mapping at a time to an existing connection.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								POST /connections/<connection_id>/mappings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The JSON payload of this API endpoint contains detailed configuration for the mapping itself:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								object_name
+								: the name of the Salesforce object to map
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The remaining details are provided in an object attached to the
+							Element:code
+								config
+								attribute, matching the output format for the mapping detail above.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								access
+								: indicates whether the mapping should be configured for read-only access from Salesforce or read-write in both directions
+							Element:ul
+							Element:li
+							Element:code
+								read_only
+								: data will flow only from Salesforce to PostgreSQL
+							Element:li
+							Element:code
+								read_write
+								: data will flow in both directions
+							Element:li
+							Element:code
+								fields
+								: an object representing the fields to map for the object. Each field name is an attribute on the object, with its value being an empty object. In the future, we may accept additional options for each field in the mapping.
+							Element:li
+							Element:code
+								indexes
+								: an object representing the indexes to include for the object. Each index is provided as an attribute whose name is the field name, and the value is an object with additional settings:
+							Element:ul
+							Element:li
+							Element:code
+								unique
+								: a Boolean indicating whether the index should require unique values
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example payload:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								object_name
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								Account
+							Element:span
+								"
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								config
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								access
+							Element:span
+								"
+							Element:span
+								,
+							Element:span
+								"
+							Element:span
+								read_write
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								sf_notify_enabled
+							Element:span
+								"
+							Element:span
+								true
+								,
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								sf_polling_seconds
+							Element:span
+								"
+							Element:span
+								600
+								,
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								fields
+							Element:span
+								"
+							Element:span
+								: {},
+							Element:span
+								"
+							Element:span
+								CreatedDate
+							Element:span
+								"
+							Element:span
+								: {},
+							Element:span
+								"
+							Element:span
+								Id
+							Element:span
+								"
+							Element:span
+								: {},
+							Element:span
+								"
+							Element:span
+								IsDeleted
+							Element:span
+								"
+							Element:span
+								: {},
+							Element:span
+								"
+							Element:span
+								Name
+							Element:span
+								"
+							Element:span
+								: {} },
+							Element:span
+								"
+							Element:span
+								SystemModstamp
+							Element:span
+								"
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								indexes
+							Element:span
+								"
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								Id
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								unique
+							Element:span
+								"
+							Element:span
+								false
+								},
+							Element:span
+								: {
+							Element:span
+								"
+							Element:span
+								SystemModstamp
+							Element:span
+								"
+							Element:span
+								:
+							Element:span
+								"
+							Element:span
+								unique
+							Element:span
+								"
+							Element:span
+								false
+								} } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If the values provided are valid, the response code to this endpoint will be a 201 Created, with full details for the created mapping in the payload of the response. The response payload will be the same as the output from the mapping detail listed above.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If there were any errors in the input, the response code will be 400 Bad Request, with details about the errors in the JSON payload for the response.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Edit an existing mapping
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Similar to creating a new mapping, you can use the API to edit an existing mapping as well.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								PUT /mappings/<mapping_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The payload is identical to what you’d send when creating a new mapping. The ideal workflow would be to retrieve the details for the mapping, extract the
+							Element:code
+								config
+								attribute, make appropriate changes, then
+							Element:code
+								PUT
+								it back to the same URL.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Like the creation endpoint, any errors will return a 400 Bad Request with details included in the response payload. Successful responses will be 200 OK, with the entire mapping payload included.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Delete an existing mapping
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mappings can also be deleted individually.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								DELETE /mappings/<mapping_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								$
+							Element:span
+								curl -X DELETE -H "Authorization: Bearer <token>" https://connect-us.heroku.com/api/v3/mappings/<mapping_id>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This endpoint simply returns with a 204 No Content indicating that the mapping was deleted. Additional tasks, including removing data from your database, may still run after this response returns.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								connect
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								salesforce
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+							Element:span
+							Element:a
+								Keep reading
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:span
+							Element:a
+								Heroku Connect
+							Element:li
+							Element:span
+							Element:a
+								Heroku Connect
+							Element:li
+							Element:span
+							Element:a
+								OAuth
+							Element:li
+							Element:span
+							Element:a
+								Platform API Reference
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+							Element:a
+							Element:span
+								Feedback
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								Log in to submit feedback.

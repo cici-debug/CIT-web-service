@@ -1,0 +1,593 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Changing The Engine While You’re Driving Down The Highway
+					by Owen on October 14/2011
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					We recently ran into an interesting and difficult problem: how do we change a large, heavily-used table without violating our “avoid downtime if possible” mantra?
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The following is a slightly expurgated version of the postmortem I sent the rest of the team. Table names have been changed to protect the guilty.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											What Hotfixes?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the Sinistar release’s post-release migrations list, there were two
+										Element:code
+											ALTER TABLE
+											migrations slated to make structural changes to the
+										Element:code
+											customer
+											and
+										Element:code
+											customer_login
+											tables (changing the types of some columns, specifically). When we tested these migrations on a copy of the production system’s data, we discovered that they would have caused those tables to be inaccessible for two and five minutes respectively. Since customers are core to our applications, we determined that this qualified as “downtime” in the release plan.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											I prototyped an alternate approach to the
+										Element:code
+											customer
+											changes (outlined below) intended to make changes to the table without taking the app offline while they were happening. The alternate approach was considerably more complex than the original
+										Element:code
+											ALTER TABLE
+											statement, as well as being considerably slower (~15 minutes for our largest shard, as compared to two minutes); we discussed whether it was worth taking the app offline at zero-dark-hundred on a weekend instead and concluded that we’d need to be able to make online changes to expensive tables eventually and opted to go ahead with the alternate approach as a learning experience.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How Did It Work?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The alternate approach we used relied on more MySQL-side tools to make the changes. Specifically, we:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Created a new, empty version of the
+										Element:code
+											customer
+											table (the “target”) table based on the current
+										Element:code
+											customer
+											table plus intended structural changes. Structural changes to an empty table that the app does not use are quite cheap.
+										Element:li
+											Installed triggers on
+										Element:code
+											INSERT
+											,
+										Element:code
+											UPDATE
+											, and
+										Element:code
+											DELETE
+											operations on the
+										Element:code
+											customer
+											table that copied rows (using
+										Element:code
+											REPLACE
+											) into the target table, applying the intended transforms to the affected columns.
+										Element:li
+										Element:p
+											Installed a server-side procedure (“the migration procedure”) that:
+										Element:ol
+										Element:li
+											Selected all of the keys from the original
+										Element:code
+											customer
+											table.
+										Element:li
+											For each key, copied the corresponding row from the
+										Element:code
+											customer
+											table to the target table using
+										Element:code
+											REPLACE
+											.
+										Element:li
+											Ran the migration procedure. (This part is where most of the time went.)
+										Element:li
+											Verified that the contents of the target table were in 1:1 correspondence with the contents of the original
+										Element:code
+											customer
+											table, where the only permitted differences between corresponding rows were the changes intended by the original migration.
+										Element:li
+											Renamed the original
+										Element:code
+											customer
+											table out of the way and renamed the target table to
+										Element:code
+											customer
+											.
+										Element:li
+											Verified that nothing had gone horribly wrong in our apps.
+										Element:li
+											Dropped the renamed version of the original
+										Element:code
+											customer
+											table, along with the triggers and the migration procedure.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The steps are grouped into four phases:
+										Element:code
+											prepare.xml
+											(covering steps 1-3),
+										Element:code
+											execute.xml
+											(covering step 4),
+										Element:code
+											cutover.xml
+											(covering step 6) and
+										Element:code
+											cleanup.xml
+											(covering step 8). The steps not covered by phases were performed semi-manually.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The changes to
+										Element:code
+											customer_login
+											proceeded along the same paths.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											What Went Right
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Well, first of all, we noticed a potential app outage hazard before it went live.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We were able to back out and rewrite the migrations without affecting existing development environments, where the original
+										Element:code
+											ALTER TABLE
+											might have already run, thanks largely to
+										Element:a
+											Liquibase
+											‘s precondition support.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We ran through several versions of this plan, both on my development environment image and with QA (on our release candidate environment), which ferretted out a handful of subtle bugs in the migration procedure that would’ve damaged customer data. Our QA team’s extensive experience and automation tooling around our applications prevented any of those mistakes from going live.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Designing the hotfix in several phases permitted us to run the relatively safe phases over the weekend, with relatively little involvement from our operations team beyond monitoring.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The verification steps did not take out our applications in the process, and revealed a way to move at least some verification steps out of our applications’ scripts directory and into the
+										Element:code
+											core-dbs
+											source tree.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, it worked. Despite the relatively high complexity and the large collection of moving parts, this alternate plan worked very well. Rather than taking our applications offline, everything stayed up (and didn’t slow down too badly).
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											What Went Wrong, And What We Learned
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Finding Problems Late is A Problem
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We didn’t catch the initial problem before it went out to everyone’s development environments. I’ve habitually not worried about migration timing until code freeze, which means that potentially-troublesome migrations will have already run on our bleeding-edge environment (and possibly our release candidate environment) before we notice the problem. This lead to increased complexity in the alternate migration path’s Liquibase configuration – we made extensive use of preconditions to ensure that the alternate migration would be harmless on systems where the original
+													Element:code
+														ALTER TABLE
+														had already run, which seems to have worked, but I’d rather not have had that problem in the first place as it’s another moving part that can have problems.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Concurrency is a Hard Problem
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The first version of the migration procedure looked like this:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Select all of the
+													Element:strong
+														rows
+														from the original
+													Element:code
+														customer
+														table.
+													Element:li
+														For each row, insert that row into the target table using
+													Element:code
+														REPLACE
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The select and loop steps use a MySQL cursor to iterate over their results. While the
+													Element:a
+														MySQL documentation
+														states that it’s undefined whether a cursor is over a snapshot of the query results or over the underlying tables, in practice we found that it was using a snapshot. Since the loop took considerable time to run, and since it (intentionally) did not prevent further changes to the original
+													Element:code
+														customer
+														table from occurring after the snapshot, the loop would insert, into the target table, a “stale” version of any
+													Element:code
+														customer
+														row that had been modified since the snapshot was taken (overwriting the correct version copied into the target table by the triggers on the original table).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We only noticed this on our release candidate environent. When we ran through the migration plan initially to ensure that the procedure did not block our applications’ normal usage, QA ran part of their Selenium suite, which produces a relatively high volume of test traffic. Out of ten thousand customers in the
+													Element:code
+														release-candidate
+														databases, four customers had stale rows copied. This is not a bug we would ever have identified using only manual testing (even with a verification tool), so I’m intensely pleased that we had automation in place and very glad I got QA involved in testing the hotfix as extensively as we did.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Switching from a snapshot of the rows in
+													Element:code
+														customer
+														to a snapshot of the keys in
+													Element:code
+														customer
+														and selecting out the row itself only immediately before copying it to the target table addressed the problem; even in production, our verification script identified exactly zero mismatches between the original
+													Element:code
+														customer
+														table and the target table (across ten million customers). It also made the procedure body somewhat shorter and simpler by reducing the number of fields copied from the cursor on each step of the iteration.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														I’ve Got Ten Million Queries, Is This Bad?
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Boy, is it slow. The migration procedure, which issues one query per affected
+													Element:code
+														customer
+														row, takes approximately ten times as long as a straight
+													Element:code
+														ALTER TABLE
+														, and produces considerably more IO load. This lead to the
+													Element:code
+														customer
+														hotfix running into Friday morning (we kicked it off Thursday afternoon). I made some changes to the
+													Element:code
+														customer_login
+														migration procedure to attempt to compensate – instead of issuing a
+													Element:code
+														REPLACE
+														query for each row, we used a prefix of
+													Element:code
+														customer_login
+														‘s primary key (
+													Element:code
+														customerid
+														) instead to issue only one
+													Element:code
+														REPLACE
+														query for each customer’s worth of rows. This seems to have helped, but not by much. Future iterations of this process might even go by larger groups of rows, depending on the average and worst-case number of rows per group.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														The Best Laid Plans…
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We ran through three iterations of the migration procedure for the
+													Element:code
+														customer
+														table before we settled on a working version. While I did design recovery migrations to back out the broken versions of the procedure that were intended to leave trunk and other environments unaffected by the iterative testing process, they didn’t quite work as planned. Somehow (and we still don’t know how for sure), all of the customers on our bleeding-edge environment were deleted outright instead of being migrated over. We weren’t able to reproduce the problem with the final plan, and we do keep backups of our testing databases, so we were able to recover the missing customers, but it’s another thing that we only noticed because of QA’s intervention.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We avoided this with
+													Element:code
+														customer_login
+														by not building the migrations for that table until we’d ironed out issues in the
+													Element:code
+														customer
+														migrations, and in the future we’ll avoid rolling this sort of hotfix into master (for our bleeding edge environment and development environments) until we’re confident that it’s correct.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														No Space Left On Device
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This is one that caught me totally by surprise. When we ran the migration procedure for
+													Element:code
+														customer
+														in production, we learned that passing 10m queries through the MySQL binary logs (for replication) uses up a lot of space. Fortunately, we keep the binlogs on a separate partition from the main data store, so this did not take MySQL out, but it could’ve if our Ops folks weren’t so sharp. This did, however, take replication out temporarily. Operations resized the partition the binlogs live on, which kept things running (slowly, but smoothly) while the
+													Element:code
+														customer_login
+														migration procedure ran.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Read Locking Is Not Your Friend
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Our initial version of a verification tool, a PHP script in one of our apps’
+													Element:code
+														scripts/
+														directory that ran against the live databases on our master database, would’ve taken our applications offline in roughly the same way as the original
+													Element:code
+														ALTER TABLE
+														statements would’ve. I only realized this when I ran the verification queries (outside of their script) against one of our replica databases’ shards and realized how long they took, shortly before we had planned to run the verification step in the hotfix plan. Fortunately, the verification used very little from our app’s environment; I ported it to a simple shell script and ran it against a replica (after replication caught up) instead. In the future, I’m going to try to get more of our verification scripts written that way where possible, since it does a good job of insulating our applications from side effects.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											In Summary
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Working with large data sets is hard, especially in MySQL (where even reads can cause locks). Making structural changes to those data sets is even harder, especially while the application’s in flight. However, I feel like this went relatively well even with the “creative” issues discovered during testing, and we’ll be using this approach for large tables more frequently in the future.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

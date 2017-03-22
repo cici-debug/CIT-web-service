@@ -1,0 +1,1640 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Overview
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Platform9 is the simplest way for enterprises to implement a private cloud, with intelligent, self-service provisioning of workloads onto their computing infrastructure. Platform9’s cloud service enables the use of existing and new virtualized servers to power private clouds in a minutes, while interoperating seamlessly with existing processes and management products.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Platform9 is based on OpenStack and is 100% compatible with core OpenStack APIs. This documentation describes Platform9’s REST APIs, which include APIs for core OpenStack components that Platform9 supports such as Nova, Glance and Keystone, along with APIs for Platform9’s proprietary components such as Resource Manager.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:aside
+					To use Platform9’s REST API, you are
+				Element:strong
+					required
+					to get an authentication token, which must be passed into all API calls as an
+				Element:code
+					X-Auth-Token
+					request header. All REST API calls are in JSON format. Check the
+				Element:a
+					Usage
+					section for more information.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Terminology
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Service Endpoint
+								: A Service Endpoint is a distinct web service exposed by Platform9. For eg, Nova, Glance, Keystone and Resource Manager are the distinct Service Endpoints. Each Service Endpoint has a distinct URL that follows the format:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								https://<my-company-platform9-url>/<service-endpoint-name>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example: ‘https://foo.platform9.net/keystone’
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								where:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								◦
+							Element:strong
+								my-company-platform9-url
+								is the URL corresponding to the Platform9 account created for your company. This URL is typically of the format https://{company-name}.platform9.net. Eg https://foo.platform9.net
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								◦
+							Element:strong
+								service-endpoint-name
+								is the distinct name for the given service endpoint. For eg the service-endpoint-name for Keystone Service Endpoint is ‘keystone’. The corresponding documentation sections for each Service Endpoint such as Nova, Glance, Keystone and Resource Manager will list the distinct Service Endpoint URL at the beginning.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A REST API request to a Service Endpoint always includes the version of the API being referenced, immediately after the Service Endpoint name.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example: ‘https://foo.platform9.net/keystone/v2.0’
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								where ‘2.0’ is the current supported version of keystone API.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Tenant
+								: Platform9 Private Cloud is designed to be shared by multiple users and teams of users. The concept of a ‘Tenant’ is designed so that Administrators can create a distinct Tenant per team of users that will be using the Platform9 Private Cloud. For eg, an Administrator might want to create distinct Tenants for ‘Development’ and ‘QA’ teams to definte different logical pools of resources that each of these teams will utilize. At any given point, a user logged into Platform9 is always operating in the context of a distinct Tenant. An Administrator can assign a given user to one or more Tenants.
+							Element:li
+							Element:strong
+								Role
+								: Role-based access controls what functionality a user has access to, within a given Tenant. Platform9 currently supports two roles.
+							Element:ul
+							Element:li
+							Element:strong
+								Administrator
+								: As an Administrator user, you have complete access to all functionality exposed by Platform9. You can add or remove servers to Platform9, configure networking, populate image catalog, create and destroy instances etc.
+							Element:li
+							Element:strong
+								Self-Service User
+								: A Self-Service user does not have access to infrastructure. He cannot see or manipulate servers, storage or networking configuration. But he does have access to all instances running within a given tenant, as well as Images in the catalog that the tenant has access to. He can create a new instance from Images in the catalog, view all instances running within given tenant, perform lifecycle operations on them, or delete them.
+							Element:li
+							Element:strong
+								Flavor
+								: A flavor is a pre-defined instance configuration that determines the amount of CPU, Memory and Storage that will be allocated to an instance. Flavors allow the Administrators to standardize on one or more resource configurations for instances within their environment and ensure that all instances are created using one of these standard configurations only. Platform9 ships with a default set of useful flavors, but Administrators can create their own set of flavors that better suit their environments.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Usage
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								# Copyright (c) Platform9 Systems. All rights reserved
+							Element:span
+								# This python sample code demonstrates how to get the authentication-token from Platform9 Keystone Service by passing username and password credentials.
+							Element:span
+								import
+							Element:span
+								requests
+							Element:span
+								import
+							Element:span
+								json
+							Element:span
+								# Platform9 currently ships with a default tenant with name 'service'.
+							Element:span
+								TENANT
+							Element:span
+								=
+							Element:span
+								'service'
+							Element:span
+								def
+							Element:span
+								login
+							Element:span
+								(
+							Element:span
+								username
+							Element:span
+								,
+							Element:span
+								password
+							Element:span
+								):
+							Element:span
+								data
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								"auth"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								"tenantName"
+							Element:span
+								:
+							Element:span
+								TENANT
+							Element:span
+								,
+							Element:span
+								"passwordCredentials"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								"username"
+							Element:span
+								:
+							Element:span
+								username
+							Element:span
+								,
+							Element:span
+								"password"
+							Element:span
+								:
+							Element:span
+								password
+							Element:span
+								}
+							Element:span
+								}
+							Element:span
+								}
+							Element:span
+								req
+							Element:span
+								=
+							Element:span
+								requests
+							Element:span
+								.
+							Element:span
+								post
+							Element:span
+								(
+							Element:span
+								"https://my-company.platform9.net/keystone/v2.0/tokens"
+							Element:span
+								,
+							Element:span
+								json
+							Element:span
+								.
+							Element:span
+								dumps
+							Element:span
+								(
+							Element:span
+								data
+							Element:span
+								),
+							Element:span
+								verify
+							Element:span
+								=
+							Element:span
+								False
+							Element:span
+								,
+							Element:span
+								headers
+							Element:span
+								=
+							Element:span
+								{
+							Element:span
+								'Content-Type'
+							Element:span
+								:
+							Element:span
+								'application/json'
+							Element:span
+								})
+							Element:span
+								if
+							Element:span
+								req
+							Element:span
+								.
+							Element:span
+								status_code
+							Element:span
+								!=
+							Element:span
+								200
+							Element:span
+								:
+							Element:span
+								raise
+							Element:span
+								Exception
+							Element:span
+								(
+							Element:span
+								"Platform9 login returned
+							Element:span
+								%
+							Element:span
+								d, body:
+							Element:span
+								%
+							Element:span
+								s"
+							Element:span
+								%
+							Element:span
+								(
+							Element:span
+								r
+							Element:span
+								.
+							Element:span
+								status_code
+							Element:span
+								,
+							Element:span
+								r
+							Element:span
+								.
+							Element:span
+								text
+							Element:span
+								))
+							Element:span
+								else
+							Element:span
+								:
+							Element:span
+								return
+							Element:span
+								req
+							Element:span
+								.
+							Element:span
+								json
+							Element:span
+								()
+							Element:span
+								# This is the Platform9 username and password associated with your Platform9 account.
+							Element:span
+								username
+							Element:span
+								=
+							Element:span
+								<
+							Element:span
+								my
+							Element:span
+								-
+							Element:span
+								platform9
+							Element:span
+								-
+							Element:span
+								username
+							Element:span
+								>
+							Element:span
+								password
+							Element:span
+								=
+							Element:span
+								<
+							Element:span
+								my
+							Element:span
+								-
+							Element:span
+								platform9
+							Element:span
+								-
+							Element:span
+								password
+							Element:span
+								>
+							Element:span
+								auth
+							Element:span
+								=
+							Element:span
+								login
+							Element:span
+								(
+							Element:span
+								username
+							Element:span
+								,
+							Element:span
+								password
+							Element:span
+								)
+							Element:span
+								auth_token
+							Element:span
+								=
+							Element:span
+								auth
+							Element:span
+								[
+							Element:span
+								'access'
+							Element:span
+								][
+							Element:span
+								'token'
+							Element:span
+								][
+							Element:span
+								'id'
+							Element:span
+								]
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A typical Platform9 REST API call involves following two steps:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								All Platform9 REST API calls use JSON as content type. Set the content-type property to be “application/json” in the request header for all Platform9 REST API calls.
+							Element:li
+								Get an authorization token from keystone by making a POST request to:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								https://<my-company-platform9-url>/keystone/v2.0/tokens
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								with your credentials in the request body. (Please check the
+							Element:a
+								documentation
+								for this endpoint to see the request format.)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:aside
+								NOTE: The authentication tokens generated by Platform9 Keystone are valid for 24 hours today. Once the token expires, the corresponding request will return a 401 Unauthorized response code. At this point, you must regenerate a new authentication token and pass it to the API calls.
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Make your REST API call by setting the ‘X-AuthToken’ parameter in request header to the authentication token you just received in the step above. Each REST API call URL will follow the syntax:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								http://<service-endpoint-url>/<api-call-parameters>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								◦
+							Element:strong
+								service-endpoint-url
+								is described as part of definition of Service Endpoint
+							Element:a
+								here
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								◦
+							Element:strong
+								api-call-parameters
+								are defined per API request and are described below.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example, if you wanted to get a list of users on a specified tenant, you would make a GET request to:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								https://my-company.platform9.net/keystone_admin/v2.0/tenants/{tenantId}/users
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								replacing {tenantId} with the correct identifier of the Tenant you are operating in the context of.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								API Endpoints
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Please refer to the
+							Element:a
+								OpenStack API Reference Guide
+								for a complete OpenStack API documentation, and refer to the table below for a list of services that Platform9 supports and respective API documentation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								APIs that are unique to Platform9 or are not listed on the OpenStack website are described in the Platform9 API Documentation.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Service
+							Element:th
+								Version
+							Element:th
+								Documentation
+							Element:tbody
+							Element:tr
+							Element:td
+								keystone
+							Element:td
+								v3
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-identity-v3.html
+							Element:tr
+							Element:td
+								keystone
+							Element:td
+								v2
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-identity-v2.html
+							Element:tr
+							Element:td
+								nova
+							Element:td
+								v2
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-compute-v2.html
+							Element:tr
+							Element:td
+								glance
+							Element:td
+								v2
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-image-v2.html
+							Element:tr
+							Element:td
+								glance
+							Element:td
+								v1
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-image-v1.html
+							Element:tr
+							Element:td
+								cinder
+							Element:td
+								v2
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-blockstorage-v2.html
+							Element:tr
+							Element:td
+								cinder
+							Element:td
+								v1
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-blockstorage-v1.html
+							Element:tr
+							Element:td
+								neutron
+							Element:td
+								v2.0
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-networking-v2.html
+							Element:tr
+							Element:td
+								heat
+							Element:td
+								v1
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-orchestration-v1.html
+							Element:tr
+							Element:td
+								ceilometer
+							Element:td
+								v2
+							Element:td
+							Element:a
+								http://developer.openstack.org/api-ref-telemetry-v2.html
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Resource Manager
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Service Endpoint URI
+					:
+				Element:code
+					https://<my-company-platform9-url>/resmgr
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The resource manager is source of truth for:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Hosts allocated to Platform9.
+				Element:li
+					Their roles in the Platform9 system.
+				Element:li
+					(Optionally) which hosts are approved by user for specific role in Platform9.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Check the
+				Element:a
+					Usage
+					section for usage details.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					GET /v1/roles
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"roleA"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"display_name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Role A"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"description"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Simple role A"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"active_version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"3.0.9-1"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"roleB"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"display_name"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Role B"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"description"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Another role B"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"active_version"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1.0.2-5"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Returns a list of Platform9 roles available in the system.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Parameter
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											name
+										Element:td
+											string
+										Element:td
+											The name of the role.
+										Element:tr
+										Element:td
+											display_name
+										Element:td
+											string
+										Element:td
+											The user-friendly name for the role.
+										Element:tr
+										Element:td
+											description
+										Element:td
+											string
+										Element:td
+											A description of the role.
+										Element:tr
+										Element:td
+											active_version
+										Element:td
+											string
+										Element:td
+											The version of the role.
+									Node:
+									(type) c
+									(layer)3
+										Element:h2
+											GET /v1/roles/{role_name}
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+										Element:span
+											"name"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"roleA"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"display_name"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"Role A"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"description"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"Simple role A"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"active_version"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"3.0.9-1"
+										Element:span
+										Element:span
+											}
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Returns a Platform9 role corresponding to
+										Element:code
+											role_name
+											.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request Parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Parameter
+										Element:th
+											Style
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											role_name
+										Element:td
+											URI
+										Element:td
+											string
+										Element:td
+											The name of the role.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Parameter
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											name
+										Element:td
+											string
+										Element:td
+											The name of the role.
+										Element:tr
+										Element:td
+											display_name
+										Element:td
+											string
+										Element:td
+											The user-friendly name for the role.
+										Element:tr
+										Element:td
+											description
+										Element:td
+											string
+										Element:td
+											A description of the role.
+										Element:tr
+										Element:td
+											active_version
+										Element:td
+											string
+										Element:td
+											The version of the role.
+									Node:
+									(type) c
+									(layer)3
+										Element:h2
+											GET /v1/hosts
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+										Element:span
+											{
+										Element:span
+										Element:span
+											"id"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"rsc_1"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"state"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"active"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"info"
+										Element:span
+											:
+										Element:span
+										Element:span
+											{
+										Element:span
+										Element:span
+											"hostname"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"leb-centos-1.platform9.sys"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"os_family"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"Linux"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"arch"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"x86_64"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"os_info"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"centos 6.4 Final"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"responding"
+										Element:span
+											:
+										Element:span
+										Element:span
+											true
+										Element:span
+											,
+										Element:span
+										Element:span
+											"last_response_time"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"2014-08-29T18:04:42Z"
+										Element:span
+										Element:span
+											},
+										Element:span
+										Element:span
+											"roles"
+										Element:span
+											:
+										Element:span
+										Element:span
+											[
+										Element:span
+											"role_1"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"role2"
+										Element:span
+											],
+										Element:span
+										Element:span
+											"role_status"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"ok"
+										Element:span
+										Element:span
+											},
+										Element:span
+										Element:span
+											{
+										Element:span
+										Element:span
+											"id"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"rsc_2"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"state"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"activating"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"info"
+										Element:span
+											:
+										Element:span
+										Element:span
+											{
+										Element:span
+										Element:span
+											"hostname"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"leb-centos-1.platform9.sys"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"os_family"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"Linux"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"arch"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"x86_64"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"os_info"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"centos 6.4 Final"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"responding"
+										Element:span
+											:
+										Element:span
+										Element:span
+											false
+										Element:span
+											,
+										Element:span
+										Element:span
+											"last_response_time"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"2014-08-29T18:04:42Z"
+										Element:span
+										Element:span
+											},
+										Element:span
+										Element:span
+											"roles"
+										Element:span
+											:
+										Element:span
+										Element:span
+											[
+										Element:span
+											"role_2"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"role5"
+										Element:span
+											],
+										Element:span
+										Element:span
+											"role_status"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"ok"
+										Element:span
+										Element:span
+											},
+										Element:span
+										Element:span
+											]
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Returns a list of hosts in the Platform9 system with their assigned roles.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											last_response_time
+											values are used when the host is not responding. Otherwise, this value may be null.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For unauthorized hosts,
+										Element:code
+											responding
+											,
+										Element:code
+											last_response_time
+											, and
+										Element:code
+											role_status
+											are not exposed.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Parameter
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											id
+										Element:td
+											string
+										Element:td
+											The unique ID of the host.
+										Element:tr
+										Element:td
+											state
+										Element:td
+											string
+										Element:td
+											The current state of the host. Can be
+										Element:code
+											active
+											(host currently has a role assigned to it),
+										Element:code
+											inactive
+											(host currently has no roles assigned to it), or
+										Element:code
+											activating
+											(host is currently being assigned a role).
+										Element:tr
+										Element:td
+											hostname
+										Element:td
+											string
+										Element:td
+											The name of the host.
+										Element:tr
+										Element:td
+											os_family
+										Element:td
+											string
+										Element:td
+											The operating system family of the host.
+										Element:tr
+										Element:td
+											arch
+										Element:td
+											string
+										Element:td
+											The architecture of the host.
+										Element:tr
+										Element:td
+											os_info
+										Element:td
+											string
+										Element:td
+											Information about the operating system.
+										Element:tr
+										Element:td
+											responding
+										Element:td
+											boolean
+										Element:td
+											If
+										Element:code
+											true
+											, it indicates that the host is currently responding.
+										Element:tr
+										Element:td
+											last_response_time
+										Element:td
+											dateTime
+										Element:td
+											The time of the last response by the host.
+										Element:tr
+										Element:td
+											roles
+										Element:td
+											array
+										Element:td
+											A list of roles by name that belong to the host.
+										Element:tr
+										Element:td
+											role_status
+										Element:td
+											string
+										Element:td
+											Can be
+										Element:code
+											ok
+											,
+										Element:code
+											converging
+											,
+										Element:code
+											retrying
+											, or
+										Element:code
+											failed
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:h2
+											GET /v1/hosts/{id}
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+										Element:span
+											"id"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"rsc_1"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"info"
+										Element:span
+											:
+										Element:span
+										Element:span
+											{
+										Element:span
+										Element:span
+											"hostname"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"leb-centos-1.platform9.sys"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"os_family"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"Linux"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"arch"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"x86_64"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"os_info"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"centos 6.4 Final"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"responding"
+										Element:span
+											:
+										Element:span
+										Element:span
+											true
+										Element:span
+											,
+										Element:span
+										Element:span
+											"last_response_time"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"2014-08-29T18:04:42Z"
+										Element:span
+										Element:span
+											},
+										Element:span
+										Element:span
+											"state"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"active"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"roles"
+										Element:span
+											:
+										Element:span
+										Element:span
+											[
+										Element:span
+											"role4"
+										Element:span
+											,
+										Element:span
+										Element:span
+											"role3"
+										Element:span
+											],
+										Element:span
+										Element:span
+											"role_status"
+										Element:span
+											:
+										Element:span
+										Element:span
+											"ok"
+										Element:span
+										Element:span
+											}
+										Element:span
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Returns details for a single host.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											last_response_time
+											value is used when the host is not responding. Otherwise, this value may be null.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For unauthorized hosts,
+										Element:code
+											responding
+											,
+										Element:code
+											last_response_time
+											, and
+										Element:code
+											role_status
+											are not exposed.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request Parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Parameter
+										Element:th
+											Style
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											id
+										Element:td
+											URI
+										Element:td
+											string
+										Element:td
+											The unique ID of the host.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response Parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Parameter
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											id
+										Element:td
+											string
+										Element:td
+											The unique ID of the host.
+										Element:tr
+										Element:td
+											state
+										Element:td
+											string
+										Element:td
+											The current state of the host. Can be
+										Element:code
+											active
+											(host currently has a role assigned to it),
+										Element:code
+											inactive
+											(host currently has no roles assigned to it), or
+										Element:code
+											activating
+											(host is currently being assigned a role).
+										Element:tr
+										Element:td
+											hostname
+										Element:td
+											string
+										Element:td
+											The name of the host.
+										Element:tr
+										Element:td
+											os_family
+										Element:td
+											string
+										Element:td
+											The operating system family of the host.
+										Element:tr
+										Element:td
+											arch
+										Element:td
+											string
+										Element:td
+											The architecture of the host.
+										Element:tr
+										Element:td
+											os_info
+										Element:td
+											string
+										Element:td
+											Information about the operating system.
+										Element:tr
+										Element:td
+											responding
+										Element:td
+											boolean
+										Element:td
+											If
+										Element:code
+											true
+											, it indicates that the host is currently responding.
+										Element:tr
+										Element:td
+											last_response_time
+										Element:td
+											dateTime
+										Element:td
+											The time of the last response by the host.
+										Element:tr
+										Element:td
+											roles
+										Element:td
+											array
+										Element:td
+											A list of roles by name that belong to the host.
+										Element:tr
+										Element:td
+											role_status
+										Element:td
+											string
+										Element:td
+											Can be
+										Element:code
+											ok
+											,
+										Element:code
+											converging
+											,
+										Element:code
+											retrying
+											, or
+										Element:code
+											failed
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											python

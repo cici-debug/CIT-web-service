@@ -1,0 +1,583 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Changes to Autobills in the FreshBooks API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					FreshBooks is dedicated to providing a secure and trustworthy payments service. We work around the clock to keep ahead of attackers and ensure we meet or beat the latest requirements of our industry, and we’re nearing completion of a key goal: Payments Card Industry (PCI) compliance. PCI Compliance is a high bar to meet in ensuring that Credit Card data is securely transferred and stored both in our technology and our processes. It’s the same standard used by credit companies themselves, and by all industry-leading payment processors.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					While we strive to achieve this high bar of security in a seamless way for our customers, there are some unavoidable changes to our Recurring Billing API. This document outlines the changes client systems need to make to continue to create autobills through the FreshBooks Classic API.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Timeline
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Our API will continue to accept and process raw credit card information until the end of January 31st, 2017. The API will begin accepting credit card tokens as outlined in this document as of December 1st, 2016. This allows a two month transition period to make required changes to your systems. The strict regulation timelines of our PCI auditing process require that we can not extend our acceptance of raw Credit Card data through our API beyond January 31st — there will be no exceptions.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					No action is required for existing autobill profiles. As part of our rollout, we will tokenize all existing autobilling profiles so that they continue to operate without interruption. New profiles created via the API and profiles being updated with new credit cards are what must begin using tokens.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					High Level View
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Systems currently follow a flow something like this:
+			Node:
+			(type) c
+			(layer)1
+				Element:ol
+				Element:li
+					create a client
+				Element:li
+					create a recurring profile with raw credit card data
+				Element:li
+					the recurring profile processes credit cards automatically as scheduled
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The new required flow follows this sequence:
+			Node:
+			(type) c
+			(layer)1
+				Element:ol
+				Element:li
+					create a client
+				Element:li
+					send raw credit card data to our secured tokenization service, receive a token
+				Element:li
+					create a recurring profile with the token you received instead of a card number
+				Element:li
+					the recurring profile processes credit cards automatically as scheduled
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Gateway Support
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We support tokenization with Stripe and Authorize.NET. It is not possible to generate auto-bill profiles using the API for FreshBooks Payments, Braintree, or PayPal.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Technical Details
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This section provides a step by step walkthrough of the new tokenization process, including example calls and responses. Client creation is not affected by these changes, so it is assumed in all examples that you already have a Client, and have their Credit Card information to provide to the Tokenization Service.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					General Flow
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Send Card Details to Tokenization Service
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Start by making a POST call to our tokenization server with card data. The call should specify the content type as application/json using a Content-Type header. The data should be a valid JSON object with one key, ‘cc_info’, and a set of required card data that depends on the gateway data is being tokenized for.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is an example curl call:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -X POST -H "Content-Type: application/json" \ -d '{"cc_info": { "name": "John Doe", "card_number": "4111111111111111", "expiry_month": "02", "expiry_year": "2020" }}' https://paid.freshbooks.com/gateway/stripe/tokenize
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is an example successful response:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "cc_token": "tok_1912fb2jyvokPAPlvz9uSvy4" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Successful responses will always have an HTTP status code of 200, be JSON encoded, and contain a single cc_token key containing the token to include in your Recurring API Create and Update calls.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Exact details for the required request data on each Gateway are included at the end of this document.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Create A Recurring Profile
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With the token received from the tokenization service, construct a Recurring Profile Create or Update call as normal, but include the token in a cc_token field instead of the user’s credit card number in a cc_number field.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The example below is the same as that found in our
+										Element:a
+											Recurring Profile
+											documentation, updated to show that the call accepts a cc_token instead of a cc_number. See the section in particular for what information must be sent and how to format it.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<request method="recurring.create"> <recurring> <client_id>40</client_id> <!-- Client to generate invoices for --> <!-- Contacts are optional --> <contacts> <contact> <contact_id>23</contact_id> </contact> </contacts> <date>2007-09-23</date> <po_number>2314</po_number> <!-- Purchase order number (Optional) --> <discount>10</discount> <!-- Percent discount (Optional) --> <occurrences>1</occurrences> <!-- Number of invoices to generate; 0 infinite (default 0) --> <frequency>monthly</frequency> <!-- One of 'weekly', '2 weeks', '4 weeks', 'monthly', '2 months', --> <!-- '3 months', '6 months', 'yearly', '2 years' --> <send_email>1</send_email> <!-- Send email notification(Default 1) --> <send_snail_mail>0</send_snail_mail> <!-- Send copy by snail mail (Default 0) --> <currency_code>CAD</currency_code> <!-- Defaults to systems base currency (Optional) --> <language>en</language> <!-- Defaults to the client's language --> <notes>Due upon receipt.</notes> <!-- (Optional) --> <terms>Payment due in 30 days.</terms> <!-- (Optional) --> <first_name>John</first_name> <!-- (Optional) --> <last_name>Smith</last_name> <!-- (Optional) --> <organization>ABC Corp</organization> <!-- (Optional) --> <p_street1></p_street1> <!-- (Optional) --> <p_street2></p_street2> <!-- (Optional) --> <p_city></p_city> <!-- (Optional) --> <p_state></p_state> <!-- (Optional) --> <p_country></p_country> <!-- (Optional) --> <p_code></p_code> <!-- (Optional) --> <vat_name></vat_name> <!-- e.g. 'VAT Number' (Optional) --> <vat_number></vat_number> <!-- If set, shown with vat_name under client address (Optional) --> <return_uri></return_uri> <!-- (Optional) --> <autobill> <!-- (Optional) --> <!-- Case insensitive gateway name from gateway.list (Must be auto-bill capable) --> <gateway_name>Authorize.net</gateway_name> <card> <!-- Token you received from our tokenization service --> <cc_token>tok_1912fb2jyvokPAPlvz9uSvy4</cc_token> <name>John Smith</name> <expiration> <month>3</month> <year>2012</year> </expiration> </card> </autobill> <lines> <line> <name>Yard Work</name> <description>Mowed the lawn.</description> <unit_cost>10</unit_cost> <quantity>4</quantity> <tax1_name>GST</tax1_name> <tax2_name>PST</tax2_name> <tax1_percent>8</tax1_percent> <tax2_percent>6</tax2_percent> <type>Time</type> <!-- (Optional) --> <!-- One of 'Item' or 'Time'. If omitted, the line's type defaults to 'Item' --> </line> </lines> </recurring> </request>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:h2
+											Gateway Fields and Tokenization URLs
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Details for Stripe
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your integration uses the Stripe gateway to create recurring profiles, this is the URL to post CC data to to receive a token:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											https://paid.freshbooks.com/gateway/stripe/tokenize
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All of the following data is required:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"cc_info": { "card_number": "4111111111111111", "name": "John Smith", "expiry_month": "02", "expiry_year": "2012" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is an example curl call:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -X POST -H "Content-Type: application/json" \ -d '{"cc_info": { "card_number": "4111111111111111", "name": "John Smith", "expiry_month": "02", "expiry_year": "2012" }}' https://paid.freshbooks.com/gateway/stripe/tokenize
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Details for Authorize.net
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your integration uses the Stripe gateway to create recurring profiles, this is the URL to post CC data to to receive a token:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											https://paid.freshbooks.com/gateway/authorize/tokenize
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All of the following data is required:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"cc_info": { "card_number": "4111111111111111", "name": "John Smith", "expiry_month": "02", "expiry_year": "2012", "cvv": "123", "email": "test@example.com", "postal_code": "90210", "country": "US" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is an example curl call:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -X POST -H "Content-Type: application/json" \ -d '{"cc_info": { "card_number": "4111111111111111", "name": "John Smith", "expiry_month": "02", "expiry_year": "2012", "cvv": "123", "email": "test@example.com", "postal_code": "90210", "country": "US" }}' https://paid.freshbooks.com/gateway/authorize/tokenize
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:h2
+											Errors when Tokenizing
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Missing Required Field
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If a field in your request is missing or not properly specified, you’ll receive an HTTP 422 (Unprocessable Entity) error response like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "error": { "message": { "cc_info": { "name": [ "This field is required." ] } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Bad Card Number or Expiration
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you submit a Credit Card number that does not tokenize, or an Expiry date in the past or that is otherwise invalid, an HTTP 422 (Unprocessable Entity) status code will be returned along with an error response like the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "error": { "message": "Your card number is incorrect." } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											or
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "error": { "message": "Your card's expiration year is invalid." } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Failure to specify Content-Type or to provide valid JSON
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you fail to specify a content type as application/json with the “Content-Type: application/json” header in your request, or provide syntactically invalid JSON (e.g. single quotes for keys or missing an external set of {}’s), you’ll receive an HTTP status of 403 (Forbidden), and an HTML response similar to the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<html> <head> <title>403 Forbidden</title> </head> <body bgcolor="white"> <center> <h1>403 Forbidden</h1> </center> <hr> <center>nginx</center> </body> </html>
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Support for Making the Change
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If you or a developer has tried to make this transition and run into problems not addressed here, contact
+				Element:a
+					api@freshbooks.com
+					with information about what you’ve tried and what went wrong, and we’ll do our best to help.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

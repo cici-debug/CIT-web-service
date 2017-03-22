@@ -1,0 +1,35 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Action
+					Actions allow you to configure incoming messages delivery method.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+					This tutorial will help you configure the method of receiving incoming SMS messages. Before configuring Action, you must have [phone number](/docs/phone-number) and [Configuration container](/docs/message-configuration) ready. [block:image] { "images": [ { "image": [ "https://files.readme.io/6af562b-sms4.PNG", "sms4.PNG", 493, 89, "#dcd4d3" ] } ] } [/block] When setting up Action, you have to choose between two incoming message delivery methods: * **Http forward method** - allows you to receive messages from your subscribers in real-time * *HTTP POST* - Receive messages via POST request in the request body * *HTTP GET* - Receive messages via GET request as part of the URL query string * **Pull method** - allows you to fetch new messages from Infobip server over API at your convenience [block:callout] { "type": "info", "title": "Difference between Forward and Pull methods", "body": "Learn more about Forward and Pull methods for receiving messages in [introduction](/docs/receive-sms-introduction#step-3-action-setup)." } [/block] ###Available methods * [Create new Action](#create-new-action) * [Get Action](#get-action) * [Delete Action](#delete-action) ##Action model |Property name|Type|Description| |-|-|-| |actionKey|string|Unique ID of the Action.| |type|string|Action model of receiving the message. Must be `HTTP_FORWARD_POST`, `HTTP_FORWARD_GET` or `PULL`| |callbackData|string|Data string that will be returned with each received message.| |forwardUrl|string|URL to which new messages will be forwarded (if `type` is set to `HTTP_FORWARD_POST` or `HTTP_FORWARD_GET`)| [block:api-header] { "type": "post", "title": "Create new Action" } [/block] This method will create new Action withing Configuration container. ``` https://api.infobip.com/sms/1/numbers/{numberKey}/configurations/{configurationKey}/actions ``` ###Create Pull example [block:code] { "codes": [ { "code": "POST /sms/1/numbers/78D8394AC5EG0460B4CF0E723FC31B49/configurations/64GD2CA328536A09DD2CA328536A09D8/actions HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nAccept: application/json\n\n{\n\t\"type\": \"PULL\",\n\t\"callbackData\": \"you-do-not-call-us-we-call-you-data\"\n}", "language": "json" } ] } [/block] Response [block:code] { "codes": [ { "code": "{\n \"actionKey\": \"76BA545050E5623F6BA00D595A23EC28\",\n \"type\": \"PULL\",\n \"callbackData\": \"someCallbackData\"\n}", "language": "json" } ] } [/block] The success response is represented by an HTTP status code `200 OK`. ###Create HTTP POST forward example [block:code] { "codes": [ { "code": "POST /sms/1/numbers/78D8394AC5EG0460B4CF0E723FC31B49/configurations/64GD2CA328536A09DD2CA328536A09D8/actions HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nAccept: application/json\n\n{\n\t\"type\": \"HTTP_FORWARD_POST\",\n\t\"forwardUrl\": \"http://someurl.com/message\",\n\t\"callbackData\": \"someCallbackData\"\n}", "language": "json" } ] } [/block] Response [block:code] { "codes": [ { "code": "{\n \"actionKey\": \"76BA545050E5623F6BA00D595A23EC28\",\n \"type\": \"HTTP_FORWARD_POST\",\n \"callbackData\": \"someCallbackData\",\n \"forwardUrl\": \"http://someurl.com/message\"\n}", "language": "json" } ] } [/block] The success response is represented by an HTTP status code `200 OK`. ###Create HTTP GET forward example Use [placeholders](#section-using-placeholders-in-http-forward-get-request) in `forwardUrl` to generate query string with desired message data. [block:code] { "codes": [ { "code": "POST /sms/1/numbers/78D8394AC5EG0460B4CF0E723FC31B49/configurations/64GD2CA328536A09DD2CA328536A09D8/actions HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nAccept: application/json\n\n{\n\t\"type\": \"HTTP_FORWARD_GET\",\n\t\"forwardUrl\": \"http://someurl.com/message?sender=%sender%&text=%cleanText%\",\n\t\"callbackData\": \"someCallbackData\"\n}", "language": "json" } ] } [/block] Response [block:code] { "codes": [ { "code": "{\n \"actionKey\": \"76BA545050E5623F6BA00D595A23EC28\",\n \"type\": \"HTTP_FORWARD_GET\",\n \"callbackData\": \"someCallbackData\",\n \"forwardUrl\": \"http://someurl.com/message?sender=%sender%&text=%cleanText%\"\n}", "language": "json" } ] } [/block] The success response is represented by an HTTP status code `200 OK`. ####Using placeholders in HTTP Forward GET request This method allows you to pass message data as URL query string parameters. Example: ``` http://someurl.com/message?sender=%sender%&text=%cleanText% ``` You can combine any placeholder from this list to build your query string parameters. Wrap a **placeholder name** with `%` like this `%sender%`. Palcehodlers |Placeholder name|Description| |-|-| |sender|Sender ID| |text|Message text| |keyword|Configuration container keyword| |cleanText|Message text without keyword| |receiver|Receiver number| |when|Date sent| |callbackdata|Callback data| [block:api-header] { "type": "get", "title": "Get Action" } [/block] This method will return the Action of selected Configuration ``` https://api.infobip.com/sms/1/numbers/{numberKey}/configurations/{configurationKey}/actions ``` Request example [block:code] { "codes": [ { "code": "GET /sms/1/numbers/78D8394AC5EG0460B4CF0E723FC31B49/configurations/64GD2CA328536A09DD2CA328536A09D8/actions HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nAccept: application/json", "language": "json" } ] } [/block] Response [block:code] { "codes": [ { "code": "{\n \"actions\": [\n {\n \"actionKey\": \"76BA545050E5623F6BA00D595A23EC28\",\n \"type\": \"PULL\",\n \"callbackData\": \"you-do-not-call-us-we-call-you-data\"\n }\n ]\n}", "language": "json" } ] } [/block] The success response is represented by an HTTP status code `200 OK`. [block:api-header] { "type": "delete", "title": "Delete Action" } [/block] This method will delete Action of selected Configuration ``` https://api.infobip.com/sms/1/numbers/{numberKey}/configurations/{configurationKey}/actions/{actionKey} ``` Request example [block:code] { "codes": [ { "code": "DELETE /sms/1/numbers/78D8394AC5EG0460B4CF0E723FC31B49/configurations/64GD2CA328536A09DD2CA328536A09D8/actions/76BA545050E5623F6BA00D595A23EC28 HTTP/1.1\nHost: api.infobip.com\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\nAccept: application/json", "language": "json" } ] } [/block] The success response is represented by an HTTP status code `204 No Content`. There is no response body.
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subscribe to our newsletter
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript
+												Node:
+												(type) c
+												(layer)4
+													Element:noscript

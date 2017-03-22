@@ -1,0 +1,244 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+								Receive a SMS
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To forward a new incoming SMS, tyntec makes a POST request to your $callbackUrl.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Over-length messages are recomposed before being forwarded to your webserver.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								tyntec's application will retry delivery every 10 seconds in case your application does not accept the inbound message (200, 201, 202 status code). Retries are paused for 10 minutes after every 100 consecutive unsuccessful delivery attempts. tyntec's application will retry for a maximum of 48 hours.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following code block gives a basic example of how the request will look like:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+								Receiving SMS (JSON)
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								curl -X POST -H "Content-Type: application/json" -d '{ "from":"+491622943176", "to":"+14155270903", "message":"This is an example.", "originMCC":"262", "originMNC":"02", "originTtId":"2" "totalPrice":"0.002", "requestId":"12-75cfafba-8799-4f2b-8505-ece6af6abf01", "size":1, "missingParts":false, "contentList": [{ "msgId":"12-1407778865439+1234567890", "sentDate":"2014-05-13T17:41:06+0100", "price":"0.001", "currency":"EUR", "priceEffective":"2010-11-01T00:00:00+0000" "sequenceNumber":1, ]} }' https://rest.customer.com/inboundmessages/
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The parameters in this request have the following meaning:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:strong
+								Parameter
+							Element:td
+							Element:strong
+								Possible Values
+							Element:td
+							Element:strong
+								Description
+							Element:tr
+							Element:td
+								from
+							Element:td
+								any international phone number or string
+							Element:td
+								This parameter gives the phone number of the sending party in international format if available or any other received sender idendification.
+							Element:tr
+							Element:td
+								to
+							Element:td
+								any of your numbers provided by tyntec in international format
+							Element:td
+								This parameter gives your number provided by tyntec that has received the respective message.
+							Element:tr
+							Element:td
+								message
+							Element:td
+								any UTF-8 encoded string
+							Element:td
+							Element:p
+								The received message will be sent to you as a UTF-8 encoded string.
+								Note: Missing parts of an over-length message will be marked with <...> at the respective position within the message
+							Element:tr
+							Element:td
+								originMCC
+							Element:td
+							Element:p
+								UTF-8 encoded string according to ITU E.212
+							Element:td
+								A representative MNC (
+							Element:strong
+								M
+								obile
+							Element:strong
+								N
+								etwork
+							Element:strong
+								C
+								ode) of the originating network.
+							Element:tr
+							Element:td
+								originMNC
+							Element:td
+							Element:p
+								UTF-8 encoded string according to ITU E.212
+							Element:td
+								A representative MNC (
+							Element:strong
+								M
+								obile
+							Element:strong
+								N
+								etwork
+							Element:strong
+								C
+								ode) of the originating network.
+							Element:tr
+							Element:td
+								originTtId
+							Element:td
+								integer
+							Element:td
+							Element:p
+								The tyntec id of the originating network.
+								The mapping can be found in the
+							Element:em
+								customer lounge
+								under “home>resource center>network lists>mobile outbound sms” (https://customerlounge.tyntec.com/resource-centre.html).
+							Element:tr
+							Element:td
+								totalPrice
+							Element:td
+								float
+							Element:td
+								The sum of prices for each message part listed in “contentList”.
+							Element:tr
+							Element:td
+								requestId
+							Element:td
+							Element:td
+								The unique identifier provided for each request (retries will use the same requestId as the original request for easy message tracking).
+							Element:tr
+							Element:td
+								size
+							Element:td
+								integer
+							Element:td
+								The amount of respective concatenated SMS parts.
+							Element:tr
+							Element:td
+								missingParts
+							Element:td
+								boolean
+							Element:td
+								True in case a part of an over-length was not received by the tyntec platform and the forwarded message text is incomplete.
+							Element:tr
+							Element:td
+								contentList
+							Element:td
+							Element:td
+							Element:p
+								tyntec merges over-length (concatenated) SMS into one string before sending it to your webserver.
+							Element:p
+								The contenList provides detailed information on each message part.
+							Element:p
+								NOTE: tyntec will charge for each part of the concatenated message as an individual message!
+							Element:tr
+							Element:td
+								msgId
+							Element:td
+							Element:td
+								The unique identifier provided by tyntec for each message part.
+							Element:tr
+							Element:td
+								price
+							Element:td
+								float
+							Element:td
+							Element:p
+								The price per message from the respective network.
+								Negative prices represent payout in favor of tyntec’s customer.
+							Element:tr
+							Element:td
+								currency
+							Element:td
+								currency code following
+							Element:a
+								ISO 4217
+							Element:td
+								The currency in which the pricing is given; corresponding to the currency of the invoice.
+							Element:tr
+							Element:td
+								priceEffective
+							Element:td
+								date in the format “
+							Element:em
+								yyyy-MM-ddTHH:mm:ss+HHmm
+								” (according to
+							Element:a
+								ISO 8601
+								)
+							Element:td
+								The date when the “price” became effective.
+							Element:tr
+							Element:td
+								sentDate
+							Element:td
+							Element:td
+								The time stamp when the SMS has been received by the sending MSC (if available).
+							Element:p
+								The time stamp when the respective message was received by tyntec.
+							Element:em
+								or
+							Element:tr
+							Element:td
+								sequenceNumber
+							Element:td
+								integer
+							Element:td
+								In case an over-length message is received tyntec recomposes the full message text before forwarding. The “sequenceNumber” indicates the order of the message part.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+						Node:
+						(type) c
+						(layer)2
+							Element:center
+							Element:ul
+							Element:li
+							Element:a
+								Contact
+							Element:li
+							Element:a
+								Imprint
+							Element:li
+							Element:a
+								Disclaimer

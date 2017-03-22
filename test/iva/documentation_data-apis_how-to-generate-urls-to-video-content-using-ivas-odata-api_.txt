@@ -1,0 +1,259 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:span
+					How to Generate URLs to Video Content Using IVA’s OData API
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:aside
+													Element:h4
+														Search Documentation
+													Element:label
+														Search for:
+													Element:h4
+														Documentation Menu
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														Please note that direct links to Video URLs require a subscription to IVA’s services. Please contact sales for more information.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Option 1: Using local cache for videos available
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For optimal performance, IVA recommends caching data about the video availability locally rather than making API calls for every request.
+							Element:br
+								What to cache?
+							Element:br
+								The VideoAsset Entity has a reference to the Encodes Collection. This collection is described in the
+							Element:a
+								Data Dictionary
+								. The Encodes collection returns meta data for all of the video formats available for a particular Video Asset.
+							Element:br
+								IVA recommends using the Encodes Collection to generate your own URLs to videos using the
+							Element:a
+								Video API
+								. This method enables you to cache the data from the Encodes Collection for a specific Video Asset and generate the video links on the fly programmatic without making an API call.
+							Element:br
+								To include the Encodes collection for a particular Video Asset use the EXPAND option.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Ex: http://api.internetvideoarchive.com/2.0/DataService/VideoAssets(178)?$expand=Encodes&developerid={yourdeveloperid}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This will return meta data for the VideoAsset with PublishedID 178 and include all of the available Encodes. You can then choose the best Encode for your application from the collection of Encodes returned. Use the
+							Element:a
+								Video API
+								to call the video. The
+							Element:a
+								Video API
+								allows you to generate links you can pass to your player.
+												Node:
+												(type) c
+												(layer)4
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Option 2: Using the GetEncodes() Method to generate URL
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This method is NOT recommended for most implementations. Consult IVA’s Client Services before implementing this method. Direct link Video URLs can be generated using IVA OData API using the GetEncodes() method and are counted against your hourly quota. This method performs the same function as written in the Security Document in the
+							Element:a
+								Video API
+								for each Encode available for a particular VideoAsset.
+							Element:br
+								This method requires two parameters: PublishedId (int) and ReportTag (string).
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Ex: http://api.internetvideoarchive.com/2.0/DataService/GetEncodes?publishedid=561667&reporttag='test'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+								PublishedId
+								is the unique ID for the particular video asset you wish to link.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+								ReportTag
+								is a string used to tag your usage reports inside your Media Manager account.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to get working URLs returned from this method, you need to include some information in the HEADER request. These parameters are:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+								TTL
+								– This is the time when the Video URLs should expire. This time is based on Unix Epoch time which is the number of seconds from midnight on 1/1/1970. To generate this value, calculate the difference in seconds between 1/1/1970 and the time you want the video to expire. For more information on this visit: http://www.epochconverter.com/
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+								DeveloperId
+								is the GUID assigned to you to access the IVA OData API.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+								Token
+								is an MD5 hash of your secret key (supplied to you in your welcome letter) concatenated with the requesting URL. This MD5 hash generation method is identical to the one used for the
+							Element:a
+								VIDEO API
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If the TTL or Token are omitted from the HEADER or the hash does not match the hash generated in the IVA OData API, the URLs returned will be partial URLs without the necessary CustomerId, e, and h parameters for a working URL.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								VB.NET Example Code:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Private Shared Sub OnSendingRequest(ByVal sender As Object, ByVal e As SendingRequestEventArgs) Dim token As String = ConfigurationManager.AppSettings("secretkey") Dim url As String = e.Request.RequestUri.ToString Dim ttl As Long = DateDiff("s", "01/01/1970 00:00:00", DateAdd("n", 10, Date.UtcNow)) 'good for 10 minutes Dim hash As String = LCase(System.Web.Security.FormsAuthentication.HashPasswordForStoringInConfigFile(token & url, "MD5")) e.RequestHeaders.Add("developerid", ConfigurationManager.AppSettings("developerid")) e.RequestHeaders.Add("ttl", ttl.ToString) e.RequestHeaders.Add("token", hash) End Sub
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								C# Example Code:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								private static void OnSendingRequest(object sender, SendingRequestEventArgs e) { // Add an Authorization header string token = ConfigurationManager.AppSettings("secretkey"); string url = e.Request.RequestUri.ToString; long ttl = DateDiff("s", "01/01/1970 00:00:00", DateAdd("n", 10, System.DateTime.UtcNow)); //good for 10 minutes string hash = Strings.LCase(System.Web.Security.FormsAuthentication.HashPasswordForStoringInConfigFile(token + url, "MD5")); e.RequestHeaders.Add("developerid", ConfigurationManager.AppSettings("developerid")); e.RequestHeaders.Add("ttl", ttl.ToString); e.RequestHeaders.Add("token", hash); }
+						Node:
+						(type) c
+						(layer)2
+																		Node:
+																		(type) c
+																		(layer)6
+																			Element:footer
+																			Element:img
+																			Element:span
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:span
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:a
+																			Element:img
+																			Element:span
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:span
+																				Phone: +1 856 310 1981
+																			Element:a
+																			Element:span
+																			Element:i
+																			Element:br
+																				Fax: +1 856 310 1956 E-mail Us:
+																			Element:a
+																				support@internetvideoarchive.com
+																			Element:h6
+																				RECENT BLOG POSTS
+																			Element:ul
+																			Element:li
+																			Element:a
+																				IVA Trailers of the Week – First Contact
+																			Element:span
+																				March 15, 2017
+																			Element:li
+																			Element:a
+																				Video Hack Day 3
+																			Element:span
+																				March 14, 2017
+																			Element:li
+																			Element:a
+																				AdQ Announcement
+																			Element:span
+																				March 13, 2017
+																			Element:h6
+																				MORE LINKS
+																			Element:ul
+																			Element:li
+																			Element:a
+																				Developers
+																			Element:li
+																			Element:a
+																				Contact Us
+																			Element:li
+																			Element:a
+																				Privacy Policy
+																			Element:li
+																			Element:a
+																				Charts
+																			Element:li
+																			Element:a
+																				Client Login
+																			Element:li
+																			Element:a
+																				Legacy Documentation
+																			Element:h6
+																				EVENTS
+																				»
+																			Element:a
+																				Mar. 11-12, Video Hack Day 3, New York City
+																				»
+																			Element:a
+																				Apr. 24-27, NAB Show, Las Vegas, NV
+																			Element:h6
+																				SUBMIT CONTENT
+																			Element:ul
+																			Element:li
+																			Element:a
+																				Movie
+																			Element:li
+																			Element:a
+																				TV
+																			Element:li
+																			Element:a
+																				Video Game
+																			Element:span
+																				© Copyright Internet Video Archive LLC.

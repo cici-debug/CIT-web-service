@@ -1,0 +1,284 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					API Reference
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Docs
+					/
+				Element:a
+					Tutorials
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Encoding videos for Web and Mobile devices
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This tutorial will teach you how to encode videos to multiple formats with Coconut's API.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We are going to write a simple config file that describes the source file location and all the output formats we want. Then, we will submit it with just a few lines of code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											The config file
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The config file uses a very simple format that is very easy to read and maintain. It's mainly composed of keys / values with simple keywords.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now it's time to open your favorite text editor and create the config file
+										Element:code
+											coconut.conf
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Declaring our first variable
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For our tutorial, we want every transcoded videos to be uploaded to an S3 account. So to keep things DRY, we will define our AWS S3 bucket URL in a variable so we can use it in all output formats without repeating ourselves.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To declare a variable, you have to use the special keyword
+										Element:code
+											var
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											var access_key = accesskey # AWS access key var secret_key = secretkey # AWS secret key var bucket = mybucket var s3 = s3://$access_key:$secret_key@$bucket/videos
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To use a variable, just call it
+										Element:code
+											$varname
+											anywhere in the config file.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Setting the source video location and the webhook URL
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every settings must be prefixed with the special keyword
+										Element:code
+											set
+											. So let's define the source video location:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											set source = http://media.s3.amazonaws.com/demo.mp4
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that we support
+										Element:code
+											http(s)
+											,
+										Element:code
+											ftp
+											and
+										Element:code
+											sftp
+											protocols as source.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we want to define the
+										Element:a
+											webhook URL
+											which will be called when the job is completed:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											set webhook = http://yourserver.com/webhooks/coconut
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Read our tutorial on
+										Element:a
+											how to manage webhooks server-side
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:i
+											Inspecting Webhooks
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To debug and inspect the POST request, we suggest you to use our
+										Element:a
+											Webhook Inspector
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Encoding the video to multiple formats
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To define an output, use the special keyword
+										Element:code
+											->
+											followed by the
+										Element:a
+											format
+											you want.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's see how to encode the video to MP4 and WebM for the web and another MP4 version (lower quality) for mobile devices:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											# This is the $s3 variable we declared earlier -> mp4 = $s3/web/video.mp4 -> webm = $s3/web/video.webm -> mp4:360p = $s3/mobile/video.mp4
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For each output (
+										Element:code
+											->
+											), we set the destination which is an URL where you want the encoded videos to be uploaded to. In our example we used Amazon S3, but we support many other
+										Element:a
+											CDNs and protocols
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Submitting the config file
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The config file looks like this so far:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											# Variable declarations var access_key = accesskey # AWS access key var secret_key = secretkey # AWS secret key var bucket = mybucket var s3 = s3://$access_key:$secret_key@$bucket/videos # Setting the source file to convert and the webhook URL # to be notified when the job is complete set source = http://media.s3.amazonaws.com/demo.mp4 set webhook = http://yourserver.com/webhooks/coconut # We define all the output formats and their associated # destination URLs -> mp4 = $s3/web/video.mp4 -> webm = $s3/web/video.webm -> mp4:360p = $s3/mobile/video.mp4
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is the curl command to create the job:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl https://api.coconut.co/v1/job \ -u api-key: \ -T coconut.conf
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We provide a number of
+										Element:a
+											client libraries
+											to make requests very easily, so be sure to check them out.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That concludes the first tutorial on how to encode videos with Coconut. If you want to go further, you can read the
+										Element:a
+											full documentation
+											. There is always our
+										Element:a
+											FAQ
+											if you have any questions.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A video without a cool picture to show off is not very attractive, so be sure to read our
+										Element:a
+											next tutorial
+											on how to generate thumbnails and animated GIFs.
+										Element:a
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:hr

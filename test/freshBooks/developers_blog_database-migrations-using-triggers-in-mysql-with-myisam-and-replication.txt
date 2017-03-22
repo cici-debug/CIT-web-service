@@ -1,0 +1,381 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Database migrations using triggers in MySQL with MyISAM and replication
+					by Taavi on October 3/2011
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Last year we purchased the book
+				Element:a
+					Refactoring Databases
+					. While the first chapter was preaching to the choir (database migrations are
+				Element:em
+					normal
+					around here), there was one extremely valuable gem:
+				Element:a
+					the use of database triggers to effect seamless data migrations
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The book targets enterprise environments where there are multiple applications accessing the database concurrently, each with release cycles measured in months and years, and regularly scheduled downtime windows. In contrast, FreshBooks has fewer moving parts (and each part is much smaller), release cycles on the order of weeks (sometimes hours!), and no time is good for downtime. We’re used around the world, and it shows in the server activity logs 24/7.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					However, we can still learn a lot from
+				Element:em
+					Refactoring Databases
+					. Methods of performing migrations with staggered application releases over the course of months are equally applicable to a normal web app undergoing a 0-downtime deployment with rolling backend restarts to a new version of the code.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Database triggers are a way of telling the database server to react automatically to some other action, like
+				Element:a
+					If This Then That
+					. The Big Three operations that change data are
+				Element:code
+					INSERT
+					,
+				Element:code
+					UPDATE
+					, and
+				Element:code
+					DELETE
+					. One example use of triggers is to create an audit log by instructing the database server to record the effect of all
+				Element:code
+					UPDATE
+					statements against a table. From this description it’s tempting to think that a lot of things should be done using triggers! Unfortunately they run on the database server itself (so can easily cause a performance bottleneck), are written in SQL (which can make it hard to express yourself if you need to do any kind of data transformation), are impossible to unit test (any test you can write for them is essentially an integration test), and don’t allow chaining (in MySQL at least; if you need two logical things done you have to write them as a single trigger; Observer and Visitor patterns are not an option here).
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Believe it or not, MySQL (even using the MyISAM table engine) has full support for triggers! In the context of supporting data migrations, there are some more specific uses whose benefits outweigh the issues above. Data migration triggers don’t have to exist for very long, and it’s a strong hint to reorganize your release schedule if you find yourself wanting to do more than one thing in a single trigger. Useful things a trigger can do to support a data migration include:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					keeping two columns in a table in sync
+				Element:li
+					keeping two columns in two different tables in sync
+				Element:li
+					creating new column(s) with data synthesized from old one(s) and vice versa
+				Element:li
+				Element:a
+					anything else you can do with a trigger
+					(no dynamic SQL!)
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					However, there are some gotchas to keep in mind when you’re replicating with triggers. With MySQL replication the master records all the data-changing SQL statements executed, and the slave(s) execute those recorded SQL statements
+				Element:a
+					. The slave machine doesn’t check any privileges; it assumes that if the master performed the operation that it was okay. Normally this is perfectly fine, but triggers add an extra layer of indirection.
+				Element:sup
+					1
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Let’s try an example. Say that we want to replicate data from one table (
+				Element:code
+					FOO
+					) into another (
+				Element:code
+					BAR
+					) using an
+				Element:code
+					AFTER INSERT
+					trigger. The
+				Element:code
+					CREATE TRIGGER
+					statement itself will be written to the replication logs to be executed
+				Element:em
+					blindly
+					by the slave(s); each MySQL instance will then have a copy of the trigger. Trigger creation on the master requires the
+				Element:code
+					SUPER
+					privilege. Note that
+				Element:code
+					ALL PRIVILEGES
+					does
+				Element:strong
+					not
+					include
+				Element:code
+					SUPER
+					!
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					CREATE TRIGGER `foo_to_bar` AFTER INSERT ON foo FOR EACH ROW INSERT INTO bar (some_column) VALUES (NEW.some_old_column);
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					NEW
+					is an
+				Element:a
+					alias for use in triggers
+					. When a user issues an
+				Element:code
+					INSERT INTO FOO
+					statement, the master checks that this is okay, inserts the row in
+				Element:code
+					FOO
+					, runs the trigger (with the privileges of the trigger creator), and records only the
+				Element:em
+					original
+				Element:code
+					INSERT
+					statement for replication.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					A slave server sees the
+				Element:code
+					INSERT INTO FOO
+					statement, does the insert blindly, and runs the trigger. And that works
+				Element:a
+					IFF
+					the user who created the trigger on the master
+				Element:em
+					also
+					exists on the slave! If the trigger-creator user doesn’t exist on the slave, replication will fail on the
+				Element:code
+					INSERT
+					statement, because the slave is no longer in “blind-execution” replication, but acting on a trigger just as if it had been caused only on the local instance.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					“So,” you think to yourself, “I’ll just add the trigger-creator user and re-start replication.” Except that this is MyISAM, and there are no transactions…and that original
+				Element:code
+					INSERT
+					statement already completed! So restarting replication will cause a duplicate PK error (if you’re lucky). Being lucky, removing the new row in
+				Element:code
+					FOO
+					on the slave will let you restart replication and everything goes on its merry way. If you weren’t lucky, your slave is now strangely out of sync with the master.
+				Element:em
+					Have fun cleaning up!
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					But assuming the trigger-creator user is in place, things will work quite happily. At one point, we had over a million triggers running simultaneously for a few weeks. Of course, before trusting the results we ran some data verifications to ensure we had exactly the right data.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					So be careful the first time you deploy triggers, and enjoy the power they give to change your schema without inconveniencing your users.
+				Element:code
+					![:)](/assets/blog-uploads/img/icon_smile.gif)
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					This is equally a problem for saving the results of local-state-specific functions. For example, it’s a bad idea to do something like
+				Element:sup
+					1
+				Element:code
+					INSERT INTO foo VALUES (GET_LOCK('a lock'))
+					because the value returned by
+				Element:code
+					GET_LOCK()
+					could be different on the slave versus on the master. Timestamps manage to propagate properly because of extra annotations (read: computer-readable SQL comments) included in the replication logs.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

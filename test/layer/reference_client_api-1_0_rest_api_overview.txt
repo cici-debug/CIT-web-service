@@ -1,0 +1,476 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					REST API overview
+				Element:a
+					¶
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All data is sent and received as JSON over
+				Element:code
+					HTTPS
+					. All endpoints are relative to the base URL:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					https://api.layer.com
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Headers
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Every request must include an
+							Element:code
+								Accept
+								header (see
+							Element:a
+								Versioning
+								below) and a
+							Element:code
+								Content-Type
+								header. Most requests must include an
+							Element:code
+								Authorization
+								header (see
+							Element:a
+								Authenticating requests
+								below):
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Accept: application/vnd.layer+json; version=1.0 Content-Type: application/json Authorization: Layer session-token="YOUR-SESSION-TOKEN"
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Versioning
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The API is versioned via an
+							Element:code
+								Accept
+								header:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Accept: application/vnd.layer+json; version=1.0
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You must explicitly require a version via the header. This allows us to make changes in future versions, and gives you time to update, without breaking your app in the meantime. An error is returned if you fail to request a specific version of the API:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Invalid header
+								| Status: 406 (Not Acceptable)
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{
+							Element:span
+								"id"
+								:
+							Element:span
+								"invalid_header"
+								,
+							Element:span
+								"code"
+								:
+							Element:span
+								107
+								,
+							Element:span
+								"message"
+								:
+							Element:span
+								"Invalid Accept header; must be of form application/vnd.layer+json; version=x.y"
+								,
+							Element:span
+								"url"
+								:
+							Element:span
+								"http://docs.layer.com/reference/client_api#versioning"
+								,
+							Element:span
+								"data"
+								: {
+							Element:span
+								"header"
+								:
+							Element:span
+								"Accept"
+								} }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								URLs
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Many resource objects contain properties postfixed with
+							Element:q
+								_url
+								, which indicate the correct URL for performing an operation upon that resource. For example, the
+							Element:code
+								Conversation
+								object contains a
+							Element:code
+								message_url
+								property with the current URL for getting
+							Element:a
+								Message
+								objects in that
+							Element:a
+								Conversation
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also get a list of important URLs by making a
+							Element:code
+								GET
+								request to the root endpoint:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								GET
+						Node:
+						(type) c
+						(layer)2
+							Element:b
+								https://api.layer.com/
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -i -X GET https://api.layer.com/
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Response:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Status: 200 (OK)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								Link
+								header in the response will contain important URLs:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								link: <https://api.layer.com/nonces>; rel=nonces, <https://api.layer.com/sessions>; rel=sessions, <https://api.layer.com/conversations>; rel=conversations, <https://api.layer.com/content>; rel=content
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The possible
+							Element:code
+								rel
+								values are:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								nonces
+								: The URL to request a nonce for authentication
+							Element:li
+							Element:code
+								conversations
+								: The URL to load the first page of conversations
+							Element:li
+							Element:code
+								content
+								: The URL for uploading large content, such as images and video
+							Element:li
+							Element:code
+								websocket
+								: The URL to establish a WebSocket connection
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Requests overview
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To protect Layer servers from abuse, we enforce rate limiting. Limits are set to be relatively forgiving. Exceeding limits will return a Rate Limiting Error (
+							Element:q
+								Status 429 (Too Many Requests)
+								), along with an empty response body.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authenticating requests
+										Element:a
+											¶
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Unless otherwise noted, every request made using the REST API must be authenticated with a session token. See
+										Element:a
+											Authentication
+											for details on getting a session token.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Session tokens will expire after some time (by default, this interval is 5 minutes for staging apps and 30 days for production apps). You will need to
+										Element:a
+											acquire a new session token
+											once a previous one expires.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you send a request without a session token, or with an expired session token, the request will fail:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Authentication required
+											| Status: 401 (Unauthorized)
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{
+										Element:span
+											"id"
+											:
+										Element:span
+											"authentication_required"
+											,
+										Element:span
+											"code"
+											:
+										Element:span
+											4
+											,
+										Element:span
+											"message"
+											:
+										Element:span
+											"The session token is no longer valid because it has expired."
+											,
+										Element:span
+											"url"
+											:
+										Element:span
+											"https://developer.layer.com/api.md#authentication"
+											,
+										Element:span
+											"data"
+											: {
+										Element:span
+											"nonce"
+											:
+										Element:span
+											"38a9b5a41725ec2bbb51ce43328b671731496f1f"
+											} }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Retrying requests and deduplication
+													Element:a
+														¶
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Requests can fail for a number of reasons, both client-side and server-side. To avoid exposing your users to bugs or lost data, you should always be prepared to retry requests. We recommend an exponential backoff strategy until the request is successful.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														However, retrying requests may lead to the possibility of creating duplicate resources (for example, if the client goes offline after sending a request but before receiving a successful response). As a result, we provide a way to deduplicate creation requests by assigning an
+													Element:code
+														id
+														to your creation request:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+													Element:span
+														// Illustrative example
+													Element:span
+														var
+														request = { id: generateUUID(), field1: value1, field2: value2 }; execute(request,
+													Element:span
+														{
+													Element:span
+														function
+														(
+													Element:span
+														err, result
+														)
+													Element:span
+														if
+														(err) delayAndRetryWithSameID(request); });
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The server will not re-execute the request if the ID has already been used. For a REST request, the server will instead respond with an HTTP status
+													Element:q
+														409 (Conflict)
+														and an error in the response body:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{
+													Element:span
+														"id"
+														:
+													Element:span
+														"id_in_use"
+														,
+													Element:span
+														"code"
+														:
+													Element:span
+														111
+														,
+													Element:span
+														"message"
+														:
+													Element:span
+														"The requested Message already exists"
+														,
+													Element:span
+														"url"
+														:
+													Element:span
+														"http://docs.layer.com/reference/client_api#retrying-requests-and-deduplication"
+														,
+													Element:span
+														"data"
+														:
+													Element:a
+														Message
+														|
+													Element:a
+														Conversation
+														}
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For a WebSocket request, a WebSocket packet will be returned indicating that the request was unsuccessful. The packet will contain the above JSON in the
+													Element:code
+														body
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you receive such an error, it’s safe to retry the request
+													Element:em
+														using the same UUID
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Providing an
+													Element:code
+														id
+														is optional. If you do provide an
+													Element:code
+														id
+														, it will become the ID of the resource you created. If you do not provide an
+													Element:code
+														id
+														, we will generate an ID for the resource.
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														Concepts
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														Websocket overview

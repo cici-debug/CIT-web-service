@@ -1,0 +1,3114 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:a
+					Getting Started
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Hyperglance API (HGAPI) is a RESTful JSON web service API to support integrations with 3
+							Element:sup
+								rd
+								party applications; HGAPI client applications integrate external data and processes into the Hyperglance platform.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The HGAPI is exposed by the Hyperglance Server (HGS). By default the API's root endpoint is located at:
+							Element:strong
+								https://<host>/hgapi
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note: We strongly recommend that client applications be configurable, in case this endpoint URL is ever changed in future versions of Hyperglance, or by administrators.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Developers should be aware when parsing responses from the HGAPI that these responses may contain extra additional JSON fields compared to those documented. Therefore HGAPI clients should be prepared to simply ignore any extra undocumented fields.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Concepts & Terminology
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+								Datasource
+							Element:br
+							Element:td
+								A datasource is a unique name assigned to an HGAPI application and so serves to identify the source of topology data in Hyperglance.
+							Element:br
+								An HGAPI application has a single datasource name. Typically the name is chosen based on the underlying system from which data is retrieved. You will usually want to hard-code this into your application.
+							Element:br
+								Examples: "AcmeApp", “OpenStack”, "John's MongoDb"
+							Element:br
+							Element:tr
+							Element:td
+								Topology
+							Element:br
+							Element:td
+								A topology is a well-formed piece of the overall Network.
+							Element:br
+								Every client application contributes at least one topology. Multiple topologies can be added/updated/removed by HGAPI client applications. The use of multiple topologies by a single client application is supported purely for organizational purposes.
+							Element:br
+								A topology is a graph structure consisting of Groups, Nodes, Endpoints and Links. Each of which can have Attributes.
+							Element:br
+							Element:tr
+							Element:td
+								Network
+							Element:br
+							Element:td
+								An aggregation of all topologies which occurs periodically within the HGS.
+							Element:br
+							Element:tr
+							Element:td
+								Nodes
+							Element:br
+							Element:td
+								A kind of entity often used to model network devices or top-level concepts.
+							Element:br
+								Examples: Servers, Virtual-Machines, Load-Balancers.
+							Element:br
+							Element:tr
+							Element:td
+								Endpoints
+							Element:br
+							Element:td
+								A kind of entity often used to model hardware components or second-level concepts.
+							Element:br
+								An endpoint always belong to a node. A node can own many endpoints.
+							Element:br
+								Examples: Network Interface Cards, Ports, Logical Disk Partitions.
+							Element:br
+							Element:tr
+							Element:td
+								Links
+							Element:br
+							Element:td
+								A kind of entity often used to model connectivity or relationships between endpoints.
+							Element:br
+								A link always spans between two endpoints.
+							Element:br
+							Element:br
+								Examples: SNMP Connectivity, Logical relationships.
+							Element:br
+							Element:tr
+							Element:td
+								Alarms
+							Element:br
+							Element:td
+								A kind of entity often used to model alarms/alerts/problems.
+							Element:br
+								An alarm always belongs to either a node or an endpoint.
+							Element:br
+								Examples: High CPU Alarm, Service Down Alarm.
+							Element:br
+							Element:tr
+							Element:td
+								Attributes
+							Element:br
+							Element:td
+								Textual key/value data. All nodes, endpoints and links support attributes.
+							Element:br
+							Element:tr
+							Element:td
+								Types
+							Element:br
+							Element:td
+								Every Node, Endpoint or Link has a type.
+							Element:br
+								A type is a string used to indicate the kind/flavor/variety of an entity. Typically filters will use types to assign icons & colors.
+							Element:br
+								A type can be any value the client application wishes although the Hyperglance Client may set default icons on nodes of certain types in the absence of a filter.
+							Element:br
+								Examples: vm, host, switch, connection, flow
+							Element:br
+							Element:tr
+							Element:td
+								Keys
+							Element:br
+							Element:td
+								An ID provided by the client application for every entity and must be unique within the context of a single topology.
+							Element:br
+								Used to assign relationships between entities within a topology (e.g. Endpoints assigned to a node) and to track the lifetime of entities across updates to the topology.
+							Element:br
+								Keys should be 'stable', meaning the same logical entity should be given the same key across updates to the topology.
+							Element:br
+							Element:tr
+							Element:td
+								Unique IDs
+							Element:br
+								(UIDs)
+							Element:br
+							Element:td
+								An ID generated by the HGS for every entity and is completely unique within the entire network.
+							Element:br
+								The format and structure of UID strings is undefined.
+							Element:br
+							Element:tr
+							Element:td
+								Collector-plugin
+							Element:br
+							Element:td
+								Closed-source Hyperglance Server plugins developed by Real-Status that also integrate with 3
+							Element:sup
+								rd
+								party applications rather like an HGAPI client application.
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Authentication
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Developers must generate an API Key for their application to use for authenticating with the HGS. Please remember that this API Key should be kept secret & secure and treated like a password. Every HGAPI client application should be given its own, unique API Key.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								API Keys can be created and managed by visiting the 'API' section’s 'Register App' in the Hyperglance admin panel
+							Element:a
+								https://IP_address:8443/#/admin
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The HGAPI uses Basic-Access-Authentication with HTTPS for secure access. This protocol requires passing an “Authorization” header which encodes the unique Datasource and API Key as the username and password respectively.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Many web request tools & frameworks have a simple way to generate this “Authorization” header given the username and password. However the header can also be manually constructed as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Combine the Datasource and API Key into a single string, separated by a colon: “Datasource:APIKey”
+							Element:li
+								Encode this string into Base64 according to the RFC-2045 specification for MIME encoding and without any line length limit.
+							Element:li
+								Prefix the encoded string with the word Basic and a space: “Basic “
+							Element:li
+								Supply this string as the request header named “Authorization”.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example if the Datasource is “AcmeApp” and the API Key is “a15f3a32-77f3-4784-b10c-ff8b0587495b” then the header will be:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+								Authorization
+							Element:br
+							Element:td
+								Basic QWNtZUFwcDphMTVmM2EzMi03N2YzLTQ3ODQtYjEwYy1mZjhiMDU4NzQ5NWI=
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The authorization header must be provided in every API call made to the HGAPI.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Sample code:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								examples/basic examples/rest_utils.py
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					HGAPI v3.0
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All paths are specified relative to the HGAPI’s root endpoint URL, see “Overview” section.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:a
+					Network API - Get Network
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+				Element:i
+					GET /network
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Returns topologies from all datasources that have been aggregated into a coherent network that the Hyperglance Client could display. Topologies are grouped by datasource and can be filtered to a given datasource if the optional query parameter is provided.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Note: Due to the aggregation process, the topologies returned by this call may have been altered since they were originally contributed.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Note: The aggregation process is an automatic, periodic process so this call may not immediately reflect changes to a topology.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Normal response codes:
+					200 OK
+				Element:strong
+					400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found
+				Element:br
+					Error response codes:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Query parameters:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					datasource
+					(optional)
+				Element:br
+				Element:td
+					The unique name identifier of a data-source to constrain the response to. Only the part of the network contributed by the provided data-source will be returned.
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Example response:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+					{
+				Element:br
+					"updatedAt": 123456789,
+				Element:br
+					"network": [
+				Element:br
+					{
+				Element:br
+					"datasource": "AcmeApp",
+				Element:br
+					"topologies": [
+				Element:br
+					{
+				Element:br
+					"name": "example topology"
+				Element:br
+					"nodes": [
+				Element:br
+					{
+				Element:br
+					"UID": "902c-8ce241a85bbb",
+				Element:br
+					"key": "node1",
+				Element:br
+					"name": "new-vm-test",
+				Element:br
+					"type": "vm",
+				Element:br
+					"attributes": [
+				Element:br
+					{ "name": "Company", "value": "Acme Corp." }
+				Element:br
+					],
+				Element:br
+					"groupKey": "g1"
+				Element:br
+					},
+				Element:br
+					{
+				Element:br
+					"UID": "9421-8bb2a8139669",
+				Element:br
+					"key": "node2",
+				Element:br
+					"name": "lab host1",
+				Element:br
+					"type": "host",
+				Element:br
+					"attributes": [
+				Element:br
+					{ "name": "Company", "value": "Acme Corp." }
+				Element:br
+					],
+				Element:br
+					"groupKey": "g1"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"endpoints": [
+				Element:br
+					{
+				Element:br
+					"UID": "8c73-e7f06f359a1f",
+				Element:br
+					"key": "ep1",
+				Element:br
+					"name": "ep1",
+				Element:br
+					"type": "virtual port",
+				Element:br
+					"attributes": [],
+				Element:br
+					"nodeUID": "902c-8ce241a85bbb"
+				Element:br
+					},
+				Element:br
+					{
+				Element:br
+					"UID": "988a-60aa3b19f13a",
+				Element:br
+					"key": "ep2",
+				Element:br
+					"name": "ep2",
+				Element:br
+					"type": "physical port",
+				Element:br
+					"attributes": [],
+				Element:br
+					"nodeUID": "9421-8bb2a8139669"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"links": [
+				Element:br
+					{
+				Element:br
+					"UID": "becd-5c6d4c62b09c",
+				Element:br
+					"key": "link1",
+				Element:br
+					"name": "link1",
+				Element:br
+					"type": "virtual<->physical connection",
+				Element:br
+					"attributes": [],
+				Element:br
+					"endpointAUID": "8c73-e7f06f359a1f",
+				Element:br
+					"endpointBUID": "988a-60aa3b19f13a"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"alarms": [
+				Element:br
+					{
+				Element:br
+					"UID": "898e-87ef7fed4dff",
+				Element:br
+					"key": "alarm1",
+				Element:br
+					"name": "High CPU",
+				Element:br
+					"type": "metric alarm",
+				Element:br
+					"attributes": [
+				Element:br
+					{
+				Element:br
+					"name": "Description",
+				Element:br
+					"value": "CPU exceeded threshold!"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"ownerUID": "902c-8ce241a85bbb",
+				Element:br
+					"severity": "CRITICAL"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"groups": [
+				Element:br
+					{
+				Element:br
+					"UID": "AcmeApp|example topology|GROUP|VPC|g1",
+				Element:br
+					"key": "g1",
+				Element:br
+					"type": "VPC",
+				Element:br
+					"name": "group1",
+				Element:br
+					"appTags": [],
+				Element:br
+					"attributes": [
+				Element:br
+					{
+				Element:br
+					"name": "Description",
+				Element:br
+					"value": "Small subset of Topology"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"dependsOnNodeKeys": [],
+				Element:br
+					"urls": [],
+				Element:br
+					"parentGroupKey": null
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					JSON elements:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					updatedAt
+				Element:br
+				Element:td
+					Integer
+				Element:br
+				Element:td
+					Time the Network was last updated.
+				Element:br
+					Unit: Seconds since Unix Epoch.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					network
+				Element:br
+				Element:td
+					List of Datasource-Topologies
+				Element:br
+				Element:td
+					Topologies grouped by their data-source identifier.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					datasource
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The data-source identifier.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					topologies
+				Element:br
+				Element:td
+					List of Topologies
+				Element:br
+				Element:td
+					All topologies contributed by a data-source.
+				Element:br
+					Absent from these topologies are any non-creatable entities.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					name
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					Name of topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					nodes
+				Element:br
+				Element:td
+					List of Nodes
+				Element:br
+				Element:td
+					Nodes in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpoints
+				Element:br
+				Element:td
+					List of Endpoints
+				Element:br
+				Element:td
+					Endpoints in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					links
+				Element:br
+				Element:td
+					List of Links
+				Element:br
+				Element:td
+					Links in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					alarms
+				Element:br
+				Element:td
+					List of Alarms
+				Element:br
+				Element:td
+					Alarms in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					groups
+				Element:br
+				Element:td
+					List of groups
+				Element:br
+				Element:td
+					Groups in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					UID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of the Node, Endpoint, Link or Alarm.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					key
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of the Node, Endpoint, Link or Alarm.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					type
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Type of the Node, Endpoint, Link or Alarm.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					groupKey
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The group name of the node.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					parentGroupKey
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The group name of the child group.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					name
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The name of a Node, Endpoint, Link or Alarm.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					attributes
+				Element:br
+				Element:td
+					List of Attributes
+				Element:br
+				Element:td
+					Attributes of the Node, Endpoint, Link, Alarm or Group.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					name
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The name of an Attribute.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					value
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The value of an Attribute.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					nodeUID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of the Node that an Endpoint attaches to.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointAUID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of an Endpoint that a Link attaches to.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointBUID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of an Endpoint that a Link attaches to.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					ownerUID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of a Node or Endpoint that an Alarm attaches to.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					severity
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The severity of an Alarm.
+				Element:br
+					One of:
+				Element:strong
+					CRITICAL
+					,
+				Element:strong
+					SEVERE
+					,
+				Element:strong
+					WARNING
+					,
+				Element:strong
+					INFO
+					.
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Sample code:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					examples/basic examples/get_network.py
+				Element:li
+					examples/basic examples/augment_attributes2.py
+			Node:
+			(type) c
+			(layer)1
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+				Element:em
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:a
+					Topology API - List
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+				Element:i
+					GET /topology
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Lists all topologies as contributed by the HGAPI client application.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Normal response codes:
+					200 OK
+				Element:strong
+					400 Bad Request, 401 Unauthorized, 403 Forbidden
+				Element:br
+					Error response codes:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Example response:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+					{
+				Element:br
+					"topologies": [
+				Element:br
+					{
+				Element:br
+					"name": "example topology"
+				Element:br
+					"nodes": [
+				Element:br
+					{
+				Element:br
+					"UID": "902c-8ce241a85bbb",
+				Element:br
+					"key": "node1",
+				Element:br
+					"name": "new-vm-test",
+				Element:br
+					"type": "vm",
+				Element:br
+					"attributes": [
+				Element:br
+					{ "name": "Company", "value": "Acme Corp." }
+				Element:br
+					],
+				Element:br
+					"groupKey": "g1"
+				Element:br
+					},
+				Element:br
+					{
+				Element:br
+					"UID": "9421-8bb2a8139669",
+				Element:br
+					"key": "node2",
+				Element:br
+					"name": "lab host1",
+				Element:br
+					"type": "host",
+				Element:br
+					"attributes": [
+				Element:br
+					{ "name": "Company", "value": "Acme Corp." }
+				Element:br
+					]
+				Element:br
+					"groupKey": "g1"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"endpoints": [
+				Element:br
+					{
+				Element:br
+					"UID": "8c73-e7f06f359a1f",
+				Element:br
+					"key": "ep1",
+				Element:br
+					"name": "ep1",
+				Element:br
+					"type": "virtual port",
+				Element:br
+					"attributes": [],
+				Element:br
+					"nodeKey": "node1",
+				Element:br
+					"nodeUID": "902c-8ce241a85bbb"
+				Element:br
+					},
+				Element:br
+					{
+				Element:br
+					"UID": "988a-60aa3b19f13a",
+				Element:br
+					"key": "ep2",
+				Element:br
+					"name": "ep2",
+				Element:br
+					"type": "physical port",
+				Element:br
+					"attributes": [],
+				Element:br
+					"nodeKey": "node2",
+				Element:br
+					"nodeUID": "9421-8bb2a8139669"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"links": [
+				Element:br
+					{
+				Element:br
+					"UID": "becd-5c6d4c62b09c",
+				Element:br
+					"key": "link1",
+				Element:br
+					"name": "link1",
+				Element:br
+					"type": "virtual<->physical connection",
+				Element:br
+					"attributes": [],
+				Element:br
+					"endpointAKey": "ep1",
+				Element:br
+					"endpointAUID": "8c73-e7f06f359a1f",
+				Element:br
+					"endpointBKey": "ep2",
+				Element:br
+					"endpointBUID": "988a-60aa3b19f13a"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"alarms": [
+				Element:br
+					{
+				Element:br
+					"UID": "898e-87ef7fed4dff",
+				Element:br
+					"key": "alarm1",
+				Element:br
+					"name": "High CPU",
+				Element:br
+					"type": "metric alarm",
+				Element:br
+					"attributes": [
+				Element:br
+					{
+				Element:br
+					"name": "Description",
+				Element:br
+					"value": "CPU exceeded threshold!"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"nodeKey": "node1",
+				Element:br
+					"ownerUID": "902c-8ce241a85bbb",
+				Element:br
+					"severity": "CRITICAL"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"groups": [
+				Element:br
+					{
+				Element:br
+					"UID": "AcmeApp|example topology|GROUP|VPC|g1",
+				Element:br
+					"key": "g1",
+				Element:br
+					"type": "VPC",
+				Element:br
+					"name": "group1",
+				Element:br
+					"appTags": [],
+				Element:br
+					"attributes": [
+				Element:br
+					{
+				Element:br
+					"name": "Description",
+				Element:br
+					"value": "Small subset of Topology"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"dependsOnNodeKeys": [],
+				Element:br
+					"urls": [],
+				Element:br
+					"parentGroupKey": null
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					JSON elements:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					topologies
+				Element:br
+				Element:td
+					List of Topologies
+				Element:br
+				Element:td
+					All topologies contributed by this datasource.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					name
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					Name of topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					nodes
+				Element:br
+				Element:td
+					List of Nodes
+				Element:br
+				Element:td
+					Nodes in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpoints
+				Element:br
+				Element:td
+					List of Endpoints
+				Element:br
+				Element:td
+					Endpoints in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					links
+				Element:br
+				Element:td
+					List of Links
+				Element:br
+				Element:td
+					Links in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					alarms
+				Element:br
+				Element:td
+					List of Alarms
+				Element:br
+				Element:td
+					Alarms in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					groups
+				Element:br
+				Element:td
+					List of groups
+				Element:br
+				Element:td
+					Groups in a topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					UID
+					(optional)
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of the Node, Endpoint, Link or Alarm.
+				Element:br
+					Will be null if the entity is not creatable:
+				Element:br
+					E.g. An Endpoint is not creatable if its nodeKey or nodeUID are invalid.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					key
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of the Node, Endpoint, Link or Alarm.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					name
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The name of a Node, Endpoint, Link or Alarm.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					type
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Type of the Node, Endpoint, Link or Alarm.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					groupKey
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The group name of the node.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					parentGroupKey
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The group name of the child group.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					attributes
+				Element:br
+				Element:td
+					List of Attributes
+				Element:br
+				Element:td
+					Attributes of the Node, Endpoint, Link, Alarm or Group.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					name
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The name of an Attribute.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					value
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The value of an Attribute.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					nodeKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of the Node that an Endpoint or Alarm attaches to.
+				Element:br
+					Will be null if one was not specified.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					nodeUID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of the Node that an Endpoint attaches to.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointAKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of an Endpoint that a Link attaches to.
+				Element:br
+					Will be null if one was not specified.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointAUID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of an Endpoint that a Link attaches to.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointBKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of an Endpoint that a Link attaches to.
+				Element:br
+					Will be null if one was not specified.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointBUID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of an Endpoint that a Link attaches to.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of the Endpoint than an Alarm attaches to.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					ownerUID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of a Node or Endpoint that an Alarm attaches to.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					severity
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The severity of an Alarm.
+				Element:br
+					One of:
+				Element:strong
+					CRITICAL
+					,
+				Element:strong
+					SEVERE
+					,
+				Element:strong
+					WARNING
+					,
+				Element:strong
+					INFO
+					.
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Sample code:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					examples/basic examples/list_topologies.py
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:a
+					Topology API - Create/Update
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+				Element:i
+					PUT /topology
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Creates or updates (if already created by the HGAPI client application) a single topology.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Normal response codes:
+					200 OK, 202 Accepted
+				Element:strong
+					400 Bad Request, 401 Unauthorized, 403 Forbidden
+				Element:br
+					Error response codes:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Example request:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+					{
+				Element:br
+					"name":"example topology",
+				Element:br
+					"nodes":[
+				Element:br
+					{
+				Element:br
+					"key":"node1",
+				Element:br
+					"name":"new-vm-test",
+				Element:br
+					"type":"vm",
+				Element:br
+					"groupKey": "g1",
+				Element:br
+					"attributes":[
+				Element:br
+					{
+				Element:br
+					"name":"Company",
+				Element:br
+					"value":"Acme Corp."
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"dependsOnNodeKeys":[
+				Element:br
+					"node3"
+				Element:br
+					],
+				Element:br
+					"appTags":[
+				Element:br
+					"appTag1",
+				Element:br
+					"appTag2"
+				Element:br
+					],
+				Element:br
+					"urls": [
+				Element:br
+					{
+				Element:br
+					"displayName": "Hyperglance API",
+				Element:br
+					"urlPath": "
+				Element:a
+					https://www.hyperglance.com/api/
+					",
+				Element:br
+					"description": "API Reference in Hyperglance support Page”
+				Element:br
+					},
+				Element:br
+					{
+				Element:br
+					"displayName": "Hyperglance",
+				Element:br
+					"urlPath": "
+				Element:a
+					https://twitter.com/hyperglance
+					",
+				Element:br
+					"description": "Hyperglance Twitter Account"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"networkDetails":{
+				Element:br
+					"name":"name1",
+				Element:br
+					"ipAddresses":[
+				Element:br
+					"1.2.3.4",
+				Element:br
+					"4.3.2.1"
+				Element:br
+					],
+				Element:br
+					"hostNames":[
+				Element:br
+					"host1",
+				Element:br
+					"host2"
+				Element:br
+					],
+				Element:br
+					"dnsNames":[
+				Element:br
+					"dns1",
+				Element:br
+					"dns2"
+				Element:br
+					],
+				Element:br
+					"macAddresses":[
+				Element:br
+					"mac1",
+				Element:br
+					"mac2"
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					},
+				Element:br
+					{
+				Element:br
+					"key":"node2",
+				Element:br
+					"name":"lab host1",
+				Element:br
+					"type":"host",
+				Element:br
+					"groupKey": "g1",
+				Element:br
+					"attributes":[
+				Element:br
+					{
+				Element:br
+					"name":"Company",
+				Element:br
+					"value":"Acme Corp."
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					},
+				Element:br
+					{
+				Element:br
+					"key":"node3",
+				Element:br
+					"name":"network-1",
+				Element:br
+					"type":"network",
+				Element:br
+					"groupKey": "g2",
+				Element:br
+					"attributes":[
+				Element:br
+					{
+				Element:br
+					"name":"Company",
+				Element:br
+					"value":"Acme Corp."
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"endpoints":[
+				Element:br
+					{
+				Element:br
+					"key":"ep1",
+				Element:br
+					"type":"virtual port",
+				Element:br
+					"nodeKey":"node1",
+				Element:br
+					"networkDetails":{
+				Element:br
+					"ipAddresses":[
+				Element:br
+					"11.22.33.44"
+				Element:br
+					],
+				Element:br
+					"macAddresses":[
+				Element:br
+					"mac101",
+				Element:br
+					"mac102"
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					},
+				Element:br
+					{
+				Element:br
+					"key":"ep2",
+				Element:br
+					"type":"physical port",
+				Element:br
+					"nodeKey":"node2"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"links":[
+				Element:br
+					{
+				Element:br
+					"key":"link1",
+				Element:br
+					"type":"virtual<->physical connection",
+				Element:br
+					"endpointAKey":"ep1",
+				Element:br
+					"endpointBKey":"ep2"
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"alarms":[
+				Element:br
+					{
+				Element:br
+					"key":"alarm1",
+				Element:br
+					"name":"High CPU",
+				Element:br
+					"type":"metric alarm",
+				Element:br
+					"severity":"CRITICAL",
+				Element:br
+					"nodeKey":"node1",
+				Element:br
+					"attributes":[
+				Element:br
+					{
+				Element:br
+					"name":"Description",
+				Element:br
+					"value":"CPU exceeded threshold!"
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					],
+				Element:br
+					"groups": [
+				Element:br
+					{
+				Element:br
+					"key": "g1",
+				Element:br
+					"name": "group1",
+				Element:br
+					"type": "VPC",
+				Element:br
+					"attributes": [
+				Element:br
+					{
+				Element:br
+					"name": "Description",
+				Element:br
+					"value": "Small subset of Topology"
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					},
+				Element:br
+					{
+				Element:br
+					"key": "g2",
+				Element:br
+					"name": "group2",
+				Element:br
+					"type": "RDS",
+				Element:br
+					"parentGroupKey": "g1",
+				Element:br
+					"attributes": [
+				Element:br
+					{
+				Element:br
+					"name": "Description",
+				Element:br
+					"value": "Small subset of Topology"
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					JSON elements:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					name
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The unique name of the topology being created/updated.
+				Element:br
+					Must be unique within the scope of the datasource.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					nodes
+					(optional)
+				Element:br
+				Element:td
+					List of Nodes
+				Element:br
+				Element:td
+					Nodes to be created/updated.
+				Element:br
+					Any nodes created prior for this topology and are not present in this list will be removed.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpoints
+					(optional)
+				Element:br
+				Element:td
+					List of Endpoints
+				Element:br
+				Element:td
+					Endpoints to be created/updated.
+				Element:br
+					Any endpoints created prior for this topology and are not present in this list will be removed.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					links
+					(optional)
+				Element:br
+				Element:td
+					List of Links
+				Element:br
+				Element:td
+					Links to be created/updated.
+				Element:br
+					Any links created prior for this topology and are not present in this list will be removed.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					alarms
+					(optional)
+				Element:br
+				Element:td
+					List of Alarms
+				Element:br
+				Element:td
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					groups
+					(optional)
+				Element:br
+				Element:td
+					List of groups
+				Element:br
+				Element:td
+					Groups to be created/updated.
+				Element:br
+					Any groups created prior for this topology and are not present in this list will be removed.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					key
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					An identifier that must be unique within this topology.
+				Element:br
+					Valid on Nodes, Endpoints and Links.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					type
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					A type indicator. May take any value.
+				Element:br
+					Valid on Nodes, Endpoints and Links.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					groupKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					Node will be created inside this group
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					parentGroupKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The child group will be created inside this group
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					attributes
+					(optional)
+				Element:br
+				Element:td
+					List of Attributes
+				Element:br
+				Element:td
+					Attributes to be created/updated
+				Element:br
+					Valid on Nodes, Endpoints, Links, Alarms and Group.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					name
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The name of an attribute to be created/updated.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					value
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The value of an attribute to be created/updated.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					dependsOnNodeKeys
+					(optional)
+				Element:br
+				Element:td
+					List of Strings
+				Element:br
+				Element:td
+					Each string is a key of a node which “supports” the given node (which means that the given node is dependent on those)
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					appTags
+					(optional)
+				Element:br
+				Element:td
+					List of Strings
+				Element:br
+				Element:td
+					Application tags which will be assigned to the given node
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					urls
+					(optional)
+				Element:br
+				Element:td
+					List of External Links
+				Element:br
+				Element:td
+					The urls can be created/updated on the entities.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					networkDetails
+					(optional)
+				Element:br
+				Element:td
+					Object
+				Element:br
+				Element:td
+					Contains network details for a given a Node Endpoint.
+				Element:br
+					Contains properties:
+				Element:br
+				Element:strong
+					name, ipAddresses, hostNames, dnsNames, macAddresses
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					name
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					Name associated with the given node (Exclusive just for Node)
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					ipAddresses
+					(optional)
+				Element:br
+				Element:td
+					List of Strings
+				Element:br
+				Element:td
+					IP addresses (IPv4 and IPv6) which assigned to the given Node or Endpoint
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					hostNames
+					(optional)
+				Element:br
+				Element:td
+					List of Strings
+				Element:br
+				Element:td
+					The hostnames of the given Node (Exclusive just for Node)
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					dnsNames
+					(optional)
+				Element:br
+				Element:td
+					List of Strings
+				Element:br
+				Element:td
+					The DNS names of the given Node (Exclusive just for Node)
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					macAddresses
+					(optional)
+				Element:br
+				Element:td
+					List of Strings
+				Element:br
+				Element:td
+					The MAC addresses of the given Node or Endpoint
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					nodeKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of the node to attach to.
+				Element:br
+					Only valid on Endpoints and Alarms.
+				Element:br
+					On Endpoints one of
+				Element:strong
+					nodeKey
+					or
+				Element:strong
+					nodeUID
+					must be provided.
+				Element:br
+					On Alarms one of
+				Element:strong
+					nodeKey
+					,
+				Element:strong
+					endpointKey
+					or
+				Element:strong
+					ownerUID
+					must be provided.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					nodeUID
+					(optional)
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of the node to attach to.
+				Element:br
+					Only valid on Endpoints.
+				Element:br
+					One of
+				Element:strong
+					nodeKey
+					or
+				Element:strong
+					nodeUID
+					must be provided.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointAKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of an endpoint to attach one end of a link to.
+				Element:br
+					Only valid on Links.
+				Element:br
+					One of
+				Element:strong
+					endpointAKey
+					or
+				Element:strong
+					endpointAUID
+					must be provided.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointAUID
+					(optional)
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of an endpoint to attach one end of a link to.
+				Element:br
+					One valid on Links.
+				Element:br
+					One of
+				Element:strong
+					endpointAKey
+					or
+				Element:strong
+					endpointAUID
+					must be provided.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointBKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of an endpoint to attach one end of a link to.
+				Element:br
+					Only valid on Links.
+				Element:br
+					One of
+				Element:strong
+					endpointBKey
+					or
+				Element:strong
+					endpointBIUD
+					must be provided.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointBUID
+					(optional)
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of an endpoint to attach one end of a link to.
+				Element:br
+					Only valid on Links.
+				Element:br
+					One of
+				Element:strong
+					endpointBKey
+					or
+				Element:strong
+					endpointBUID
+					must be provided.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpointKey
+					(optional)
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The Key of the endpoint to attach to.
+				Element:br
+					Only valid on Alarms.
+				Element:br
+					One of
+				Element:strong
+					nodeKey
+					,
+				Element:strong
+					endpointKey
+					or
+				Element:strong
+					ownerUID
+					must be provided.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					ownerUID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of a node or endpoint to attach to.
+				Element:br
+					Only valid on Alarms.
+				Element:br
+					One of
+				Element:strong
+					nodeKey
+					,
+				Element:strong
+					endpointKey
+					or
+				Element:strong
+					ownerUID
+					must be provided.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					severity
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The severity of an Alarm.
+				Element:br
+					One of:
+				Element:strong
+					CRITICAL
+					,
+				Element:strong
+					SEVERE
+					,
+				Element:strong
+					WARNING
+					,
+				Element:strong
+					INFO
+					.
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Example response:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+					{
+				Element:br
+					"nodes": [
+				Element:br
+					{ "key":"node1" "UID": "902c-8ce241a85bbb" },
+				Element:br
+					{ "key":"node2" "UID": "9421-8bb2a8139669" }
+				Element:br
+					],
+				Element:br
+					"endpoints": [
+				Element:br
+					{ "key": "ep1", "UID": "8c73-e7f06f359a1f" },
+				Element:br
+					{ "key": "ep2", "UID": "988a-60aa3b19f13a" }
+				Element:br
+					],
+				Element:br
+					"links": [
+				Element:br
+					{ "key": "link1", "UID": "becd-5c6d4c62b09c" }
+				Element:br
+					],
+				Element:br
+					"alarms": [
+				Element:br
+					{ "key": "alarm1", "UID": "898e-87ef7fed4dff" }
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					JSON elements:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					nodes
+				Element:br
+				Element:td
+					Nodes that were created or updated in this topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					endpoints
+				Element:br
+				Element:td
+					Endpoints that were created or updated in this topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					links
+				Element:br
+				Element:td
+					Links that were created or updated in this topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					alarms
+				Element:br
+				Element:td
+					Alarms that were created or updated in this topology.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					key
+				Element:br
+				Element:td
+					The Key of the Node, Endpoint, Link or Alarm that was created or updated.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					UID
+				Element:br
+				Element:td
+					The generated unique UID of the Node, Endpoint or Link that was created or updated.
+				Element:br
+					Note: UIDs will not change once an entity is created; the UIDs of updated entities are the same as they were when those entities were first created.
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Sample code:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					examples/basic examples/create_topology.py
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:a
+					Topology API - Remove
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+				Element:i
+					DELETE /topology
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Removes all topologies contributed by the HGAPI client application, or removes a single topology if called with a query parameter specifying an individual topology name.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Normal response codes:
+					202 Accepted, 204 No Content
+				Element:strong
+					400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found
+				Element:br
+					Error response codes:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Query parameters:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					name
+					(optional)
+				Element:br
+				Element:td
+					The name of a topology to remove. (Must be a topology that was contributed by the HGAPI client application).
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Sample code:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					examples/basic examples/delete_topology.py
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:a
+					Augmentation API - Attributes
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+				Element:i
+					PUT /augment/attributes
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Specifies the set of attribute augmentations to apply to any pre-existing nodes, endpoints, links or alarms. Replacing all attribute augmentations provided in any prior invocation of this call made by the HGAPI client application.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Normal response codes:
+					200 OK, 202 Accepted
+				Element:strong
+					400 Bad Request, 401 Unauthorized, 403 Forbidden
+				Element:br
+					Error response codes:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Example request:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+					{
+				Element:br
+					"attributes": [
+				Element:br
+					{
+				Element:br
+					"UID": "acda-dee6d506a1db",
+				Element:br
+					"attributes": [
+				Element:br
+					{ "name": "Contact E-Mail", "value": "jon@example.com" }
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					JSON elements:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					attributes
+				Element:br
+				Element:td
+					List of Attribute-Augmentations
+				Element:br
+				Element:td
+					Attribute-Augmentations to apply.
+				Element:br
+					Any Attribute-Augmentations created prior by this data-source will be replaced.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					UID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of a Node, Endpoint, Link, Alarm or Group receiving the augmentation.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					attributes
+				Element:br
+				Element:td
+					List of Attributes
+				Element:br
+				Element:td
+					Attributes to add to the Node, Endpoint, Link or Group.
+				Element:br
+					Any Attribute-Augmentations created prior for the entity by this data-source will be replaced.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					name
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The name of an attribute.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					value
+				Element:br
+				Element:td
+					String
+				Element:br
+				Element:td
+					The value of an attribute.
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Sample code:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					examples/basic examples/augment_attributes1.py
+				Element:li
+					examples/basic examples/augment_attributes2.py
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:a
+					Augmentation API – Application Tags
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+				Element:i
+					PUT /augment/apptags
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Specifies the set of application tags augmentations to apply to any pre-existing nodes.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Replacing all application tags augmentations provided in any prior invocation of this call made by the HGAPI client application.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Normal response codes:
+					200 OK, 202 Accepted
+				Element:strong
+					400 Bad Request, 401 Unauthorized, 403 Forbidden
+				Element:br
+					Error response codes:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Example request:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+					{
+				Element:br
+					"appTags": [
+				Element:br
+					{
+				Element:br
+					"UID": "acda-dee6d506a1db",
+				Element:br
+					"appTags": ["AugmentedAppTag1", "AugmentedAppTag2"]
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					JSON elements:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					appTags
+				Element:br
+				Element:td
+					List of Application-Tags-Augmentations
+				Element:br
+				Element:td
+					Application-Tags-Augmentations to apply.
+				Element:br
+					Any Application-Tags-Augmentations created prior by this data-source will be replaced.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					UID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of a Node receiving the augmentation.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					appTags
+				Element:br
+				Element:td
+					List of Strings
+				Element:br
+				Element:td
+					Each String is an application tag that will be associated to the Node that receiving the augmentation.
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Sample code:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					examples/basic examples/augment_appTags.py
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:a
+					Augmentation API – Depends On
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+				Element:i
+					PUT /augment/dependencies
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Specifies the set of dependency augmentations to apply to any pre-existing nodes.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Replacing all dependency augmentations provided in any prior invocation of this call made by the HGAPI client application.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Normal response codes:
+					200 OK, 202 Accepted
+				Element:strong
+					400 Bad Request, 401 Unauthorized, 403 Forbidden
+				Element:br
+					Error response codes:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Example request:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+					{
+				Element:br
+					"dependsOn": [
+				Element:br
+					{
+				Element:br
+					"UID": "acda-dee6d506a1db",
+				Element:br
+					"dependsOn": ["898e-87ef7fed4dff", "988a-60aa3b19f13a"]
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					JSON elements:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					dependsOn
+				Element:br
+				Element:td
+					List of Dependency-Augmentations
+				Element:br
+				Element:td
+					Dependency-Augmentations to apply.
+				Element:br
+					Any Dependency-Augmentations created prior by this data-source will be replaced.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					UID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of a Node receiving the augmentation.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					dependsOn
+				Element:br
+				Element:td
+					List of UID Strings
+				Element:br
+				Element:td
+					Each UID in that list is associated with a node that supports the Node that receiving the augmentation.
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Sample code:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					examples/basic examples/augment_dependencies.py
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Augmentation API – Entity Specific Urls
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+				Element:i
+					PUT /augment/urls
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Specifies the list of external url augmentations to apply to any pre-existing nodes.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Replacing all external url augmentations provided in any prior invocation of this call made by the HGAPI client application.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Normal response codes:
+					200 OK, 202 Accepted
+				Element:strong
+					400 Bad Request, 401 Unauthorized, 403 Forbidden
+				Element:br
+					Error response codes:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Example request:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+					{
+				Element:br
+					"urls": [
+				Element:br
+					{
+				Element:br
+					"UID": "acda-dee6d506a1db",
+				Element:br
+					"urls": [
+				Element:br
+					{
+				Element:br
+					"displayName": "Hyperglance API",
+				Element:br
+					"urlPath": "
+				Element:a
+					https://www.hyperglance.com/api/
+					",
+				Element:br
+					"description": "API Reference in Hyperglance support Page"
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+					]
+				Element:br
+					}
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					JSON elements:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:strong
+					urls
+				Element:br
+				Element:td
+					List of urls -Augmentations
+				Element:br
+				Element:td
+					Url-Augmentations to apply.
+				Element:br
+					Any Url-Augmentations created prior by this data-source will be replaced.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					UID
+				Element:br
+				Element:td
+					UID String
+				Element:br
+				Element:td
+					The UID of a Node or Group receiving the augmentation.
+				Element:br
+				Element:tr
+				Element:td
+				Element:strong
+					urls
+				Element:br
+				Element:td
+					List of urls
+				Element:br
+				Element:td
+					Each url in that list is associated with a node or group receiving the augmentation.
+				Element:br
+					Url consists of displayName, description and urlPath fields.
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Sample code:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					examples/basic examples/augment_ urls.py
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:br
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:br
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:a
+					Python Code Samples
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					A selection of Python code samples that demonstrate the use of the API are located in the SDK/examples subdirectory.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					These samples were written against
+				Element:strong
+					Python 3.4
+					, but may work in newer versions too.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+				Element:a
+					Running the Samples
+			Node:
+			(type) c
+			(layer)1
+				Element:ol
+				Element:li
+					Open a browser and visit : hyperglance admin panel
+				Element:a
+					https://IP_address:8443/#/admin
+					.
+				Element:li
+					Select the 'API' section to create a unique API key via 'Register App'.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Register a new App by entering a suitable Datasource name (for example call it: AcmeApp) and giving it a helpful label/description.
+				Element:li
+					Note the API key that is generated. Keep this safe and treat it like a password!
+				Element:li
+					Open SDK/examples/basic examples/config.py in a text-editor.
+				Element:li
+					Set the DATASOURCE and API_KEY values to match those from steps 2 and 3 above.
+				Element:li
+					Set the HGS_SERVER value to the URL of your Hyperglance Server (including the port if necessary).
+				Element:li
+					Ensure that the Python interpreter is on your PATH. On Windows Python 3.4 is installed under: C:\Python34
+				Element:li
+					To run a Python script, launch a command-line shell and type: python name_of_script.py

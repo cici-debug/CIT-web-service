@@ -1,0 +1,438 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Manually verifying character representations
+					by Taavi on December 19/2011
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					As a part of the
+				Element:a
+					UTF-8 work we’ve been doing
+					, we have to turn HTML entities (numeric and named character references) into UTF-8 byte sequences. As it turns out, browsers don’t do this the way PHP 5.3′s
+				Element:a
+					() function does.
+				Element:code
+					html_entity_decode
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					There are 4 classes of difference:
+			Node:
+			(type) c
+			(layer)1
+				Element:ol
+				Element:li
+				Element:a
+					Surrogate codepoints
+				Element:li
+				Element:a
+					Windows-1252
+					characters in the
+				Element:a
+					ISO-8859-1 dead zone
+				Element:li
+				Element:a
+					Mathematical angle brackets
+				Element:li
+				Element:a
+					U+0000
+					(NUL)
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The first we can just ignore. Surrogate codepoints aren’t valid in UTF-8 (if you have them, you’ve actually got
+				Element:a
+					CESU-8
+					), and we’re going to leave them entirely alone. This means that eventually things might get a bit uglier (instead of seeing a replacement character e.g. �, you’ll see the text of the character reference e.g.
+				Element:code
+					&#55000;
+					). This way we’re not destroying data, even if it wasn’t displaying correctly before.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The second is a bit of fun. All the specs say that numeric character references use Unicode codepoint values. But (apparently) a lot of data contain codepoints in the range U+0080 through U+009F inclusive, which are (largely) non-printing control characters. Browsers rewrite numeric character references for the 27 codepoints which are defined in Windows-1252 in that range anyway. For example, the numeric character reference
+				Element:code
+					&#146;
+					looks like ’ in your browser (properly referenced as
+				Element:code
+					&rsquo;
+					or
+				Element:code
+					&#8217;
+					i.e. ’). Because all the major browsers do this remapping, we’re going to use it, too.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The third is another place where browsers violate the letter of the spec. Officially,
+				Element:code
+					&lang;
+					(⟨) and
+				Element:code
+					&rang;
+					(⟩) map to U+2329 (〈) and U+232A (〉), respectively. But browsers actually render them as U+27E8 (⟨) and U+27E9 (⟩)! The rationale seems to be that the
+				Element:a
+					old codepoint is ambiguous
+					(the
+				Element:a
+					Unicode spec agrees
+					).
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The fourth fun thing is how browsers handle null bytes. Literal nulls aren’t visible at all, but the numeric character reference for codepoint U+0000 (
+				Element:code
+					&#0;
+					) comes across as the replacement character (�) in browsers we tested.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					In order to test these (and make sure there aren’t more hiding!), I devised a number of tests, each attacking the problem from a slightly different angle. Nobody wants to sit through visually confirming that several thousand pairs of characters are the same character, and depending on the font it can be very difficult to see the difference between the angle brackets from #3 above.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Method #1: Pure JavaScript
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Trying to fall asleep last week, I realized that we can get a browser to tell us what Unicode codepoint it uses to represent a given entity by using
+							Element:code
+								innerHTML
+								and
+							Element:code
+								textContent.charCodeAt
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								<!DOCTYPE html> <html><head></head> <body> <span id="codepoint">?</span>: <span id="test_location"></span> <table border="1"> <thead> <tr><th>Entity</th><th>HTML got</th><th>JS got</th></tr> </thead> <tbody id="results"> </tbody> </table> <script> // This list was mechanically extracted from the PHP 5.3.8 source file ext/standard/tests/strings/htmlentities_html4.phpt // It is assumed that this is how PHP's html_entity_decode will treat each of the named entities, so we can compare that to how browsers render them. var named_entities = {"&quot;": 0x00022, "&amp;": 0x00026, "&#039;": 0x00027, "&lt;": 0x0003C, "&gt;": 0x0003E, "&nbsp;": 0x000A0, "&iexcl;": 0x000A1, "&cent;": 0x000A2, "&pound;": 0x000A3, "&curren;": 0x000A4, "&yen;": 0x000A5, "&brvbar;": 0x000A6, "&sect;": 0x000A7, "&uml;": 0x000A8, "&copy;": 0x000A9, "&ordf;": 0x000AA, "&laquo;": 0x000AB, "&not;": 0x000AC, "&shy;": 0x000AD, "&reg;": 0x000AE, "&macr;": 0x000AF, "&deg;": 0x000B0, "&plusmn;": 0x000B1, "&sup2;": 0x000B2, "&sup3;": 0x000B3, "&acute;": 0x000B4, "&micro;": 0x000B5, "&para;": 0x000B6, "&middot;": 0x000B7, "&cedil;": 0x000B8, "&sup1;": 0x000B9, "&ordm;": 0x000BA, "&raquo;": 0x000BB, "&frac14;": 0x000BC, "&frac12;": 0x000BD, "&frac34;": 0x000BE, "&iquest;": 0x000BF, "&Agrave;": 0x000C0, "&Aacute;": 0x000C1, "&Acirc;": 0x000C2, "&Atilde;": 0x000C3, "&Auml;": 0x000C4, "&Aring;": 0x000C5, "&AElig;": 0x000C6, "&Ccedil;": 0x000C7, "&Egrave;": 0x000C8, "&Eacute;": 0x000C9, "&Ecirc;": 0x000CA, "&Euml;": 0x000CB, "&Igrave;": 0x000CC, "&Iacute;": 0x000CD, "&Icirc;": 0x000CE, "&Iuml;": 0x000CF, "&ETH;": 0x000D0, "&Ntilde;": 0x000D1, "&Ograve;": 0x000D2, "&Oacute;": 0x000D3, "&Ocirc;": 0x000D4, "&Otilde;": 0x000D5, "&Ouml;": 0x000D6, "&times;": 0x000D7, "&Oslash;": 0x000D8, "&Ugrave;": 0x000D9, "&Uacute;": 0x000DA, "&Ucirc;": 0x000DB, "&Uuml;": 0x000DC, "&Yacute;": 0x000DD, "&THORN;": 0x000DE, "&szlig;": 0x000DF, "&agrave;": 0x000E0, "&aacute;": 0x000E1, "&acirc;": 0x000E2, "&atilde;": 0x000E3, "&auml;": 0x000E4, "&aring;": 0x000E5, "&aelig;": 0x000E6, "&ccedil;": 0x000E7, "&egrave;": 0x000E8, "&eacute;": 0x000E9, "&ecirc;": 0x000EA, "&euml;": 0x000EB, "&igrave;": 0x000EC, "&iacute;": 0x000ED, "&icirc;": 0x000EE, "&iuml;": 0x000EF, "&eth;": 0x000F0, "&ntilde;": 0x000F1, "&ograve;": 0x000F2, "&oacute;": 0x000F3, "&ocirc;": 0x000F4, "&otilde;": 0x000F5, "&ouml;": 0x000F6, "&divide;": 0x000F7, "&oslash;": 0x000F8, "&ugrave;": 0x000F9, "&uacute;": 0x000FA, "&ucirc;": 0x000FB, "&uuml;": 0x000FC, "&yacute;": 0x000FD, "&thorn;": 0x000FE, "&yuml;": 0x000FF, "&OElig;": 0x00152, "&oelig;": 0x00153, "&Scaron;": 0x00160, "&scaron;": 0x00161, "&Yuml;": 0x00178, "&fnof;": 0x00192, "&circ;": 0x002C6, "&tilde;": 0x002DC, "&Alpha;": 0x00391, "&Beta;": 0x00392, "&Gamma;": 0x00393, "&Delta;": 0x00394, "&Epsilon;": 0x00395, "&Zeta;": 0x00396, "&Eta;": 0x00397, "&Theta;": 0x00398, "&Iota;": 0x00399, "&Kappa;": 0x0039A, "&Lambda;": 0x0039B, "&Mu;": 0x0039C, "&Nu;": 0x0039D, "&Xi;": 0x0039E, "&Omicron;": 0x0039F, "&Pi;": 0x003A0, "&Rho;": 0x003A1, "&Sigma;": 0x003A3, "&Tau;": 0x003A4, "&Upsilon;": 0x003A5, "&Phi;": 0x003A6, "&Chi;": 0x003A7, "&Psi;": 0x003A8, "&Omega;": 0x003A9, "&alpha;": 0x003B1, "&beta;": 0x003B2, "&gamma;": 0x003B3, "&delta;": 0x003B4, "&epsilon;": 0x003B5, "&zeta;": 0x003B6, "&eta;": 0x003B7, "&theta;": 0x003B8, "&iota;": 0x003B9, "&kappa;": 0x003BA, "&lambda;": 0x003BB, "&mu;": 0x003BC, "&nu;": 0x003BD, "&xi;": 0x003BE, "&omicron;": 0x003BF, "&pi;": 0x003C0, "&rho;": 0x003C1, "&sigmaf;": 0x003C2, "&sigma;": 0x003C3, "&tau;": 0x003C4, "&upsilon;": 0x003C5, "&phi;": 0x003C6, "&chi;": 0x003C7, "&psi;": 0x003C8, "&omega;": 0x003C9, "&thetasym;": 0x003D1, "&upsih;": 0x003D2, "&piv;": 0x003D6, "&ensp;": 0x02002, "&emsp;": 0x02003, "&thinsp;": 0x02009, "&zwnj;": 0x0200C, "&zwj;": 0x0200D, "&lrm;": 0x0200E, "&rlm;": 0x0200F, "&ndash;": 0x02013, "&mdash;": 0x02014, "&lsquo;": 0x02018, "&rsquo;": 0x02019, "&sbquo;": 0x0201A, "&ldquo;": 0x0201C, "&rdquo;": 0x0201D, "&bdquo;": 0x0201E, "&dagger;": 0x02020, "&Dagger;": 0x02021, "&bull;": 0x02022, "&hellip;": 0x02026, "&permil;": 0x02030, "&prime;": 0x02032, "&Prime;": 0x02033, "&lsaquo;": 0x02039, "&rsaquo;": 0x0203A, "&oline;": 0x0203E, "&frasl;": 0x02044, "&euro;": 0x020AC, "&image;": 0x02111, "&weierp;": 0x02118, "&real;": 0x0211C, "&trade;": 0x02122, "&alefsym;": 0x02135, "&larr;": 0x02190, "&uarr;": 0x02191, "&rarr;": 0x02192, "&darr;": 0x02193, "&harr;": 0x02194, "&crarr;": 0x021B5, "&lArr;": 0x021D0, "&uArr;": 0x021D1, "&rArr;": 0x021D2, "&dArr;": 0x021D3, "&hArr;": 0x021D4, "&forall;": 0x02200, "&part;": 0x02202, "&exist;": 0x02203, "&empty;": 0x02205, "&nabla;": 0x02207, "&isin;": 0x02208, "&notin;": 0x02209, "&ni;": 0x0220B, "&prod;": 0x0220F, "&sum;": 0x02211, "&minus;": 0x02212, "&lowast;": 0x02217, "&radic;": 0x0221A, "&prop;": 0x0221D, "&infin;": 0x0221E, "&ang;": 0x02220, "&and;": 0x02227, "&or;": 0x02228, "&cap;": 0x02229, "&cup;": 0x0222A, "&int;": 0x0222B, "&there4;": 0x02234, "&sim;": 0x0223C, "&cong;": 0x02245, "&asymp;": 0x02248, "&ne;": 0x02260, "&equiv;": 0x02261, "&le;": 0x02264, "&ge;": 0x02265, "&sub;": 0x02282, "&sup;": 0x02283, "&nsub;": 0x02284, "&sube;": 0x02286, "&supe;": 0x02287, "&oplus;": 0x02295, "&otimes;": 0x02297, "&perp;": 0x022A5, "&sdot;": 0x022C5, "&lceil;": 0x02308, "&rceil;": 0x02309, "&lfloor;": 0x0230A, "&rfloor;": 0x0230B, "&lang;": 0x02329, "&rang;": 0x0232A, "&loz;": 0x025CA, "&spades;": 0x02660, "&clubs;": 0x02663, "&hearts;": 0x02665, "&diams;": 0x02666}; var test_location = document.getElementById('test_location'); var name_span = document.getElementById('codepoint'); var results = document.getElementById('results'); function testEntity(entity, expected_codepoint) { var new_row; name_span.textContent = entity; test_location.innerHTML = entity; if (test_location.textContent.charCodeAt(0) != expected_codepoint) { new_row = document.createElement("tr"); new_row.innerHTML = "<td>" + entity.replace("&", "&amp;") + "</td><td>U+" + test_location.textContent.charCodeAt(0).toString(16) + "</td><td>U+" + expected_codepoint.toString(16) + "</td>"; results.appendChild(new_row); } } function testBouncer(tests, i) { if (tests.length < i) { name_span.textContent = "DONE!"; return; } testEntity.apply(null, tests[i]); setTimeout(function(){testBouncer(tests, i+1);}, 0); } function main() { var tests = []; for (var entity in named_entities) { tests.push([entity, named_entities[entity]]); } for (var codepoint = 0; codepoint < 0x10000; codepoint++) { if (codepoint >= 0xD800 && codepoint <= 0xDFFF) { // Ignore surrogates continue; } tests.push(["&#" + codepoint + ";", codepoint]); } setTimeout(function(){testBouncer(tests, 0);}) } setTimeout(main, 0); </script> </body> </html>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It takes a few minutes to run, and doesn’t actually tell us what the browser displays, but it does tell us what the browser interpreted. It’s probably close enough and has the benefit of being easy to run an a wide variety of browsers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It turns out that there are some differences:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								IE likes to render U+003F (a literal question mark “?”) for a lot of things
+							Element:li
+								Firefox and IE on Windows complain about U+000D, but Chrome and Safari do not (nor does Firefox 8 on OSX)
+							Element:li
+								Safari on iPhone matches Safari on OSX, but you’ll probably want to be plugged in while it runs…
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The results aren’t convincing enough for me to bet customer data on it, though.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Method #2: Building a Browser
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								I also looked into how to render HTML into a canvas element in order to do automated pixel-perfect comparisions. Doing it with Firefox seems to involve writing a bit of
+							Element:a
+								chrome
+								, and I got nowhere fast. With some idle poking around, though, I found the
+							Element:a
+								pyqt
+								bindings, and enough examples of how to use a
+							Element:a
+								QWebPage
+								to
+							Element:a
+								turn HTML into a bitmap
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, install the pyqt bindings from
+							Element:a
+								homebrew
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								brew install pyqt
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								And get a drink. Maybe go to lunch. When it’s done, we can run this bit of fun:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								#!/usr/bin/env python # -*- coding: utf-8 -*- import base64 import htmlentitydefs import json import re import sys sys.path.insert(0, '/usr/local/lib/python') from PyQt4.QtCore import * from PyQt4.QtGui import * from PyQt4.QtWebKit import * with open('entity_list.json') as f: # A file containing the named entities I want to check, as a JSON array unique_entities = json.load(f) app = QApplication([]) SIZE = 100 size = QSize(SIZE, SIZE) page = QWebPage() # If you don't set the viewport size, you won't see anything page.setViewportSize(size) frame = page.mainFrame() surface1 = QImage(size, QImage.Format_ARGB32_Premultiplied) surface2 = QImage(size, QImage.Format_ARGB32_Premultiplied) entity_re = re.compile(r'^&(?:(?P<name>\w+)|#(?:x(?P<hex>[0-9a-f]+)|(?P<decimal>\d+)));$') def decode(entity): """Naive HTML entity decoder. Explicitly follows the specs, not what browsers actually do. Takes a string containing only the entity, and returns a unicode string with the decoded intepretation. """ m = entity_re.match(entity) if not m: raise ValueError() elif m.group('name'): return unichr(htmlentitydefs.name2codepoint[m.group('name')]) elif m.group('hex'): return unichr(int(m.group('hex'), 16)) elif m.group('decimal'): return unichr(int(m.group('decimal'), 10)) else: raise ValueError() for entity in unique_entities: try: decoded_entity = decode(entity) except ValueError: print "Couldn't decode entity", entity continue if u'\uD800' <= decoded_entity <= u'\uDFFF': # Don't care about surrogates. continue surface1.fill(0xFFFFFFFF) surface2.fill(0xFFFFFFFF) # Experiments tell me I should make new painters every time (see .end() below) painter1 = QPainter(surface1) painter2 = QPainter(surface2) SCALE = 3 painter1.scale(SCALE,SCALE) painter2.scale(SCALE,SCALE) frame.setHtml(decoded_entity) frame.render(painter1) painter1.end() frame.setHtml(entity) frame.render(painter2) painter2.end() # The bits() method returns a sip_ptr thing, which is a Python interface # to a void* pointing at the ARGB32 backing store for the image. # Hence width x height x byte width of a pixel bitmap1 = surface1.bits().asstring(SIZE*SIZE*4) bitmap2 = surface2.bits().asstring(SIZE*SIZE*4) # Should probably be a set of 4-tuples (i.e. pixel values) # but "nothing" is "opaque white" so all 0xFF. if len(set(bitmap1)) == 1: print "Nothing to see", entity # Looking for a bit-perfect image if bitmap1 != bitmap2: print "Glyph mismatch on entity %s" % (entity,) surface1.save('mismatch%s.utf8.png' % (entity,)) surface2.save('mismatch%s.entity.png' % (entity,)) # Seems to crash at the end no matter what I do. ![:(](/assets/blog-uploads/img/icon_sad.gif) # sys.exit(app.exec_())
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It’s probably advisable to generate the before and after entity transformations outside of Python, since we won’t be doing the real translation with Python. In this case, however, I know that
+							Element:code
+								htmlentitydefs.name2codepoint
+								has the same data as PHP, and that
+							Element:code
+								html_decode_entities
+								does the naïve thing with numeric character references (again, like
+							Element:code
+								html_decode_entities
+								).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								I was pretty happy with this, but it’s only for one browser engine, and not actually a browser that anyone runs. But it’s neat to know that you can create an entire browser inside of Python to generate screenshots and even hook into the JS engine.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Method #3: Taking Screenshots
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As it turns out, we don’t need to verify all 60-some-thousand codepoints in the Basic Multilingual Plane. We only have about 6000 of them in the database, and 6000 characters nearly fits on a single 27″ iMac screen!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The first step is to create a big table (≈150×50 cells) containing the codepoints in question. Take a screenshot.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then load up a similar table, but with the expected transformations applied. Take another screenshot.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then we’ll have some fun in
+								![](/assets/blog-uploads/img/entity_test_offset_overlay.png) The top layer is using the Difference mode at 72% opacity. It’s offset by a few dozen pixels to show the effect. ![](/assets/blog-uploads/img/entity_test_partial_difference.png) When we move the two layers to be perfectly overlaid, most characters go black (meaning “no difference”). The white background is grey because we’re still at only 72% opacity. You can see the signal we get in the URI when things are different. There’s also that pesky �… ![](/assets/blog-uploads/img/entity_test_full_difference.png) At full opacity, any difference between the two screenshots pops out pretty loudly. Looks like `` renders differently than a null byte!
+							Element:a
+								the GIMP
+								using layers and the Difference mode.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At the end of the day, being able to visually and manually verify all the things we intend to work on gives us a lot of confidence. It doesn’t hurt that all 3 methods agree on where the trouble spots are!
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Developer Stuff
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														API Overview
+													Element:li
+													Element:a
+														Authentication
+													Element:li
+													Element:a
+														Helper Libraries
+													Element:li
+													Element:a
+														Application Billing
+													Element:li
+													Element:a
+														Webhooks
+													Element:li
+													Element:a
+														Developer Blog
+													Element:a
+													Element:img
+													Element:li
+													Element:a
+														Developer Forum
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														API Calls
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Callbacks
+													Element:li
+													Element:a
+														Categories
+													Element:li
+													Element:a
+														Clients
+													Element:li
+													Element:a
+														Estimates
+													Element:li
+													Element:a
+														Expenses
+													Element:li
+													Element:a
+														Gateway
+													Element:li
+													Element:a
+														FreshBooks API Guide for Invoices
+													Element:li
+													Element:a
+														Items
+													Element:li
+													Element:a
+														Languages
+													Element:li
+													Element:a
+														Payments
+													Element:li
+													Element:a
+														Projects
+													Element:li
+													Element:a
+														Receipts
+													Element:li
+													Element:a
+														Recurring
+													Element:li
+													Element:a
+														Staff
+													Element:li
+													Element:a
+														System
+													Element:li
+													Element:a
+														Tasks
+													Element:li
+													Element:a
+														Taxes
+													Element:li
+													Element:a
+														Time Entries
+													Element:li
+													Element:a
+														Contractors
+													Element:li
+													Element:a
+														Default Terms
+													Element:li
+													Element:a
+														Reports
+													Element:li
+													Element:a
+														Currency
+													Element:li
+													Element:a
+														Email Templates
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resources
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Code
+													Element:li
+													Element:a
+														Developer Tips
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Tour FreshBooks
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Online Invoicing
+													Element:li
+													Element:a
+														Time Tracking
+													Element:li
+													Element:a
+														Client Estimates
+													Element:li
+													Element:a
+														Expense Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:a
+													Element:img
+													Element:img
+													Element:p
+														FreshBooks, 1655 Dupont St. Suite 250, Toronto, ON M6P 3T1 Canada
+													Element:p
+														Copyright © 2000-2017 FreshBooks is a service of 2ndSite Inc. All rights reserved.
+													Element:p
+													Element:a
+														Security Safeguards
+														|
+													Element:a
+														Terms of Service
+														|
+													Element:a
+														Privacy Policy
+												Node:
+												(type) c
+												(layer)4
+													Element:img

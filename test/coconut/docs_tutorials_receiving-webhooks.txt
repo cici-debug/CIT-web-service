@@ -1,0 +1,223 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					API Reference
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Docs
+					/
+				Element:a
+					Tutorials
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Receiving Webhooks
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After completing the previous tutorials, you learned to
+							Element:a
+								encode videos
+								,
+							Element:a
+								create cool video previews
+								and
+							Element:a
+								encode videos using HLS for Mobile devices
+								. Finally, we saw how to submit the config file to be processed using the official client libraries.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this final tutorial, we will explain how to retrieve the media URLs and errors from the
+							Element:strong
+								webhook
+								sent to your application when everything is complete.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											The whole config file
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For our tutorial, we will use an improved config file which combines everything we have seen previously:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											# Variable declarations var post = abc1234 var num = 3 var filename = demo # AWS S3 bucket where the media will be uploaded var access_key = accesskey var secret_key = secretkey var bucket = mybucket var s3 = s3://$access_key:$secret_key@$bucket/$post # Setting the source video and the webhook URL set source = http://media.s3.amazonaws.com/demo.mp4 set webhook = http://yourserver.com/webhooks/coconut?post_id=$post # Encoding for web and mobile devices -> mp4 = $s3/videos/web/$filename.mp4 -> webm = $s3/videos/web/$filename.webm -> mp4:360p = $s3/videos/mobile/$filename.mp4 -> hls = $s3/videos/hls/$filename.m3u8 # Creating video previews -> jpg:200x = $s3/thumbnails/small/$filename_#num#.jpg, number=$num -> jpg:640x = $s3/thumbnails/large/$filename_#num#.jpg, number=$num -> gif:300x = $s3/gif/$filename.gif -> storyboard:640x = $s3/storyboard/$filename.png
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After submitting this config file, we only need to wait for the webhook that would tell us that the whole job is done.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											The Webhook
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A webhook request is just a regular POST HTTP request in JSON format.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two fields that interest us:
+										Element:code
+											output_urls
+											and
+										Element:code
+											errors
+											. As you can guess, the first gives us all the media URLs and the latter, all the encountered errors.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is the sample JSON data based on our config file:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "id": 1234, "output_urls": { "mp4": "http://mybucket.s3.amazonaws.com/abc1234/videos/mp4/demo.mp4", "mp4:360p": "http://mybucket.s3.amazonaws.com/abc1234/videos/mobile/demo.mp4", "hls": "http://mybucket.s3.amazonaws.com/abc1234/videos/hls/demo.m3u8", "jpg:200x": [ "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/small/demo_01.jpg", "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/small/demo_02.jpg", "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/small/demo_03.jpg" ], "jpg:640x": [ "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/large/demo_01.jpg", "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/large/demo_02.jpg", "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/large/demo_03.jpg" ], "storyboard:640x": "http://mybucket.s3.amazonaws.com/abc1234/storyboard/demo.png" }, "errors": { "output": { "webm": "output_audio_cant_be_resampled", "gif:300x": "gif_not_uploaded" } }, "event": "job.completed" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Awesome, every URLs and
+										Element:a
+											errors
+											are there!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											output_urls
+											and
+										Element:code
+											errors
+											are
+										Element:em
+											Hashes
+											with each key corresponding to a section name used in the config file.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Writing the server
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To receive webhooks, you just need to write the code listening to POST requests made to
+										Element:code
+											/webhooks/coconut
+											(mentioned in the config file).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:i
+											Exposing localhost to the Internet
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While developing on your machine, your web app is not public and is thus not accessible by the Coconut servers. To make your local app reachable, we suggest to use
+										Element:a
+											ngrok
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let's setup a small
+										Element:a
+											sinatra
+											app to handle incoming webhooks:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											# server.rb require "sinatra" require "json" post "/webhooks/coconut" do urls = JSON.parse(request.body.read)["output_urls"] puts "Here are the media URLs: #{urls.inspect}" end
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Testing it:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											ruby server.rb [2014-04-08 16:47:14] INFO WEBrick 1.3.1 [2014-04-08 16:47:14] INFO ruby 2.1.1 (2014-02-24) [x86_64-darwin13.0] == Sinatra/1.4.4 has taken the stage on 4567 for development with backup from WEBrick [2014-04-08 16:47:14] INFO WEBrick::HTTPServer#start: pid=74361 port=4567 Here are the media URLs: {"mp4"=>"http://mybucket.s3.amazonaws.com/abc1234/videos/mp4/demo.mp4", "ios:360p"=>"http://mybucket.s3.amazonaws.com/abc1234/videos/mobile/demo.mp4", "hls"=>"http://mybucket.s3.amazonaws.com/abc1234/videos/hls/demo.m3u8", "jpg:200x"=>["http://mybucket.s3.amazonaws.com/abc1234/thumbnails/small/demo_01.jpg", "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/small/demo_02.jpg", "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/small/demo_03.jpg"], "jpg:640x"=>["http://mybucket.s3.amazonaws.com/abc1234/thumbnails/large/demo_01.jpg", "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/large/demo_02.jpg", "http://mybucket.s3.amazonaws.com/abc1234/thumbnails/large/demo_03.jpg"], "storyboard:640x"=>"http://mybucket.s3.amazonaws.com/abc1234/storyboard/demo.png"} ::1 - - [08/Apr/2014 16:47:17] "POST /webhooks/coconut HTTP/1.1" 200 - 0.0080 localhost - - [08/Apr/2014:16:47:16 CEST] "POST /webhooks/coconut HTTP/1.1" 200 0 - -> /webhooks/coconut
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Excellent! You can do everything you need like saving the URLs into your database.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are a PHP guy, you might be interested in this sample code:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $body = file_get_contents("php://input"); $webhook = json_decode($body, true); echo "Here are the media URLs:"; <br> print_r($webhook["output_urls"]); ?>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Congratulations!
+											You have learned everything you need to know on how to integrate Coconut. Visit our
+										Element:a
+											FAQ
+											or
+										Element:a
+											contact us
+											if you have any questions.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:hr

@@ -1,0 +1,329 @@
+Node:
+(type) c
+(layer)0
+	Element:article
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					WebSockets API overview
+				Element:a
+					¶
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Versioning
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The API is versioned via the WebSocket
+							Element:code
+								protocol
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								var ws = new WebSocket('wss://websockets.layer.com/?session_token=keuIjkPoPlkxw==', 'layer-2.0');
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You must explicitly provide the
+							Element:q
+								“layer-2.0”
+								parameter, and adjust it as needed if requesting a different version of the API.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Packets
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To avoid confusion with Layer messages, events and notifications, we use the term
+							Element:em
+								Packet
+								to describe data sent/received through the WebSocket.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Packets have a standard set of top-level fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								type
+								: The type of data contained in the packet. See below
+							Element:li
+							Element:code
+								timestamp
+								: The time on the server when the packet was sent
+							Element:li
+							Element:code
+								body
+								: The content and details of the packet
+							Element:li
+							Element:code
+								counter
+								: An index used to detect missed packets (see
+							Element:a
+								Recovery
+								)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Currently there are four possible values for the
+							Element:code
+								type
+								field:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:q
+								“change”
+								(Change Packet): Notifies you of changes that have happened on the server
+							Element:li
+							Element:q
+								“request”
+								(Request Packet): The client sends this to request an operation (create a conversation, send a message, etc)
+							Element:li
+							Element:q
+								“response”
+								(Response Packet): The server sends this in response to a request packet
+							Element:li
+							Element:q
+								“signal”
+								(Signal Packet): The packet contains data about an ephemeral event such as typing indicators
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Change packets are documented in
+							Element:a
+								Receiving changes
+								below. Request and response packets are documented below, and in more detail with the corresponding REST endpoints. Signal packets are documented in
+							Element:a
+								Typing indicators
+								below.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Request packet overview
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								body
+								field of a request packet should have the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								request_id
+							Element:td
+								string
+							Element:td
+								An ID created by the client to identify a response
+							Element:tr
+							Element:td
+							Element:code
+								method
+							Element:td
+								string
+							Element:td
+								Possible values are
+							Element:q
+								“Message.create”
+								or
+							Element:q
+								“Conversation.create”
+							Element:tr
+							Element:td
+							Element:code
+								object_id
+							Element:td
+								string (optional)
+							Element:td
+								If sending a message, this should be the ID of the target conversation
+							Element:tr
+							Element:td
+							Element:code
+								data
+							Element:td
+								object
+							Element:td
+								The data with which to create a conversation or message
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you sends a request packet, it should generate and include a
+							Element:code
+								request_id
+								. Response to that request will contain the same
+							Element:code
+								request_id
+								, so that you know which request the response is associated with. The
+							Element:code
+								request_id
+								field can be in any format, as long as it matches the following regex:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								/^[a-zA-Z0
+							Element:span
+								-9.
+								-]+$/
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+							Element:strong
+								Note
+							Element:p
+								If you don’t provide a
+							Element:code
+								request_id
+								, you will
+							Element:em
+								not
+								receive a Response Packet.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Response Packet overview
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								body
+								field of a Response Packet will have the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								request_id
+							Element:td
+								string
+							Element:td
+								Echoes back the
+							Element:code
+								request_id
+								sent by the client
+							Element:tr
+							Element:td
+							Element:code
+								method
+							Element:td
+								string
+							Element:td
+								The
+							Element:code
+								method
+								provided in the request
+							Element:tr
+							Element:td
+							Element:code
+								data
+							Element:td
+								string
+							Element:td
+								The data returned from the request
+							Element:tr
+							Element:td
+							Element:code
+								success
+							Element:td
+								boolean
+							Element:td
+							Element:q
+								true
+								if the operation succeeded,
+							Element:q
+								false
+								if there was an error
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If there was an error, the
+							Element:code
+								data
+								field will contain an error object as documented in
+							Element:a
+								Errors
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								REST API overview
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Errors
