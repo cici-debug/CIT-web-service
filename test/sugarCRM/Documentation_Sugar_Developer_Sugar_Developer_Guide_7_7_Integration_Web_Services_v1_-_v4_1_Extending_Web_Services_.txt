@@ -1,0 +1,347 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Extending v1 - v4.1 Web Services
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The guide will demonstrate how to add your own custom methods to the REST and SOAP API or extend exisiting ones.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Extending the API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following example will demonstrate how to extend the v4_1 API.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Defining the Entry Point Location
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is where you define the directory that will contain your new REST and SOAP entry points. We recommend a path formatted as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											./custom/service/{version}_custom/
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The actual location of the entry points does not matter, however, using a path such as this will allow you to call your entry points as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											http://{sugar_url}/custom/service/{version}_custom/rest.php
+										Element:li
+											http://{sugar_url}/custom/service/{version}_custom/soap.php
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Define the SugarWebServiceImpl Class
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The next step is to define a new 'SugarWebServiceImpl' class. Since we are using v4_1, we need to extend the file 'service/v4_1/SugarWebServiceImplv4_1.php' and add our new method. To do this, we will create the file:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/service/v4_1_custom/SugarWebServiceImplv4_1_custom.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php if(!defined('sugarEntry'))define('sugarEntry', true); require_once('service/v4_1/SugarWebServiceImplv4_1.php'); class SugarWebServiceImplv4_1_custom extends SugarWebServiceImplv4_1 { /* * Returns the session id if authenticated * * @param string $session * @return string $session - false if invalid. * */ function example_method($session) { $GLOBALS['log']->info('Begin: SugarWebServiceImplv4_1_custom->example_method'); $error = new SoapError(); //authenticate if (!self::$helperObject->checkSessionAndModuleAccess($session, 'invalid_session', '', '', '', $error)) { $GLOBALS['log']->info('End: SugarWebServiceImplv4_1_custom->example_method.'); return false; } return $session; } } ?>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Define the Registry Class
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we will define the registry class that will register our new function. This file will be located at:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/service/v4_1_custom/registry.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php require_once('service/v4_1/registry.php'); class registry_v4_1_custom extends registry_v4_1 { protected function registerFunction() { parent::registerFunction(); $this->serviceClass->registerFunction('example_method', array('session'=>'xsd:string'), array('return'=>'xsd:string')); } } ?>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Define the REST Entry Point
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This REST entry point will be located at:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/service/v4_1_custom/rest.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php chdir('../../..'); require_once('SugarWebServiceImplv4_1_custom.php'); $webservice_path = 'service/core/SugarRestService.php'; $webservice_class = 'SugarRestService'; $webservice_impl_class = 'SugarWebServiceImplv4_1_custom'; $registry_path = 'custom/service/v4_1_custom/registry.php'; $registry_class = 'registry_v4_1_custom'; $location = 'custom/service/v4_1_custom/rest.php'; require_once('service/core/webservice.php'); ?>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Define the SOAP Entry Point
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This SOAP entry point will be located at:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/service/v4_1_custom/soap.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php chdir('../../..'); require_once('SugarWebServiceImplv4_1_custom.php'); $webservice_class = 'SugarSoapService2'; $webservice_path = 'service/v2/SugarSoapService2.php'; $webservice_impl_class = 'SugarWebServiceImplv4_1_custom'; $registry_class = 'registry_v4_1_custom'; $registry_path = 'custom/service/v4_1_custom/registry.php'; $location = 'custom/service/v4_1_custom/soap.php'; require_once('service/core/webservice.php'); ?>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 01/14/2016 11:15pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

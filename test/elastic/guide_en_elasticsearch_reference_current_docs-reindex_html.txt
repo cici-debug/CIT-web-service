@@ -1,0 +1,1584 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Reindex API
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Reindex does not attempt to set up the destination index. It does not copy the settings of the source index. You should set up the destination index prior to running a
+							Element:code
+								_reindex
+								action, including setting up mappings, shard counts, replicas, etc.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The most basic form of
+							Element:code
+								_reindex
+								just copies documents from one index to another. This will copy documents from the
+							Element:code
+								twitter
+								index into the
+							Element:code
+								new_twitter
+								index:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "twitter" }, "dest": { "index": "new_twitter" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That will return something like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "took" : 147, "timed_out": false, "created": 120, "updated": 0, "deleted": 0, "batches": 1, "version_conflicts": 0, "noops": 0, "retries": { "bulk": 0, "search": 0 }, "throttled_millis": 0, "requests_per_second": -1.0, "throttled_until_millis": 0, "total": 120, "failures" : [ ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Just like
+							Element:a
+								,
+							Element:code
+								_update_by_query
+							Element:code
+								_reindex
+								gets a snapshot of the source index but its target must be a
+							Element:span
+								index so version conflicts are unlikely. The
+							Element:strong
+								different
+							Element:code
+								dest
+								element can be configured like the index API to control optimistic concurrency control. Just leaving out
+							Element:code
+								version_type
+								(as above) or setting it to
+							Element:code
+								internal
+								will cause Elasticsearch to blindly dump documents into the target, overwriting any that happen to have the same type and id:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "twitter" }, "dest": { "index": "new_twitter", "version_type": "internal" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Setting
+							Element:code
+								version_type
+								to
+							Element:code
+								external
+								will cause Elasticsearch to preserve the
+							Element:code
+								version
+								from the source, create any documents that are missing, and update any documents that have an older version in the destination index than they do in the source index:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "twitter" }, "dest": { "index": "new_twitter", "version_type": "external" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Settings
+							Element:code
+								op_type
+								to
+							Element:code
+								create
+								will cause
+							Element:code
+								_reindex
+								to only create missing documents in the target index. All existing documents will cause a version conflict:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "twitter" }, "dest": { "index": "new_twitter", "op_type": "create" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default version conflicts abort the
+							Element:code
+								_reindex
+								process but you can just count them by settings
+							Element:code
+								"conflicts": "proceed"
+								in the request body:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "conflicts": "proceed", "source": { "index": "twitter" }, "dest": { "index": "new_twitter", "op_type": "create" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can limit the documents by adding a type to the
+							Element:code
+								source
+								or by adding a query. This will only copy
+							Element:code
+								tweet
+								's made by
+							Element:code
+								kimchy
+								into
+							Element:code
+								new_twitter
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "twitter", "type": "tweet", "query": { "term": { "user": "kimchy" } } }, "dest": { "index": "new_twitter" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								index
+								and
+							Element:code
+								type
+								in
+							Element:code
+								source
+								can both be lists, allowing you to copy from lots of sources in one request. This will copy documents from the
+							Element:code
+								tweet
+								and
+							Element:code
+								post
+								types in the
+							Element:code
+								twitter
+								and
+							Element:code
+								blog
+								index. It’d include the
+							Element:code
+								post
+								type in the
+							Element:code
+								twitter
+								index and the
+							Element:code
+								tweet
+								type in the
+							Element:code
+								blog
+								index. If you want to be more specific you’ll need to use the
+							Element:code
+								query
+								. It also makes no effort to handle ID collisions. The target index will remain valid but it’s not easy to predict which document will survive because the iteration order isn’t well defined.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": ["twitter", "blog"], "type": ["tweet", "post"] }, "dest": { "index": "all_together" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It’s also possible to limit the number of processed documents by setting
+							Element:code
+								size
+								. This will only copy a single document from
+							Element:code
+								twitter
+								to
+							Element:code
+								new_twitter
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "size": 1, "source": { "index": "twitter" }, "dest": { "index": "new_twitter" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want a particular set of documents from the twitter index you’ll need to sort. Sorting makes the scroll less efficient but in some contexts it’s worth it. If possible, prefer a more selective query to
+							Element:code
+								size
+								and
+							Element:code
+								sort
+								. This will copy 10000 documents from
+							Element:code
+								twitter
+								into
+							Element:code
+								new_twitter
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "size": 10000, "source": { "index": "twitter", "sort": { "date": "desc" } }, "dest": { "index": "new_twitter" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								source
+								section supports all the elements that are supported in a
+							Element:a
+								search request
+								. For instance only a subset of the fields from the original documents can be reindexed using source filtering as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "twitter", "_source": ["user", "tweet"] }, "dest": { "index": "new_twitter" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Like
+							Element:code
+								_update_by_query
+								,
+							Element:code
+								_reindex
+								supports a script that modifies the document. Unlike
+							Element:code
+								_update_by_query
+								, the script is allowed to modify the document’s metadata. This example bumps the version of the source document:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "twitter" }, "dest": { "index": "new_twitter", "version_type": "external" }, "script": { "inline": "if (ctx._source.foo == 'bar') {ctx._version++; ctx._source.remove('foo')}", "lang": "painless" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Just as in
+							Element:code
+								_update_by_query
+								, you can set
+							Element:code
+								ctx.op
+								to change the operation that is executed on the destination index:
+						Node:
+						(type) c
+						(layer)2
+							Element:dl
+							Element:dt
+							Element:span
+							Element:code
+								noop
+							Element:dd
+								Set
+							Element:code
+								ctx.op = "noop"
+								if your script decides that the document doesn’t have to be indexed in the destination index. This no operation will be reported in the
+							Element:code
+								noop
+								counter in the
+							Element:a
+								response body
+								.
+							Element:dt
+							Element:span
+							Element:code
+								delete
+							Element:dd
+								Set
+							Element:code
+								ctx.op = "delete"
+								if your script decides that the document must be deleted from the destination index. The deletion will be reported in the
+							Element:code
+								deleted
+								counter in the
+							Element:a
+								response body
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Setting
+							Element:code
+								ctx.op
+								to anything else is an error. Setting any other field in
+							Element:code
+								ctx
+								is an error.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Think of the possibilities! Just be careful! With great power…. You can change:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								_id
+							Element:li
+							Element:code
+								_type
+							Element:li
+							Element:code
+								_index
+							Element:li
+							Element:code
+								_version
+							Element:li
+							Element:code
+								_routing
+							Element:li
+							Element:code
+								_parent
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Setting
+							Element:code
+								_version
+								to
+							Element:code
+								null
+								or clearing it from the
+							Element:code
+								ctx
+								map is just like not sending the version in an indexing request. It will cause that document to be overwritten in the target index regardless of the version on the target or the version type you use in the
+							Element:code
+								_reindex
+								request.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default if
+							Element:code
+								_reindex
+								sees a document with routing then the routing is preserved unless it’s changed by the script. You can set
+							Element:code
+								routing
+								on the
+							Element:code
+								dest
+								request to change this:
+						Node:
+						(type) c
+						(layer)2
+							Element:dl
+							Element:dt
+							Element:span
+							Element:code
+								keep
+							Element:dd
+								Sets the routing on the bulk request sent for each match to the routing on the match. The default.
+							Element:dt
+							Element:span
+							Element:code
+								discard
+							Element:dd
+								Sets the routing on the bulk request sent for each match to null.
+							Element:dt
+							Element:span
+							Element:code
+								=<some text>
+							Element:dd
+								Sets the routing on the bulk request sent for each match to all text after the
+							Element:code
+								=
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example, you can use the following request to copy all documents from the
+							Element:code
+								source
+								index with the company name
+							Element:code
+								cat
+								into the
+							Element:code
+								dest
+								index with routing set to
+							Element:code
+								cat
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "source", "query": { "match": { "company": "cat" } } }, "dest": { "index": "dest", "routing": "=cat" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default
+							Element:code
+								_reindex
+								uses scroll batches of 1000. You can change the batch size with the
+							Element:code
+								size
+								field in the
+							Element:code
+								source
+								element:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "source", "size": 100 }, "dest": { "index": "dest", "routing": "=cat" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Reindex can also use the
+							Element:a
+								Ingest Node
+								feature by specifying a
+							Element:code
+								pipeline
+								like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _reindex { "source": { "index": "source" }, "dest": { "index": "dest", "pipeline": "some_ingest_pipeline" } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Reindex from Remote
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Reindex supports reindexing from a remote Elasticsearch cluster:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _reindex { "source": { "remote": { "host": "http://otherhost:9200", "username": "user", "password": "pass" }, "index": "source", "query": { "match": { "test": "data" } } }, "dest": { "index": "dest" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											host
+											parameter must contain a scheme, host, and port (e.g.
+										Element:code
+											https://otherhost:9200
+											). The
+										Element:code
+											username
+											and
+										Element:code
+											password
+											parameters are optional and when they are present reindex will connect to the remote Elasticsearch node using basic auth. Be sure to use
+										Element:code
+											https
+											when using basic auth or the password will be sent in plain text.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Remote hosts have to be explicitly whitelisted in elasticsearch.yaml using the
+										Element:code
+											reindex.remote.whitelist
+											property. It can be set to a comma delimited list of allowed remote
+										Element:code
+											host
+											and
+										Element:code
+											port
+											combinations (e.g.
+										Element:code
+											otherhost:9200, another:9200, 127.0.10.*:9200, localhost:*
+											). Scheme is ignored by the whitelist - only host and port are used.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This feature should work with remote clusters of any version of Elasticsearch you are likely to find. This should allow you to upgrade from any version of Elasticsearch to the current version by reindexing from a cluster of the old version.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note: On 5.2.0, when reindexing from a pre-2.0 Elasticsearch cluster, you must add
+										Element:code
+											"_source": true
+											under the
+										Element:code
+											source
+											setting of the reindexing request body. This is no longer required starting in 5.2.1+.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To enable queries sent to older versions of Elasticsearch the
+										Element:code
+											query
+											parameter is sent directly to the remote host without validation or modification.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Reindexing from a remote server uses an on-heap buffer that defaults to a maximum size of 100mb. If the remote index includes very large documents you’ll need to use a smaller batch size. The example below sets the batch size
+										Element:code
+											10
+											which is very, very small.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _reindex { "source": { "remote": { "host": "http://otherhost:9200" }, "index": "source", "size": 10, "query": { "match": { "test": "data" } } }, "dest": { "index": "dest" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is also possible to set the socket read timeout on the remote connection with the
+										Element:code
+											socket_timeout
+											field and the connection timeout with the
+										Element:code
+											connect_timeout
+											field. Both default to thirty seconds. This example sets the socket read timeout to one minute and the connection timeout to ten seconds:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _reindex { "source": { "remote": { "host": "http://otherhost:9200", "socket_timeout": "1m", "connect_timeout": "10s" }, "index": "source", "query": { "match": { "test": "data" } } }, "dest": { "index": "dest" } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											URL Parameters
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to the standard parameters like
+										Element:code
+											pretty
+											, the Reindex API also supports
+										Element:code
+											refresh
+											,
+										Element:code
+											wait_for_completion
+											,
+										Element:code
+											wait_for_active_shards
+											,
+										Element:code
+											timeout
+											, and
+										Element:code
+											requests_per_second
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sending the
+										Element:code
+											refresh
+											url parameter will cause all indexes to which the request wrote to be refreshed. This is different than the Index API’s
+										Element:code
+											refresh
+											parameter which causes just the shard that received the new data to be refreshed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the request contains
+										Element:code
+											wait_for_completion=false
+											then Elasticsearch will perform some preflight checks, launch the request, and then return a
+										Element:code
+											task
+											which can be used with
+										Element:a
+											Tasks APIs
+											to cancel or get the status of the task. Elasticsearch will also create a record of this task as a document at
+										Element:code
+											.tasks/task/${taskId}
+											. This is yours to keep or remove as you see fit. When you are done with it, delete it so Elasticsearch can reclaim the space it uses.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											wait_for_active_shards
+											controls how many copies of a shard must be active before proceeding with the reindexing. See
+										Element:a
+											here
+											for details.
+										Element:code
+											timeout
+											controls how long each write request waits for unavailable shards to become available. Both work exactly how they work in the
+										Element:a
+											Bulk API
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											requests_per_second
+											can be set to any positive decimal number (
+										Element:code
+											1.4
+											,
+										Element:code
+											6
+											,
+										Element:code
+											1000
+											, etc) and throttles the number of requests per second that the reindex issues or it can be set to
+										Element:code
+											-1
+											to disabled throttling. The throttling is done waiting between bulk batches so that it can manipulate the scroll timeout. The wait time is the difference between the time it took the batch to complete and the time
+										Element:code
+											requests_per_second * requests_in_the_batch
+											. Since the batch isn’t broken into multiple bulk requests large batch sizes will cause Elasticsearch to create many requests and then wait for a while before starting the next set. This is "bursty" instead of "smooth". The default is
+										Element:code
+											-1
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Response body
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The JSON response looks like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "took" : 639, "updated": 0, "created": 123, "batches": 1, "version_conflicts": 2, "retries": { "bulk": 0, "search": 0 } "throttled_millis": 0, "failures" : [ ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											took
+										Element:dd
+											The number of milliseconds from start to end of the whole operation.
+										Element:dt
+										Element:span
+										Element:code
+											updated
+										Element:dd
+											The number of documents that were successfully updated.
+										Element:dt
+										Element:span
+										Element:code
+											created
+										Element:dd
+											The number of documents that were successfully created.
+										Element:dt
+										Element:span
+										Element:code
+											batches
+										Element:dd
+											The number of scroll responses pulled back by the the reindex.
+										Element:dt
+										Element:span
+										Element:code
+											version_conflicts
+										Element:dd
+											The number of version conflicts that reindex hit.
+										Element:dt
+										Element:span
+										Element:code
+											retries
+										Element:dd
+											The number of retries attempted by reindex.
+										Element:code
+											bulk
+											is the number of bulk actions retried and
+										Element:code
+											search
+											is the number of search actions retried.
+										Element:dt
+										Element:span
+										Element:code
+											throttled_millis
+										Element:dd
+											Number of milliseconds the request slept to conform to
+										Element:code
+											requests_per_second
+											.
+										Element:dt
+										Element:span
+										Element:code
+											failures
+										Element:dd
+											Array of all indexing failures. If this is non-empty then the request aborted because of those failures. See
+										Element:code
+											conflicts
+											for how to prevent version conflicts from aborting the operation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Works with the Task API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can fetch the status of all running reindex requests with the
+										Element:a
+											Task API
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET _tasks?detailed=true&actions=*reindex
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The responses looks like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "nodes" : { "r1A2WoRbTwKZ516z6NEs5A" : { "name" : "r1A2WoR", "transport_address" : "127.0.0.1:9300", "host" : "127.0.0.1", "ip" : "127.0.0.1:9300", "attributes" : { "testattr" : "test", "portsfile" : "true" }, "tasks" : { "r1A2WoRbTwKZ516z6NEs5A:36619" : { "node" : "r1A2WoRbTwKZ516z6NEs5A", "id" : 36619, "type" : "transport", "action" : "indices:data/write/reindex", "status" : {
+										Element:a
+										Element:span
+											"total" : 6154, "updated" : 3500, "created" : 0, "deleted" : 0, "batches" : 4, "version_conflicts" : 0, "noops" : 0, "retries": { "bulk": 0, "search": 0 }, "throttled_millis": 0 }, "description" : "" } } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											this object contains the actual status. It is just like the response json with the important addition of the
+										Element:code
+											total
+											field.
+										Element:code
+											total
+											is the total number of operations that the reindex expects to perform. You can estimate the progress by adding the
+										Element:code
+											updated
+											,
+										Element:code
+											created
+											, and
+										Element:code
+											deleted
+											fields. The request will finish when their sum is equal to the
+										Element:code
+											total
+											field.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With the task id you can look up the task directly:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_tasks/taskId:1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The advantage of this API is that it integrates with
+										Element:code
+											wait_for_completion=false
+											to transparently return the status of completed tasks. If the task is completed and
+										Element:code
+											wait_for_completion=false
+											was set on it them it’ll come back with a
+										Element:code
+											results
+											or an
+										Element:code
+											error
+											field. The cost of this feature is the document that
+										Element:code
+											wait_for_completion=false
+											creates at
+										Element:code
+											.tasks/task/${taskId}
+											. It is up to you to delete that document.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Works with the Cancel Task API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Any Reindex can be canceled using the
+										Element:a
+											Task Cancel API
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _tasks/task_id:1/_cancel
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											task_id
+											can be found using the tasks API above.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Cancelation should happen quickly but might take a few seconds. The task status API above will continue to list the task until it is wakes to cancel itself.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Rethrottling
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The value of
+										Element:code
+											requests_per_second
+											can be changed on a running reindex using the
+										Element:code
+											_rethrottle
+											API:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _reindex/task_id:1/_rethrottle?requests_per_second=-1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											task_id
+											can be found using the tasks API above.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Just like when setting it on the
+										Element:code
+											_reindex
+											API
+										Element:code
+											requests_per_second
+											can be either
+										Element:code
+											-1
+											to disable throttling or any decimal number like
+										Element:code
+											1.7
+											or
+										Element:code
+											12
+											to throttle to that level. Rethrottling that speeds up the query takes effect immediately but rethrotting that slows down the query will take effect on after completing the current batch. This prevents scroll timeouts.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Reindex to change the name of a field
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											_reindex
+											can be used to build a copy of an index with renamed fields. Say you create an index containing documents that look like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/test/1?refresh { "text": "words words", "flag": "foo" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											But you don’t like the name
+										Element:code
+											flag
+											and want to replace it with
+										Element:code
+											tag
+											.
+										Element:code
+											_reindex
+											can create the other index for you:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _reindex { "source": { "index": "test" }, "dest": { "index": "test2" }, "script": { "inline": "ctx._source.tag = ctx._source.remove(\"flag\")" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now you can get the new document:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET test2/test/1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											and it’ll look like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "found": true, "_id": "1", "_index": "test2", "_type": "test", "_version": 1, "_source": { "text": "words words", "tag": "foo" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Or you can search by
+										Element:code
+											tag
+											or whatever you want.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Manual slicing
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Reindex supports
+													Element:a
+														Sliced Scroll
+														, allowing you to manually parallelize the process relatively easily:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST _reindex { "source": { "index": "twitter", "slice": { "id": 0, "max": 2 } }, "dest": { "index": "new_twitter" } } POST _reindex { "source": { "index": "twitter", "slice": { "id": 1, "max": 2 } }, "dest": { "index": "new_twitter" } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Which you can verify works with:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET _refresh POST new_twitter/_search?size=0&filter_path=hits.total
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Which results in a sensible
+													Element:code
+														total
+														like this one:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "hits": { "total": 120 } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Automatic slicing
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also let reindex automatically parallelize using
+										Element:a
+											Sliced Scroll
+											to slice on
+										Element:code
+											_uid
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _reindex?slices=5&refresh { "source": { "index": "twitter" }, "dest": { "index": "new_twitter" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which you also can verify works with:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST new_twitter/_search?size=0&filter_path=hits.total
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which results in a sensible
+										Element:code
+											total
+											like this one:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "hits": { "total": 120 } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Adding
+										Element:code
+											slices
+											to
+										Element:code
+											_reindex
+											just automates the manual process used in the section above, creating sub-requests which means it has some quirks:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											You can see these requests in the
+										Element:a
+											Tasks APIs
+											. These sub-requests are "child" tasks of the task for the request with
+										Element:code
+											slices
+											.
+										Element:li
+											Fetching the status of the task for the request with
+										Element:code
+											slices
+											only contains the status of completed slices.
+										Element:li
+											These sub-requests are individually addressable for things like cancellation and rethrottling.
+										Element:li
+											Rethrottling the request with
+										Element:code
+											slices
+											will rethrottle the unfinished sub-request proportionally.
+										Element:li
+											Canceling the request with
+										Element:code
+											slices
+											will cancel each sub-request.
+										Element:li
+											Due to the nature of
+										Element:code
+											slices
+											each sub-request won’t get a perfectly even portion of the documents. All documents will be addressed, but some slices may be larger than others. Expect larger slices to have a more even distribution.
+										Element:li
+											Parameters like
+										Element:code
+											requests_per_second
+											and
+										Element:code
+											size
+											on a request with
+										Element:code
+											slices
+											are distributed proportionally to each sub-request. Combine that with the point above about distribution being uneven and you should conclude that the using
+										Element:code
+											size
+											with
+										Element:code
+											slices
+											might not result in exactly
+										Element:code
+											size
+											documents being `_reindex`ed.
+										Element:li
+											Each sub-requests gets a slightly different snapshot of the source index though these are all taken at approximately the same time.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Picking the number of slices
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At this point we have a few recommendations around the number of
+										Element:code
+											slices
+											to use (the
+										Element:code
+											max
+											parameter in the slice API if manually parallelizing):
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Don’t use large numbers.
+										Element:code
+											500
+											creates fairly massive CPU thrash.
+										Element:li
+											It is more efficient from a query performance standpoint to use some multiple of the number of shards in the source index.
+										Element:li
+											Using exactly as many shards as are in the source index is the most efficient from a query performance standpoint.
+										Element:li
+											Indexing performance should scale linearly across available resources with the number of
+										Element:code
+											slices
+											.
+										Element:li
+											Whether indexing or query performance dominates that process depends on lots of factors like the documents being reindexed and the cluster doing the reindexing.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Reindex daily indices
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can use
+										Element:code
+											_reindex
+											in combination with
+										Element:a
+											Painless
+											to reindex daily indices to apply a new template to the existing documents.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Assuming you have indices consisting of documents as following:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT metricbeat-2016.05.30/beat/1?refresh {"system.cpu.idle.pct": 0.908} PUT metricbeat-2016.05.31/beat/1?refresh {"system.cpu.idle.pct": 0.105}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The new template for the
+										Element:code
+											metricbeat-*
+											indices is already loaded into elasticsearch but it applies only to the newly created indices. Painless can be used to reindex the existing documents and apply the new template.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The script below extracts the date from the index name and creates a new index with
+										Element:code
+											-1
+											appended. All data from
+										Element:code
+											metricbeat-2016.05.31
+											will be reindex into
+										Element:code
+											metricbeat-2016.05.31-1
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _reindex { "source": { "index": "metricbeat-*" }, "dest": { "index": "metricbeat" }, "script": { "lang": "painless", "inline": "ctx._index = 'metricbeat-' + (ctx._index.substring('metricbeat-'.length(), ctx._index.length())) + '-1'" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All documents from the previous metricbeat indices now can be found in the
+										Element:code
+											*-1
+											indices.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET metricbeat-2016.05.30-1/beat/1 GET metricbeat-2016.05.31-1/beat/1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The previous method can also be used in combination with
+										Element:a
+											change the name of a field
+											to only load the existing data into the new index, but also rename fields if needed.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Extracting a random subset of an index
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Reindex can be used to extract a random subset of an index for testing:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _reindex { "size": 10, "source": { "index": "twitter", "query": { "function_score" : { "query" : { "match_all": {} }, "random_score" : {} } }, "sort": "_score"
+										Element:a
+										Element:span
+											}, "dest": { "index": "random_twitter" } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Reindex defaults to sorting by
+										Element:code
+											_doc
+											so
+										Element:code
+											random_score
+											won’t have any effect unless you override the sort to
+										Element:code
+											_score
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Bulk API
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Term Vectors »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

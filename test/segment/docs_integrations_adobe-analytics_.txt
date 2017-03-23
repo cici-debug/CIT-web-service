@@ -1,0 +1,2054 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Adobe Analytics Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					Adobe Analytics
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to Adobe Analytics in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After you toggle on Adobe Analytics (formly known as Omniture/Sitecatalyst) in Segment, you can start sending data to a report suite. You can send data with any of our
+							Element:a
+								libraries
+								. When you send events via our mobile SDKs or server-side libraries, we translate that data into XML format and pass it to Adobe Analytics’
+							Element:code
+								Data Insertion API
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Our server-side integration with Adobe Analytics provides support for
+							Element:strong
+								Adobe Mobile Services
+								“states”, “actions”, and lifecycle events, metrics, and dimensions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Events tracked in client-side javascript are sent directly from the browser using Adobe Analytics’
+							Element:code
+								Appmeasurement.js
+								library by default. However, you may enable the Cloud-Based Connection Mode in the Segment app if you would prefer to send data via our servers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following documentation provides detailed explanation of how both integration components work (Device-Based and Cloud-Based). For FAQs relating to client vs server-side tracking, unique users, identifiers, etc, please be sure to view the bottom of this page!
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Device-Based (data sent via
+							Element:code
+								analytics.js
+								)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Initialization
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When using Adobe Analytics through
+										Element:code
+											analytics.js
+											, we will check if you already have global properties such as
+										Element:code
+											window.s_account
+											or any properties on the
+										Element:code
+											window.s
+											object and use them. However, in the absence of any of these values, we will fallback on the
+										Element:strong
+											Report Suite ID
+											,
+										Element:strong
+											Tracking Server URL
+											, and
+										Element:strong
+											Tracking Server Secure URL
+											(optional) you have defined in the integrations settings inside Segment.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once these required properties are set, we will load
+										Element:code
+											appmeasurement.js
+											version 1.6.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Marketing Cloud Visitor ID Service
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’d like to use Adobe’s Marketing Cloud Visitor ID Service, please provide Segment with your
+										Element:strong
+											Marketing Cloud Organization ID
+											in the advanced options inside Segment.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our analytics.js integration will load their
+										Element:code
+											visitorAPI.js
+											library, but will not initialize it unless you provide your Marketing Cloud Organization ID. If you do, we will set
+										Element:code
+											window.s.visitor
+											with the return value from
+										Element:code
+											window.Visitor.getInstance(<Your Marketing Cloud Org Id>)
+											. See
+										Element:a
+											their documentation
+											for more information.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											We load
+										Element:code
+											visitorAPI.js
+											in the same script as
+										Element:code
+											appmeasurement.js
+											because Adobe Analytics requires synchronous execution of the two scripts. Using the visitor API is
+										Element:strong
+											optional
+											but for those who do, we make it available on the page.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, the Segment snippet includes an empty
+							Element:code
+								page
+								call. When
+							Element:code
+								page
+								is called, there’s a few things that will happen:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								Set
+							Element:code
+								window.s.pageName
+								to whatever the
+							Element:code
+								name
+								of the page call was. This means that by default, the Segment
+							Element:code
+								.page()
+								call will set this property as
+							Element:code
+								undefined
+								since no parameters were passed. If you include a
+							Element:code
+								name
+								such as
+							Element:code
+								.page('Home')
+								, we will set
+							Element:code
+								window.s.pageName
+								to
+							Element:code
+								'Home'
+								.
+							Element:p
+							Element:strong
+								Note
+								: If no
+							Element:code
+								name
+								is passed, Adobe Analytics will by default fallback to displaying the
+							Element:code
+								url
+								as the name of the page.
+							Element:li
+							Element:p
+								Set
+							Element:code
+								window.s.events
+								to the
+							Element:code
+								name
+								from your
+							Element:code
+								.page(<name>)
+								call
+							Element:li
+							Element:p
+								Check if page call is associated with a
+							Element:code
+								userId
+								from a previous
+							Element:code
+								.identify()
+								call. If so, we will set the
+							Element:code
+								userId
+								as
+							Element:code
+								window.s.visitorID
+								.
+							Element:p
+							Element:strong
+								IMPORTANT
+								: Note that Adobe Analytics
+							Element:a
+								does not support setting vistorID
+								if you are sending a timestamped hit. So we will only set
+							Element:code
+								window.s.visitorID
+								if your
+							Element:strong
+								Timestamp Option
+								is
+							Element:code
+								disabled
+								and a
+							Element:code
+								userId
+								exists on the event.
+							Element:li
+							Element:p
+								Check for some common properties such as the following and set them on the
+							Element:code
+								window.s
+								object:
+							Element:ul
+							Element:li
+							Element:code
+								channel
+							Element:li
+							Element:code
+								campaign
+							Element:li
+							Element:code
+								state
+							Element:li
+							Element:code
+								zip
+							Element:p
+								First respect the
+							Element:code
+								properties
+								you have sent via the
+							Element:code
+								.page()
+								call. Thus an example page call in order to set the four properties above would be:
+							Element:pre
+							Element:code
+								analytics.page({ channel: 'Laptops', campaign: '0813', state: 'RI', zip: '02818' });
+							Element:p
+								For
+							Element:code
+								campaign
+								, we will respect our
+							Element:a
+								spec
+								and check
+							Element:code
+								context.campaign.name
+								first before checking
+							Element:code
+								properties.campaign
+								.
+							Element:p
+								Alternatively, if you had already set any of these four properties on your existing Adobe Analytics instance on the page (
+							Element:code
+								window.s.channel
+								,
+							Element:code
+								window.s.campaign
+								, etc.), we will fallback on that as the default value. This allows you easily set a default values for all your web pages but be able to programmatically change them per page if needed.
+							Element:li
+							Element:p
+								If your
+							Element:strong
+								Timestamp Option
+								is either
+							Element:strong
+								Timestamp Enabled
+								or
+							Element:strong
+								Timestamp Optional
+								, we will attach the
+							Element:code
+								timestamp
+								to
+							Element:code
+								window.s.timestamp
+								. Please make sure that this setting is inline with your
+							Element:em
+								actual
+								timestamp setting inside Adobe Analytics for the same Report Suite ID.
+							Element:li
+							Element:p
+								Check if any of the page call’s properties have been mapped to any custom Adobe Analytics variables such as
+							Element:code
+								eVar
+								,
+							Element:code
+								props
+								, and
+							Element:code
+								hVar
+								.
+							Element:p
+								Given the mapping setting below:
+							Element:p
+							Element:img
+							Element:p
+								If you call the following page call:
+							Element:pre
+							Element:code
+								analytics.page({ browser: 'chrome', searchTerm: 'swim shorts', section: 'swimwear' });
+							Element:p
+								Set the following properties on the
+							Element:code
+								window.s
+								object:
+							Element:ul
+							Element:li
+							Element:code
+								window.s.prop1 = 'chrome'
+							Element:li
+							Element:code
+								window.s.eVar7 = 'swim shorts'
+							Element:li
+							Element:code
+								window.s.eVar3
+								will be set to the
+							Element:code
+								url
+								of the page where the call was made (
+							Element:code
+								.page()
+								automatically sets a
+							Element:code
+								url
+								property)
+							Element:li
+							Element:code
+								window.s.hier1 = 'swimwear'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								7) Finally we will flush the pageview request to Adobe Analytics using
+							Element:code
+								window.s.t()
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Track
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Required Prerequisite Steps
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Event tracking for Adobe Analytics through Segment requires you to predefine which
+													Element:code
+														events
+														you want to collect.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You must predefine in
+													Element:em
+														both
+														Adobe Analytics and Segment integration settings UI a list of
+													Element:code
+														.track()
+														events you want to send and which properties you want to send as custom variables.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This means that you
+													Element:strong
+														must
+														map each event and property to a corresponding Adobe Analytics
+													Element:code
+														event
+														,
+													Element:code
+														prop
+														, or
+													Element:code
+														eVar
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here is an example of how you might map the custom variables in Segment:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Given the settings above, if you make a sample
+													Element:code
+														.track()
+														call below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														analytics.track('Watched Video', { plan: 'free', videoName: 'The Uptick' });
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following will happen:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:p
+														Check if the Segment event name,
+													Element:code
+														'Watched Video'
+														, is mapped in your Segment settings. If it is, set
+													Element:code
+														window.s.linkTrackEvents
+														and
+													Element:code
+														window.s.events
+														to its corresponding Adobe Analytics event name,
+													Element:code
+														'event1'
+														. If no matching event name is found in the Segment settings, do nothing and abort.
+													Element:li
+													Element:p
+														Attach
+													Element:code
+														timestamp
+														to
+													Element:code
+														window.s.timestamp
+														if your
+													Element:strong
+														Timestamp Option
+														setting inside Segment is either
+													Element:strong
+														Timestamp Enabled
+														or
+													Element:strong
+														Timestamp Optional
+														.
+													Element:li
+													Element:p
+														Update common variables such as
+													Element:code
+														channel
+														,
+													Element:code
+														campaign
+														,
+													Element:code
+														state
+														,
+													Element:code
+														zip
+														if their corresponding properties were included in the event or on your
+													Element:code
+														window.s
+														object.
+													Element:li
+													Element:p
+														Check if the Segment event name,
+													Element:code
+														Watched Video
+														is mapped to an
+													Element:code
+														eVar
+														. Since it is in the example case above, set
+													Element:code
+														window.s.eVar3
+														as
+													Element:code
+														'Watched Video'
+														.
+													Element:li
+													Element:p
+														Check if any of the properties are mapped to either a
+													Element:code
+														prop
+														,
+													Element:code
+														eVar
+														, or
+													Element:code
+														hVar
+														. Thus for the example above, set
+													Element:code
+														window.s.prop1
+														as
+													Element:code
+														'free'
+														and
+													Element:code
+														window.s.eVar4
+														as
+													Element:code
+														'The Uptick'
+														.
+													Element:li
+													Element:p
+														Automatically try to set
+													Element:code
+														window.s.pageName
+														to the following values, in order of precedence:
+													Element:ul
+													Element:li
+													Element:code
+														properties.pageName
+														(for backward compatibility)
+													Element:li
+													Element:code
+														options.pageName
+														(if you already have
+													Element:code
+														window.s.pageName
+														defined on the web page)
+													Element:li
+													Element:code
+														context.page.title
+														(which is automatically tracked by our
+													Element:code
+														analytics.js
+														library)
+													Element:p
+														Since
+													Element:code
+														context.page.title
+														will always be populated, at the very minimum
+													Element:code
+														window.s.pageName
+														will always be set to the value inside your
+													Element:code
+														<title>
+														tag of the page where the
+													Element:code
+														.track()
+														call was fired.
+													Element:li
+													Element:p
+														Set
+													Element:code
+														window.s.linkTrackVars
+														, which is a joined string of variable keys delimited by a comma. The example above would produce a value of
+													Element:code
+														'eVar3,events,pageName,timestamp,eVar3,prop1'
+														. This tells Adobe Analytics which properties on the
+													Element:code
+														window.s
+														object they should send along with this event.
+													Element:li
+													Element:p
+														Finally, we will flush the request to Adobe Analytics via
+													Element:code
+														window.s.tl(true, 'o', 'Watched Video')
+													Element:p
+													Element:em
+														Note
+														:
+													Element:code
+														true
+														sets a
+													Element:code
+														500ms
+														delay to give your browser time to flush the event. It also signifies to Adobe that this event is something other than a
+													Element:code
+														href
+														link. The
+													Element:code
+														'o'
+														stands for
+													Element:code
+														'Other'
+														, as opposed to
+													Element:code
+														'd'
+														for
+													Element:code
+														'Downloads'
+														and
+													Element:code
+														'e'
+														for
+													Element:code
+														'Exit Links'
+														. The final parameter is the link name you will see in reports inside Adobe Analytics.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Ecommerce Events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Adobe Analytics integration works with our standard
+										Element:a
+											Ecommerce API
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following mapping between semantic ecommerce events for Segment and Adobe Analytics are supported:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+											Segment Event Name
+										Element:td
+											Adobe Analytics Event Name
+										Element:tr
+										Element:td
+											Product Viewed
+										Element:td
+										Element:code
+											prodView
+										Element:tr
+										Element:td
+											Product Added
+										Element:td
+										Element:code
+											scAdd
+										Element:tr
+										Element:td
+											Product Removed
+										Element:td
+										Element:code
+											scRemove
+										Element:tr
+										Element:td
+											Cart Viewed
+										Element:td
+										Element:code
+											scView
+										Element:tr
+										Element:td
+											Checkout Started
+										Element:td
+										Element:code
+											scCheckout
+										Element:tr
+										Element:td
+											Order Completed
+										Element:td
+										Element:code
+											purchase
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For any of the above ecommerce events, data is sent similarly to
+										Element:code
+											.track()
+											events. The difference here is that you do
+										Element:strong
+											NOT
+											need to predefine these Segment event names in the Segment settings. The above ecommerce events will automatically be mapped and sent to Adobe Analytics.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: Ecommerce relevant properties such as
+										Element:code
+											orderId
+											,
+										Element:code
+											products
+											will be sent automatically. However, if you want to attach custom properties to Adobe’s
+										Element:code
+											eVar
+											,
+										Element:code
+											prop
+											or
+										Element:code
+											hVar
+											, you need to predefine them in the Segment settings. (just the properties, no need to map the event names, unless you want the event name to be set to an
+										Element:code
+											eVar
+											).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For all ecommerce events listed, we will send product description data to Adobe Analytics.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Given the sample
+										Element:code
+											Order Completed
+											Segment event:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.track('Order Completed', { orderId: '50314b8e9bcf000000000000', total: 30.00, revenue: 25.00, shipping: 3.00, tax: 2.00, discount: 2.50, coupon: 'hasbros', currency: 'USD', products: [ { id: '507f1f77bcf86cd799439011', sku: '45790-32', name: 'Monopoly: 3rd Edition', price: 19, quantity: 1, category: 'Games' }, { id: '505bd76785ebb509fc183733', sku: '46493-32', name: 'Go Pro', price: 99, quantity: 2, category: 'Electronics' } ] });
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Set
+										Element:code
+											window.s.products
+											with the product description string.
+										Element:p
+											The product description is a semi-colon delimited string per product which is additionally delimited by commas if you have multiple products. The string format per product is
+										Element:code
+											[category];[name];[quantity];[total]
+											. Total is calculated by multiplying price and quantity for each product.
+										Element:p
+										Element:strong
+											Note
+											: you can optionally choose whether to map the
+										Element:code
+											name
+											,
+										Element:code
+											sku
+											, or
+										Element:code
+											id
+											for each of item in the
+										Element:code
+											products
+											array. So one could alternatively send product descriptions with
+										Element:code
+											[category];[sku];[quantity];[total]
+											. Select the mapping via the
+										Element:strong
+											Product Identifier
+											dropdown under Advanced Options in your Adobe Analytics Segment settings.
+										Element:code
+											name
+											is the default identifier.
+										Element:p
+											Thus the above example would set
+										Element:code
+											window.s.products
+											to
+										Element:code
+											'Games;Monopoly: 3rd Edition;1;19,Electronics;Go Pro;2;99'
+											.
+										Element:p
+											Note that the default fallback values for
+										Element:code
+											quantity
+											and
+										Element:code
+											price
+											is
+										Element:code
+											1
+											and
+										Element:code
+											0
+											, respectively.
+										Element:p
+										Element:strong
+											Important
+											: If any of the items in the
+										Element:code
+											products
+											array have property values that include commas or semi-colons, you may have data issues since Adobe Analytics uses them as delimiters.
+										Element:li
+										Element:p
+											Update common variables such as
+										Element:code
+											channel
+											,
+										Element:code
+											campaign
+											,
+										Element:code
+											state
+											,
+										Element:code
+											zip
+											, and
+										Element:code
+											pageName
+											. These values will be set if they exist at the property level, your existing Adobe Analytics variables already attached on the
+										Element:code
+											window.s
+											object, or
+										Element:code
+											context.page.title
+											(for
+										Element:code
+											pageName
+											).
+										Element:li
+										Element:p
+											Set
+										Element:code
+											window.s.events
+											with the corresponding Adobe Analytics naming convention. The example above wouild set this as
+										Element:code
+											'purchase'
+											.
+										Element:li
+										Element:p
+											Check if the event name is mapped as an
+										Element:code
+											eVar
+											and if so, set it on the
+										Element:code
+											window.s
+											.
+										Element:li
+										Element:p
+											Check if any other top level properties (not the custom properties at the item level inside
+										Element:code
+											products
+											array) have been mapped to a custom variable in the Segment settings such as
+										Element:code
+											eVar
+											,
+										Element:code
+											prop
+											, and
+										Element:code
+											hVar
+											. If so, set them on the
+										Element:code
+											window.s
+											.
+										Element:li
+										Element:p
+											Set
+										Element:code
+											window.s.purchaseID
+											and
+										Element:code
+											window.s.transactionID
+											as the
+										Element:code
+											orderId
+											, which for the example above would be
+										Element:code
+											'50314b8e9bcf000000000000'
+											. Note that this is only for
+										Element:code
+											Order Completed
+											events.
+										Element:p
+											The default
+										Element:code
+											currencyCode
+											we set upon pageload is
+										Element:code
+											USD
+											. However, we will check if you have passed any currency other than this in your event by checking
+										Element:code
+											properties.currency
+											.
+										Element:p
+										Element:strong
+											Important
+											: If you’d like to collect
+										Element:code
+											transactionID
+											, make sure to enable the transactionID storage setting inside your
+										Element:a
+											Reporting Suite
+											!
+										Element:li
+										Element:p
+											Attach the
+										Element:code
+											timestamp
+											as
+										Element:code
+											window.s.timestamp
+											if your
+										Element:strong
+											Timestamp Option
+											is
+										Element:strong
+											Timestamp Enabled
+											or
+										Element:strong
+											Timestamp Optional
+											.
+										Element:li
+										Element:p
+											Set
+										Element:code
+											window.s.linkTrackEvents
+											to the Adobe Analyics event name, which would be
+										Element:code
+											purchase
+											for the example above.
+										Element:li
+										Element:p
+											Set
+										Element:code
+											window.s.linkTrackVars
+											which is a string of keys we want Adobe Analytics to read from the
+										Element:code
+											window.s
+											object when the request is sent. For the example above, the value of
+										Element:code
+											linkTrackVars
+											would be set as
+										Element:code
+											'pageName,events,products,purchaseID,transactionID,timestamp'
+											.
+										Element:li
+										Element:p
+											Finally, fire off the event via
+										Element:code
+											window.s.tl(true, 'o', 'Order Completed');
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Server side (data sent via mobile or server side libraries)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you send data via any of our mobile or server side libraries, we will use Adobe Analytics’
+							Element:strong
+								Data Insertion API
+								. You must configure your
+							Element:strong
+								Report Suite ID
+								and
+							Element:strong
+								Tracking Server URL
+								inside Segment for us to be able to successfully send data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Important
+								: For data sent from server-side libraries, you’ll still need to predefine your events and custom properties in order to send events to Adobe Analytics server side integration. However,
+							Element:em
+								for data sent from mobile devices
+								, we will send
+							Element:em
+								every
+								event along automatically, and you may use their
+							Element:a
+								processing rules
+								UI to map actions, lifecycle dimensions, and custom properties from
+							Element:code
+								contextData
+								to events, props and eVars retroactively.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When we generate the XML tag to be sent, there are a few things that happen:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								If your
+							Element:strong
+								Timestamp Option
+								is
+							Element:strong
+								Timestamp Enabled
+								or
+							Element:strong
+								Timestamp Optional
+								, set
+							Element:code
+								<timestamp>
+								.
+							Element:li
+							Element:p
+								For
+							Element:code
+								.track()
+								events, we will set
+							Element:code
+								<channel>
+								as
+							Element:code
+								properties.channel
+								or fallback to
+							Element:code
+								properties.category
+								. If neither properties are provided, we will not set this XML tag. For
+							Element:code
+								.page()
+								events, this XML tag will be set as the
+							Element:code
+								category
+								of the page call, which is sent by providing both
+							Element:code
+								category
+								and
+							Element:code
+								name
+								(ie.
+							Element:code
+								.page('Some Category', 'Some Name');
+								)
+							Element:li
+							Element:p
+								For
+							Element:code
+								.track()
+								events, we will set
+							Element:code
+								<pageName>
+								as
+							Element:code
+								properties.pageName
+								,
+							Element:code
+								properties.page
+								,
+							Element:code
+								context.page.title
+								,
+							Element:code
+								context.screen.name
+								or
+							Element:code
+								'None'
+								(in order of precedence). For
+							Element:code
+								.page()
+								calls, we will set the tag as the
+							Element:code
+								name
+								. This can be sent by providing the first parameter:
+							Element:code
+								.page('Some Name');
+							Element:li
+							Element:p
+								Since Adobe Analytics does not
+							Element:a
+								support sending timestamped hits a
+								, if you have set your Report to
+							Element:code
+								<visitorID>
+							Element:strong
+								Timestamp Disabled
+								, we will set
+							Element:code
+								<visitorID>
+								as these values in order of precedence:
+							Element:ul
+							Element:li
+							Element:p
+							Element:code
+								visitorId
+								passed manually from the client. Adobe Analytics sets a cookie with their own
+							Element:code
+								visitorId
+								on the client. You can read from this cookie and pass it to your servers manually and then send it to Segment. This is generally unnecessary, but may be worth considering if you’re concerned about unique user identification.
+							Element:p
+								(In Node.js)
+							Element:pre
+							Element:code
+								analytics.track({ userId: '019mr8mf4r', event: 'Gotta catch em all', properties: { caught: 1738 }, integrations: { 'Adobe Analytics': { visitorId: '12345' } } });
+							Element:li
+							Element:p
+							Element:code
+								userId
+							Element:li
+							Element:code
+								anonymousId
+							Element:li
+							Element:p
+								We will map a number of other supported XML tags. For example, we will set
+							Element:code
+								<ipAddress>
+								with the
+							Element:code
+								ip
+								of the call.
+							Element:p
+							Element:strong
+								Note
+								: For server side libraries, the
+							Element:code
+								ip
+								would be by default be the
+							Element:code
+								ip
+								address of your company servers, NOT the customers’ own. This means that for server side events, it is best practice to grab your customer’s
+							Element:code
+								ip
+								from their requests and manually send that to Segment as
+							Element:code
+								context.ip
+								.
+							Element:p
+								We will also set your
+							Element:code
+								context.locale
+								(which is automatically collected if using a mobile library) to
+							Element:code
+								<language>
+								. Since mobile libraries also send your
+							Element:code
+								traits
+								from previous
+							Element:code
+								.identify()
+								calls inside the
+							Element:code
+								context.traits
+								, we will try to send
+							Element:code
+								<state>
+								and
+							Element:code
+								<zip>
+								by looking up
+							Element:code
+								context.traits.address.state
+								and
+							Element:code
+								context.traits.postalCode
+								respectively, as noted in our
+							Element:a
+								identify spec
+								. If these lookups fail, we will fallback on
+							Element:code
+								properties.state
+								and
+							Element:code
+								properties.zip
+								.
+							Element:p
+								For mobile libraries, since we can detect whether the event occured while the user had wifi connection, we will also send the
+							Element:code
+								<connectionType>
+								as
+							Element:code
+								lan/wifi
+								. All other events will be treated as
+							Element:code
+								Mobile Carrier
+								inside Adobe’s Mobile Web Reports.
+							Element:p
+								We will also calculate your timezone offset from UTC/GMT as required by Adobe and send
+							Element:code
+								<timezone>
+								based on your
+							Element:code
+								context.timezone
+								and the
+							Element:code
+								timestamp
+								fields.
+							Element:p
+								Since many out of the box reports from Mobile Web services rely on the
+							Element:code
+								<userAgent>
+								tag, we will also map this to your
+							Element:code
+								context.userAgent
+								.
+							Element:p
+							Element:strong
+								Important
+								: Android library can collect the
+							Element:code
+								userAgent
+								automatically – however, the iOS library cannot do so. However, since we do collect other contextual metadata about your device, we will render a valid iOS userAgent string that should populate all your Mobile Web Reports.
+							Element:li
+							Element:p
+								If you are using the
+							Element:a
+								Marketing Cloud ID Service
+								, you can pass the
+							Element:strong
+								Marketing Cloud Visitor ID
+								as an integration specific setting and we will set that as
+							Element:code
+								<marketingCloudVisitorID>
+								.
+							Element:p
+								(In Node.js)
+							Element:pre
+							Element:code
+								analytics.track({ userId: '019mr8mf4r', event: 'Gotta catch em all', properties: { caught: 1738 }, integrations: { 'Adobe Analytics': { marketingCloudVisitorId: '12345' } } });
+							Element:li
+							Element:p
+								For
+							Element:code
+								.track()
+								events only, set some custom link report parameters such as:
+							Element:ul
+							Element:li
+							Element:code
+								<linkType>
+								to
+							Element:code
+								'o'
+								(stands for
+							Element:code
+								'Other'
+								)
+							Element:li
+							Element:code
+								<linkURL>
+								to
+							Element:code
+								context.page.url
+								with a default fallback to
+							Element:code
+								'No linkURL provided'
+							Element:li
+							Element:code
+								<linkName>
+								to
+							Element:code
+								'Link Name - <whatever was set as the linkURL>'
+							Element:li
+							Element:p
+								On the server, we send
+							Element:em
+								all
+								property values as
+							Element:code
+								contextData.$propertyKey
+								by defauly so that you can further map them with Adobe Processing Rules. If you’d like to set a prefix for your properties, you may specify that in the integration’s advanced settings page and we will send the properties as
+							Element:code
+								contextData.<prefix>.$propertyKey
+								.
+							Element:li
+							Element:p
+								For Segment
+							Element:a
+								native mobile spec
+								events, we automatically translate them and forward them to Adobe Analytics as
+							Element:a
+								Mobile Services Lifecycle Metrics
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Specifically, we map the following events:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+								Segment Event Name
+							Element:td
+								Adobe Analytics Event Name
+							Element:tr
+							Element:td
+								Application Opened
+							Element:td
+							Element:code
+								a.LaunchEvent
+							Element:tr
+							Element:td
+								Application Installed
+							Element:td
+							Element:code
+								a.InstallEvent
+							Element:tr
+							Element:td
+								Application Updated
+							Element:td
+							Element:code
+								a.UpgradeEvent
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following metrics and dimensions are supported:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								a.AppID
+							Element:li
+							Element:code
+								a.HourOfDay
+							Element:li
+							Element:code
+								a.DayOfWeek
+							Element:li
+							Element:code
+								a.OSVersion
+							Element:li
+							Element:code
+								a.DeviceName
+							Element:li
+							Element:code
+								a.CarrierName
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Support for additional “stateful” lifecycle dimensions is coming in a future Adobe Analytics release. If there are any missing that are of importance to you, let us know and we’ll get them shipped!
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								Set
+							Element:code
+								<userAgent>
+								with
+							Element:code
+								context.userAgent
+								(which is automatically populated by our libraries). Note this is omitted for mobile events and superceded by
+							Element:code
+								DeviceName
+								and
+							Element:code
+								OSVersion
+								.
+							Element:li
+							Element:p
+								For any ecommerce events, we will try to set
+							Element:code
+								<products>
+								if possible. The product description will have the same logic as the ecommerce event processing done on the client side integration.
+							Element:li
+							Element:p
+								We will follow the same logic as the client side and look up any mappings for custom properties and generate the proper
+							Element:code
+								<eVar>
+								,
+							Element:code
+								<prop>
+								, and
+							Element:code
+								<hVar>
+								XML tags.
+							Element:li
+							Element:p
+								Finally, we send the event
+							Element:code
+								POST
+								request to your
+							Element:strong
+								Tracking Server URL
+								!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								List Variables
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can map your Segment properties in your settings to any of your three list variables. You can either send the property value as a comma delimited string (ie.
+							Element:code
+								'brady,edelman,blount'
+								) or as an array (
+							Element:code
+								['brady', 'edelman', 'blount']
+								). If you choose to send them as an array, we will join it so that it is a comma delimited string before sending to Adobe!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								FAQ
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are a few common questions that we’ve heard over time that is worth mentioning.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Best practices for userId and sessioning
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											UPDATE
+											: If you are willing to sacrifice having your own
+										Element:code
+											userId
+											inside Adobe, you can enable
+										Element:strong
+											Drop Visitor ID
+											to effectively resolve the issue of Adobe creating a new user profile when you set
+										Element:code
+											window.s.visitorID
+											with a custom value. Not setting this value will ensure that the funnel between annonymous users to identified users are not broken inside your reports (assuming you are only using
+										Element:code
+											analytics.js
+											to send data to Adobe).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Adobe Analytics unfortunately counts every “effective” visitor ID as a
+										Element:em
+											unique
+											visitor. There is no ability for Segment to alias, implicitly or explicitly, two effective IDs on your behalf.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Key to understanding the implications of this fact is an understanding of what Adobe Analytics means by
+										Element:strong
+											“effective” visitor ID
+											. To do so, we recommend reading
+										Element:a
+											this section of their documentation
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With analytics.js, prior to
+										Element:code
+											identify
+											ing your users the default auto-generated Adobe Analytics
+										Element:a
+											is used as the effective visitor ID. If you provide your Marketing Cloud ID Service Organization ID, then we’ll set the MCVID, which is used as the effective ID instead.
+										Element:code
+											s_vi
+											cookie value
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you
+										Element:code
+											identify
+											your user, Segment sets the
+										Element:code
+											visitorId
+											variable to your
+										Element:code
+											userId
+											. This effectively creates a new user, which
+										Element:em
+											does
+											have unique user implications. However, based on a thorough reading of their documentation and discussion with many customers, we believe this is the best practice because now you can seamlessly track this user across devices whenever they are logged in.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											So if you’d like to track your users on the server as well, you have a few options. If you’re only tracking logged-in users, sending their
+										Element:code
+											userId
+											in your events will ensure that the events are attributed to the proper user. If you’re tracking anonymous users as well, Segment will by default send the
+										Element:code
+											s_vi
+											cookie from Adobe if you pass it under
+										Element:code
+											context['Adobe Analytics'].visitorId
+											as the
+										Element:code
+											visitorId
+											. Then we will fallback on the
+										Element:code
+											userId
+											and lastly the Segment
+										Element:code
+											anonymousId
+											, which you’ll notice is a different ID from the anonymous
+										Element:code
+											s_vi
+											value used on the client (Adobe Analytics’ auto-generated effective ID for anonymous users).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you don’t mind slightly inflated unique user counts, this may be acceptable, as all events in that anonymous user’s session will still be attributable to a single user ID. If you really do want to tie the anonymous event from the client side with your server side events, you could grab the
+										Element:code
+											s_vi
+											cookie value from the client and pass it to your server. We will respect any value passed in
+										Element:code
+											context["Adobe Analytics"].visitorId
+											and pass that as the
+										Element:code
+											visitorID
+											if provided. But keep in mind that if you go this route, you would probably need to manage the
+										Element:code
+											s_vi
+											cookies for all your users since you always need to pass it with all your server side calls. Note that you can only parse the
+										Element:code
+											s_vi
+											cookie if you have
+										Element:strong
+											1st party cookie
+											enabled in you reporting suite.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Thus our recommendation is to stomach the slight inflated user count and simply just use the Segment
+										Element:code
+											userId
+											as the
+										Element:code
+											visitorId
+											. Yes you will have two user profiles if you have any anonymous client side events but you can always set up custom eVars to connect the few anonymous events to the right user.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’re using the marketingCloudVisitorID, we recommend doing this and including it in
+										Element:code
+											context["Adobe Analytics"].marketingCloudVisitorId
+											. We’ll send both the userId (or anonymousId, if the call is anonymous) in the
+										Element:code
+											<visitorId>
+											tag and the MCVID in the
+										Element:code
+											<marketingCloudVisitorID>
+											tag, and Adobe will handle it from there.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We know this is daunting territory, so please don’t hesitate to reach out directly for guidance!
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Populating Custom Links report with server side data
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Since we cannot automatically track page data for
+										Element:strong
+											server side
+											calls, if you want to populate the
+										Element:strong
+											Custom Links
+											report in Adobe Analytics, you will need to manually pass
+										Element:code
+											context.page.url
+											!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sending data via mobile library
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment supports Adobe Analytics Mobile Services. With Segment, there is no need to package Adobe Analytics SDKs to take advantage of Adobe Analytics Mobile Services functionality.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For getting started with our mobile libraries, check out the
+							Element:a
+								iOS
+								and
+							Element:a
+								Android
+								technical docs.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Add the Adobe Analytics Report Suite Id / Report Server Url
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The first thing you’ll want to do is to add the
+										Element:strong
+											Report Suite Id
+											and the
+										Element:strong
+											Tracking Server Url
+											settings to your Segment Adobe Analytics integrations settings.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											When Will I See Data?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you already have an app deployed with the Segment library, and you just turned on Adobe Analytics, it will take up to an hour for all your mobile users to refresh their Segment settings cache, and learn about the new service that you want to send to.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After the settings cache refreshes, our library will automatically start sending data to Omniture.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Android Permissions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+											You’ll need to make sure you added these permissions to your
+										Element:code
+											AndroidManifest.xml
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<uses-permission android:name="android.permission.INTERNET" /> <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+								✅
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+								✅
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We offer an optional
+							Element:strong
+								Cloud-based
+								Connection Mode for
+							Element:strong
+								Web
+								data with Adobe Analytics. As a reminder, this removes the Adobe Analytics javascript library from your site, improving performance.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Context Data Property Prefix
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you would like to prefix your Segment properties before sending them as contextData, enter a prefix here.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Drop Visitor ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This will disable Visitor ID from being passed to Adobe.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											eVars
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Map your Adobe Analytics eVar names to the property names you’re using in your Segment events. Enter a Segment property name on the left and an Adobe Analytics eVar number on the right. You can view your Segment events and properties in your Schema.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Enable pageName for Track Events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you do not want to attach
+										Element:code
+											pageName
+											for your
+										Element:code
+											.track()
+											calls, you can disable this option.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Map your Adobe Analytics events names to your Segment events. Enter a Segment event name on the left and an Adobe Analytics event number on the right. You can view your Segment events in your Schema.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Hierarchy Variables
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Map your Adobe Analytics hVars to the property names you’re using in your Segment page calls. Enter a Segment property name on the left and an Adobe Analytics hVar number on the right. You can view your Segment page calls and properties in your Schema.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											List Variables
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Map your Adobe Analytics list variables names to the property names you’re using in your Segment events. Enter a Segment property name on the left and an Adobe Analytics list variable number on the right. You can view your Segment events and properties in your Schema.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Marketing Cloud Organization Id
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you would like to use the Marketing Cloud Id Service and use visitorAPI.js, please enter your Marketing Cloud Organization ID. If you do not know your organization ID, you can find it on the Marketing Cloud administration page. It should look something like ‘1234567ABC@AdobeOrg’.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Product Identifier
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Adobe Analytics only accepts a single
+										Element:a
+											product identifier
+											. Use this option to choose whether we send product
+										Element:code
+											name
+											,
+										Element:code
+											id
+											, or
+										Element:code
+											sku
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Props
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Map your Adobe Analytics property names to the property names you’re using in your Segment events. Enter a Segment property name on the left and an Adobe Analytics property number on the right. You can view your Segment events and properties in your Schema.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Report Suite ID(s)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your Report Suite ID in your Adobe Analytics Settings page. Multiple report suite ids can be separated by commas:
+										Element:code
+											suite1,suite2,suite3
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Timestamp Option
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Adobe Analytics can have Report Suites that will accept timestamped, non-timestamped or hybrid data. Note that we can only play historical data for timestamped or hybrid Report Suites.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Tracking Server Secure URL
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is the secure URL of your Adobe Analytics server.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Tracking Server URL
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is the URL of your Adobe Analytics server.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											browser
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

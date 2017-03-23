@@ -1,0 +1,361 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					How to Manipulate File Attachments
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								An example in bash script demonstrating how to attach a file to a record using the v10
+							Element:code
+								<module>/:record/file/:field
+								REST POST API endpoint, then retrieve it with the
+							Element:code
+								GET
+								endpoint.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Manipulating File Attachments
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authenticating
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, you will need to authenticate to the Sugar API. An example is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X POST -H Cache-Control:no-cache -d '{ "grant_type":"password", "client_id":"sugar", "client_secret":"", "username":"admin", "password":"password", "platform":"custom_api" }' https://{site_url}/rest/v10/oauth2/token
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on authenticating can be found in the
+										Element:a
+											How to Authenticate and Log Out
+											example and
+										Element:a
+											/oauth2/logout
+											endpoint documentation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Submitting a File Attachment
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we can create a Note record using the
+										Element:code
+											/<module
+											endpoint, and then submit a File to the Note record using the
+										Element:code
+											/<module>/:record/file/:field
+											endpoint.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Create Note
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														curl -s -X POST -H OAuth-Token:{access_token} -H Cache-Control:no-cache -d '{ "name":"Test Note" }' https://{site_url}/rest/v10/Notes
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Add An Attachment to the Note
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														curl -X POST -H OAuth-Token:{access_token} -H Cache-Control:no-cache -F "filename=@/path/to/file.txt" https://{site_url}/rest/v10/Notes/7b49aebd-8734-9773-8ef1-53553fa369c7/file/filename
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "filename":{ "content-type":"text\/plain", "content-length":13, "name":"file.txt", "uri":"http:\/\/<site url>\/rest\/v10\/Notes\/7b49aebd-8734-9773-8ef1-53553fa369c7\/file\/filename" }, "record":{ "my_favorite":false, "following":true, "id":"7b49aebd-8734-9773-8ef1-53553fa369c7", "name":"My Note", "date_modified":"2014-04-21T11:53:53-04:00", "modified_user_id":"1", "modified_by_name":"admin", "created_by":"1", "created_by_name":"Administrator", "doc_owner":"", "user_favorites":[ ], "description":"", "deleted":false, "assigned_user_id":"", "assigned_user_name":"", "team_count":"", "team_name":[ { "id":1, "name":"Global", "name_2":"", "primary":true } ], "file_mime_type":"text\/plain", "file_url":"", "filename":"file.txt", "parent_type":"", "parent_id":"", "contact_id":"", "portal_flag":false, "embed_flag":false, "parent_name":"", "contact_name":"", "contact_phone":"", "contact_email":"", "account_id":"", "opportunity_id":"", "acase_id":"", "lead_id":"", "product_id":"", "quote_id":"", "_acl":{ "fields":{ } }, "_module":"Notes" } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Getting a File Attachment
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we can retrieve the file attachment stored in Sugar by utilizing the
+										Element:code
+											/<module>/:record/file/:field
+										Element:code
+											GET
+											endpoint.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -i -s -X GET -H OAuth-Token:{access_token} -H Cache-Control:no-cache https://{site_url}/rest/v10/Notes/7b49aebd-8734-9773-8ef1-53553fa369c7/file/filename
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														HTTP/1.1 200 OK Date: Wed, 12 Mar 2014 15:15:03 GMT Server: Apache/2.2.22 (Unix) PHP/5.3.14 mod_ssl/2.2.22 OpenSSL/0.9.8o X-Powered-By: PHP/5.3.14 ZendServer/5.0 Set-Cookie: ZDEDebuggerPresent=php,phtml,php3; path=/ Expires: Cache-Control: max-age=0, private Pragma: Content-Disposition: attachment; filename="file.txt" X-Content-Type-Options: nosniff ETag: d41d8cd98f00b204e9800998ecf8427e Content-Length: 16 Connection: close Content-Type: application/octet-stream This is the file contents.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You can also output the results directly to a file by omitting the header data and output the results directly to a new file.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														curl -s -X GET -H OAuth-Token:{access_token} -H Cache-Control:no-cache https://{site_url}/rest/v10/Notes/7b49aebd-8734-9773-8ef1-53553fa369c7/file/filename > file.txt
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Last modified: 04/15/2016 11:01am
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

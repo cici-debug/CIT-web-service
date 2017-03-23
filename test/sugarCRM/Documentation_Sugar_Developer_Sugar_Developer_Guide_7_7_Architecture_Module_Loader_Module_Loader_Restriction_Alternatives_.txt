@@ -1,0 +1,566 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Module Loader Restriction Alternatives
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This article provides workarounds for commonly used functions that are blacklisted by Sugar for the On-Demand environment.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Blacklisted Functions
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											$variable()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Variable functions are sometimes used when trying to dynamically call a function. This is commonly used to retrieve a new bean object.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Restricted use:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$module = "Account"; $id = "6468238c-da75-fd9a-406b-50199fe6b5f8"; //creating a new bean $focus = new $module() //retrieving a specific record $focus->retrieve($id);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As of 6.3.0, we have implemented
+										Element:a
+											newBean
+											and
+										Element:a
+											getBean
+											which can be found in the
+										Element:a
+											BeanFactory
+											. Below is the recommended approach to create or fetch a bean:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$module = "Accounts"; $id = "6468238c-da75-fd9a-406b-50199fe6b5f8"; //creating a new bean $focus = BeanFactory::newBean($module); //or creating a new bean and retrieving a specific record $focus = BeanFactory::getBean($module, $id);
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											array_filter()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											array_filter
+											filters elements of an array using a callback function. It is restricted from OnDemand use due to its ability to call other restricted functions.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Restricted use:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											/** * Returns whether the input integer is odd * @param $var * @return int */ function odd($var) { return($var & 1); } $myArray = array("a"=>1, "b"=>2, "c"=>3, "d"=>4, "e"=>5); $filteredArray = array_filter($myArray, "odd");
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An alternative to using
+										Element:code
+											array_filter
+											is to use a
+										Element:code
+											foreach
+											loop.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$filteredArray = array(); $myArray = array("a"=>1, "b"=>2, "c"=>3, "d"=>4, "e"=>5); foreach ($myArray as $key => $value) { // check whether the input integer is odd if($value & 1) { $filteredArray[$key] = $value; } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											copy()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											copy
+											method is sometimes used by developers when duplicating files in the uploads directory.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Restricted use:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$result = copy($oldFile, $newFile);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An alternative to using
+										Element:code
+											copy
+											is the
+										Element:a
+											duplicate_file
+											method found in the
+										Element:a
+											UploadFile
+											class.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											require_once('include/upload_file.php'); $uploadFile = new UploadFile(); $result = $uploadFile->duplicate_file($oldFileId, $newFileId);
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											file_exists()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											file_exists
+											method is used by developers to determine if a file exists.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Restricted use:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											if(file_exists($file_path)) { require_once($file); }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An alternative to using
+										Element:code
+											file_exists
+											is the
+										Element:a
+											fileExists
+											method found in the
+										Element:a
+											SugarAutoLoader
+											class.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$file = 'include/utils.php'; if (SugarAutoloader::fileExists($file)) { require_once($file); }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											file_get_contents()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											file_get_contents
+											method is used to retrieve the contents of a file.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Restricted use:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$file_contents = file_get_contents('file.txt');
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An alternative to using
+										Element:code
+											file_get_contents
+											and
+										Element:code
+											sugar_file_get_contents
+											is the
+										Element:a
+											get_file_contents
+											method found in the
+										Element:a
+											UploadFile
+											class.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											require_once('include/upload_file.php'); $uploadFile = new UploadFile(); //get the file location $uploadFile->temp_file_location = UploadFile::get_upload_path($file_id); $file_contents = $uploadFile->get_file_contents();
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											fwrite()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											fwrite
+											method is a function used to write content to a file. As there isn't currently a direct alternative for this function, you may find one of the following a good solution to what you are trying to achieve.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Adding/Removing Logic Hooks
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When working with logic hooks, it is very common for a developer to need to modify
+													Element:code
+														./custom/modules/<module>/logic_hooks.php
+														. When creating module loadable packages, developers will sometimes use
+													Element:code
+														fwrite
+														to modify this file upon installation to include their additional hooks. As of Sugar 6.3,
+													Element:a
+														Logic Hook Extensions
+														were implemented to allow a developer to append custom hooks. If you would prefer to edit the
+													Element:code
+														logic_hooks.php
+														file, you will need to use the
+													Element:code
+														check_logic_hook_file
+														method as described below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														//Adding a logic hook require_once("include/utils.php"); $my_hook = Array( 999, 'Example Logic Hook', 'custom/modules/<module>/my_hook.php', 'my_hook_class', 'my_hook_function' ); check_logic_hook_file("Accounts", "before_save", $my_hook);
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removing a logic hook can be done by using
+													Element:code
+														remove_logic_hook
+														:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														//Removing a logic hook require_once("include/utils.php"); $my_hook = Array( 999, 'Example Logic Hook', 'custom/modules/<module>/my_hook.php', 'my_hook_class', 'my_hook_function' ); remove_logic_hook("Accounts", "before_save", $my_hook);
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											getimagesize()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											getimagesize
+											method is used to retrieve information about an image file.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Restricted use:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$img_size = getimagesize($path);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are looking to verify an image is .png or .jpeg, you can use the
+										Element:code
+											verify_uploaded_image
+											method:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											require_once('include/utils.php'); if (verify_uploaded_image($path)) { //logic }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are looking to get the mime type of an image, you can use the
+										Element:code
+											get_file_mime_type
+											method:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$mime_type = get_file_mime_type($path);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 11/17/2016 09:20am
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

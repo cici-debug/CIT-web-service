@@ -1,0 +1,1558 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Analytics for PHP
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Our PHP library lets you record analytics data from your PHP code. The requests hit our servers, and then we route your data to any analytics service you enable on your integrations page.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This library is open-source, so you can
+				Element:a
+					check it out on Github
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					PHP is a little different than our other server-side libraries because it is a single-threaded language. We’ve done everything we can to make our library as performant as possible, while still leaving you room to tune the settings for your application. If you want to learn more about tuning your settings for high performance, be sure to read through our section on
+				Element:a
+					configuration
+					at the end of this guide.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Want to stay updated on releases? Subscribe to the
+				Element:a
+					release feed
+					.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Clone the repository from github into your desired application directory.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For composer users: we’ve
+							Element:a
+								got you covered too
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								git clone https://github.com/segmentio/analytics-php /my/app/folders/
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Add the following to your PHP script to actually load the Segment analytics library in your code:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								require_once("/path/to/analytics-php/lib/Segment.php");
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now, you’re ready to actually initialize the module. In our examples, we first rename this module to be
+							Element:code
+								Analytics
+								for convenience. In your initialization script, go ahead and make the following call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								# Setup our Segment tracking and # alias to Analytics for convenience class_alias('Segment', 'Analytics'); Segment::init("YOUR_WRITE_KEY");
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You only need to call
+							Element:code
+								init
+								once when your php file is requested. All of your files will then have access to the same
+							Element:code
+								Analytics
+								client.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Of course, you’ll want to replace
+							Element:code
+								YOUR_WRITE_KEY
+								with your actual
+							Element:strong
+								Write Key
+								which you can find in Segment under your source settings.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The default PHP consumer is the
+							Element:a
+								libcurl consumer
+								. If this is not working well for you, or if you have a high-volume project, you may want to try one of our other consumers like the
+							Element:a
+								fork-curl consumer
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								identify
+								lets you tie a user to their actions and record traits about them. It includes a unique User ID and any optional traits you know about them.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We recommend calling
+							Element:code
+								identify
+								a single time when the user’s account is first created, and only identifying again later when their traits change.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s what a basic call to
+							Element:code
+								identify
+								might look like:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Segment::identify(array( "userId" => "2sfjej334", "traits" => array( "email" => $user->email, "name" => $user->name, "friends" => 25 ) ));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This will identify the user by his unique User ID (the one you know him by in your database) and label him with
+							Element:code
+								email
+								,
+							Element:code
+								name
+								and
+							Element:code
+								friends
+								traits.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								Array, optional
+							Element:td
+								A hash of traits you know about the user. Things like:
+							Element:code
+								email
+								,
+							Element:code
+								name
+								or
+							Element:code
+								friends
+								.
+							Element:tr
+							Element:td
+							Element:code
+								anonymousId
+							Element:em
+								String, optional
+							Element:td
+								If you want to track users anonymously, you can include the Anonymous ID instead of a User ID
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								Number, optional
+							Element:td
+								The number of seconds since the unix epoch (
+							Element:code
+								time()
+								) representing when the identify took place. If the identify just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past, make sure you to provide a
+							Element:code
+								timestamp
+								.
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								Array, optional
+							Element:td
+								An object containing any number of options or context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								identify method payload
+								in our
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								lets you record the actions your users perform.Every action triggers what we call an “event”, which can also have associated properties.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to track events that are indicators of success for your site, like
+							Element:strong
+								Signed Up
+								,
+							Element:strong
+								Item Purchased
+								or
+							Element:strong
+								Article Bookmarked
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, we recommend tracking just a few important events. You can always add more later!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								track
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Segment::track(array( "userId" => "f4ca124298", "event" => "Signed Up", "properties" => array( "plan" => "Enterprise" ) ));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That’s just telling us that your user just triggered the
+							Element:strong
+								Signed Up
+								event and chose your hypothetical
+							Element:strong
+								Enterprise
+								plan.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								event properties can be anything you want to record, for example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Segment::track(array( "userId" => "f4ca124298", "event" => "Article Bookmarked", "properties" => array( "title" => "Snow Fall", "subtitle" => "The Avalanche at Tunnel Creek", "author" => "John Branch" ) ));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								track
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								event
+							Element:em
+								String
+							Element:td
+								The name of the event you’re tracking. We recommend human-readable names like
+							Element:strong
+								Song Played
+								or
+							Element:strong
+								Status Updated
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								Array, optional
+							Element:td
+								A hash of properties for the event. If the event was
+							Element:strong
+								Product Added
+								to cart, it might have properties like
+							Element:code
+								price
+								or
+							Element:code
+								product
+								.
+							Element:tr
+							Element:td
+							Element:code
+								anonymousId
+							Element:em
+								String, optional
+							Element:td
+								If you want to track users anonymously, you can include the Anonymous ID instead of a User ID
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								Number, optional
+							Element:td
+								The number of seconds since the unix epoch (
+							Element:code
+								time()
+								) representing when the identify took place. If the identify just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past, make sure you to provide a
+							Element:code
+								timestamp
+								.
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								Array, optional
+							Element:td
+								An object containing any number of options or context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on
+							Element:strong
+								best practices in event naming as well as the
+								in our
+							Element:code
+								track
+								method payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								method lets you record page views on your website, along with optional extra information about the page being viewed.
+							Element:code
+								page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re using our client-side setup in combination with the PHP library, page calls are
+							Element:strong
+								already tracked for you
+								by default. However, if you want to record your own page views manually and aren’t using our client-side library, read on!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								page
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Segment::page(array( "userId" => $user->id, "category" => "Docs", "name" => "PHP library", "properties" => array( "url" => "https://segment.com/libraries/php/" ) ));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								page
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								category
+							Element:em
+								String, optional
+							Element:td
+								The category of the page. Useful for things like ecommerce where many pages might live under a larger category.
+							Element:em
+								Note: if you only pass one string to
+							Element:code
+								page
+								we assume it’s a
+							Element:code
+								name
+								, not a
+							Element:code
+								category
+								. You
+							Element:strong
+								must
+								include a
+							Element:code
+								name
+								if you want to send a
+							Element:code
+								category
+								.
+							Element:tr
+							Element:td
+							Element:code
+								name
+							Element:em
+								String, optional
+							Element:td
+								The name of the of the page, for example
+							Element:strong
+								Signup
+								or
+							Element:strong
+								Home
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								Object, optional
+							Element:td
+								A dictionary of properties of the page. We’ll automatically send the
+							Element:code
+								url
+								,
+							Element:code
+								title
+								,
+							Element:code
+								referrer
+								and
+							Element:code
+								path
+								, but you can add your own too!
+							Element:tr
+							Element:td
+							Element:code
+								anonymousId
+							Element:em
+								String, optional
+							Element:td
+								If you want to track users anonymously, you can include the Anonymous ID instead of a User ID
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								Array, optional
+							Element:td
+								An object containing any number of options or context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								in our
+							Element:code
+								page
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Group
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								group
+								lets you associate an
+							Element:a
+								identified user
+								with a group. A group could be a company, organization, account, project or team! It also lets you record custom traits about the group, like industry or number of employees.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This is useful for tools like
+							Element:a
+								Intercom
+								,
+							Element:a
+								Preact
+								and
+							Element:a
+								Totango
+								, as it ties the user to a
+							Element:strong
+								group
+								of other users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								group
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Segment::group(array( "userId" => $user->id, "groupId" => $group->id, "traits" => array( "name" => $group->name, "size" => $group->size ); ));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								group
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								groupId
+							Element:em
+								String
+							Element:td
+								The ID for the group to associate with the user.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								Array, optional
+							Element:td
+								An array containing a the traits which the group should be tagged with. These might be things like the group’s
+							Element:code
+								name
+								or
+							Element:code
+								employeeCount
+							Element:tr
+							Element:td
+							Element:code
+								anonymousId
+							Element:em
+								String, optional
+							Element:td
+								If you want to track users anonymously, you can include the Anonymous ID instead of a User ID
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								Array, optional
+							Element:td
+								An object containing any number of options or context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find more details about
+							Element:code
+								group
+								including the
+							Element:strong
+								in our
+							Element:code
+								group
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Alias
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								alias
+								is how you associate one identity with another. This is an advanced method, but it is required to manage user identities successfully in
+							Element:em
+								some
+								of our integrations.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In
+							Element:a
+								Mixpanel
+								it’s used to associate an anonymous user with an identified user once they sign up. For
+							Element:a
+								KISSmetrics
+								and
+							Element:a
+								Trak.io
+								if your user switches IDs, you can use ‘alias’ to rename the ‘userId’.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								alias
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Segment::alias(array( "previousId" => $previousId, "userId" => $userId ))
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								alias
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								previousId
+							Element:em
+								String
+							Element:td
+								The previous ID to alias from.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s a full example of how we might use the
+							Element:a
+								call:
+							Element:code
+								alias
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								# the anonymous user does actions ... Segment::track(array( "userId" => "anonymous_user", "event" => "Anonymous Event" )); # the anonymous user signs up and is aliased Segment::alias(array( "previousId" => "anonymous_user", "userId" => "identified@gmail.com" )); # the identified user is identified Segment::identify(array( "userId" => "identified@gmail.com", "traits" => array( "plan" => "Free" ) )); # the identified user does actions ... Segment::track(array( "userId" => "identified@gmail.com", "event" => "Identified Action" ));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more details about
+							Element:code
+								alias
+								including the
+							Element:strong
+								, check out our
+							Element:code
+								alias
+								call payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Historical Import
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can import historical data by adding the
+							Element:code
+								timestamp
+								argument to any of your method calls. This can be helpful if you’ve just switched to Segment.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Historical imports can only be done into integrations that can accept historical timestamp’ed data. Most analytics tools like Mixpanel, Amplitude, Kissmetrics, etc. can handle that type of data just fine. One common integration that does not accept historical data is Google Analytics since their API cannot accept historical data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								If you’re tracking things that are happening right now, leave out the
+							Element:code
+								timestamp
+								and our servers will timestamp the requests for you.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Selecting Integrations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								alias
+								,
+							Element:code
+								group
+								,
+							Element:code
+								identify
+								,
+							Element:code
+								page
+								and
+							Element:code
+								track
+								calls can all be passed an array of
+							Element:code
+								integrations
+								that lets you turn certain integrations on or off. By default all integrations are enabled.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using the
+							Element:code
+								integrations
+								array, you can specify which analytics providers you want each call to go to.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s a
+							Element:code
+								track
+								call with the
+							Element:code
+								integrations
+								array shown:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Segment::track(array( "userId" => "9387459", "event" => "Image Uploaded", "integrations" => array( "All" => false, "Mixpanel" => true, "Customer.io" => true ) ))
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this case, we’re specifying that we want this track to only go to Mixpanel and Customer.io.
+							Element:code
+								"all" => false
+								says that no integration should be enabled unless otherwise specified.
+							Element:code
+								"Mixpanel" => true
+								turns on Mixpanel, etc.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Integration flags are
+							Element:strong
+								case sensitive
+								and match
+							Element:a
+								the integration’s name in the docs
+								(i.e. “AdLearn Open Platform”, “awe.sm”, “MailChimp”, etc.).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:p
+								Available at the business level, filtering track calls can be done right from the Segment UI on your source schema page. We recommend using the UI if possible since it’s a much simpler way of managing your filters and can be updated with no code changes on your side.
+							Element:li
+							Element:p
+								If you are on a grandfathered plan, events sent server-side that are filtered through the Segment dashboard will still count towards your API usage.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Flush
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								flush
+								explicitly tells the PHP runtime to flush the data sent to Segment’s servers. In most configurations, this is done automatically by the runtime, but some PHP installations won’t take care of it for you, so it’s worth calling at the end of your script, just to be safe.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Segment::flush();
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Configuration
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Because PHP is a single threaded and shared-nothing environment, we can’t use a queue in a separate thread or a connection pool to flush messages. Instead, you have the option to specify different consumers to make requests to our servers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are few options which you can use to configure your client to aid with debugging. These can be enabled with any of the consumers you use.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Segment::init("YOUR_WRITE_KEY", array( "consumer" => "lib_curl", "debug" => true, "ssl" => false, "error_handler" => function ($code, $msg) { [...] } ));
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								consumer
+							Element:em
+								String, optional
+							Element:td
+								To explicitly mark which consumer to use. Defaults to
+							Element:code
+								lib_curl
+								.
+							Element:tr
+							Element:td
+							Element:code
+								debug
+							Element:em
+								Boolean, optional
+							Element:td
+								Whether to log messages and wait for a response. Makes any queuing consumers non-async, defaults to
+							Element:code
+								false
+								.
+							Element:tr
+							Element:td
+							Element:code
+								ssl
+							Element:em
+								Boolean, optional
+							Element:td
+								Whether to use SSL for the connection, defaults to
+							Element:code
+								true
+								. Because this adds significant round-trip time, change to
+							Element:code
+								false
+								if you make many requests.
+							Element:tr
+							Element:td
+							Element:code
+								error_handler
+							Element:em
+								Function, optional
+							Element:td
+								A handler which will be called on errors to aid in debugging,
+							Element:code
+								function ($code, $message) {}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Lib-Curl Consumer
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											lib-curl consumer
+											is a reliable option for low-volume sources or if you want fast response times under light loads. The library runs synchronously, queuing calls and sending them in batches to Segment’s servers. By default, this happens every 100 calls, or at the end of serving the page. By default, we ignore http responses to optimize the library’s speed, but you can choose to wait for these responses by enabling debug mode.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your servers are handling more than 20 requests per second, you may want to look at the
+										Element:a
+											file consumer
+											to optimize performance.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There is a maximum of
+										Element:code
+											500kb
+											per batch request and
+										Element:code
+											15kb
+											per call.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The lib-curl consumer is Segment’s default PHP library, although you may still initialize it explicitly and set queue and batch sizes in the library’s initialization settings.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Segment::init("YOUR_WRITE_KEY", array( "consumer" => "lib_curl", "debug" => true, "max_queue_size" => 10000, "batch_size" => 100 ));
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Fork-Curl Consumer
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											fork-curl consumer
+											should work best for cases where you can’t use persistent sockets, or want to ensure quick response times under light load. It works by creating an in-memory queue which buffers track and identify calls. The queue is flushed by forking an async
+										Element:code
+											curl
+											process that sends a batch request. By default, this happens every
+										Element:code
+											100
+											calls, or at the end of serving the page. This consumer will spawn a separate process for each request which tracks events. If your servers are handling more than 20 requests per second, you may want to look at the
+										Element:a
+											file consumer
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To initialize the consumer explicitly, use
+										Element:code
+											"consumer" => "fork_curl"
+											as an entry in your
+										Element:code
+											options
+											array.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Segment::init("YOUR_WRITE_KEY", array( "consumer" => "fork_curl", "debug" => true, "max_queue_size" => 10000, "batch_size" => 100 ));
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:code
+											max_queue_size
+										Element:em
+											Number, optional
+										Element:td
+											The max size of the queue, defaults to
+										Element:code
+											10000
+											items.
+										Element:tr
+										Element:td
+										Element:code
+											batch_size
+										Element:em
+											Number, optional
+										Element:td
+											How many items to send in a single curl request, defaults to
+										Element:code
+											100
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Socket Consumer
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you can’t spawn other processes from your PHP scripts, you can use the
+										Element:a
+											socket consumer
+											, which will allow you to make requests to Segment. Each time a track or identify call is made, it will initiate a socket request to our servers. The socket request is about as async as you can get with PHP, where the request will write the event data and close the connection before waiting for a response. However, if your servers are dealing with more than 100s of requests per second or cannot use a persistent connection, you may want to use one of the other consumers instead.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To initialize the consumer explicitly, use
+										Element:code
+											"consumer" => "socket"
+											as an entry in your
+										Element:code
+											options
+											array.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Segment::init("YOUR_WRITE_KEY", array( "consumer" => "socket", "timeout" => 0.5, "debug" => true, "error_handler" => function ($code, $msg) { error_log($msg); } ));
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:code
+											timeout
+										Element:em
+											Number, optional
+										Element:td
+											The number of seconds to wait for the socket request to time out, defaults to
+										Element:code
+											0.5
+											.
+										Element:tr
+										Element:td
+										Element:code
+											debug
+										Element:em
+											Boolean, optional
+										Element:td
+											Whether to check the response for an error, defaults to
+										Element:code
+											false
+											. This will make the library block until a response has been received from the API, so it is not recommended for production use.
+										Element:tr
+										Element:td
+										Element:code
+											error_handler
+										Element:em
+											Function, optional
+										Element:td
+											A function to handle errors, particularly useful for debugging. Note that if debug mode is not specified, then the
+										Element:code
+											error_handler
+											will only be called on connection level errors and timeouts.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											File Consumer
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											file consumer
+											is a more performant method for making requests to Segment. Each time a track or identify call is made, it will record that call to a log file. The log file is then uploaded “out of band” by running the
+										Element:code
+											file.php
+											file found in
+										Element:a
+											our github repository
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To initialize this consumer explicitly, use
+										Element:code
+											"consumer" => "file"
+											as an entry in your
+										Element:code
+											options
+											array.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Segment::init("YOUR_WRITE_KEY", array( "consumer" => "file" "filename" => "/tmp/analytics.log" ));
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:code
+											filename
+										Element:em
+											String, optional
+										Element:td
+											The location to write the log file, defaults to
+										Element:code
+											"/tmp/analytics.log"
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To upload your log file to segment.com, simply run the
+										Element:code
+											send.php
+											file included as part of our repository.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											php send.php --secret YOUR_WRITE_KEY --file /tmp/analytics.log
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We recommend running this as part of a cron job every few minutes so that your log files stay manageable in size. Every time the
+										Element:code
+											send.php
+											runs it will remove the old log file for you once it has finished processing.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The easiest way to do this is to create a new cron job to upload your log files. Using the defaults, this cron job must run as the www-user. You should run the following commands in your terminal, but change the location of the PHP script to point at your
+										Element:code
+											analytics-php/send.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$ # create a cron job that runs as www-data every minute $ echo '*/1 * * * * www-data php /my/path/to/analytics-php/send.php > /dev/null' | sudo tee /etc/cron.d/analytics $ sudo service cron reload # reload the cron daemon
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re having trouble we have a few tips that help common problems.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my debugger
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check that you’ve followed all the steps in the
+										Element:a
+											Quickstart
+											.
+										Element:li
+										Element:p
+											Make sure that you’re calling one of our API methods once the library is successfully installed—
+										Element:a
+											,
+										Element:code
+											identify
+										Element:a
+											, etc.
+										Element:code
+											track
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my end tools
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check your credentials for that integration.
+										Element:li
+										Element:p
+											Make sure that the integration you are troubleshooting can accept server-side API calls. Compatibility is shown on the
+										Element:a
+											integration docs
+											pages and on the sheets on your Segment source Integrations page.
+										Element:li
+										Element:p
+											Check out the
+										Element:a
+											integration’s documentation
+											to see if there are other requirements for using the method and integration you’re trying to get working.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								3rd-Party Libraries
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you only need support for PHP5, the team at
+							Element:a
+								Underground Elephant
+								has released a
+							Element:a
+								3rd-party library
+								based on Guzzle.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For
+							Element:a
+								FuelPHP
+								support, our friends at
+							Element:a
+								Bit API Hub
+								built this
+							Element:a
+								3rd-party library Segment package
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re using Laravel 4 our friends at Catchet have written a wrapper for you! Docs and GitHub repo can be found here:
+							Element:a
+								https://github.com/cachethq/Laravel-Segment
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have any questions or see anywhere we can improve our documentation, please
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:span
+							Element:span
+								Was this document helpful?
+							Element:span
+							Element:label
+							Element:span
+								Yes
+							Element:label
+							Element:span
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

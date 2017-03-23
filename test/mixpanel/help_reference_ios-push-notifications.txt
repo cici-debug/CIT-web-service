@@ -1,0 +1,1071 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Sending iOS push notifications from Mixpanel
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Introduction
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel makes it simple to send iOS push notifications through the
+							Element:a
+								Apple Push Notification service
+								. Once you are set up, you'll be able to use the Mixpanel website to send pushes to your users as easily as you send an email. To get started, you need to:
+							Element:abbr
+								(APNs)
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Configure your app for push notifications by creating an App ID and corresponding Provisioning Profile
+							Element:li
+								Enable iOS push notifications in Mixpanel by uploading your app's SSL push certificate
+							Element:li
+								Add your users' device tokens to their Mixpanel People profiles using our
+							Element:a
+								iOS lib
+								or API
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This guide will help you set up a Sandbox APNS environment and test sending push notifications. Setting up production certificates is slightly different and will not be covered in this tutorial. If your app is already configured to receive push notifications feel free to skip ahead to
+							Element:a
+								the next section
+								of this guide.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Configuring your app for push notifications
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your app must first be configured and built with an App ID and Provisioning Profile configured to use the Apple Push Notifications service.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To begin, log in to the iOS developer center and browse to
+							Element:a
+								Certificates, Identifiers & Profiles
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Set up your App ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Select "App IDs" under the "Identifiers" section of the left-hand navigation pane and click the plus icon to the top-right of the UI to create a new App ID.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Give your App ID a descriptive name - then make sure the App ID prefix and Bundle ID are correct.
+										Element:strong
+											Your Bundle ID should match the Bundle ID of your app in Xcode
+											. Make sure to check "Push Notifications" under App Services, then click Continue.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once created, click your new App ID and then click Edit.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Generate your APNs certificate
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Scroll down to "Push Notifications" and click "Create Certificate..." under "Development SSL Certificate". This will begin the APNS cert generation process.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Make sure to read the directions on the first page of the wizard ("About Creating a Certificate Signing Request") before clicking "Continue".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the certificate is ready simply download and double-click the file to add the credentials to Keychain Access. You'll need Keychain Access again in a few steps so you might want to keep it open - for now, go back to the Certificate portal to create a Provisioning Profile.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Set up your Provisioning Profile
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Select "Development" under the "Provisioning Profiles" section of the left-hand navigation pane and click the plus icon to the top-right of the UI to create a Provisioning Profile for your newly-created App ID.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Select "iOS App Development" as the profile type and click "Continue". You'll then be asked for the App ID to link this profile to - select the one created in the previous steps, then "Continue".
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								On the next page you'll be prompted to select a Developer certificate - make sure you choose the identity you use for Xcode (this is generally the same as the user credentials you logged in to the Developer Portal with).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You'll then be asked to select the iOS devices you plan on testing the app on. This guide assumes you want to test on a single device, but you're free to select up to 15 iOS devices in this modal.
+							Element:strong
+								You must add the specific devices you plan to run the app on
+								- if you do not see the device listed, you'll need to register the device through the "Devices" section of the Developer Portal or through Xcode.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Verify that the settings look correct, then click "Generate". You can then download the new Provisioning Profile - just double click the file to add it to Xcode.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Enabling push notifications in Mixpanel
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Before you can send push notifications with Mixpanel, you have to export and upload your Apple Push certificate.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Export your Apple Push certificate from Keychain Access
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Launch Keychain Access on your Mac. Find the iOS push certificate for your app in the "My Certificates" section of Keychain Access. Its name will begin with "Apple Development IOS Push Services". If you expand the certificate row in Keychain Access,
+										Element:strong
+											it should contain your private key
+											. Select both the certificate and the key it contains, then right click, and choose "Export".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please note Mixpanel supports only one push certificate per project. To use multiple certificates (e.g., production and development), create a separate project for each one.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When prompted for the file format, select "Personal Information Exchange (.p12)".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When prompted for a password to protect the exported items,
+										Element:strong
+											do not enter a password
+											. This will let us read your certificate once you upload it. You may be asked for your keychain password afterwards. Enter your password in this second dialog.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Upload your Apple Push certificate to Mixpanel
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to send push notifications on your behalf, we need the certificate file you just exported. To upload it, head to your
+										Element:a
+											Mixpanel project
+											, click your name in the upper righthand corner, and select Settings from the dropdown.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Switch to the "Notifications" tab, click "Change" next to the "Apple Push Certificate" line, and upload your certificate.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sending user device tokens to Mixpanel
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can only send push notifications to users whose profiles have the special
+							Element:code
+								$ios_devices
+								property. The value of this property should be a
+							Element:strong
+								list
+								of the user's hex-encoded device tokens.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sending tokens using the Mixpanel iOS library
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The easiest way to get your users' device tokens into their profiles is using
+										Element:a
+											people addPushDeviceToken:
+											in the Mixpanel iOS library.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, you must ask the user for permission to send push notifications using
+										Element:a
+											registerUserNotificationSettings
+											(iOS 8+) or
+										Element:a
+											registerForRemoteNotificationTypes
+											(iOS 7 and below):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											-
+										Element:span
+											(
+										Element:span
+											BOOL
+										Element:span
+											)
+										Element:span
+											application:
+										Element:span
+											(
+										Element:span
+											UIApplication
+										Element:span
+											*
+										Element:span
+											)
+										Element:span
+											application
+										Element:span
+											didFinishLaunchingWithOptions:
+										Element:span
+											(
+										Element:span
+											NSDictionary
+										Element:span
+											*
+										Element:span
+											)
+										Element:span
+											launchOptions
+										Element:span
+											{
+										Element:span
+											// Initialize Mixpanel with your project token
+										Element:span
+											[
+										Element:span
+											Mixpanel
+										Element:span
+											sharedInstanceWithToken
+										Element:span
+											:
+										Element:span
+											@"YOUR PROJECT TOKEN"
+										Element:span
+											];
+										Element:span
+											Mixpanel
+										Element:span
+											*
+										Element:span
+											mixpanel
+										Element:span
+											=
+										Element:span
+											[
+										Element:span
+											Mixpanel
+										Element:span
+											sharedInstance
+										Element:span
+											];
+										Element:span
+											// Tell iOS you want your app to receive push notifications
+										Element:span
+											// This code will work in iOS 8.0 xcode 6.0 or later:
+										Element:span
+											if
+										Element:span
+											([[[
+										Element:span
+											UIDevice
+										Element:span
+											currentDevice
+										Element:span
+											]
+										Element:span
+											systemVersion
+										Element:span
+											]
+										Element:span
+											floatValue
+										Element:span
+											]
+										Element:span
+											>=
+										Element:span
+											8.0
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											[[
+										Element:span
+											UIApplication
+										Element:span
+											sharedApplication
+										Element:span
+											]
+										Element:span
+											registerUserNotificationSettings
+										Element:span
+											:[
+										Element:span
+											UIUserNotificationSettings
+										Element:span
+											settingsForTypes
+										Element:span
+											:(
+										Element:span
+											UIUserNotificationTypeSound
+										Element:span
+											|
+										Element:span
+											UIUserNotificationTypeAlert
+										Element:span
+											|
+										Element:span
+											UIUserNotificationTypeBadge
+										Element:span
+											)
+										Element:span
+											categories
+										Element:span
+											:
+										Element:span
+											nil
+										Element:span
+											]];
+										Element:span
+											[[
+										Element:span
+											UIApplication
+										Element:span
+											sharedApplication
+										Element:span
+											]
+										Element:span
+											registerForRemoteNotifications
+										Element:span
+											];
+										Element:span
+											}
+										Element:span
+											// This code will work in iOS 7.0 and below:
+										Element:span
+											else
+										Element:span
+											{
+										Element:span
+											[[
+										Element:span
+											UIApplication
+										Element:span
+											sharedApplication
+										Element:span
+											]
+										Element:span
+											registerForRemoteNotificationTypes
+										Element:span
+											:
+										Element:span
+											(
+										Element:span
+											UIRemoteNotificationTypeNewsstandContentAvailability
+										Element:span
+											|
+										Element:span
+											UIRemoteNotificationTypeBadge
+										Element:span
+											|
+										Element:span
+											UIRemoteNotificationTypeSound
+										Element:span
+											|
+										Element:span
+											UIRemoteNotificationTypeAlert
+										Element:span
+											)];
+										Element:span
+											}
+										Element:span
+											// Call .identify to flush the People record to Mixpanel
+										Element:span
+											[
+										Element:span
+											mixpanel
+										Element:span
+											identify
+										Element:span
+											:
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											distinctId
+										Element:span
+											];
+										Element:span
+											return
+										Element:span
+											YES
+										Element:span
+											;
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This will cause iOS to show the user the "This App Would Like to Send You Push Notifications" prompt.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the user accepts, iOS will call your application delegate's
+										Element:a
+											application:didRegisterForRemoteNotificationWithDeviceToken:
+											method, passing in the APNs device token. Pass this token directly to
+										Element:a
+											people addPushDeviceToken:
+											to add the token to the currently identified user's Mixpanel People profile.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											-
+										Element:span
+											(
+										Element:span
+											void
+										Element:span
+											)
+										Element:span
+											application:
+										Element:span
+											(
+										Element:span
+											UIApplication
+										Element:span
+											*
+										Element:span
+											)
+										Element:span
+											application
+										Element:span
+											didRegisterForRemoteNotificationsWithDeviceToken:
+										Element:span
+											(
+										Element:span
+											NSData
+										Element:span
+											*
+										Element:span
+											)
+										Element:span
+											deviceToken
+										Element:span
+											{
+										Element:span
+											Mixpanel
+										Element:span
+											*
+										Element:span
+											mixpanel
+										Element:span
+											=
+										Element:span
+											[
+										Element:span
+											Mixpanel
+										Element:span
+											sharedInstance
+										Element:span
+											];
+										Element:span
+											[
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											people
+										Element:span
+											addPushDeviceToken
+										Element:span
+											:
+										Element:span
+											deviceToken
+										Element:span
+											];
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Importing device tokens
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you already have your users' device tokens, you can import into Mixpanel by making
+										Element:a
+											API requests to the /engage endpoint
+											and setting the special property
+										Element:code
+											$ios_devices
+											to a list of the user's iOS device tokens in hex.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your request should be formatted as a JSON dictionary, with
+										Element:code
+											$distinct_id
+											and
+										Element:code
+											$token
+											set as usual.
+										Element:code
+											$union
+											should be set to a dictionary which has its
+										Element:code
+											$ios_devices
+											key pointing to an array of the users' device tokens in hex. A
+										Element:code
+											$union
+											record operates on list properties and results in a list that contains only unique items (i.e., no duplicates). We use
+										Element:code
+											$union
+											here, as opposed to
+										Element:code
+											$append
+											so that the user's
+										Element:code
+											$ios_devices
+											list only contains one copy of each device ID.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"123456"
+										Element:span
+											,
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$ignore_time"
+										Element:span
+											:
+										Element:span
+											true
+										Element:span
+											,
+										Element:span
+											"$union"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"$ios_devices"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											"2ffca4ad6599adc9b5202d15a5286d33c19547d472cd09de44219cda5ac30207"
+										Element:span
+											]
+										Element:span
+											}
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After
+										Element:a
+											base64 encoding
+											, the above would be sent as this request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.mixpanel.com/engage/?data=ew0KICAgICIkZGlzdGluY3RfaWQi OiAiMTIzNDU2IiwNCiAgICAiJHRva2VuIjogIjM2YWRhNWIxMGRhMzlhMTM0NzU1O TMyMWJhZjEzMDYzIiwNCiAgICAiJGlnbm9yZV90aW1lIjogdHJ1ZSwNCiAgICAiJH VuaW9uIjogew0KICAgICAgICAiJGlvc19kZXZpY2VzIjogWyIyZmZjYTRhZDY1OTl hZGM5YjUyMDJkMTVhNTI4NmQzM2MxOTU0N2Q0NzJjZDA5ZGU0NDIxOWNkYTVhYzMw MjA3Il0NCiAgICB9DQp9
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sending push notifications to your app
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The final step to enabling push notifications is to digitally sign your app with credentials allowing it to generate push tokens and receive messages from APNs.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Adjust Xcode Code Signing preferences
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Open Xcode and select your main target's Build Settings. Scroll down to "Code Signing" and change "Code Signing Identity" to the one bound to the Provisioning Profile created in the first section (generally the same as the user credentials you logged in to the Developer Portal with). Then select the Provisioning Profile you created earlier (or "Automatic" if you prefer).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Send a push notification from Mixpanel
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Run your app on your device. When prompted, allow notifications. Then press the home button to send your app to the background.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Head to your
+										Element:a
+											Mixpanel project
+											, then select "Explore" from the sidebar. There should be a user in the list. Select the user, click "Send a notification", and select "Push Notification".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Compose your message, schedule it to send immediately and click "Send this message".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The message should show up on your device.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Handling pushes
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Pushes received while your app is running in the foreground will not generate the standard system alert above. Instead, they are passed to the
+							Element:a
+								application:didReceiveRemoteNotification:
+								callback on your app delegate, which you must override if you'd like to handle them. For example, to show a standard alert view, do the following:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								-
+							Element:span
+								(
+							Element:span
+								void
+							Element:span
+								)
+							Element:span
+								application:
+							Element:span
+								(
+							Element:span
+								UIApplication
+							Element:span
+								*
+							Element:span
+								)
+							Element:span
+								application
+							Element:span
+								didReceiveRemoteNotification:
+							Element:span
+								(
+							Element:span
+								NSDictionary
+							Element:span
+								*
+							Element:span
+								)
+							Element:span
+								userInfo
+							Element:span
+								{
+							Element:span
+								// Show alert for push notifications recevied while the
+							Element:span
+								// app is running
+							Element:span
+								NSString
+							Element:span
+								*
+							Element:span
+								message
+							Element:span
+								=
+							Element:span
+								[[
+							Element:span
+								userInfo
+							Element:span
+								objectForKey
+							Element:span
+								:
+							Element:span
+								@"aps"
+							Element:span
+								]
+							Element:span
+								objectForKey
+							Element:span
+								:
+							Element:span
+								@"alert"
+							Element:span
+								];
+							Element:span
+								UIAlertView
+							Element:span
+								*
+							Element:span
+								alert
+							Element:span
+								=
+							Element:span
+								[[
+							Element:span
+								UIAlertView
+							Element:span
+								alloc
+							Element:span
+								]
+							Element:span
+								initWithTitle
+							Element:span
+								:
+							Element:span
+								@""
+							Element:span
+								message
+							Element:span
+								:
+							Element:span
+								message
+							Element:span
+								delegate
+							Element:span
+								:
+							Element:span
+								nil
+							Element:span
+								cancelButtonTitle
+							Element:span
+								:
+							Element:span
+								@"OK"
+							Element:span
+								otherButtonTitles
+							Element:span
+								:
+							Element:span
+								nil
+							Element:span
+								];
+							Element:span
+								[
+							Element:span
+								alert
+							Element:span
+								show
+							Element:span
+								];
+							Element:span
+								[
+							Element:span
+								alert
+							Element:span
+								release
+							Element:span
+								];
+							Element:span
+								}
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Provisioning environments
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When using APNs, a common source of problems is managing Apple's provisioning system. Some things to know:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								You cannot send pushes to the iOS Simulator.
+							Element:li
+								When you enable push for an app, Apple provides you with two push SSL certificates: Development and Production. The former is meant to be used in conjunction with builds signed with your Development provisioning profile, the latter with builds signed with either of your Distribution provisioning profiles (Ad Hoc or Production).
+							Element:li
+								The APNs Development and Production environments use different device tokens.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The best way to handle provisioning environments is to create two separate Mixpanel projects for each of your iOS apps, one for development and one for production. Upload your development push certificate to the first and your production push certificate to the second. Likewise, use the development project token in Development builds and your production project token in Ad Hoc and Production builds. This approach avoids mixing tokens and certificates from different provisioning environments which won't work together.
+								Document Sections
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Introduction
+							Element:li
+							Element:a
+								Configuring your app for push notifications
+							Element:li
+							Element:a
+								Enabling push notifications in Mixpanel
+							Element:li
+							Element:a
+								Sending user device tokens to Mixpanel
+							Element:li
+							Element:a
+								Send a push notification
+							Element:li
+							Element:a
+								Handling pushes
+							Element:li
+							Element:a
+								Provisioning environments

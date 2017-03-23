@@ -1,0 +1,614 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Simple Query String Query
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A query that uses the SimpleQueryParser to parse its context. Unlike the regular
+							Element:code
+								query_string
+								query, the
+							Element:code
+								simple_query_string
+								query will never throw an exception, and discards invalid parts of the query. Here is an example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /_search { "query": { "simple_query_string" : { "query": "\"fried eggs\" +(eggplant | potato) -frittata", "analyzer": "snowball", "fields": ["body^5","_all"], "default_operator": "and" } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								simple_query_string
+								top level parameters include:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:colgroup
+							Element:col
+							Element:col
+							Element:thead
+							Element:tr
+							Element:th
+								Parameter
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								query
+							Element:td
+							Element:p
+								The actual query to be parsed. See below for syntax.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								fields
+							Element:td
+							Element:p
+								The fields to perform the parsed query against. Defaults to the
+							Element:code
+								index.query.default_field
+								index settings, which in turn defaults to
+							Element:code
+								_all
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								default_operator
+							Element:td
+							Element:p
+								The default operator used if no explicit operator is specified. For example, with a default operator of
+							Element:code
+								OR
+								, the query
+							Element:code
+								capital of Hungary
+								is translated to
+							Element:code
+								capital OR of OR Hungary
+								, and with default operator of
+							Element:code
+								AND
+								, the same query is translated to
+							Element:code
+								capital AND of AND Hungary
+								. The default value is
+							Element:code
+								OR
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								analyzer
+							Element:td
+							Element:p
+								The analyzer used to analyze each term of the query when creating composite queries.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								flags
+							Element:td
+							Element:p
+								Flags specifying which features of the
+							Element:code
+								simple_query_string
+								to enable. Defaults to
+							Element:code
+								ALL
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								analyze_wildcard
+							Element:td
+							Element:p
+								Whether terms of prefix queries should be automatically analyzed or not. If
+							Element:code
+								true
+								a best effort will be made to analyze the prefix. However, some analyzers will be not able to provide a meaningful results based just on the prefix of a term. Defaults to
+							Element:code
+								false
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								lenient
+							Element:td
+							Element:p
+								If set to
+							Element:code
+								true
+								will cause format based failures (like providing text to a numeric field) to be ignored.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								minimum_should_match
+							Element:td
+							Element:p
+								The minimum number of clauses that must match for a document to be returned. See the
+							Element:a
+								documentation for the full list of options.
+							Element:code
+								minimum_should_match
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								quote_field_suffix
+							Element:td
+							Element:p
+								A suffix to append to fields for quoted parts of the query string. This allows to use a field that has a different analysis chain for exact matching. Look
+							Element:a
+								here
+								for a comprehensive example.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								all_fields
+							Element:td
+							Element:p
+								Perform the query on all fields detected in the mapping that can be queried. Will be used by default when the
+							Element:code
+								_all
+								field is disabled and no
+							Element:code
+								default_field
+								is specified index settings, and no
+							Element:code
+								fields
+								are specified.
+						Node:
+						(type) c
+						(layer)2
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Simple Query String Syntax
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The
+																Element:code
+																	simple_query_string
+																	supports the following special characters:
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:code
+																	+
+																	signifies AND operation
+																Element:li
+																Element:code
+																	|
+																	signifies OR operation
+																Element:li
+																Element:code
+																	-
+																	negates a single token
+																Element:li
+																Element:code
+																	"
+																	wraps a number of tokens to signify a phrase for searching
+																Element:li
+																Element:code
+																	*
+																	at the end of a term signifies a prefix query
+																Element:li
+																Element:code
+																	(
+																	and
+																Element:code
+																	)
+																	signify precedence
+																Element:li
+																Element:code
+																	~N
+																	after a word signifies edit distance (fuzziness)
+																Element:li
+																Element:code
+																	~N
+																	after a phrase signifies slop amount
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	In order to search for any of these special characters, they will need to be escaped with
+																Element:code
+																	\
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Be aware that this syntax may have a different behavior depending on the
+																Element:code
+																	default_operator
+																	value. For example, consider the following query:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search { "query": { "simple_query_string" : { "fields" : ["content"], "query" : "foo bar -baz" } } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	You may expect that documents containing only "foo" or "bar" will be returned, as long as they do not contain "baz", however, due to the
+																Element:code
+																	default_operator
+																	being OR, this really means "match documents that contain "foo" or documents that contain "bar", or documents that don’t contain "baz". If this is unintended then the query can be switched to
+																Element:code
+																	"foo bar +-baz"
+																	which will not return documents that contain "baz".
+															Node:
+															(type) c
+															(layer)5
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Default Field
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When not explicitly specifying the field to search on in the query string syntax, the
+													Element:code
+														index.query.default_field
+														will be used to derive which field to search on. It defaults to
+													Element:code
+														_all
+														field.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If the
+													Element:code
+														_all
+														field is disabled and no
+													Element:code
+														fields
+														are specified in the request`, the
+													Element:code
+														simple_query_string
+														query will automatically attempt to determine the existing fields in the index’s mapping that are queryable, and perform the search on those fields.
+															Node:
+															(type) c
+															(layer)5
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Multi Field
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The fields parameter can also include pattern based field names, allowing to automatically expand to the relevant fields (dynamically introduced fields included). For example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "simple_query_string" : { "fields" : ["content", "name.*^5"], "query" : "foo bar baz" } } }
+															Node:
+															(type) c
+															(layer)5
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Flags
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														simple_query_string
+														support multiple flags to specify which parsing features should be enabled. It is specified as a
+													Element:code
+														|
+														-delimited string with the
+													Element:code
+														flags
+														parameter:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "simple_query_string" : { "query" : "foo | bar + baz*", "flags" : "OR|AND|PREFIX" } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The available flags are:
+													Element:code
+														ALL
+														,
+													Element:code
+														NONE
+														,
+													Element:code
+														AND
+														,
+													Element:code
+														OR
+														,
+													Element:code
+														NOT
+														,
+													Element:code
+														PREFIX
+														,
+													Element:code
+														PHRASE
+														,
+													Element:code
+														PRECEDENCE
+														,
+													Element:code
+														ESCAPE
+														,
+													Element:code
+														WHITESPACE
+														,
+													Element:code
+														FUZZY
+														,
+													Element:code
+														NEAR
+														, and
+													Element:code
+														SLOP
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Query String Query
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Term level queries »
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+										Element:h5
+											Be in the know with the latest and greatest from Elastic.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Thanks for subscribing! We'll keep you updated with new releases.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

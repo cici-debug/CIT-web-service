@@ -1,0 +1,430 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:a
+					ArcGIS REST API: Spatial Analysis Service
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:aside
+													Element:h4
+														Getting Started
+													Element:h4
+														Tasks
+													Element:h4
+														Context
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+														Back to Top
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Programmatically accessing analysis services
+			Node:
+			(type) c
+			(layer)1
+															Node:
+															(type) c
+															(layer)5
+																Element:aside
+																Element:h4
+																	In this topic
+																Element:h5
+																	In this topic
+																Element:ul
+																Element:li
+																Element:a
+																	1 Get the token
+																Element:li
+																Element:a
+																	2 Get the Analysis Service URL
+																Element:li
+																Element:a
+																	3 Submit a job (analysis task)
+																Element:li
+																Element:a
+																	4 Monitor the job
+																Element:li
+																Element:a
+																	5 Get the results of the job
+																Element:li
+																Element:a
+																	Python 3 code sample
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	This document describes how to programmatically access and use analysis services. The sample code in this document uses Python. If you are programming in JavaScript, start by reading the JavaScript API document
+																Element:a
+																	Working with Analysis Widgets
+																	. These JavaScript widgets and associated classes allow easy access to the tasks within the Analysis Service.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The general workflow to follow when programmatically submitting Analysis Service tasks to ArcGIS Online is as follows.
+															Node:
+															(type) c
+															(layer)5
+																Element:ol
+																Element:li
+																	Get token-based authentication from the portal host or
+																Element:span
+																	www.arcgis.com
+																	.
+																Element:li
+																	Get the Analysis Service URL from the portal host or
+																Element:span
+																	www.arcgis.com
+																	and formatting the response as a dictionary to query for data.
+																Element:li
+																	Submit your job.
+																Element:li
+																	Monitor the job status.
+																Element:li
+																	Get job results.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The above workflow is presented as a series of Python routines, each routine building on the previous one. At the end of this document, the
+																Element:span
+																	analysis_job_results()
+																	knits all the routines together and shows using the Create Buffers task.
+			Node:
+			(type) c
+			(layer)1
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Note:
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The code samples in the five sections below are written for Python 2 (installed with ArcGIS for Desktop version 10). The
+																Element:a
+																	last section
+																	has code samples that use Python 3 (installed with ArcGIS Pro).
+															Node:
+															(type) c
+															(layer)5
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								1 Get the token
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using ArcGIS Online requires authentication and an active and valid username/password is required to obtain token-based authentication. Once a token has been issued from ArcGIS Online, you can access specific resources, submit requests, submit analysis service jobs, and obtain results and status messages from analysis service jobs.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This approach uses all Python built-in modules. The
+							Element:span
+								portal_url
+								object can be either the Organization Portal assigned with the ArcGIS Online subscription (for example
+							Element:span
+								http://companyname.maps.arcgis.com
+								) or
+							Element:span
+								www.arcgis.com
+								can be used if it is accessible from the organization.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Python code sample below shows how to obtain a token using an ArcGIS Online username and password. Since working with ArcGIS Online programmatically requires many HTTP requests and responses, this sample has a utility function called
+							Element:span
+								submit_request()
+								to take the HTTP request as a parameter and return the
+							Element:span
+								json
+								response data in the form of a Python dictionary.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								import urllib import urllib2 import httplib import time import json import contextlib def submit_request(request): """ Returns the response from an HTTP request in json format.""" with contextlib.closing(urllib2.urlopen(request)) as response: job_info = json.load(response) return job_info def get_token(portal_url, username, password): """ Returns an authentication token for use in ArcGIS Online.""" # Set the username and password parameters before # getting the token. # params = {"username": username, "password": password, "referer": "http://www.arcgis.com", "f": "json"} token_url = "{}/generateToken".format(portal_url) request = urllib2.Request(token_url, urllib.urlencode(params)) token_response = submit_request(request) if "token" in token_response: print("Getting token...") token = token_response.get("token") return token else: # Request for token must be made through HTTPS. # if "error" in token_response: error_mess = token_response.get("error", {}).get("message") if "This request needs to be made over https." in error_mess: token_url = token_url.replace("http://", "https://") token = get_token(token_url, username, password) return token else: raise Exception("Portal error: {} ".format(error_mess))
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								See the
+							Element:a
+								Generate Token
+								documentation for more information on the
+							Element:span
+								generateToken
+								request.
+															Node:
+															(type) c
+															(layer)5
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								2 Get the Analysis Service URL
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You use the token returned in the above code sample to access resources on ArcGIS Online, including submitting a job through the Spatial Analysis service. Using the token, you can programmatically obtain the URL needed to submit a spatial analysis job request through the ArcGIS REST API. The spatial analysis URL for submitting a job is not static and can change based on the user and the ArcGIS Online for Organizations account associated with the username. The Python code sample below shows how to obtain the request URL using token-based authentication.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def get_analysis_url(portal_url, token): """ Returns Analysis URL from AGOL for running analysis services.""" print("Getting Analysis URL...") portals_self_url = "{}/portals/self?f=json&token={}".format(portal_url, token) request = urllib2.Request(portals_self_url) portal_response = submit_request(request) # Parse the dictionary from the json data response to get Analysis URL. # if "helperServices" in portal_response: helper_services = portal_response.get("helperServices") if "analysis" in helper_services: analysis_service = helper_services.get("analysis") if "url" in analysis_service: analysis_url = analysis_service.get("url") return analysis_url else: raise Exception("Unable to obtain Analysis URL.")
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								See the
+							Element:a
+								Portal Self
+								documentation for more information on the
+							Element:span
+								portal_url/self
+								request.
+															Node:
+															(type) c
+															(layer)5
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								3 Submit a job (analysis task)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:span
+								analysis_url
+								returned from the above code sample contains the URL that is needed to submit jobs programmatically through the Spatial Analysis service. The Python code sample below shows an example of how to submit an analysis job through the ArcGIS REST API using any of the available Analysis Service tasks:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def analysis_job(analysis_url, task, token, params): """ Submits an Analysis job and returns the job URL for monitoring the job status in addition to the json response data for the submitted job.""" # Unpack the Analysis job parameters as a dictionary and add token and # formatting parameters to the dictionary. The dictionary is used in the # HTTP POST request. Headers are also added as a dictionary to be included # with the POST. # print("Submitting analysis job...") params["f"] = "json" params["token"] = token headers = {"Referer":"http://www.arcgis.com"} task_url = "{}/{}".format(analysis_url, task) submit_url = "{}/submitJob?".format(task_url) request = urllib2.Request(submit_url, urllib.urlencode(params), headers) analysis_response = submit_request(request) if analysis_response: # Print the response from submitting the Analysis job. # print(analysis_response) return task_url, analysis_response else: raise Exception("Unable to submit analysis job.")
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As an example, if you were to run the
+							Element:a
+								Create Buffers
+								task, the
+							Element:span
+								task
+								argument would be "CreateBuffers" and
+							Element:span
+								params
+								would be a dictionary with values for the
+							Element:span
+								inputLayer
+								,
+							Element:span
+								distances
+								,
+							Element:span
+								units
+								,
+							Element:span
+								dissolveType
+								, and
+							Element:span
+								outputName
+								keys. (See the
+							Element:span
+								analysis_job_results()
+								function implementation at the end of this document for an example.) The
+							Element:span
+								params
+								dictionary is initialized with these key/value pairs.
+															Node:
+															(type) c
+															(layer)5
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								4 Monitor the job
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:span
+								analysis_job()
+								function above returns a URL for the task that can be used to monitor the job status, and a dictionary containing information about the job that can be used to access the job results. The Python code sample below shows how to monitor the job submitted through REST.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def analysis_job_status(task_url, job_info, token): """ Tracks the status of the submitted Analysis job.""" if "jobId" in job_info: # Get the id of the Analysis job to track the status. # job_id = job_info.get("jobId") job_url = "{}/jobs/{}?f=json&token={}".format(task_url, job_id, token) request = urllib2.Request(job_url) job_response = submit_request(request) # Query and report the Analysis job status. # if "jobStatus" in job_response: while not job_response.get("jobStatus") == "esriJobSucceeded": time.sleep(5) request = urllib2.Request(job_url) job_response = submit_request(request) print(job_response) if job_response.get("jobStatus") == "esriJobFailed": raise Exception("Job failed.") elif job_response.get("jobStatus") == "esriJobCancelled": raise Exception("Job cancelled.") elif job_response.get("jobStatus") == "esriJobTimedOut": raise Exception("Job timed out.") if "results" in job_response: return job_response else: raise Exception("No job results.") else: raise Exception("No job url.")
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:span
+								analysis_job_status()
+								function sends requests to the job URL to get the status of the job. It will continue to send requests until the status of the job is
+							Element:span
+								esriJobSucceeded
+								. The sleep time is set so that the responses will not be sent as frequently in case the job submitted is large. Errors are raised if the status of the job is
+							Element:span
+								esriJobFailed
+								,
+							Element:span
+								esriJobCancelled
+								, or
+							Element:span
+								esriJobTimedOut
+								. A list of the
+							Element:span
+								jobStatus
+								values can be found in
+							Element:a
+								Checking job status
+								.
+															Node:
+															(type) c
+															(layer)5
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								5 Get the results of the job
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once the job succeeds, the json data from the result response is returned by the above
+							Element:span
+								analysis_job_status()
+								function. The dictionary created from the json data result response can then be used as input to the
+							Element:span
+								analysis_job_results()
+								function below to get additional information about the result.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								def analysis_job_results(task_url, job_info, token): """ Use the job result json to get information about the feature service created from the Analysis job.""" # Get the paramUrl to get information about the Analysis job results. # if "jobId" in job_info: job_id = job_info.get("jobId") if "results" in job_info: results = job_info.get("results") result_values = {} for key in results.keys(): param_value = results[key] if "paramUrl" in param_value: param_url = param_value.get("paramUrl") result_url = "{}/jobs/{}/{}?token={}&f=json".format(task_url, job_id, param_url, token) request = urllib2.Request(result_url) param_result = submit_request(request) job_value = param_result.get("value") result_values[key] = job_value return result_values else: raise Exception("Unable to get analysis job results.") else: raise Exception("Unable to get analysis job results.") if __name__ == '__main__': httplib.HTTPConnection._http_vsn = 10 httplib.HTTPConnection._http_vsn_str = 'HTTP/1.0' username = "username" password = "password" host_url = "http://www.arcgis.com" portal_url = "{}/sharing/rest".format(host_url) token = get_token(portal_url, username, password) analysis_url = get_analysis_url(portal_url, token) feature_service = "http://<path_to_feature_service_to_buffer>" task = "CreateBuffers" output_service = "CreateBuffers_20_35_50_feature_service" params = {"inputLayer": {"url":feature_service}, "distances": [20, 35, 50], "units": "Miles", "dissolveType": "Dissolve", "outputName": {"serviceProperties":{"name": output_service}}} task_url, job_info = analysis_job(analysis_url, task, token, params) job_info = analysis_job_status(task_url, job_info, token) job_values = analysis_job_results(task_url, job_info, token)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using the
+							Element:span
+								param_url
+								along with the
+							Element:span
+								task_url
+								, the dictionary of result values from the job can be returned and information about the new service created from the CreateBuffers task, such as the URL and the Item ID, can be obtained.
+															Node:
+															(type) c
+															(layer)5
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Python 3 code sample
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The code sample below implements all the routines above in Python 3. The main difference is due to how Python implements
+							Element:span
+								urllib
+								between version 2 and 3.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								import urllib.request import urllib.parse import urllib.error import http.client import time import json import contextlib def submit_request(request): """ Returns the response from an HTTP request in json format.""" with contextlib.closing(urllib.request.urlopen(request)) as response: content = response.read() content_decoded = content.decode("utf-8") job_info = json.loads(content_decoded) return job_info def get_token(portal_url, username, password): """ Returns an authentication token for use in ArcGIS Online.""" # Set the username and password parameters before # getting the token. # params = {"username": username, "password": password, "referer": "http://www.arcgis.com", "f": "json"} token_url = "{}/generateToken".format(portal_url) data = urllib.parse.urlencode(params) data_encoded = data.encode("utf-8") request = urllib.request.Request(token_url, data=data_encoded) token_response = submit_request(request) if "token" in token_response: print("Getting token...") token = token_response.get("token") return token else: # Request for token must be made through HTTPS. # if "error" in token_response: error_mess = token_response.get("error", {}).get("message") if "This request needs to be made over https." in error_mess: token_url = token_url.replace("http://", "https://") token = get_token(token_url, username, password) return token else: raise Exception("Portal error: {} ".format(error_mess)) def get_analysis_url(portal_url, token): """ Returns Analysis URL from AGOL for running analysis services.""" print("Getting Analysis URL...") portals_self_url = "{}/portals/self?f=json&token={}".format(portal_url, token) request = urllib.request.Request(portals_self_url) portal_response = submit_request(request) # Parse the dictionary from the json data response to get Analysis URL. # if "helperServices" in portal_response: helper_services = portal_response.get("helperServices") if "analysis" in helper_services: analysis_service = helper_services.get("analysis") if "url" in analysis_service: analysis_url = analysis_service.get("url") return analysis_url else: raise Exception("Unable to obtain Analysis URL.") def analysis_job(analysis_url, task, token, params): """ Submits an Analysis job and returns the job URL for monitoring the job status in addition to the json response data for the submitted job.""" # Unpack the Analysis job parameters as a dictionary and add token and # formatting parameters to the dictionary. The dictionary is used in the # HTTP POST request. Headers are also added as a dictionary to be included # with the POST. # print("Submitting analysis job...") params["f"] = "json" params["token"] = token headers = {"Referer":"http://www.arcgis.com"} task_url = "{}/{}".format(analysis_url, task) submit_url = "{}/submitJob?".format(task_url) data = urllib.parse.urlencode(params) data_encoded = data.encode("utf-8") request = urllib.request.Request(submit_url, data=data_encoded, headers=headers) analysis_response = submit_request(request) if analysis_response: # Print the response from submitting the Analysis job. # print(analysis_response) return task_url, analysis_response else: raise Exception("Unable to submit analysis job.") def analysis_job_status(task_url, job_info, token): """ Tracks the status of the submitted Analysis job.""" if "jobId" in job_info: # Get the id of the Analysis job to track the status. # job_id = job_info.get("jobId") job_url = "{}/jobs/{}?f=json&token={}".format(task_url, job_id, token) request = urllib.request.Request(job_url) job_response = submit_request(request) # Query and report the Analysis job status. # if "jobStatus" in job_response: while not job_response.get("jobStatus") == "esriJobSucceeded": time.sleep(5) request = urllib.request.Request(job_url) job_response = submit_request(request) print(job_response) if job_response.get("jobStatus") == "esriJobFailed": raise Exception("Job failed.") elif job_response.get("jobStatus") == "esriJobCancelled": raise Exception("Job cancelled.") elif job_response.get("jobStatus") == "esriJobTimedOut": raise Exception("Job timed out.") if "results" in job_response: return job_response else: raise Exception("No job results.") else: raise Exception("No job url.") def analysis_job_results(task_url, job_info, token): """ Use the job result json to get information about the feature service created from the Analysis job.""" # Get the paramUrl to get information about the Analysis job results. # if "jobId" in job_info: job_id = job_info.get("jobId") if "results" in job_info: results = job_info.get("results") result_values = {} for key in list(results.keys()): param_value = results[key] if "paramUrl" in param_value: param_url = param_value.get("paramUrl") result_url = "{}/jobs/{}/{}?token={}&f=json".format(task_url, job_id, param_url, token) request = urllib.request.Request(result_url) param_result = submit_request(request) job_value = param_result.get("value") result_values[key] = job_value return result_values else: raise Exception("Unable to get analysis job results.") else: raise Exception("Unable to get analysis job results.") if __name__ == '__main__': http.client.HTTPConnection._http_vsn = 10 http.client.HTTPConnection._http_vsn_str = 'HTTP/1.0' username = "username" password = "password" host_url = "http://www.arcgis.com" portal_url = "{}/sharing/rest".format(host_url) token = get_token(portal_url, username, password) analysis_url = get_analysis_url(portal_url, token) feature_service = "http://<path_to_feature_service_to_buffer>" task = "CreateBuffers" output_service = "CreateBuffers_20_35_50_feature_service6" params = {"inputLayer": {"url": feature_service}, "distances": [20, 35, 50], "units": "Miles", "dissolveType": "Dissolve", "outputName": {"serviceProperties": {"name": output_service}}} task_url, job_info = analysis_job(analysis_url, task, token, params) job_info = analysis_job_status(task_url, job_info, token) job_values = analysis_job_results(task_url, job_info, token)
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								Feedback on this topic?
+						Node:
+						(type) c
+						(layer)2
+							Element:h5
+								In this topic
+						Node:
+						(type) c
+						(layer)2
+							Element:h5
+								In this topic
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								1 Get the token
+							Element:li
+							Element:a
+								2 Get the Analysis Service URL
+							Element:li
+							Element:a
+								3 Submit a job (analysis task)
+							Element:li
+							Element:a
+								4 Monitor the job
+							Element:li
+							Element:a
+								5 Get the results of the job
+							Element:li
+							Element:a
+								Python 3 code sample
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:p
+							Element:small
+							Element:a
+								Copyright © 2017 Esri
+								. All rights reserved. |
+							Element:a
+								Privacy
+								|
+							Element:a
+								Terms of use
+								|
+							Element:a
+								Plain English
+								|
+							Element:a
+								FAQ

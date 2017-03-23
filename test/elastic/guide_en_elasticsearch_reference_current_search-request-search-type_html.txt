@@ -1,0 +1,342 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Search Type
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are different execution paths that can be done when executing a distributed search. The distributed search operation needs to be scattered to all the relevant shards and then all the results are gathered back. When doing scatter/gather type execution, there are several ways to do that, specifically with search engines.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								One of the questions when executing a distributed search is how much results to retrieve from each shard. For example, if we have 10 shards, the 1st shard might hold the most relevant results from 0 till 10, with other shards results ranking below it. For this reason, when executing a request, we will need to get results from 0 till 10 from all shards, sort them, and then return the results if we want to ensure correct results.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Another question, which relates to the search engine, is the fact that each shard stands on its own. When a query is executed on a specific shard, it does not take into account term frequencies and other search engine information from the other shards. If we want to support accurate ranking, we would need to first gather the term frequencies from all shards to calculate global term frequencies, then execute the query on each shard using these global frequencies.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Also, because of the need to sort the results, getting back a large document set, or even scrolling it, while maintaining the correct sorting behavior can be a very expensive operation. For large result set scrolling, it is best to sort by
+							Element:code
+								_doc
+								if the order in which documents are returned is not important.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Elasticsearch is very flexible and allows to control the type of search to execute on a
+							Element:span
+								basis. The type can be configured by setting the
+							Element:strong
+								per search request
+							Element:span
+								parameter in the query string. The types are:
+							Element:strong
+								search_type
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Query Then Fetch
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Parameter value:
+										Element:span
+											.
+										Element:strong
+											query_then_fetch
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The request is processed in two phases. In the first phase, the query is forwarded to
+										Element:span
+											. Each shard executes the search and generates a sorted list of results, local to that shard. Each shard returns
+										Element:strong
+											all involved shards
+										Element:span
+											to the coordinating node to allow it merge and re-sort the shard level results into a globally sorted set of results, of maximum length
+										Element:strong
+											just enough information
+										Element:code
+											size
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											During the second phase, the coordinating node requests the document content (and highlighted snippets, if any) from
+										Element:span
+											.
+										Element:strong
+											only the relevant shards
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is the default setting, if you do not specify a
+										Element:code
+											search_type
+											in your request.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Dfs, Query Then Fetch
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Parameter value:
+										Element:span
+											.
+										Element:strong
+											dfs_query_then_fetch
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Same as "Query Then Fetch", except for an initial scatter phase which goes and computes the distributed term frequencies for more accurate scoring.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Rescoring
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Scroll »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

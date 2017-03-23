@@ -1,0 +1,399 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Gengo API Overview (v2)
+				Element:a
+					¶
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Translation flow
+				Element:li
+				Element:a
+					What happens behind the scenes
+				Element:li
+				Element:a
+					Submitting a job
+				Element:li
+				Element:a
+					Checking on the status of the order
+				Element:li
+				Element:a
+					Getting the translations back
+				Element:li
+				Element:a
+					Escaping content for translation
+				Element:li
+				Element:a
+					Quality levels supported through the API
+				Element:li
+				Element:a
+					Review workflows
+				Element:li
+				Element:a
+					Revising jobs
+				Element:li
+				Element:a
+					Rejecting jobs
+				Element:li
+				Element:a
+					Duplicate jobs
+				Element:li
+				Element:a
+					Response Formats
+				Element:li
+				Element:a
+					Encoding
+				Element:li
+				Element:a
+					Throttling
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Translation flow
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Gengo API allows you to connect your app to Gengo, and order human translation without needing to use our order form. Because human translation is not instant, our API is asynchronous. This means that unlike some other web APIs like
+							Element:a
+								Flickr
+								or
+							Element:a
+								Twitter
+								, you need to allow time for translators to complete their translations.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								What happens behind the scenes
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once an order has been submitted, Gengo translators receive a notification of new work available and work on translations on a first-come, first-serve basis. They work on the jobs within our website’s translation interface.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Submitting a job
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Submitting an order to Gengo is a straightforward process. First you’ll need to identify the content you want to have translated and build a job payload that includes this in the parameter “body”. This could be 1 large piece of text, such as an email or a blog post, or this could be several smaller content strings. Each piece of content that is uniquely identified in your code will be it’s own “job” for a Gengo translator.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In your system, these are likely associated with a unique ID in a database. It will be important to know which content is connected to each row in the database, so that when Gengo returns the translation you are able to easily identify where it will be added to your system. This is done by using the “custom_data” parameter.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The most common way to work with the Gengo API is to set a location for us to push notifications to. This is done by setting the “callback_url” to a public accessible endpoint. Whenever there is an update to the job, like when a translators starts working on the content or has finished the job, Gengo will POST the content to the callback_url provided.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The more information a translator has about the text they are working on, the higher the quality will be. All context for a job can be appended to the “comment” parameter when sending a job. For example, if you have a photo that could go along with a product description, or a link to a blog post, these should be included. You may also want to include a style guide to maintain a consistent tone across all of the work Gengo does for you.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once an order has been placed, you will receive an “order_id” back.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Checking on the status of the order
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once a job has been sent to Gengo, it can go through a few different statuses. Initially all jobs that are sent are first put into a queuing system. This allows us to accept very large payloads from any number of users 24/7. In the background, we’ll begin processing these jobs and making them “available” to our translators.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once a translator starts to work on a job, we consider the job “pending”. The job will remain in this state until they’ve completed the work. At this time the job will either be in a ‘reviewable’ state (if you want to review the translation and perhaps communicate with our translator about changes you’d like to see made) or it will be in the ‘approved’ state.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At anytime you may get an update on the jobs in the order by sending a GET request to the
+							Element:a
+								/translate/order/
+								end point.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Getting the translations back
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Typically Gengo will send the completed jobs to your system as translators complete them. However, if you’d like to poll our system for an update, that can be best done by passing a comma separated list of job ids to GET
+							Element:a
+								/translate/jobs/{id_1,id_2,id_3}/
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The best way to get a list of completed job_ids in an order is to make a request to the GET
+							Element:a
+								/translate/order/
+								end point and check the “jobs_approved” array.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Escaping content for translation
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sometimes you might want to include text within a job that you do not need to be translated. To exclude text from the word count of a job, and indicate to the translator that it does not need to be translated, you can wrap text within triple square brackets [[[like this]]]. Please remember to close your triple brackets, and try to avoid having large areas of excluded text - it’s normally better to break the job into parts instead.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Quality levels supported through the API
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Currently, our API supports the “standard” and “pro” quality levels.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Please see our
+							Element:a
+								Quality Policy
+								page for more information.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Review workflows
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once a translation is completed, we allow for 120 hours for review. Sending a request to the PUT
+							Element:a
+								/translate/job/{id}/
+								endpoint you’re able to update the status to “approved”.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you prefer not to manually approve jobs, or your system does not have the capability, you can simply add the auto_approve=”true” parameter to your job requests. This will instantly approve jobs when they are submitted, and provide you with the full translated text. Please note that by using the auto_approve parameter you waive your right to reject or request revisions on a translation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Additionally, if your system will not be able to respond to comments, or you do not plan to, it is helpful to add a comment saying “Our system is unable to respond to any translator comments” or similar - this will avoid the translator waiting for a response from you.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Revising jobs
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If a job requires corrections, you can request them using the
+							Element:a
+								translate/job/{id} (PUT)
+								call, and the “revise” action. Please be as descriptive as possible with your comment when you request a correction.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This workflow can be useful when you want to add specific automated quality checks on the content. Since it is possible to accidentally harass a translator with this feature, we limit the number of revision requests to three.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Rejecting jobs
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you are unhappy with a translation from Gengo, you have the opportunity to reject the job and either receive a credit refund, or pass the job onto a different translator.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All rejections are reviewed by our staff, and we take each one seriously - normally we will contact the translator and review what has gone wrong with that particular translation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To reject a job, use the
+							Element:a
+								/translate/job/{id} (PUT)
+								call with the action parameter set to “reject”. We insist that rejections are made by humans (because we don’t want machines rejecting translations) so we require you to complete a captcha when you submit a rejection. See the
+							Element:a
+								translate/job/{id} (PUT)
+								page for more details.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Duplicate jobs
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When an ordered job is exactly the same as a previously approved job, it will be considered a “duplicate” and will be discounted 100% unless Translation Memory is enabled, in which case they will be considered as either “repetitions” or “exact matches”. When two or more jobs in the same order are exactly the same, they will be translated as normal.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Response Formats
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All API responses will contain at least 1 and possibly 2 key-value pairs. The second key’s name will depend on whether the call was successful or not. The second key name for a successful call with an expected payload will be “response”, i.e. {“opstat” : “ok”, “response” : ”...”} and a failed response will have second key name as “err”, i.e. {“opstat” : “error”, “err” : {“code” : ...}}
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Encoding
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Gengo expects all data to be UTF-8 encoded and will respond with UTF-8 encoded data. Make sure you encode your data in UTF-8 to avoid issues.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Throttling
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Please note that our API currently has a 150 requests per minute limit per originating IP address.
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:a
+							Element:span
+								MENU
+							Element:i
+							Element:a
+							Element:a
+							Element:a
+							Element:a
+							Element:span
+								© 2008-2017 Gengo, Inc
+							Element:span
+							Element:a
+								Legal
+							Element:span
+							Element:a
+								Quality Policy
+							Element:a
+							Element:p
+								Professional, people-powered translation in one click

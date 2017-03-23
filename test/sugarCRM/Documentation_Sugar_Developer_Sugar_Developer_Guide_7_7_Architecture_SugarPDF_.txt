@@ -1,0 +1,653 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					SugarPDF
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As of version 6.7.x, Sugar includes a Smarty template engine called PDF Manager. This allows administrators to create and manage templates for generated PDF files for any deployed module, custom or standard. The PDF Manager is available to only administrative users and can be accessed through Admin > PDF Manager.
+							Element:br
+								For more information on the PDF Manager, please refer to the
+							Element:a
+								PDF Manager
+								documentation in the Administration guide.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Key PDF Classes
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											TCPDF
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sugar uses the
+										Element:a
+											TCPDF
+											4.6.013 library, located in
+										Element:code
+											./vendor/tcpdf/
+											, as the core engine to generate PDFs. This library is extended by
+										Element:a
+											Sugarpdf
+											which is used by the core application to generate PDFs.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sugarpdf
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											Sugarpdf
+											class, located in
+										Element:code
+											./include/Sugarpdf/Sugarpdf.php
+											, extends the
+										Element:a
+											TCPDF
+											class. Within this class, we have overridden certain functions to integrate sugar features. Some key methods that were overridden are listed below:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Method
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											Header
+										Element:td
+											Overridden to enable custom logos.
+										Element:tr
+										Element:td
+											SetFont
+										Element:td
+											Overridden to allow for the loading of custom fonts. The custom fonts direction is defined by the
+										Element:code
+											K_PATH_CUSTOM_FONTS
+											var. By default, this value is set to
+										Element:code
+											./custom/vendor/tcpdf/fonts/
+										Element:tr
+										Element:td
+											Cell
+										Element:td
+											Overridden to apply the prepare_string() function. This allows for the ability to clean the string before sending to PDF.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some key additional methods that were added are listed below:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Method
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											predisply
+										Element:td
+											Preprocessing before the display method is called. Is intended to setup general PDF document properties like margin, footer, header, etc.
+										Element:tr
+										Element:td
+											display
+										Element:td
+											Performs the actual PDF content generation. This is where the logic to display output to the PDF should be placed.
+										Element:tr
+										Element:td
+											process
+										Element:td
+											Calls predisplay and display.
+										Element:tr
+										Element:td
+											writeCellTable
+										Element:td
+											Method to print a table using the cell print method of TCPDF
+										Element:tr
+										Element:td
+											writeHTMLTable
+										Element:td
+											Method to print a table using the writeHTML print method of TCPDF
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Custom PDF classes that extend
+										Element:code
+											Sugarpdf
+											can be located in the following directories:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											./include/Sugarpdf/sugarpdf/sugarpdf.<pdf view>.php
+										Element:li
+											./modules/<module>/sugarpdf/sugarpdf.<pdf view>.php
+										Element:li
+											./custom/modules/<module>/sugarpdf/sugarpdf.<pdf view>.php
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											PDF Manager classes that extend
+										Element:code
+											Sugarpdf
+											are located in the following directories:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											./include/Sugarpdf/sugarpdf/sugarpdf.smarty.php
+										Element:li
+											./include/Sugarpdf/sugarpdf/sugarpdf.pdfmanager.php
+										Element:li
+											./custom/include/Sugarpdf/sugarpdf/sugarpdf.pdfmanager.php
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each extended class will define a specific PDF view that is accessible with the following URL parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											module=<module>
+										Element:li
+											action=sugarpdf
+										Element:li
+											sugarpdf=<pdf view>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Within each custom PDF class, the display method will need to be redefined. If you would like, It is also possible to override other methods like
+										Element:code
+											Header
+											. The process method of this class will be called from
+										Element:a
+											ViewSugarpdf
+											. When a PDF is being generated, the most relevant
+										Element:code
+											sugarpdf.<pdf action>.pdf
+											class is determined by the
+										Element:a
+											SugarpdfFactory
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											ViewSugarpdf
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											ViewSugarpdf
+											class, located in
+										Element:code
+											./include/MVC/View/views/view.sugarpdf.php
+											, is used to create the SugarViews that generate PDFs. These views can be found and/or created in one of the following directory paths:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											./modules/<module>/views/view.sugarpdf.php
+										Element:li
+											./custom/modules/<module>/views/view.sugarpdf.php
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											SugarViews can be called by navigating to a URL in the format of:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											http://<url>/index.php?module=<module>&action=sugarpdf&sugarpdf=<pdf action>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As of 6.7, PDFs are mainly generated using the PDF Manager templating system. To generate the PDF stored in the PDF Manager, you would call a URL in the format of:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											http://<url>/index.php?module<module>&record=<record id>&action=sugarpdf&sugarpdf=pdfmanager&pdf_template_id=<template id>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SugarpdfFactory
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											ViewSugarpdf
+											class uses the
+										Element:code
+											SugarpdfFactory
+											class, located in
+										Element:code
+											./include/Sugarpdf/SugarpdfFactory.php
+											, to find the most relevant
+										Element:code
+											sugarpdf.<pdf action>.pdf
+											class which generates the PDF document for a given PDF view and module. If one is not found, then the core
+										Element:code
+											Sugarpdf
+											class is used.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											SugarpdfFactory
+											class loads the first class found for the specified PDF action as determined by the following order:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											./custom/modules/<module>/sugarpdf/sugarpdf.<pdf view>.php
+										Element:li
+											./modules/<module>/sugarpdf/sugarpdf.<pdf view>.php
+										Element:li
+											./custom/include/Sugarpdf/sugarpdf/sugarpdf.<pdf view>.php
+										Element:li
+											./include/Sugarpdf/sugarpdf/sugarpdf.<pdf view>.php
+										Element:li
+											./include/Sugarpdf/sugarpdf.php
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SugarpdfHelper
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											SugarpdfHelper
+											, located in
+										Element:code
+											./include/Sugarpdf/SugarpdfHelper.php
+											, is included by
+										Element:a
+											Sugarpdf
+											. This is a utility file that contains many functions we use to generate PDFs.
+										Element:br
+											Available functions are:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											wrapTag
+											,
+										Element:strong
+											wrapTD
+											,
+										Element:strong
+											wrapTable, etc.
+											: These functions help to create an HTML code.
+										Element:li
+										Element:strong
+											prepare_string
+											: This function prepare a string to be ready for the PDF printing.
+										Element:li
+										Element:strong
+											format_number_sugarpdf
+											: This function is a copy of format_number() from currency with a fix for sugarpdf.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											PdfManagerHelper
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											PdfManagerHelper
+											, located in
+										Element:code
+											./modules/PdfManager/PdfManagerHelper.php
+											, is primarily utilized by the pdfmanager
+										Element:a
+											Sugarpdf
+											view. This class file contains methods useful for accessing PDF Manager templates. Some of the primary methods are:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											getAvailableModules
+											: Returns an array of available modules for use with PdfManager.
+										Element:li
+										Element:strong
+											getFields
+											: Takes an module name and returns a list of fields and links available for this module in PdfManager.
+										Element:li
+										Element:strong
+											getPublishedTemplatesForModule
+											: Returns an array of the available templates for a specific module.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											FontManager
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											FontManagerclass
+											, located in
+										Element:code
+											./include/Sugarpdf/FontManager.php
+											, is a stand-alone class that manages all the fonts for
+										Element:code
+											TCPDF
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Functionality:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											List all the available fonts from the OOB font directory and the custom font directory (it can create a well-formatted list for select tag).
+										Element:li
+											Get the details of each listed font (Type, size, encoding,...) by reading the font php file.
+										Element:li
+											Add a new font to the custom font directory from a font file and a metric file.
+										Element:li
+											Delete a font from the custom font directory.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Topics
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Generating PDFs
+							Element:p
+								Overview of how to create a PDF document.
+							Element:li
+							Element:a
+								PDF Settings
+							Element:p
+								An overview of how to manage PDF settings.
+							Element:li
+							Element:a
+								Fonts
+							Element:p
+								An overview of the FontManager.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 10/11/2016 07:14pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

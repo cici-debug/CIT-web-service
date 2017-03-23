@@ -1,0 +1,434 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					HubSpot Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					HubSpot
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to HubSpot in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you toggle on HubSpot in Segment, this is what happens:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Our CDN is updated within 5-10 minutes. Then our snippet will start asynchronously loading hubspot.js onto your page. This means you should remove HubSpot’s snippet from your page.
+							Element:li
+								HubSpot will automatically start recording data.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When sending data to Hubspot via
+							Element:code
+								analytics.js
+								, an initial
+							Element:code
+								page
+								call is required. By default, this is already added in your
+							Element:a
+								Segment snippet
+								. Server-side page calls coming soon!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you call
+							Element:a
+								on analytics.js, we’ll store contact information with the
+							Element:code
+								identify
+							Element:code
+								traits
+								you provide. The
+							Element:code
+								userId
+								is ignored since HubSpot does not use a
+							Element:code
+								userId
+								. However, you must include an email trait as the
+							Element:code
+								userId
+								or as
+							Element:code
+								traits.email
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Remember that Hubspot doesn’t accept plain identity information -
+							Element:code
+								traits
+								will be attached to and passed along with your next
+							Element:code
+								page
+								or
+							Element:code
+								track
+								event. Here’s more background in
+							Element:a
+								Hubspot’s documentation
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Any traits that aren’t contact fields in HubSpot will be removed from the request. To find out which fields you can set, check out the custom field names in
+							Element:strong
+								Contacts > Contact Settings
+								. Example field names are “firstname”, “lastname”, “company”, “phone”, etc. Note: We automatically convert ‘firstName’ and ‘lastName’ to ‘firstname’ and ‘lastname’ to match HubSpot’s field format. These are the only converted property names for this integration.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Important
+								: Hubspot does not accept any trait keys that contain uppercases or spaces. So for any custom traits you send we will lowercase them and replace any spaces with an underscore.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you call
+							Element:a
+								we’ll send a custom event to HubSpot.
+							Element:code
+								track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note: HubSpot custom events are available to HubSpot Enterprise customers only.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Server Side
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:a
+											from any of our server-side sources, we’ll send the custom event to Hubspot. Because HubSpot needs to know which contact you want to tie this event to, you must provide the contact’s email as
+										Element:code
+											track
+										Element:code
+											properties.email
+											in every
+										Element:a
+											call you want to send to HubSpot.
+										Element:code
+											track
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here’s a python example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.track(user_id='YOUR_USER_ID', event='Bought Item', properties={ 'email' : 'peter@initech.com', })
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In this case, your HubSpot
+										Element:code
+											eventId
+											is ‘Bought Item’. If you want to use an existing
+										Element:code
+											eventId
+											, you can use it instead of the event value (ie.
+										Element:code
+											Bought Item
+											). If you don’t want to match an existing
+										Element:code
+											eventId
+											, you can use any event label and HubSpot will auto-create the event for you.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Setting Contact Properties on Track
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Although we recommend you to send
+										Element:code
+											traits
+											via
+										Element:a
+											, you can also set HubSpot properties on a track call, as allowed by their
+										Element:code
+											identify
+										Element:a
+											events API
+											. You might want to use this method if you’re running out of API calls on the
+										Element:a
+											requests.
+										Element:code
+											identify
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Include HubSpot contact properties into the
+										Element:code
+											context.traits
+											object:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.track(user_id='YOUR_USER_ID', event='Bought Item', properties={ 'email': 'peter@initech.com', }, context={ 'traits': { 'firstname': 'Peter', 'lastname': 'Gibbons' } })
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Call Limits
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											HubSpot limits the total amount of hourly and monthly requests we can make to their API on your behalf. Check out these
+										Element:a
+											limits
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Maximum Number of API Calls per Second, per Key or Token:
+										Element:strong
+											10
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Maximum Number of API Calls per Day, per Key or Token:
+										Element:strong
+											40,000
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+								✅
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can request your API Key from HubSpot by filling out their API Key request form at
+										Element:a
+											app.hubspot.com/keys/get
+											.
+										Element:strong
+											Don’t
+											use the temporary authorization code from
+										Element:strong
+											Settings > API Access
+											! It should look something like this:
+										Element:code
+											dfdbfe6f-e7bf-4938-8e82-7d1938e48ab8
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Hub ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your Hub ID on the
+										Element:strong
+											Settings
+											page of your
+										Element:a
+											HubSpot account
+											. It should be a series of numbers, like
+										Element:code
+											997086
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											browser
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

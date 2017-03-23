@@ -1,0 +1,386 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Models
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Each module in Sugar is extending the Sugar Model. This model is determined by the
+							Element:a
+								SugarBean
+								, which contains methods to create, read/retrieve, update, and delete records in the database and any subclass of the SugarBean. Many of the common Sugar modules also use the SugarObjects class, which is explained in the next section.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								SugarObject Templates
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sugar objects extend the concept of subclassing a step further and allow you to subclass the
+							Element:a
+								vardefs
+								. This includes inheriting of fields, relationships, indexes, and language files. However, unlike subclassing, you are not limited to a single inheritance. For example, if there were a Sugar object for fields used in every module (e.g. id, deleted, or date_modified), you could have the module inherit from both the Basic Sugar object and the Person Sugar object.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To further illustrate this, let's say the Basic object type has a field 'name' with length 10 and the Company object has a field 'name' with length 20. If you inherit from Basic first and then Company, your field will inherit the Company object's length of 20. However, the module-level setting always overrides any values provided by Sugar objects, so, if the field 'name' in your module has been set to length 60, then the field's length will ultimately be 60.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are six types of SugarObject templates:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Basic
+								: Contains the basic fields required by all Sugar modules
+							Element:li
+							Element:strong
+								Person
+								: Based on the Contacts, Prospects, and Leads modules
+							Element:li
+							Element:strong
+								Issue
+								: Based on the Bugs and Cases modules
+							Element:li
+							Element:strong
+								Company
+								: Based on the Accounts module
+							Element:li
+							Element:strong
+								File
+								: Based on the Documents module
+							Element:li
+							Element:strong
+								Sale
+								: Based on the Opportunities module
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SugarObject Interfaces
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to the object templates above, "assignable" object templates can be used for modules with records that should contain an Assigned To field. Although every module does not use this, most modules allow assignment of records to users. SugarObject interfaces allow us to add the assignable attribute to these modules.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											SugarObject interfaces and SugarObject templates are very similar to one another, but the main distinction is that templates have a base class you can subclass while interfaces do not. If you look into the file structure, templates include many additional files, including a full metadata directory. This is used primarily for Module Builder.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											File Structure
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											./include/SugarObjects/interfaces
+										Element:li
+										Element:code
+											./include/SugarObjects/templates
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Implementation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two things you need to do to take advantage of Sugar objects:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Subclass the SugarObject class you wish to extend for your class:
+										Element:br
+										Element:pre
+										Element:code
+											class MyClass extends Person { function MyClass() { parent::Person(); } }
+										Element:li
+											Add the following line to the end of the
+										Element:code
+											vardefs.php
+											file:
+										Element:br
+										Element:pre
+											This snippet tells the VardefManager to create a cache of the Contacts vardefs with the addition of all the default fields, assignable fields, team security fields (commercial editions of Sugar only), and all fields from the person class.
+										Element:code
+											VardefManager::createVardef('Contacts', 'Contact', array('default', 'assignable', 'team_security', 'person'));
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Performance Considerations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								VardefManager caches the generated vardefs into a single file that is loaded at run time. If that file is not found, Sugar loads the vardefs.php file, located in your module's directory. The same is true for language files. This caching also includes data for custom fields and any vardef or language extensions that are dropped into the extension framework.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Cache Files
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											./cache/modules/<module>/<object_name>vardefs.php
+										Element:li
+										Element:code
+											./cache/modules/<module>/languages/en_us.lang.php
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Topics
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								SugarBean
+							Element:p
+								The SugarBean class supports all the model operations to and from the database. Any module that interacts with the database utilizes the SugarBean class, which contains methods to create, read/retrieve, update, and delete records in the database (CRUD), as well as fetch related records.
+							Element:li
+							Element:a
+								BeanFactory
+							Element:p
+								The BeanFactory class, located in ./data/BeanFactory.php, is used for loading an instance of a SugarBean. This class should be used any time you are creating or retrieving bean objects. It will automatically handle any classes required for the bean.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 03/24/2016 03:23pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

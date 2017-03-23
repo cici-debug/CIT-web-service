@@ -1,0 +1,458 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Hubspot
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					HubSpot is an inbound marketing software platform that helps companies attract visitors, convert leads, and close customers.
+				Element:a
+					Visit Website
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Take your company’s analysis to the next level by
+				Element:strong
+					adding Hubspot as a Source to Segment.
+					We’ll automatically collect events like
+				Element:code
+					Form Submissions
+					and objects such as
+				Element:code
+					Contacts
+					or
+				Element:code
+					Email Campaigns
+					and load them into your data warehouse.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								From your workspace’s
+							Element:code
+								/sources
+								page, click
+							Element:code
+								add source
+								.
+							Element:li
+							Element:p
+								Choose Hubspot.
+							Element:li
+							Element:p
+								Give the source a nickname and a schema name. The nickname will be used to designate the source in the Segment interface, and the schema name is the namespace you’ll be querying against in your warehouse. Both can be whatever you like, but we recommend sticking to something that reflects the source itself, like
+							Element:code
+								Hubspot
+								for nickname and
+							Element:code
+								hubspot
+								,
+							Element:code
+								hub
+								, or
+							Element:code
+								hubspot_prod
+								for the schema name.
+							Element:p
+							Element:strong
+								Note
+								that you can add multiple instances if you have multiple Hubspot accounts. That’s why we allow you to customize the source’s nickname and schema name!
+							Element:p
+							Element:img
+							Element:li
+							Element:p
+								Finally, connect an account with
+							Element:strong
+								admin API permissions
+								to access your Hubspot data. This account should be an active user on a Professional or Enterprise plan. Check out
+							Element:a
+								Hubspot’s docs on how to get your API Key
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Voila! We’ll begin syncing your HubSpot data into Segment momentarily, and it will be written to your warehouse at your next Warehouse run.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Components
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sync
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Hubspot has a sync component, which means we’ll make requests to
+										Element:a
+											their API
+											on your behalf on a 3 hour interval to pull the latest data into Segment. In the initial sync, we’ll grab all the Hubspot objects (and their corresponding properties) according to the collections table below. The objects will be written into a designated schema corresponding to the source instance’s schema name you designated upon creation. For example, if you went with
+										Element:code
+											hubspot_prod
+											, the
+										Element:code
+											contacts
+											collection will be accessible at
+										Element:code
+											hubspot_prod.contacts
+											in SQL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our sync component uses an
+										Element:strong
+											upsert
+											API, so the data in your warehouse loaded via sync will reflect the
+										Element:strong
+											latest
+											state of the corresponding resource in Hubspot. For example, if
+										Element:code
+											lead_status
+											from
+										Element:code
+											active
+											to
+										Element:code
+											inactive
+											between syncs, on its next sync that tickets status will be
+										Element:code
+											inactive
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The source syncs and warehouse syncs are independent processes. Source runs pull your data into the Segment Hub, and warehouse runs flush that data to your warehouse. Sources will sync with Segment every 3 hours. Depending on your Warehouses plan, we will push the Source data to your warehouse on the interval associated with your billing plan.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At the moment, we don’t support filtering which objects or properties get synced. If you’re interested in this feature, please let us know!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Collections
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Collections are the groupings of resources we pull from your source. In your warehouse, each collection gets its own table.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								For a complete visual breakdown of the Hubspot collections, all their properties, and ID linkages between objects,
+							Element:a
+								view the visual schema here
+							Element:strong
+								or
+							Element:a
+								download it in PDF form here
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Event History
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Due to HubSpot’s
+										Element:a
+											API Rate Limits
+											, by default, the HubSpot source only syncs the past month of data for
+										Element:code
+											email_events
+											and
+										Element:code
+											email_subscription_event_changes
+											. If you need more, just let us know, and we’ll arrange a one-off run to pull further history.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Collection
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											contacts
+										Element:td
+											Object
+										Element:td
+											Contacts represent people in an Organization’s address book. For more info, check out
+										Element:a
+											HubSpot’s API docs
+										Element:tr
+										Element:td
+											contact_identity_profiles
+										Element:td
+											Object
+										Element:td
+											Contact identity profiles represent identities of a contact.
+										Element:tr
+										Element:td
+											contact_identities
+										Element:td
+											Object
+										Element:td
+											Contact identities represent communication methods for a contact’s profile (email, lead, etc.).
+										Element:tr
+										Element:td
+											form_submissions
+										Element:td
+											Event
+										Element:td
+											Form submissions represent input from contacts in forms created via HubSpot
+										Element:tr
+										Element:td
+											deals
+										Element:td
+											Object
+										Element:td
+											Deals for HubSpot CRM.
+										Element:tr
+										Element:td
+											contact_lists
+										Element:td
+											Object
+										Element:td
+											Contact lists are lists of contacts in an Organization’s address book. For more info, check out
+										Element:a
+											HubSpot’s API docs about the resource
+										Element:tr
+										Element:td
+											companies
+										Element:td
+											Object
+										Element:td
+											Companies visible to the portal in the HubSpot CRM. For more info, check out
+										Element:a
+											HubSpot’s API docs about the resource
+										Element:tr
+										Element:td
+											email_campaigns
+										Element:td
+											Object
+										Element:td
+											Email campaigns for marketing automation. For more info, check out
+										Element:a
+											HubSpot’s API docs about the resource
+										Element:tr
+										Element:td
+											email_events
+										Element:td
+											Event
+										Element:td
+											Email events based on user actions. For more info, check out
+										Element:a
+											HubSpot’s API docs about the resource
+										Element:tr
+										Element:td
+											email_subscriptions
+										Element:td
+											Object
+										Element:td
+											Email subscriptions of campaign contacts.
+										Element:tr
+										Element:td
+											email_subscription_event_changes
+										Element:td
+											Event
+										Element:td
+											Email subscription event changes represent changes to a recipient’s subscription that came about as a result of an email event
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

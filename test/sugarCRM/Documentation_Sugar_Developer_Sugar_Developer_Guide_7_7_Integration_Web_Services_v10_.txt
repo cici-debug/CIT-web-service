@@ -1,0 +1,489 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					v10
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								v10 API documentation.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What Is REST?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								REST stands for 'Representational State Transfer'. As of 7.x, REST is a core component of Sugar that defines how all information is exchanged within the application. This v10 API is separate from the v2-v4_1 REST APIs in that it has been rebuilt with the latest REST standards. Most functionality in the system, whether fetching or posting data, is interacting with the API in some way.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How to Access the v10 REST Service
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The base endpoint for the v10 REST service can be found at:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											http://<site_url>/rest/v10/
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For your reference, all v10 endpoints can be found by navigating to
+										Element:code
+											http://<site_url>/rest/v10/help
+											. Once you have identified your instances base endpoint, we can begin by authentication.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Authentication
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sugar 7 uses two-legged OAuth2 for authentication. You simply need to do a POST to
+							Element:code
+								/rest/v10/oauth2/token
+								with the following parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:strong
+								grant_type
+							Element:td
+								String
+							Element:td
+								Type of request. Available grant types are "password" and "refresh_token".
+							Element:tr
+							Element:td
+							Element:strong
+								client_id
+							Element:td
+								String
+							Element:td
+								The client_id of "sugar" will automatically create an OAuth Key in the system and can be used for "password" authentication. The client_id of "support_portal" will create an OAuth Key if the portal system is enabled and will allow for portal authentication. Other client_id's can be created by the administrator in the OAuthKeys section in the Administration section and can be used in the future for additional grant types, if the client secret is filled in, it will be checked to validate use of the client id.
+							Element:tr
+							Element:td
+							Element:strong
+								client_secret
+							Element:td
+								String
+							Element:td
+								The clients secret key.
+							Element:tr
+							Element:td
+							Element:strong
+								username
+							Element:td
+								String
+							Element:td
+								The username of the user authenticating to the system.
+							Element:tr
+							Element:td
+							Element:strong
+								password
+							Element:td
+								String
+							Element:td
+								The plaintext password the user authenticating to the system.
+							Element:tr
+							Element:td
+							Element:strong
+								platform
+							Element:td
+								String
+							Element:td
+								Defaults to "base" allows you to have custom meta-data per platform
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, we are going to login using a
+							Element:code
+								grant_type
+								of "password" and a
+							Element:code
+								platform
+								of "custom". Normally, when logging into Sugar, users login with a
+							Element:code
+								platform
+								type of "base". We are using "custom" to avoid any potential
+							Element:a
+								login conflicts
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								curl -X POST -H Cache-Control:no-cache -d '{ "grant_type":"password", "client_id":"sugar", "client_secret":"", "username":"<username>", "password":"<password>", "platform":"custom" }' http:/<site_url>/rest/v10/oauth2/token
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you get the response you'll need to hold onto the
+							Element:code
+								access_token
+								and the
+							Element:code
+								refresh_token
+								. Anytime the
+							Element:code
+								access_token
+								is invalidated, you'll want to make another request to the token endpoint with a
+							Element:code
+								grant_type
+								of "refresh_token". Store just the
+							Element:code
+								refresh_token
+								in long term storage – not the username and password. The response from the server will be as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "access_token": "5ee48ec7-023e-ecff-5184-530bd0358868", "expires_in": 3600, "token_type": "bearer", "scope": null, "refresh_token": "5f197357-0167-f7a6-7912-530bd03275b6", "refresh_expires_in": 1209600, "download_token": "5f531625-e301-e3ea-1b11-530bd098be41" }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Avoiding Login Conflicts
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Login conflicts often occur when building integrations or running data migrations with the
+							Element:code
+								platform
+								of "base" or any other client type that is in use. This is due to the fact that Sugar uses the same REST API to power all the various clients such as Sugar, Portal, Mobile, and even the Outlook Plugin. Due to this, you need to let the API know you aren't conflicting with another client that may be in use. The way to accomplish this is the
+							Element:code
+								/rest/v10/oauth2/token
+								call by changing the
+							Element:code
+								platform
+								parameter to something other than "base", "mobile", or "portal". It is best to name it something that describes and identifies your current integration.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Input / Output Data Types
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The default input / output datatype for REST is JSON.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Date Handling
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Date and date time inputs should be formatted following the ISO 8601 format. If the time zone is not included in a request, Sugar will assume the time zone of the user making the request.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Filter on a specific date:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{"date_start": "2015-08-12"}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Filter on a date keyword using $dateRange:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{"date_start": {"$dateRange": "today"}}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Filter on date range using manual time zones:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{"date_start": {"$dateBetween": ["2015-09-10T00:00:00+10:00","2015-09-10T23:59:59+10:00"]}}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Topics
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Endpoints
+							Element:p
+								The following sections contain the in-app help documentation for endpoints.
+							Element:li
+							Element:a
+								Extending Endpoints
+							Element:p
+								How to add your own custom endpoints to the REST API.
+							Element:li
+							Element:a
+								API Exceptions
+							Element:p
+								Sugar comes with some predefined API Exceptions, located in ./include/api/, that can be called from API endpoints. These exceptions return a specific HTTP code and a message.
+							Element:li
+							Element:a
+								Examples
+							Element:p
+								Examples of integrating with Sugar APIs.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 03/15/2016 12:03am
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

@@ -1,0 +1,464 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Profile API
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This functionality is experimental and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but experimental features are not subject to the support SLA of official GA features.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Profile API provides detailed timing information about the execution of individual components in a search request. It gives the user insight into how search requests are executed at a low level so that the user can understand why certain requests are slow, and take steps to improve them.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The output from the Profile API is
+							Element:span
+								verbose, especially for complicated requests executed across many shards. Pretty-printing the response is recommended to help understand the output
+							Element:strong
+								very
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Usage
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Any
+										Element:code
+											_search
+											request can be profiled by adding a top-level
+										Element:code
+											profile
+											parameter:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_search { "profile": true,
+										Element:a
+										Element:span
+											"query" : { "match" : { "message" : "message number" } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Setting the top-level
+										Element:code
+											profile
+											parameter to
+										Element:code
+											true
+											will enable profiling for the search
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This will yield the following result:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "took": 25, "timed_out": false, "_shards": { "total": 1, "successful": 1, "failed": 0 }, "hits": { "total": 4, "max_score": 0.5093388, "hits": [...]
+										Element:a
+										Element:span
+											}, "profile": { "shards": [ { "id": "[2aE02wS1R8q_QFnYu6vDVQ][twitter][1]", "searches": [ { "query": [ { "type": "BooleanQuery", "description": "message:message message:number", "time": "1.873811000ms", "breakdown": { "score": 51306, "score_count": 4, "build_scorer": 2935582, "build_scorer_count": 1, "match": 0, "match_count": 0, "create_weight": 919297, "create_weight_count": 1, "next_doc": 53876, "next_doc_count": 5, "advance": 0, "advance_count": 0 }, "children": [ { "type": "TermQuery", "description": "message:message", "time": "0.3919430000ms", "breakdown": { "score": 28776, "score_count": 4, "build_scorer": 784451, "build_scorer_count": 1, "match": 0, "match_count": 0, "create_weight": 1669564, "create_weight_count": 1, "next_doc": 10111, "next_doc_count": 5, "advance": 0, "advance_count": 0 } }, { "type": "TermQuery", "description": "message:number", "time": "0.2106820000ms", "breakdown": { "score": 4552, "score_count": 4, "build_scorer": 42602, "build_scorer_count": 1, "match": 0, "match_count": 0, "create_weight": 89323, "create_weight_count": 1, "next_doc": 2852, "next_doc_count": 5, "advance": 0, "advance_count": 0 } } ] } ], "rewrite_time": 51443, "collector": [ { "name": "CancellableCollector", "reason": "search_cancelled", "time": "0.3043110000ms", "children": [ { "name": "SimpleTopScoreDocCollector", "reason": "search_top_hits", "time": "0.03227300000ms" } ] } ] } ], "aggregations": [] } ] } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Search results are returned, but were omitted here for brevity
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Even for a simple query, the response is relatively complicated. Let’s break it down piece-by-piece before moving to more complex examples.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, the overall structure of the profile response is as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "profile": { "shards": [ { "id": "[2aE02wS1R8q_QFnYu6vDVQ][twitter][1]",
+										Element:a
+										Element:span
+											"searches": [ { "query": [...],
+										Element:img
+										Element:a
+										Element:span
+											"rewrite_time": 51443,
+										Element:img
+										Element:a
+										Element:span
+											"collector": [...]
+										Element:img
+										Element:a
+										Element:span
+											} ], "aggregations": [...]
+										Element:img
+										Element:a
+										Element:span
+											} ] } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											A profile is returned for each shard that participated in the response, and is identified by a unique ID
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Each profile contains a section which holds details about the query execution
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Each profile has a single time representing the cumulative rewrite time
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Each profile also contains a section about the Lucene Collectors which run the search
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Each profile contains a section which holds the details about the aggregation execution
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Because a search request may be executed against one or more shards in an index, and a search may cover one or more indices, the top level element in the profile response is an array of
+										Element:code
+											shard
+											objects. Each shard object lists it’s
+										Element:code
+											id
+											which uniquely identifies the shard. The ID’s format is
+										Element:code
+											[nodeID][indexName][shardID]
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The profile itself may consist of one or more "searches", where a search is a query executed against the underlying Lucene index. Most Search Requests submitted by the user will only execute a single
+										Element:code
+											search
+											against the Lucene index. But occasionally multiple searches will be executed, such as including a global aggregation (which needs to execute a secondary "match_all" query for the global context).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Inside each
+										Element:code
+											search
+											object there will be two arrays of profiled information: a
+										Element:code
+											query
+											array and a
+										Element:code
+											collector
+											array. Alongside the
+										Element:code
+											search
+											object is an
+										Element:code
+											aggregations
+											object that contains the profile information for the aggregations. In the future, more sections may be added, such as
+										Element:code
+											suggest
+											,
+										Element:code
+											highlight
+											, etc
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There will also be a
+										Element:code
+											rewrite
+											metric showing the total time spent rewriting the query (in nanoseconds).
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Explain API
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Profiling Queries »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,2550 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Overview
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+				Element:strong
+					API Base URL
+				Element:p
+				Element:code
+					https://pos.snapscan.io/merchant/api/v1
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The SnapScan API is REST-like and relies on HTTP status codes to indicate API errors. We support CORS so that you can interact with our API through a client-side web application. We return JSON in all responses from the API.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:strong
+					API Overview:
+					authentication, error codes, pagination and webhooks
+				Element:li
+				Element:strong
+					QR Codes:
+					how to generate QR codes and their URL structure
+				Element:li
+				Element:strong
+					Payments:
+					query the status of payments that were made against your merchant account
+				Element:li
+				Element:strong
+					Cash ups:
+					mark the end of your transaction period and query all payments completed within the associated period
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					We currently have both
+				Element:strong
+					Magento
+					and
+				Element:strong
+					WooCommerce
+					plugins available. Please contact
+				Element:a
+					help@snapscan.co.za
+					for more information.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					API Overview
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Authentication
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								# Authentication through HTTP Basic Auth
+								curl -u your-api-key:
+							Element:span
+								"api_endpoint_here"
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+								The following response can be expected for unauthorised requests:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								HTTP
+							Element:span
+								/
+							Element:span
+								1.1
+							Element:span
+								401
+							Element:span
+								UNAUTHORIZED
+							Element:span
+								Content-Type
+							Element:span
+								:
+							Element:span
+								application/json
+							Element:span
+								{
+							Element:span
+							Element:span
+								"message"
+							Element:span
+								:
+							Element:span
+							Element:span
+								"Unauthorised"
+							Element:span
+							Element:span
+								}
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Access to the API is protected through an API key. Authentication occurs via
+							Element:a
+								HTTP Basic Auth
+								. The basic auth username must be set to your API key and the password should be left blank.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All requests must be made over HTTPS and authenticated. Any request over HTTP will fail.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:aside
+								You must replace
+							Element:code
+								your-api-key
+								with your personal API key.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Error Codes
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+								Example of an error response when an invalid parameter is provided:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								HTTP
+							Element:span
+								/
+							Element:span
+								1.1
+							Element:span
+								400
+							Element:span
+								BAD REQUEST
+							Element:span
+								Content-Type
+							Element:span
+								:
+							Element:span
+								application/json
+							Element:span
+								{
+							Element:span
+							Element:span
+								"message"
+							Element:span
+								:
+							Element:span
+							Element:span
+								"startDate is not valid"
+							Element:span
+							Element:span
+								}
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								HTTP status codes are use to indicate the success or failure of an API request. In general 2xx indicates success, 4xx indicates failure due to information provided by you (eg. a required parameter is missing) while 5xx indicates that the failure was caused by the SnapScan servers (or we were unable to service the request at this time). A valid error response from us will always be a JSON object containing a message key.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Pagination
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All API resources that can return multiple records (eg. the payments API) are paginated. These endpoints provide the same set of parameters that allow you to specify which page and how many records per page to return.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Query Parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Parameter
+										Element:th
+											Default
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											page
+										Element:td
+											1
+										Element:td
+											The current page.
+										Element:tr
+										Element:td
+											perPage
+										Element:td
+											50
+										Element:td
+											The number of records to return per page (maximum: 100).
+										Element:tr
+										Element:td
+											offset
+										Element:td
+											0
+										Element:td
+											The offset to start from.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response Headers
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following pagination headers are included in the response. All pagination headers are integers.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Header
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											X-Total
+										Element:td
+											The total number of records in the query.
+										Element:tr
+										Element:td
+											X-Total-Pages
+										Element:td
+											The number of pages that the query is made up of.
+										Element:tr
+										Element:td
+											X-Page
+										Element:td
+											The current page.
+										Element:tr
+										Element:td
+											X-Per-Page
+										Element:td
+											The number of records per page.
+										Element:tr
+										Element:td
+											X-Next-Page
+										Element:td
+											The next page.
+										Element:tr
+										Element:td
+											X-Prev-Page
+										Element:td
+											The prev page
+										Element:tr
+										Element:td
+											X-Offset
+										Element:td
+											The offset being used.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Webhook
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We recommend that you make use of a webhook to be notified of payment completiong due to the real-time nature of the system. During your account set up we can configure a URL to which we will
+							Element:code
+								POST
+								payment objects as we determine their status. We will only notify you of completed and errored payments through the webhook.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We
+							Element:code
+								POST
+								the data as an
+							Element:code
+								application/x-www-form-urlencoded
+								JSON string under the
+							Element:code
+								payload
+								key.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:aside
+								We expect a
+							Element:code
+								HTTP 200
+								status code from your server. Your response body will be ignored. If we do not receive a
+							Element:code
+								HTTP 200
+								we will retry the requeset multiple times over a period of 3 minutes.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					QR Codes
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Creating the URL
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All SnapScan QR codes contain a
+				Element:strong
+					SnapCode
+					to identify the merchant. Additional parameters
+				Element:code
+					amount
+					and
+				Element:code
+					id
+					can be included to pre-populate the amount owed and a unique order number on the customers phone. These values will be associated with the payment as
+				Element:code
+					requiredAmount
+					and
+				Element:code
+					merchantReference
+					in the API.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Standard SnapCode
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your unique
+										Element:strong
+											SnapCode
+											will be displayed on your QR code stand or may be supplied by customer support. Let’s say yours is “shopalot”, your URL would look as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Payment Detail
+										Element:th
+											URL
+										Element:tbody
+										Element:tr
+										Element:td
+											Merchant: Shopalot
+										Element:br
+											SnapCode: shopalot
+										Element:td
+											https://pos.snapscan.io/qr/shopalot
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Adding payment parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+											Used for online checkout, point-of-sale, vending machines and more.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In some cases, it is useful for the merchant to include the amount owed and a unique reference number to reconcile payments.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If a merchant wishes to embed the amount and reference of a payment so that this information is pulled through into the users app at payment - they simply add query parameters to the payment URL. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Payment Detail
+										Element:th
+											URL
+										Element:tbody
+										Element:tr
+										Element:td
+											Merchant: Shopalot
+										Element:br
+											SnapCode: shopalot
+										Element:br
+											ID: Ord123
+										Element:br
+											Amount: R10.00
+										Element:td
+											https://pos.snapscan.io/qr/shopalot?id=Ord123&amount=1000
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Limiting successful payments to unique Id
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To prevent the customer from successfully paying the same reference twice or editing the payment amount. Simply add
+										Element:code
+											&strict=true
+											to the end of a payment URL.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Payment Detail
+										Element:th
+											URL
+										Element:tbody
+										Element:tr
+										Element:td
+											Merchant: Shopalot
+										Element:br
+											SnapCode: shopalot
+										Element:br
+											ID: Ord123
+										Element:br
+											Amount: R10.00
+										Element:br
+											Strict: true
+										Element:td
+											https://pos.snapscan.io/qr/shopalot?id=Ord123&amount=1000&strict=true
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Adding extra parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can add extra parameters to the payment URL. These details will be passed back under the
+										Element:code
+											extra
+											attribute in payments.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											https://pos.snapscan.io/qr/shopalot?customValue=123
+									Node:
+									(type) c
+									(layer)3
+										Element:h2
+											Generating a QR code
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use the QR code generator API to display a code on your site. This allows for the specification of the image type as well as the size. See the code snippet to the right as an example.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											An example QR code in HTML:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											<a
+										Element:span
+											href=
+										Element:span
+											"https://pos.snapscan.io/qr/shopalot?id=Ord123&amount=1000"
+										Element:span
+											>
+										Element:span
+											<img
+										Element:span
+											src=
+										Element:span
+											"https://pos.snapscan.io/qr/shopalot.svg?id=Ord123&amount=1000&snap_code_size=125"
+										Element:span
+											>
+										Element:span
+											</a>
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											The
+										Element:code
+											snap_code_size
+											can be between 50 and 500 (and defaults to 125)
+										Element:li
+											The image type can be either
+										Element:code
+											.svg
+											or
+										Element:code
+											.png
+										Element:li
+											The image type and size parameters are stripped from the generated QR code
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:aside
+											Do not specify
+										Element:code
+											width
+											or
+										Element:code
+											height
+											attributes on the HTML
+										Element:code
+											<img>
+											tag as this stretches and distorts the QR code.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Payments
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API’s main purpose is to provide you with various ways to query the status of payments that were made against your merchant account.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Credit card processing can take a few seconds and because the API caters for real-time queries it affects how the API works. If a query contains any pending payments it is necessary to poll the API until the result is available, for real-time applications we recommend that you make use of our webhook service. Seeing as webhooks can fail due to various reasons (eg. timeouts) an integration should allow the client to manually request the status of payments.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					The payment object
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					An example of a payment object:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"status"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"completed"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1999-12-31T23:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"totalAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1000
+				Element:span
+					,
+				Element:span
+				Element:span
+					"tipAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					0
+				Element:span
+					,
+				Element:span
+				Element:span
+					"requiredAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1000
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"STB115"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCodeReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Till Point #1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"John Doe"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"merchantReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"INV001"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"statementReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"SNAPSCAN 20150109"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"authCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"123456"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"extra"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"customValue"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"123"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					"deliveryAddress"
+				Element:span
+					:
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"address1"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"13 Long Street"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"address2"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"CBD"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"town"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Cape Town"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"postalCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"8001"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"country"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"South Africa"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Payment objects always have all possible attributes but if an attribute is not defined it will be
+				Element:code
+					null
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The following attributes are provided by all QR codes:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Attribute
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					id
+				Element:td
+					Integer
+				Element:td
+					Our unique ID for the payment. The ID is sequential and starts from
+				Element:code
+					1
+					.
+				Element:tr
+				Element:td
+					status
+				Element:td
+					String
+				Element:td
+					Indicates whether the payment was successful or failed. Possible values are:
+				Element:code
+					completed
+					,
+				Element:code
+					error
+					,
+				Element:code
+					pending
+				Element:tr
+				Element:td
+					date
+				Element:td
+					String
+				Element:td
+					The UTC date of when the payment was started. The date is ISO8601 formatted, eg:
+				Element:code
+					1999-12-31T23:00:00Z
+				Element:tr
+				Element:td
+					totalAmount
+				Element:td
+					Integer
+				Element:td
+					The total amount in cents paid by the user.
+				Element:tr
+				Element:td
+					tipAmount
+				Element:td
+					Integer
+				Element:td
+					If this feature is enabled for your account it will include the tip amount in cents paid by the user (totalAmount includes the tipAmount).
+				Element:tr
+				Element:td
+					snapCode
+				Element:td
+					String
+				Element:td
+					The unique reference encoded in the QR code which is linked to your account. The code is always the same for payments made through the QR.
+				Element:tr
+				Element:td
+					snapCodeReference
+				Element:td
+					String
+				Element:td
+					A reference that you can choose to be defined on the QR code which will always be the same for payments made through it.
+				Element:tr
+				Element:td
+					userReference
+				Element:td
+					String
+				Element:td
+					If this feature is enabled for your account it will include the reference defined by the user when he made the payment.
+				Element:tr
+				Element:td
+					statementReference
+				Element:td
+					String
+				Element:td
+					If the payment has been settled into your bank account it will include the statement reference for the associated settlement. This is the reference that will appear on your bank statement.
+				Element:tr
+				Element:td
+					extra
+				Element:td
+					Object
+				Element:td
+					Any extra parameters that were sent as part of the payment URL.
+				Element:tr
+				Element:td
+					deliveryAddress
+				Element:td
+					Address
+				Element:td
+				Element:strong
+					If delivery is enabled
+					for your account it will include the delivery address entered by the user.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Address has the following attributes:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Attribute
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					address1
+				Element:td
+					String
+				Element:td
+					The first address line entered by the user.
+				Element:tr
+				Element:td
+					address2
+				Element:td
+					String
+				Element:td
+					The second address line entered by the user.
+				Element:tr
+				Element:td
+					town
+				Element:td
+					String
+				Element:td
+					The town entered by the user.
+				Element:tr
+				Element:td
+					postalCode
+				Element:td
+					String
+				Element:td
+					The postal code entered by the user.
+				Element:tr
+				Element:td
+					country
+				Element:td
+					String
+				Element:td
+					The country entered by the user.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If you are generating QR codes for payments various extra attributes can be encoded in the QR:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Attribute
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					requiredAmount
+				Element:td
+					Integer
+				Element:td
+					The amount in cents that was required to be paid by the user.
+				Element:tr
+				Element:td
+					merchantReference
+				Element:td
+					String
+				Element:td
+					A unique reference defined by you and encoded in the QR code.
+				Element:tr
+				Element:td
+					authCode
+				Element:td
+					String
+				Element:td
+					A random number that is generated by us for payments that have a required amount and merchant reference defined. The number is 6 digits long and will be displayed to the user if the payment was successful.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Get all payments
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					curl -u your-api-key:
+				Element:span
+					"https://pos.snapscan.io/merchant/api/v1/payments"
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					The above command returns JSON structured like this:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					HTTP
+				Element:span
+					/
+				Element:span
+					1.1
+				Element:span
+					200
+				Element:span
+					OK
+				Element:span
+					Content-Type
+				Element:span
+					:
+				Element:span
+					application/json
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					2
+				Element:span
+					,
+				Element:span
+				Element:span
+					"status"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"error"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2000-01-01T01:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"totalAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					2050
+				Element:span
+					,
+				Element:span
+				Element:span
+					"tipAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					550
+				Element:span
+					,
+				Element:span
+				Element:span
+					"requiredAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1500
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"STB115"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCodeReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Till Point #1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Jane Doe"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"merchantReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"INV002"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"statementReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"SNAPSCAN 20150109"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"authCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"654321"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"extra"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deliveryAddress"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"status"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"completed"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1999-12-31T23:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"totalAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1000
+				Element:span
+					,
+				Element:span
+				Element:span
+					"tipAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					0
+				Element:span
+					,
+				Element:span
+				Element:span
+					"requiredAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1000
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"STB115"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCodeReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Till Point #1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"John Doe"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"merchantReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"INV001"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"statementReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"SNAPSCAN 20150109"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"authCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"123456"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"extra"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deliveryAddress"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Returns all payments that have been made against your QR codes (SnapCodes). If no parameters are provided all payments made to you will be returned. By default if the status parameter isn’t provided completed, errored and pending payments will be returned.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					A successful response is always an array and is paginated. If no payments match your query parameters the array will be empty. Payments are ordered by descending IDs, ie. the first payment will always be the latest in the returned result.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP Request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://pos.snapscan.io/merchant/api/v1/payments
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Query Parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All parameters are optional.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					startDate
+				Element:td
+					Payments that were started at or after this time, eg:
+				Element:code
+					2000-01-01T01:00:00Z
+				Element:tr
+				Element:td
+					endDate
+				Element:td
+					Payments that were started before this time, eg:
+				Element:code
+					2000-01-01T01:00:00Z
+				Element:tr
+				Element:td
+					status
+				Element:td
+					A comma separated string of the following values:
+				Element:code
+					completed
+					,
+				Element:code
+					error
+					or
+				Element:code
+					pending
+					, eg.
+				Element:code
+					completed,pending
+				Element:tr
+				Element:td
+					snapCode
+				Element:td
+					Payments with the SnapCode.
+				Element:tr
+				Element:td
+					snapCodeReference
+				Element:td
+					Payments with the SnapCode reference.
+				Element:tr
+				Element:td
+					userReference
+				Element:td
+					Payments with the user reference.
+				Element:tr
+				Element:td
+					merchantReference
+				Element:td
+					Payments with your reference.
+				Element:tr
+				Element:td
+					statementReference
+				Element:td
+					Payments included in the settlement with the provided reference.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response Codes
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Description
+				Element:th
+					HTTP Status
+				Element:th
+					JSON Response
+				Element:tbody
+				Element:tr
+				Element:td
+					OK
+				Element:td
+					200
+				Element:td
+					Array of payment objects
+				Element:tr
+				Element:td
+					Invalid parameter
+				Element:td
+					400
+				Element:td
+					Object containing a message key
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Get a payment
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					curl -u your-api-key:
+				Element:span
+					"https://pos.snapscan.io/merchant/api/v1/payments/1"
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					The above command returns JSON structured like this:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					HTTP
+				Element:span
+					/
+				Element:span
+					1.1
+				Element:span
+					200
+				Element:span
+					OK
+				Element:span
+					Content-Type
+				Element:span
+					:
+				Element:span
+					application/json
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"status"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"completed"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1999-12-31T23:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"totalAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1000
+				Element:span
+					,
+				Element:span
+				Element:span
+					"tipAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					0
+				Element:span
+					,
+				Element:span
+				Element:span
+					"requiredAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1000
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"STB115"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCodeReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Till Point #1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"John Doe"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"merchantReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"INV001"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"statementReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"SNAPSCAN 20150109"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"authCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"123456"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"extra"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deliveryAddress"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Returns a single payment.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP Request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://pos.snapscan.io/merchant/api/v1/payments/{id}
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Route Parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The
+				Element:code
+					id
+					route parameter is required.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					id
+				Element:td
+					The sequential ID of the payment.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response Codes
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Description
+				Element:th
+					HTTP Status
+				Element:th
+					JSON Response
+				Element:tbody
+				Element:tr
+				Element:td
+					OK
+				Element:td
+					200
+				Element:td
+					A payment object
+				Element:tr
+				Element:td
+					ID doesn’t exist
+				Element:td
+					404
+				Element:td
+					Object containing a message key
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Get all cash up payments
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					curl -u your-api-key:
+				Element:span
+					"https://pos.snapscan.io/merchant/api/v1/payments/cash_ups/1e07ac748d2627ba"
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					The above command returns JSON structured like this:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					HTTP
+				Element:span
+					/
+				Element:span
+					1.1
+				Element:span
+					200
+				Element:span
+					OK
+				Element:span
+					Content-Type
+				Element:span
+					:
+				Element:span
+					application/json
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					3
+				Element:span
+					,
+				Element:span
+				Element:span
+					"status"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"completed"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2000-01-01T01:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"totalAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					2050
+				Element:span
+					,
+				Element:span
+				Element:span
+					"tipAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					550
+				Element:span
+					,
+				Element:span
+				Element:span
+					"requiredAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1500
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"STB115"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCodeReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Till Point #1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Jane Doe"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"merchantReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"INV002"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"statementReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"SNAPSCAN 20150109"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"authCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"654321"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"extra"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deliveryAddress"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"id"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1
+				Element:span
+					,
+				Element:span
+				Element:span
+					"status"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"completed"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1999-12-31T23:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"totalAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1000
+				Element:span
+					,
+				Element:span
+				Element:span
+					"tipAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					0
+				Element:span
+					,
+				Element:span
+				Element:span
+					"requiredAmount"
+				Element:span
+					:
+				Element:span
+				Element:span
+					1000
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"STB115"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"snapCodeReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"Till Point #1"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"userReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"John Doe"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"merchantReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"INV001"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"statementReference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"SNAPSCAN 20150109"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"authCode"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"123456"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"extra"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+					,
+				Element:span
+				Element:span
+					"deliveryAddress"
+				Element:span
+					:
+				Element:span
+				Element:span
+					null
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					If the period contains any pending payments you can expect the following response:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					HTTP
+				Element:span
+					/
+				Element:span
+					1.1
+				Element:span
+					500
+				Element:span
+					INTERNAL SERVER ERRROR
+				Element:span
+					Content-Type
+				Element:span
+					:
+				Element:span
+					application/json
+				Element:span
+					{
+				Element:span
+				Element:span
+					"message"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"The query is not ready yet because the specified cash up period contains pending payments, please try again in a moment."
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Returns all payments that were completed successfully in the specified cash up period. If a cash up period contains any pending payments we will return a
+				Element:code
+					HTTP 500
+					. A cash up period is considered complete once we know the status of all the payments within the period. When we return a
+				Element:code
+					HTTP 500
+					due to pending payments you should wait a couple of seconds and then retry the request. See
+				Element:a
+					Cash Ups
+					for further details.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP Request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://pos.snapscan.io/merchant/api/v1/payments/cash_ups/{reference}
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Route Parameters
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The
+				Element:code
+					reference
+					route parameter is required.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					reference
+				Element:td
+					The cash up period’s reference.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response Codes
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Description
+				Element:th
+					HTTP Status
+				Element:th
+					JSON Response
+				Element:tbody
+				Element:tr
+				Element:td
+					OK
+				Element:td
+					200
+				Element:td
+					Array of payment objects
+				Element:tr
+				Element:td
+					Reference doesn’t exist
+				Element:td
+					404
+				Element:td
+					Object containing a message key
+				Element:tr
+				Element:td
+					Pending payments
+				Element:td
+					500
+				Element:td
+					Object containing a message key
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Cash Ups
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The cash up API allows you to mark the end of your transaction period on our system. Once a transaction period has been marked you will be able to query all payments that were completed within the associated period. You can use the period’s reference with the
+				Element:a
+					get cash up payments
+					endpoint to retrieve the payments.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					The cash up object
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					An example of a cash up object:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					{
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1999-12-31T23:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"reference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"ab34Def78"
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Attribute
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+					date
+				Element:td
+					String
+				Element:td
+					The UTC date of when the transaction period was ended. The date is ISO8601 formatted, eg:
+				Element:code
+					1999-12-31T23:00:00Z
+				Element:tr
+				Element:td
+					reference
+				Element:td
+					String
+				Element:td
+					A hexadecimal string with a maximum length of 32.
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Create a cash up period
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					curl -u your-api-key: -X POST
+				Element:span
+					"https://pos.snapscan.io/merchant/api/v1/cash_ups"
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					The above command returns JSON structured like this:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					HTTP
+				Element:span
+					/
+				Element:span
+					1.1
+				Element:span
+					200
+				Element:span
+					OK
+				Element:span
+					Content-Type
+				Element:span
+					:
+				Element:span
+					application/json
+				Element:span
+					{
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1999-12-31T23:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"reference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1e07ac748d2627ba"
+				Element:span
+				Element:span
+					}
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Returns a reference that marks the end of the current transaction period and the start of a new one. The reference can be used to retrieve all the payments that were successfully completed in the associated period.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP Request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					POST https://pos.snapscan.io/merchant/api/v1/cash_ups
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response Codes
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Description
+				Element:th
+					HTTP Status
+				Element:th
+					JSON Response
+				Element:tbody
+				Element:tr
+				Element:td
+					OK
+				Element:td
+					200
+				Element:td
+					A cash up object
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Get all cash ups
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					curl -u your-api-key:
+				Element:span
+					"https://pos.snapscan.io/merchant/api/v1/cash_ups"
+			Node:
+			(type) c
+			(layer)1
+				Element:blockquote
+				Element:p
+					The above command returns JSON structured like this:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:span
+					HTTP
+				Element:span
+					/
+				Element:span
+					1.1
+				Element:span
+					200
+				Element:span
+					OK
+				Element:span
+					Content-Type
+				Element:span
+					:
+				Element:span
+					application/json
+				Element:span
+					[
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2000-01-01T12:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"reference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"2f35cdc8246915c3"
+				Element:span
+				Element:span
+					},
+				Element:span
+				Element:span
+					{
+				Element:span
+				Element:span
+					"date"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1999-12-31T23:00:00Z"
+				Element:span
+					,
+				Element:span
+				Element:span
+					"reference"
+				Element:span
+					:
+				Element:span
+				Element:span
+					"1e07ac748d2627ba"
+				Element:span
+				Element:span
+					}
+				Element:span
+				Element:span
+					]
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Returns a paginated list of all cash up references that have been created. The references are ordered by descending date.
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					HTTP Request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					GET https://pos.snapscan.io/merchant/api/v1/cash_ups
+			Node:
+			(type) c
+			(layer)1
+				Element:h3
+					Response Codes
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Description
+				Element:th
+					HTTP Status
+				Element:th
+					JSON Response
+				Element:tbody
+				Element:tr
+				Element:td
+					OK
+				Element:td
+					200
+				Element:td
+					An array of cash up objects
+			Node:
+			(type) c
+			(layer)1
+				Element:a
+					shell

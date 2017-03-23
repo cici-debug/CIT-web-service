@@ -1,0 +1,495 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Subpanels
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For Sidecar, Sugar's subpanel layouts have been modified to work as simplified metadata. This page is an overview of the metadata framework for subpanels.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The reason for this change is that previous versions of Sugar generated the metadata from various sources such as the SubPanelLayout and MetaDataManager classes. This eliminates the need for generating and processing the layouts and allows the metadata to be easily loaded to Sidecar.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note
+								: Modules running in backward compatibility mode do not use the Sidecar subpanel layouts as they use the legacy MVC framework.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Hierarchy Diagram
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When loading the Sidecar subpanel layouts, the system processes the layout in the following manner:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								The Sugar application's client type is "base". For more information on the various client types, please refer to the
+							Element:a
+								User Interface
+								page.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:span
+								Subpanels and Subpanel Layouts
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sugar contains both a subpanels (plural) layout and a subpanel (singular) layout. The subpanels layout contains the collection of subpanels, whereas the subpanel layout renders the actual subpanel widget.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								An example of a stock module's subpanels layout is:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./modules/Bugs/clients/base/layouts/subpanels/subpanels.php
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php $viewdefs['Bugs']['base']['layout']['subpanels'] = array ( 'components' => array ( array ( 'layout' => 'subpanel', 'label' => 'LBL_DOCUMENTS_SUBPANEL_TITLE', 'context' => array ( 'link' => 'documents', ), ), array ( 'layout' => 'subpanel', 'label' => 'LBL_CONTACTS_SUBPANEL_TITLE', 'context' => array ( 'link' => 'contacts', ), ), array ( 'layout' => 'subpanel', 'label' => 'LBL_ACCOUNTS_SUBPANEL_TITLE', 'context' => array ( 'link' => 'accounts', ), ), array ( 'layout' => 'subpanel', 'label' => 'LBL_CASES_SUBPANEL_TITLE', 'context' => array ( 'link' => 'cases', ), ), ), 'type' => 'subpanels', 'span' => 12, );
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can see that the layout incorporates the use of the subpanel layout for each module. As most of the subpanel data is similar, this approach allows us to use less duplicate code. The subpanel layout, shown below, shows the three views that make up the subpanel widgets users see.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./clients/base/layouts/subpanel/subpanel.php
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php $viewdefs['base']['layout']['subpanel'] = array ( 'components' => array ( array ( 'view' => 'panel-top', ) array ( 'view' => 'subpanel-list', ), array ( 'view' => 'list-bottom', ), ), 'span' => 12, 'last_state' => array( 'id' => 'subpanel' ), );
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Adding Subpanel Layouts
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When a new relationship is deployed from Studio, the relationship creation process will generate the layouts using the extension framework. You should note that for stock relationships and custom deployed relationships, layouts are generated for both Sidecar and Legacy MVC Subpanel formats. This is done to ensure that any related modules, whether in Sidecar or Backward Compatibility mode, display a related subpanel as expected.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sidecar Layouts
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Custom Sidecar layouts, located in
+										Element:code
+											./custom/Extension/modules/<module>/Ext/clients/<client>/layouts/subpanels/
+											, are compiled into
+										Element:code
+											./custom/modules/<module>/Ext/clients/<client>/layouts/subpanels/subpanels.ext.php
+											using the extension framework. When a relationship is saved, layout files are created for both the "base" and "mobile" client types.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, deploying a 1:M relationship from Bugs to Leads will generate the following Sidecar files:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Bugs/Ext/clients/base/layouts/subpanels/bugs_leads_1_Bugs.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $viewdefs['Bugs']['base']['layout']['subpanels']['components'][] = array ( 'layout' => 'subpanel', 'label' => 'LBL_BUGS_LEADS_1_FROM_LEADS_TITLE', 'context' => array ( 'link' => 'bugs_leads_1', ), );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Bugs/Ext/clients/mobile/layouts/subpanels/bugs_leads_1_Bugs.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $viewdefs['Bugs']['mobile']['layout']['subpanels']['components'][] = array ( 'layout' => 'subpanel', 'label' => 'LBL_BUGS_LEADS_1_FROM_LEADS_TITLE', 'context' => array ( 'link' => 'bugs_leads_1', ), );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											The additional legacy MVC layouts generated by a relationships deployment are described below.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Legacy MVC Subpanel Layouts
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Custom Legacy MVC Subpanel layouts, located in
+										Element:code
+											./custom/Extension/modules/<module>/Ext/Layoutdefs/
+											, are compiled into
+										Element:code
+											./custom/modules/<module>/Ext/Layoutdefs/layoutdefs.ext.php
+											using the extension framework. You should also note that when a relationship is saved, wireless layouts, located in
+										Element:code
+											./custom/Extension/modules/<module>/Ext/WirelessLayoutdefs/
+											, are created and compiled into
+										Element:code
+											./custom/modules/<module>/Ext/Layoutdefs/layoutdefs.ext.php
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An example of this is when deploying a 1-M relationship from Bugs to Leads, the following layoutdef files are generated:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Bugs/Ext/Layoutdefs/bugs_leads_1_Bugs.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $layout_defs["Bugs"]["subpanel_setup"]['bugs_leads_1'] = array ( 'order' => 100, 'module' => 'Leads', 'subpanel_name' => 'default', 'sort_order' => 'asc', 'sort_by' => 'id', 'title_key' => 'LBL_BUGS_LEADS_1_FROM_LEADS_TITLE', 'get_subpanel_data' => 'bugs_leads_1', 'top_buttons' => array ( 0 => array ( 'widget_class' => 'SubPanelTopButtonQuickCreate', ), 1 => array ( 'widget_class' => 'SubPanelTopSelectButton', 'mode' => 'MultiSelect', ), ), );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Bugs/Ext/WirelessLayoutdefs/bugs_leads_1_Bugs.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $layout_defs["Bugs"]["subpanel_setup"]['bugs_leads_1'] = array ( 'order' => 100, 'module' => 'Leads', 'subpanel_name' => 'default', 'title_key' => 'LBL_BUGS_LEADS_1_FROM_LEADS_TITLE', 'get_subpanel_data' => 'bugs_leads_1', );
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Fields Metadata
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sidecar's subpanel field layouts are initially defined by the subpanel list-view metadata.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Hierarchy Diagram
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The subpanel list metadata is loaded in the following manner:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											The Sugar application's client type is "base". For more information on the various client types, please refer to the
+										Element:a
+											User Interface
+											page.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Subpanel List Views
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, all modules come with a default set of subpanel fields for when they are rendered as a subpanel. An example of this is can be found in the Bugs module:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./modules/Bugs/clients/base/views/subpanel-list/subpanel-list.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $subpanel_layout['list_fields'] = array ( 'full_name' => array ( 'type' => 'fullname', 'link' => true, 'studio' => array ( 'listview' => false, ), 'vname' => 'LBL_NAME', 'width' => '10%', 'default' => true, ), 'date_entered' => array ( 'type' => 'datetime', 'studio' => array ( 'portaleditview' => false, ), 'readonly' => true, 'vname' => 'LBL_DATE_ENTERED', 'width' => '10%', 'default' => true, ), 'refered_by' => array ( 'vname' => 'LBL_LIST_REFERED_BY', 'width' => '10%', 'default' => true, ), 'lead_source' => array ( 'vname' => 'LBL_LIST_LEAD_SOURCE', 'width' => '10%', 'default' => true, ), 'phone_work' => array ( 'vname' => 'LBL_LIST_PHONE', 'width' => '10%', 'default' => true, ), 'lead_source_description' => array ( 'name' => 'lead_source_description', 'vname' => 'LBL_LIST_LEAD_SOURCE_DESCRIPTION', 'width' => '10%', 'sortable' => false, 'default' => true, ), 'assigned_user_name' => array ( 'name' => 'assigned_user_name', 'vname' => 'LBL_LIST_ASSIGNED_TO_NAME', 'widget_class' => 'SubPanelDetailViewLink', 'target_record_key' => 'assigned_user_id', 'target_module' => 'Employees', 'width' => '10%', 'default' => true, ), 'first_name' => array ( 'usage' => 'query_only', ), 'last_name' => array ( 'usage' => 'query_only', ), 'salutation' => array ( 'name' => 'salutation', 'usage' => 'query_only', ), );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To modify this layout, navigate to Admin > Studio > {Parent Module} > Subpanels > Bugs and make your changes. Once saved, Sugar will generate
+										Element:code
+											./custom/modules/Bugs/clients/<client>/views/subpanel-for-<link>/subpanel-for-<link>.php
+											which will be used for rendering the fields you selected.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You should note that, just as Sugar mimics the Sidecar layouts in the legacy MVC framework for modules in backward compatibility, it also mimics the field list in
+										Element:code
+											./modules/<module>/metadata/subpanels/default.php
+											and
+										Element:code
+											./custom/modules/<module>/metadata/subpanels/default.php
+											. This is done to ensure that any related modules, whether in Sidecar or Backward Compatibility mode, display the same field list as expected.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 03/24/2016 04:38pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

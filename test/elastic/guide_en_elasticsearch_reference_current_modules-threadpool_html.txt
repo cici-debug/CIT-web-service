@@ -1,0 +1,568 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Thread Pool
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A node holds several thread pools in order to improve how threads memory consumption are managed within a node. Many of these pools also have queues associated with them, which allow pending requests to be held instead of discarded.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are several thread pools, but the important ones include:
+						Node:
+						(type) c
+						(layer)2
+							Element:dl
+							Element:dt
+							Element:span
+							Element:code
+								generic
+							Element:dd
+								For generic operations (e.g., background node discovery). Thread pool type is
+							Element:code
+								scaling
+								.
+							Element:dt
+							Element:span
+							Element:code
+								index
+							Element:dd
+								For index/delete operations. Thread pool type is
+							Element:code
+								fixed
+								with a size of
+							Element:code
+								# of available processors
+								, queue_size of
+							Element:code
+								200
+								. The maximum size for this pool is
+							Element:code
+								1 + # of available processors
+								.
+							Element:dt
+							Element:span
+							Element:code
+								search
+							Element:dd
+								For count/search/suggest operations. Thread pool type is
+							Element:code
+								fixed
+								with a size of
+							Element:code
+								int((# of available_processors * 3) / 2) + 1
+								, queue_size of
+							Element:code
+								1000
+								.
+							Element:dt
+							Element:span
+							Element:code
+								get
+							Element:dd
+								For get operations. Thread pool type is
+							Element:code
+								fixed
+								with a size of
+							Element:code
+								# of available processors
+								, queue_size of
+							Element:code
+								1000
+								.
+							Element:dt
+							Element:span
+							Element:code
+								bulk
+							Element:dd
+								For bulk operations. Thread pool type is
+							Element:code
+								fixed
+								with a size of
+							Element:code
+								# of available processors
+								, queue_size of
+							Element:code
+								50
+								. The maximum size for this pool is
+							Element:code
+								1 + # of available processors
+								.
+							Element:dt
+							Element:span
+							Element:code
+								percolate
+							Element:dd
+								For percolate operations. Thread pool type is
+							Element:code
+								fixed
+								with a size of
+							Element:code
+								# of available processors
+								, queue_size of
+							Element:code
+								1000
+								.
+							Element:dt
+							Element:span
+							Element:code
+								snapshot
+							Element:dd
+								For snapshot/restore operations. Thread pool type is
+							Element:code
+								scaling
+								with a keep-alive of
+							Element:code
+								5m
+								and a max of
+							Element:code
+								min(5, (# of available processors)/2)
+								.
+							Element:dt
+							Element:span
+							Element:code
+								warmer
+							Element:dd
+								For segment warm-up operations. Thread pool type is
+							Element:code
+								scaling
+								with a keep-alive of
+							Element:code
+								5m
+								and a max of
+							Element:code
+								min(5, (# of available processors)/2)
+								.
+							Element:dt
+							Element:span
+							Element:code
+								refresh
+							Element:dd
+								For refresh operations. Thread pool type is
+							Element:code
+								scaling
+								with a keep-alive of
+							Element:code
+								5m
+								and a max of
+							Element:code
+								min(10, (# of available processors)/2)
+								.
+							Element:dt
+							Element:span
+							Element:code
+								listener
+							Element:dd
+								Mainly for java client executing of action when listener threaded is set to true. Thread pool type is
+							Element:code
+								scaling
+								with a default max of
+							Element:code
+								min(10, (# of available processors)/2)
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Changing a specific thread pool can be done by setting its type-specific parameters; for example, changing the
+							Element:code
+								index
+								thread pool to have more threads:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								thread_pool: index: size: 30
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Thread pool types
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following are the types of thread pools and their respective parameters:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+													Element:code
+														fixed
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														fixed
+														thread pool holds a fixed size of threads to handle the requests with a queue (optionally bounded) for pending requests that have no threads to service them.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														size
+														parameter controls the number of threads, and defaults to the number of cores times 5.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														queue_size
+														allows to control the size of the queue of pending requests that have no threads to execute them. By default, it is set to
+													Element:code
+														-1
+														which means its unbounded. When a request comes in and the queue is full, it will abort the request.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														thread_pool: index: size: 30 queue_size: 1000
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+													Element:code
+														scaling
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														scaling
+														thread pool holds a dynamic number of threads. This number is proportional to the workload and varies between the value of the
+													Element:code
+														core
+														and
+													Element:code
+														max
+														parameters.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														keep_alive
+														parameter determines how long a thread should be kept around in the thread pool without it doing any work.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														thread_pool: warmer: core: 1 max: 8 keep_alive: 2m
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Processors setting
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The number of processors is automatically detected, and the thread pool settings are automatically set based on it. In some cases it can be useful to override the number of detected processors. This can be done by explicitly setting the
+										Element:code
+											processors
+											setting.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											processors: 2
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are a few use-cases for explicitly overriding the
+										Element:code
+											processors
+											setting:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											If you are running multiple instances of Elasticsearch on the same host but want Elasticsearch to size its thread pools as if it only has a fraction of the CPU, you should override the
+										Element:code
+											processors
+											setting to the desired fraction (e.g., if you’re running two instances of Elasticsearch on a 16-core machine, set
+										Element:code
+											processors
+											to 8). Note that this is an expert-level use-case and there’s a lot more involved than just setting the
+										Element:code
+											processors
+											setting as there are other considerations like changing the number of garbage collector threads, pinning processes to cores, etc.
+										Element:li
+											The number of processors is by default bounded to 32. This means that on systems that have more than 32 processors, Elasticsearch will size its thread pools as if there are only 32 processors present. This limitation was added to avoid creating too many threads on systems that have not properly adjusted the
+										Element:code
+											ulimit
+											for max number of processes. In cases where you’ve adjusted the
+										Element:code
+											ulimit
+											appropriately, you can override this bound by explicitly setting the
+										Element:code
+											processors
+											setting.
+										Element:li
+											Sometimes the number of processors is wrongly detected and in such cases explicitly setting the
+										Element:code
+											processors
+											setting will workaround such issues.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to check the number of processors detected, use the nodes info API with the
+										Element:code
+											os
+											flag.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Snapshot And Restore
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Transport »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,520 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Callback URLs
+				Element:a
+					¶
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					When submitting an order for translation, you can set “callback_url” for each job in the order. Gengo will post any updates about the job as they happen which makes it the most efficient way to sync your system with Gengo.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Callback notifications are sent when:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					A job has been made available to our translators
+				Element:li
+					A job has been started by one of our translators
+				Element:li
+					A job is ready for review
+				Element:li
+					A job has been approved automatically
+				Element:li
+					A job is manually approved via our Gengo Dashboard customer interface
+				Element:li
+					A job has received a comment by a translator
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Gengo will send callbacks every 15 minutes for 12 hours until we receive a 200 status response. If the end point is not reachable, we suggest using the GET
+				Element:a
+					/translate/order/{id}/
+					endpoint to receive the translation.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					For file jobs, the request that is sent to your callback will contain a “file_url_tgt” parameter, which is the link to the translated file. This link is different from the url you get from a GET on file jobs in
+				Element:a
+					Job(GET)
+					, which is “src_file_link”.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Callbacks larger than 60KB cannot be sent. If you are submitting a large text, please break it up into smaller jobs or use the
+				Element:a
+					Job(GET)
+				Element:strong
+					endpoint. We are currently working on a long term solution for this issue.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Callbacks urls can not contain authentication information.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Parameter Formats
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Parameters to callbacks are formatted in JSON and submitted with a POST call. For job-related notifications, a Job Payload will be POSTed inside a parameter named “job” as if it were a response. The following is an example of how a client might receive a callback submission for a job from Gengo:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:pre
+								1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+							Element:td
+							Element:pre
+							Element:span
+								#!/usr/bin/python
+							Element:span
+								# -*- coding: utf-8 -*-
+							Element:span
+								import
+							Element:span
+								cgi
+							Element:span
+								import
+							Element:span
+								json
+							Element:span
+								form
+							Element:span
+								=
+							Element:span
+								cgi
+							Element:span
+								.
+							Element:span
+								FieldStorage
+							Element:span
+								()
+							Element:span
+								print
+							Element:span
+								(
+							Element:span
+								"Content-type: text/html
+							Element:span
+								\n
+							Element:span
+								"
+							Element:span
+								)
+							Element:span
+								if
+							Element:span
+								"job"
+							Element:span
+								in
+							Element:span
+								form
+							Element:span
+								:
+							Element:span
+								json_data
+							Element:span
+								=
+							Element:span
+								form
+							Element:span
+								[
+							Element:span
+								"job"
+							Element:span
+								]
+							Element:span
+								.
+							Element:span
+								value
+							Element:span
+								else
+							Element:span
+								:
+							Element:span
+								json_data
+							Element:span
+								=
+							Element:span
+								False
+							Element:span
+								if
+							Element:span
+								json_data
+							Element:span
+								:
+							Element:span
+								print
+							Element:span
+								(
+							Element:span
+								json
+							Element:span
+								.
+							Element:span
+								loads
+							Element:span
+								(
+							Element:span
+								json_data
+							Element:span
+								,
+							Element:span
+								'utf-8'
+							Element:span
+								))
+							Element:span
+								else
+							Element:span
+								:
+							Element:span
+								print
+							Element:span
+								(
+							Element:span
+								"fail"
+							Element:span
+								)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Comment-related notifications are sent to the same callback when a translator submits a comment for a job. The payload will be in a parameter named “comment”, and will look like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:tt
+								:
+							Element:span
+								job_id
+							Element:em
+								String
+								of the Job ID for which comment applies
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:tt
+								:
+							Element:span
+								body
+							Element:em
+								String
+								of the comment body
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:tt
+								:
+							Element:span
+								ctime
+							Element:em
+								String
+								of the Unix Timestamp for when this comment was submitted
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:tt
+								:
+							Element:span
+								custom_data
+							Element:em
+								String
+								of the custom data associated with the job (if any)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:tt
+								:
+							Element:span
+								file_url_tgt
+							Element:em
+								String
+								of the full URL of the target file
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s an example of how a client might receive a callback submission for a job comment:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:pre
+								1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
+							Element:td
+							Element:pre
+							Element:span
+								#!/usr/bin/python
+							Element:span
+								# -*- coding: utf-8 -*-
+							Element:span
+								import
+							Element:span
+								cgi
+							Element:span
+								import
+							Element:span
+								json
+							Element:span
+								form
+							Element:span
+								=
+							Element:span
+								cgi
+							Element:span
+								.
+							Element:span
+								FieldStorage
+							Element:span
+								()
+							Element:span
+								print
+							Element:span
+								(
+							Element:span
+								"Content-type: text/html
+							Element:span
+								\n
+							Element:span
+								"
+							Element:span
+								)
+							Element:span
+								if
+							Element:span
+								"comment"
+							Element:span
+								in
+							Element:span
+								form
+							Element:span
+								:
+							Element:span
+								json_data
+							Element:span
+								=
+							Element:span
+								form
+							Element:span
+								[
+							Element:span
+								"comment"
+							Element:span
+								]
+							Element:span
+								.
+							Element:span
+								value
+							Element:span
+								else
+							Element:span
+								:
+							Element:span
+								json_data
+							Element:span
+								=
+							Element:span
+								False
+							Element:span
+								if
+							Element:span
+								json_data
+							Element:span
+								:
+							Element:span
+								data
+							Element:span
+								=
+							Element:span
+								json
+							Element:span
+								.
+							Element:span
+								loads
+							Element:span
+								(
+							Element:span
+								json_data
+							Element:span
+								,
+							Element:span
+								'utf-8'
+							Element:span
+								)
+							Element:span
+								comment
+							Element:span
+								=
+							Element:span
+								{}
+							Element:span
+								# job id to which comment applies
+							Element:span
+								comment
+							Element:span
+								[
+							Element:span
+								"job_id"
+							Element:span
+								]
+							Element:span
+								=
+							Element:span
+								data
+							Element:span
+								[
+							Element:span
+								"job_id"
+							Element:span
+								]
+							Element:span
+								# actual comment text
+							Element:span
+								comment
+							Element:span
+								[
+							Element:span
+								"body"
+							Element:span
+								]
+							Element:span
+								=
+							Element:span
+								data
+							Element:span
+								[
+							Element:span
+								"body"
+							Element:span
+								]
+							Element:span
+								# comment creation time
+							Element:span
+								comment
+							Element:span
+								[
+							Element:span
+								"ctime"
+							Element:span
+								]
+							Element:span
+								=
+							Element:span
+								data
+							Element:span
+								[
+							Element:span
+								"ctime"
+							Element:span
+								]
+							Element:span
+								# custom data from job (if any)
+							Element:span
+								custom_data
+							Element:span
+								=
+							Element:span
+								data
+							Element:span
+								[
+							Element:span
+								"custom_data"
+							Element:span
+								]
+							Element:span
+								if
+							Element:span
+								"custom_data"
+							Element:span
+								in
+							Element:span
+								data
+							Element:span
+								else
+							Element:span
+								None
+							Element:span
+								print
+							Element:span
+								(
+							Element:span
+								comment
+							Element:span
+								)
+							Element:span
+								print
+							Element:span
+								(
+							Element:span
+								custom_data
+							Element:span
+								)
+							Element:span
+								else
+							Element:span
+								:
+							Element:span
+								print
+							Element:span
+								(
+							Element:span
+								"fail"
+							Element:span
+								)
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:a
+							Element:span
+								MENU
+							Element:i
+							Element:a
+							Element:a
+							Element:a
+							Element:a
+							Element:span
+								© 2008-2017 Gengo, Inc
+							Element:span
+							Element:a
+								Legal
+							Element:span
+							Element:a
+								Quality Policy
+							Element:a
+							Element:p
+								Professional, people-powered translation in one click

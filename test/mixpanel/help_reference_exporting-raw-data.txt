@@ -1,0 +1,333 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Exporting Raw Data
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Every data point sent to Mixpanel is stored as JSON in our data store. This export API allows you to download your raw event data as it is received and stored within Mixpanel, complete with all event properties (including distinct_id) and the exact timestamp the event was fired. This returned raw JSON can then be used for a variety of tasks.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All data returned from the export API is real-time.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Prerequisites
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The specific URL endpoint for
+							Element:code
+								/export
+								is
+							Element:code
+								data.mixpanel.com
+								, which differs from that of our main API. Some considerations around using this:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								API authentication
+								is the same with this endpoint as the main API.
+							Element:li
+								You can utilize the same
+							Element:a
+								client libraries
+								but you will have to change the endpoint to
+							Element:code
+								data.mixpanel.com
+								instead of just
+							Element:code
+								mixpanel.com
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								API details
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Due to queueing, iOS and Android data can take up to 5 days to enter the raw data store.
+							Element:li
+								For this API, returned timestamps are expressed in seconds since January 1, 1970 in your
+							Element:a
+								project's timezone
+								, not UTC. This means that converting the raw exported timestamps using many epoch converters will result in incorrect offsets, as generally epoch timestamps are assumed to be in UTC. You must add back the offset between project time and UTC before storing or processing the data. For example, if your project is set to Pacific time, you would need to add 7 hours (or 8 hours if not in daylights savings time) (60 min * 60 secs * 7 hours) to the timestamp in order to convert this timestamp into UTC.
+							Element:li
+								This endpoint uses
+							Element:a
+								gzip
+								to compress the transfer; as a result, raw exports should not be processed until the file is received in its entirety. While this process is normally quick and results in a smaller file size, some large exports can take a few minutes to generate. Ensure the timeout set on the receiving client is large enough to account for this process (e.g. larger than 60 seconds).
+							Element:li
+								Data returned from this endpoint is
+							Element:a
+								JSONL
+								(newline-delimited JSON). Most receiving client libraries will automatically assume it gets a JSON string back and attempt to decode it. This specific API does not return valid JSON in aggregate, but each row is valid JSON within the API's output. Thus, raw exports, once received in full, should be parsed line-by-line instead of as an array of JSON objects.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Example usage cases
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								If you receive a spike of 10K events but notice that only a few users contributed to it and would like to dive deeper into the data.
+							Element:li
+								If you are buying mobile ads and would like to dive deeper into the exact UDIDs and see who you really can attribute to the install.
+							Element:li
+								If you are doing some very custom analysis Mixpanel cannot currently do. If this is the case, please email
+							Element:a
+								support@mixpanel.com
+								so we can either improve our product or possibly show you how you can do it with us.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Export API reference
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											URI: https://data.mixpanel.com/api/2.0/export/
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please note: The URI is
+										Element:code
+											data.mixpanel.com
+											and not just
+										Element:code
+											mixpanel.com
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Description:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Get a "raw dump" of tracked events over a time period.
+											from_datestring The date in yyyy-mm-dd format from which to begin querying for the event from. This date is inclusive. to_datestring The date in yyyy-mm-dd format from which to stop querying for the event from. This date is inclusive. eventarray The event or events that you wish to get data for, encoded as a JSON array. Example format: '["play song", "log in", "add playlist"]' wherestring An expression to filter events by. See the
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											expression section
+											on the main data export API page.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example URL:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											https://data.mixpanel.com/api/2.0/export/?from_date=2012-02-14&to_date=2012-02-14&where=properties%5B%22%24os%22%5D+%3D%3D+%22Linux%22&event=%5B%22Viewed+report%22%5D
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Return format:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"event"
+										Element:span
+											:
+										Element:span
+											"Viewed report"
+										Element:span
+											,
+										Element:span
+											"properties"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"distinct_id"
+										Element:span
+											:
+										Element:span
+											"foo"
+										Element:span
+											,
+										Element:span
+											"time"
+										Element:span
+											:
+										Element:span
+											1329263748
+										Element:span
+											,
+										Element:span
+											"origin"
+										Element:span
+											:
+										Element:span
+											"invite"
+										Element:span
+											,
+										Element:span
+											"origin_referrer"
+										Element:span
+											:
+										Element:span
+											"http://mixpanel.com/projects/"
+										Element:span
+											,
+										Element:span
+											"$initial_referring_domain"
+										Element:span
+											:
+										Element:span
+											"mixpanel.com"
+										Element:span
+											,
+										Element:span
+											"$referrer"
+										Element:span
+											:
+										Element:span
+											"https://mixpanel.com/report/3/stream/"
+										Element:span
+											,
+										Element:span
+											"$initial_referrer"
+										Element:span
+											:
+										Element:span
+											"http://mixpanel.com/"
+										Element:span
+											,
+										Element:span
+											"$referring_domain"
+										Element:span
+											:
+										Element:span
+											"mixpanel.com"
+										Element:span
+											,
+										Element:span
+											"$os"
+										Element:span
+											:
+										Element:span
+											"Linux"
+										Element:span
+											,
+										Element:span
+											"origin_domain"
+										Element:span
+											:
+										Element:span
+											"mixpanel.com"
+										Element:span
+											,
+										Element:span
+											"tab"
+										Element:span
+											:
+										Element:span
+											"stream"
+										Element:span
+											,
+										Element:span
+											"$browser"
+										Element:span
+											:
+										Element:span
+											"Chrome"
+										Element:span
+											,
+										Element:span
+											"Project ID"
+										Element:span
+											:
+										Element:span
+											"3"
+										Element:span
+											,
+										Element:span
+											"mp_country_code"
+										Element:span
+											:
+										Element:span
+											"US"
+										Element:span
+											}}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											One event per line, sorted by increasing timestamp. Each line is a valid JSON object although the return itself is valid JSON but instead JSONL. Timestamps are expressed in seconds since January 1, 1970 in your project's timezone, not UTC as a true epoch timestamp. For example, if your project is set to Pacific time, you would need to add 8 hours (or 7 hours if not in daylights savings time) (60 min * 60 secs * 8 hours) to the timestamp in order to convert this timestamp into UTC. This means that converting the raw exported timestamps using many epoch converters will result in representing times with the incorrect offset.
+											Document Sections
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Introduction
+										Element:li
+										Element:a
+											Prerequisites
+										Element:li
+										Element:a
+											API details
+										Element:li
+										Element:a
+											Example usage cases
+										Element:li
+										Element:a
+											Export API Reference

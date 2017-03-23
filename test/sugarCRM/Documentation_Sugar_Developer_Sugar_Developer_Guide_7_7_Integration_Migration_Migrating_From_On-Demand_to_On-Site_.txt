@@ -1,0 +1,483 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Migrating From On-Demand to On-Site
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Occasionally system administrators will have the need to deploy versions of their On-Demand instance to an On-Site system. Reasons for this type of deployment are:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Testing locally developed modules
+							Element:li
+								Migrating from On-Demand to On-Site
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Prerequisites
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Before migrating Sugar to an On-Site environment, you will need to request a backup of your On-Demand system by
+							Element:a
+								filing a case
+								with the Sugar Support team. Once the backup request is received, SugarCRM will provide an FTP account where the following files can be downloaded:
+							Element:br
+							Element:ul
+							Element:li
+								instance_name-YYYYMMDDHHmm.sql.gz (backup of database)
+							Element:li
+								instance_name-YYYYMMDDHHmm-triggers.sql.gz (backup of database triggers)
+							Element:li
+								instance_name-YYYYMMDDHHmm.files.tgz (backup of file system)
+							Element:li
+								The local system must be running MySQL. Converting the database to another system, such as SQL Server or Oracle, requires special handling. For more information regarding this type of conversion, please contact your Account Manager.
+							Element:li
+								On-Site system administrators must be familiar with their stack and the tools (gunzip, tar, mysqladmin, mysql, etc.) referenced in this guide.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note
+								: It is the system administrator's responsibility to diagnose and troubleshoot issues specific to the stack (permissions, environment variables, etc.).
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Steps to Complete
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Deploy the backup files to a local system using the following steps:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Extract and import the SQL data as follows:
+							Element:ul
+							Element:li
+								Extract the SQL file via an archive utility (e.g. 7-Zip) or via command line such as:
+							Element:br
+							Element:pre
+							Element:code
+								gunzip instance_name-YYYYMMDDHHmm.sql.gz
+							Element:li
+								Create a database on your MySQL server via command line:
+							Element:br
+							Element:pre
+								Or, if already logged into MySQL, with a command such as:
+							Element:code
+								mysqladmin -u mysql_username -p create instance_name
+							Element:br
+							Element:pre
+							Element:code
+								CREATE DATABASE instance_name;
+							Element:li
+								Import the SQL data to your MySQL server via the command line:
+							Element:br
+							Element:pre
+							Element:code
+								mysql -u mysql_username database_name -p < instance_name-YYYYMMDDHHmm.sql
+							Element:li
+								Extract the Triggers file via an archive utility (e.g. 7-Zip) or via command line such as:
+							Element:br
+							Element:pre
+							Element:code
+								gunzip instance_name-YYYYMMDDHHmm.triggers.sql.gz
+							Element:li
+								Import the Triggers data to your MySQL server via the command line:
+							Element:br
+							Element:pre
+							Element:code
+								mysql -u mysql_username database_name -p < instance_name-YYYYMMDDHHmm.triggers.sql
+							Element:li
+								Extract the
+							Element:code
+								tar
+								file to your web server's web root directory (e.g. /var/www/html) with the following command:
+							Element:br
+							Element:pre
+								This will create a directory named "instance_name-YYYYMMDDHHmm" in your web root directory.
+							Element:code
+								tar -C /var/www/html -xzf instance_name-YYYYMMDDHHmm.files.tgz
+							Element:li
+								Rename the newly created directory:
+							Element:br
+							Element:pre
+							Element:code
+								mv /var/www/html/instance_name-YYYYMMDDHHmm /var/www/html/instance_name
+							Element:li
+								For Linux-based servers, perform the following actions:
+							Element:ul
+							Element:li
+								Change the ownership of the directory to be accessible by the Apache user and group. Please note that the user and group (e.g.
+							Element:code
+								apache
+								,
+							Element:code
+								www-data
+								, etc.) values can vary depending on your web server configuration.
+							Element:br
+							Element:pre
+							Element:code
+								chown -R apache:apache /var/www/html/instance_name
+							Element:li
+								Change the permissions of the directory to ensure files can be accessed by the application. The actual permission values may differ depending on server security settings.
+							Element:br
+							Element:pre
+							Element:code
+								chmod -R 770 /var/www/html/instance_name
+							Element:li
+								Edit the
+							Element:code
+								config.php
+								file to point to your database.
+							Element:ul
+							Element:li
+								Open the
+							Element:code
+								config.php
+								file:
+							Element:br
+							Element:pre
+							Element:code
+								vi /var/www/html/instance_name/config.php
+							Element:li
+								Locate and update the
+							Element:code
+								dbconfig
+								array with the information appropriate for your MySQL server as follows:
+							Element:br
+							Element:pre
+							Element:code
+								'dbconfig' => array ( 'db_host_name' => 'localhost', 'db_host_instance' => 'SQLEXPRESS', 'db_user_name' => 'mysql_username', 'db_password' => 'mysql_password', 'db_name' => 'instance_name', 'db_type' => 'mysql', 'db_port' => '', 'db_manager' => 'MysqliManager', ),
+							Element:li
+								Edit the
+							Element:code
+								config.php
+								file and modify the following parameters:
+							Element:ul
+							Element:li
+							Element:code
+								site_url
+								should be the URL of the instance on your server (e.g.
+							Element:span
+								https://www.mysugarinstance.com
+								)
+							Element:li
+							Element:code
+								host_name
+								should be the URL of the instance without the https protocol (e.g. www.mysugarinstance.com)
+							Element:li
+								Modify the
+							Element:code
+								.htaccess
+								file in the root directory of the instance.
+							Element:ul
+							Element:li
+								Remove the following lines if they exist in the file:
+							Element:br
+							Element:pre
+							Element:code
+								#Added by operations to force SSL RewriteEngine On RewriteCond %{QUERY_STRING} !^entryPoint=WebToLeadCapture RewriteCond %{HTTP:X-SSL-CLUSTER} !^od2$ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+							Element:li
+								If your On-Site deployment does not reside in the root of your domain (e.g. https://www.example.com/mysugar/), change the following line from:
+							Element:br
+							Element:pre
+								to:
+							Element:code
+								RewriteBase /
+							Element:br
+							Element:pre
+							Element:code
+								RewriteBase /mysugar/
+							Element:li
+								If you are migrating permanently to an On-Site deployment, there are additional modifications that should be made to ensure full functionality for your instance of Sugar.
+							Element:ul
+							Element:li
+								To restore the ability to perform ad hoc file backups, open the
+							Element:code
+								./config.php
+								file and remove the following line:
+							Element:br
+							Element:pre
+							Element:code
+								'hide_admin_backup' => true,
+							Element:li
+								To restore the ability to perform upgrades, open the
+							Element:code
+								./config.php
+								file and remove the following line:
+							Element:br
+							Element:pre
+							Element:code
+								'disable_uw_upload' => true,
+							Element:li
+								To display the full text search configuration options under Admin > Search, open the
+							Element:code
+								./config.php
+								file and remove the following line:
+							Element:br
+							Element:pre
+							Element:code
+								'hide_full_text_engine_config' => true,
+							Element:li
+								To display the Sugar log settings under Admin > System Settings, open the
+							Element:code
+								./config.php
+								file and remove the following line:
+							Element:br
+							Element:pre
+							Element:code
+								'logger_visible' => false,
+							Element:li
+								To bypass security checks when installing packages via Admin > Module Loader, open the
+							Element:code
+								./config.php
+								file and change the following line from:
+							Element:br
+							Element:pre
+								to:
+							Element:code
+								'packageScan' => true,
+							Element:br
+							Element:pre
+							Element:code
+								'packageScan' => false,
+							Element:li
+								To ensure full-text search functions properly, open the
+							Element:code
+								./config.php
+								file and modify the following lines to point to your
+							Element:a
+								ElasticSearch
+								configuration:
+							Element:br
+							Element:pre
+							Element:code
+								'full_text_engine' => array ( 'Elastic' => array ( 'host' => '<your_elastic_search_host>', 'port' => '<your_elastic_search_port>', ), ),
+							Element:li
+								Finally, please navigate to Admin > Repair and perform a "Quick Repair and Rebuild" to clear all cached elements from the On-Demand instance.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should now have a working version of your On-Demand instance accessible from your local server.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 03/13/2017 08:07pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

@@ -1,0 +1,397 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Visibility Framework
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The visibility framework provides the capability to alter the queries Sugar uses to retrieve records from the database. This framework can allow for additional restrictions or specific logic to meet business requirements of hiding or showing only specific records. Visibility classes only apply to certain aspects of Sugar record retrieval, e.g. List Views, Dashlets, and Filter Lookups.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Custom Row Visibility
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Custom visibility class files are stored under
+							Element:code
+								./custom/data/visibility/
+								. The files in this directory can be enabled or disabled by modifying a module's visibility property located in
+							Element:code
+								./custom/Extension/modules/<module>/Ext/Vardefs/
+								. Every enabled visibility class is merged into the module's definition, allowing multiple layers of logic to be added to a module.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Visibility Class
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To add custom row visibility, you must create a visibility class that will extend the core SugarVisibility class
+										Element:code
+											./data/SugarVisibility.php
+											. The visibility class has the ability to override the following methods:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Pre 7.7.1.0
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Prior to 7.7.1.0, developers only needed to focus on the following methods.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														addVisibilityFrom
+													Element:td
+														Add visibility clauses to the FROM part of the query
+													Element:tr
+													Element:td
+														addVisibilityFromQuery
+													Element:td
+														Add visibility clauses to the FROM part of SugarQuery
+													Element:tr
+													Element:td
+														addVisibilityWhere
+													Element:td
+														Add visibility clauses to the WHERE part of the query
+													Element:tr
+													Element:td
+														addVisibilityWhereQuery
+													Element:td
+														Add visibility clauses to the WHERE part of SugarQuery
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														7.7.1.0+
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As of 7.7.1.0, several methods have been deprecated and we have implemented a new
+													Element:code
+														addVisibilityQuery()
+														method.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														addVisibilityQuery
+													Element:td
+														Add visibility clauses to a SugarQuery object.
+													Element:tr
+													Element:td
+														addVisibilityFrom
+													Element:td
+														[Deprecated] Add visibility clauses to the FROM part of the query. This method should still be implemented, as not all objects have been switched over to use
+													Element:code
+														addVisibilityQuery()
+														method.
+													Element:tr
+													Element:td
+														addVisibilityFromQuery
+													Element:td
+														[Deprecated] Add visibility clauses to the FROM part of SugarQuery. This method should still be implemented, as not all objects have been switched over to use
+													Element:code
+														addVisibilityQuery()
+														method.
+													Element:tr
+													Element:td
+														addVisibilityWhere
+													Element:td
+														[Deprecated] Add visibility clauses to the WHERE part of the query. This method should still be implemented, as not all objects have been switched over to use
+													Element:code
+														addVisibilityQuery()
+														method.
+													Element:tr
+													Element:td
+														addVisibilityWhereQuery
+													Element:td
+														[Deprecated] Add visibility clauses to the WHERE part of SugarQuery. This method should still be implemented, as not all objects have been switched over to use
+													Element:code
+														addVisibilityQuery()
+														method.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following example will create a new visibility class called 'filterAccounts_A1':
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/data/visibility/filterAccounts_A1.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); class filterAccounts_A1 extends SugarVisibility { public function addVisibilityWhere(&$query) { $table_alias = $this->getOption('table_alias'); if(empty( $table_alias)) { $table_alias = $this->bean->table_name; } $where_clause = "$table_alias.name like 'A1_%'"; if(!empty($query)) { $query .= " AND $where_clause"; } else { $query = $where_clause; } return $query; } public function addVisibilityWhereQuery(SugarQuery $sugarQuery, $options = array()) { $sugarQuery->where()->starts('name','A1_'); return $sugarQuery; } /** * For compatibility with 7.7.1.x+ instances the following code should also be implemented * For Pre-7.7.1.x instances, this function will never be used */ public function addVisibilityQuery(SugarQuery $sugarQuery) { $sugarQuery->where()->starts('name','A1_'); return $sugarQuery; } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To enable this visibility class on the Accounts module, we need to create the following file:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/Extension/modules/Accounts/Ext/Vardefs/<file>.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $dictionary['Account']['visibility']['filterAccounts_A1'] = true;
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Finally, navigate to Admin > Repair > Quick Repair and Rebuild. The system will then enable the visibility class.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Last modified: 01/27/2017 08:39am
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

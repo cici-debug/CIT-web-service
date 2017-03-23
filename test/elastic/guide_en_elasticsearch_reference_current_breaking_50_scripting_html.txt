@@ -1,0 +1,941 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Script related changes
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Switched Default Language from Groovy to Painless
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default scripting language for Elasticsearch is now Painless. Painless is a custom-built language with syntax similar to Groovy designed to be fast as well as secure. Many Groovy scripts will be identitical to Painless scripts to help make the transition between languages as simple as possible.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Documentation for Painless can be found at
+										Element:a
+											Painless Scripting Language
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											One common difference to note between Groovy and Painless is the use of parameters — all parameters in Painless must be prefixed with
+										Element:code
+											params.
+											now. The following example shows the difference:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Groovy:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "script_score": { "script": { "lang": "groovy", "inline": "Math.log(_score * 2) + my_modifier", "params": { "my_modifier": 8 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Painless (
+										Element:code
+											my_modifer
+											is prefixed with
+										Element:code
+											params
+											):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "script_score": { "script": { "lang": "painless", "inline": "Math.log(_score * 2) + params.my_modifier", "params": { "my_modifier": 8 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											script.default_lang
+											setting has been removed. It is no longer possible set the default scripting language. If a different language than
+										Element:code
+											painless
+											is used then this should be explicitly specified on the script itself.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For scripts with no explicit language defined, that are part of already stored percolator queries, the default language can be controlled with the
+										Element:code
+											script.legacy.default_lang
+											setting.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Removed 1.x script and template syntax
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The deprecated 1.x syntax of defining inline scripts / templates and referring to file or index base scripts / templates have been removed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											script
+											and
+										Element:code
+											params
+											string parameters can no longer be used and instead the
+										Element:code
+											script
+											object syntax must be used. This applies for the update api, script sort,
+										Element:code
+											script_score
+											function,
+										Element:code
+											script
+											query,
+										Element:code
+											scripted_metric
+											aggregation and
+										Element:code
+											script_heuristic
+											aggregation.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											So this usage of inline scripts is no longer allowed:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "script_score": { "lang": "groovy", "script": "Math.log(_score * 2) + my_modifier", "params": { "my_modifier": 8 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											and instead this syntax must be used:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "script_score": { "script": { "lang": "groovy", "inline": "Math.log(_score * 2) + my_modifier", "params": { "my_modifier": 8 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											script
+											or
+										Element:code
+											script_file
+											parameter can no longer be used to refer to file based scripts and templates and instead
+										Element:code
+											file
+											must be used.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This usage of referring to file based scripts is no longer valid:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "script_score": { "script": "calculate-score", "params": { "my_modifier": 8 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This usage is valid:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "script_score": { "script": { "lang": "groovy", "file": "calculate-score", "params": { "my_modifier": 8 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											script_id
+											parameter can no longer be used the refer to indexed based scripts and templates and instead
+										Element:code
+											id
+											must be used.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This usage of referring to indexed scripts is no longer valid:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "script_score": { "script_id": "indexedCalculateScore", "params": { "my_modifier": 8 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This usage is valid:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "script_score": { "script": { "id": "indexedCalculateScore", "lang" : "groovy", "params": { "my_modifier": 8 } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Template query
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											query
+											field in the
+										Element:code
+											template
+											query can no longer be used. This 1.x syntax can no longer be used:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "query": { "template": { "query": {"match_{{template}}": {}}, "params" : { "template" : "all" } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											and instead the following syntax should be used:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "query": { "template": { "inline": {"match_{{template}}": {}}, "params" : { "template" : "all" } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Search templates
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The top level
+										Element:code
+											template
+											field in the search template api has been replaced with consistent template / script object syntax. This 1.x syntax can no longer be used:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "template" : { "query": { "match" : { "{{my_field}}" : "{{my_value}}" } }, "size" : "{{my_size}}" }, "params" : { "my_field" : "foo", "my_value" : "bar", "my_size" : 5 } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											and instead the following syntax should be used:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "inline" : { "query": { "match" : { "{{my_field}}" : "{{my_value}}" } }, "size" : "{{my_size}}" }, "params" : { "my_field" : "foo", "my_value" : "bar", "my_size" : 5 } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Indexed scripts and templates
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Indexed scripts and templates have been replaced by
+										Element:a
+											stored scripts
+											which stores the scripts and templates in the cluster state instead of a dedicate
+										Element:code
+											.scripts
+											index.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For the size of stored scripts there is a soft limit of 65535 bytes. If scripts exceed that size then the
+										Element:code
+											script.max_size_in_bytes
+											setting can be added to elasticsearch.yml to change the soft limit to a higher value. If scripts are really large, other options like native scripts should be considered.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Previously indexed scripts in the
+										Element:code
+											.scripts
+											index will not be used any more as Elasticsearch will now try to fetch the scripts from the cluster state. Upon upgrading to 5.x the
+										Element:code
+											.scripts
+											index will remain to exist, so it can be used by a script to migrate the stored scripts from the
+										Element:code
+											.scripts
+											index into the cluster state. The current format of the scripts and templates hasn’t been changed, only the 1.x format has been removed.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Python migration script
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following Python script can be used to import your indexed scripts into the cluster state as stored scripts:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														from elasticsearch import Elasticsearch,helpers es = Elasticsearch([ {'host': 'localhost'} ]) for doc in helpers.scan(es, index=".scripts", preserve_order=True): es.put_script(lang=doc['_type'], id=doc['_id'], body=doc['_source'])
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This script makes use of the official Elasticsearch Python client and therefore you need to make sure that your have installed the client in your environment. For more information on this please see
+													Element:a
+														.
+													Element:code
+														elasticsearch-py
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Perl migration script
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following Perl script can be used to import your indexed scripts into the cluster state as stored scripts:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														use Search::Elasticsearch; my $es = Search::Elasticsearch->new( nodes => 'localhost:9200'); my $scroll = $es->scroll_helper( index => '.scripts', sort => '_doc'); while (my $doc = $scroll->next) { $e->put_script( lang => $doc->{_type}, id => $doc->{_id}, body => $doc->{_source} ); }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This script makes use of the official Elasticsearch Perl client and therefore you need to make sure that your have installed the client in your environment. For more information on this please see
+													Element:a
+														.
+													Element:code
+														Search::Elasticsearch
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Verifying script migration
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														After you have moved the scripts via the provided script or otherwise then you can verify with the following request if the migration has happened successfully:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET _cluster/state?filter_path=metadata.stored_scripts
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The response should include all your scripts from the
+													Element:code
+														.scripts
+														index. After you have verified that all your scripts have been moved, optionally as a last step, you can delete the
+													Element:code
+														.scripts
+														index as Elasticsearch no longer uses it.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Indexed scripts Java APIs
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All the methods related to interacting with indexed scripts have been removed. The Java API methods for interacting with stored scripts have been added under
+										Element:code
+											ClusterAdminClient
+											class. The sugar methods that used to exist on the indexed scripts API methods don’t exist on the methods for stored scripts. The only way to provide scripts is by using
+										Element:code
+											BytesReference
+											implementation, if a string needs to be provided the
+										Element:code
+											BytesArray
+											class should be used.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Scripting engines now register only a single language
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Prior to 5.0.0, script engines could register multiple languages. The Javascript script engine in particular registered both
+										Element:code
+											"lang": "js"
+											and
+										Element:code
+											"lang": "javascript"
+											. Script engines can now only register a single language. All references to
+										Element:code
+											"lang": "js"
+											should be changed to
+										Element:code
+											"lang": "javascript"
+											for existing users of the lang-javascript plugin.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Scripting engines now register only a single extension
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Prior to 5.0.0 scripting engines could register multiple extensions. The only engine doing this was the Javascript engine, which registered "js" and "javascript". It now only registers the "js" file extension for on-disk scripts.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											.javascript
+											files are no longer supported (use
+										Element:code
+											.js
+											)
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Javascript engine previously registered "js" and "javascript". It now only registers the "js" file extension for on-disk scripts.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Removed scripting query string parameters from update rest api
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											script
+											,
+										Element:code
+											script_id
+											and
+										Element:code
+											scripting_upsert
+											query string parameters have been removed from the update api.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Java transport client
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											TemplateQueryBuilder
+											has been moved to the
+										Element:code
+											lang-mustache
+											module. Therefor when using the
+										Element:code
+											TemplateQueryBuilder
+											from the Java native client the lang-mustache module should be on the classpath. Also the transport client should load the lang-mustache module as plugin:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											TransportClient transportClient = TransportClient.builder() .settings(Settings.builder().put("node.name", "node")) .addPlugin(MustachePlugin.class) .build(); transportClient.addTransportAddress( new InetSocketTransportAddress(new InetSocketAddress(InetAddresses.forString("127.0.0.1"), 9300)) );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Also the helper methods in
+										Element:code
+											QueryBuilders
+											class that create a
+										Element:code
+											TemplateQueryBuilder
+											instance have been removed, instead the constructors on
+										Element:code
+											TemplateQueryBuilder
+											should be used.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Template query
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											template
+											query has been deprecated in favour of the search template api. The
+										Element:code
+											template
+											query is scheduled to be removed in the next major version.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											GeoPoint scripts
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following helper methods have been removed from GeoPoint scripting:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											factorDistance
+										Element:li
+										Element:code
+											factorDistanceWithDefault
+										Element:li
+										Element:code
+											factorDistance02
+										Element:li
+										Element:code
+											factorDistance13
+										Element:li
+										Element:code
+											arcDistanceInKm
+										Element:li
+										Element:code
+											arcDistanceInKmWithDefault
+										Element:li
+										Element:code
+											arcDistanceInMiles
+										Element:li
+										Element:code
+											arcDistanceInMilesWithDefault
+										Element:li
+										Element:code
+											distanceWithDefault
+										Element:li
+										Element:code
+											distanceInKm
+										Element:li
+										Element:code
+											distanceInKmWithDefault
+										Element:li
+										Element:code
+											distanceInMiles
+										Element:li
+										Element:code
+											distanceInMilesWithDefault
+										Element:li
+										Element:code
+											geohashDistanceInKm
+										Element:li
+										Element:code
+											geohashDistanceInMiles
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Instead use
+										Element:code
+											arcDistance
+											,
+										Element:code
+											arcDistanceWithDefault
+											,
+										Element:code
+											planeDistance
+											,
+										Element:code
+											planeDistanceWithDefault
+											,
+										Element:code
+											geohashDistance
+											,
+										Element:code
+											geohashDistanceWithDefault
+											and convert from default units (meters) to desired units using the appropriate constance (e.g., multiply by
+										Element:code
+											0.001
+											to convert to Km).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Only 15 unique scripts can be compiled per minute by default
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you compile too many unique scripts within a small amount of time, Elasticsearch will reject the new dynamic scripts with a
+										Element:code
+											circuit_breaking_exception
+											error. By default, up to 15 inline scripts per minute will be compiled. You can change this setting dynamically by setting
+										Element:code
+											script.max_compilations_per_minute
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You should watch out for this if you are hard-coding values into your scripts.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Elasticsearch recommends the usage of parameters for efficient script handling. See details
+										Element:a
+											here
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Aggregation changes
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											API Conventions »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

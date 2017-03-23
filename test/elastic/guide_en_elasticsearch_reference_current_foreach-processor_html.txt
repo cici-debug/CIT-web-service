@@ -1,0 +1,463 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Foreach Processor
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:span
+								[
+							Element:span
+								experimental
+								]
+							Element:span
+								This processor may change or be replaced by something else that provides similar functionality. This processor executes in its own context, which makes it different compared to all other processors and for features like verbose simulation the subprocessor isn't visible. The reason we still expose this processor, is that it is the only processor that can operate on an array
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Processes elements in an array of unknown length.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All processors can operate on elements inside an array, but if all elements of an array need to be processed in the same way, defining a processor for each element becomes cumbersome and tricky because it is likely that the number of elements in an array is unknown. For this reason the
+							Element:code
+								foreach
+								processor exists. By specifying the field holding array elements and a processor that defines what should happen to each element, array fields can easily be preprocessed.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A processor inside the foreach processor works in the array element context and puts that in the ingest metadata under the
+							Element:code
+								_ingest._value
+								key. If the array element is a json object it holds all immediate fields of that json object. and if the nested object is a value is
+							Element:code
+								_ingest._value
+								just holds that value. Note that if a processor prior to the
+							Element:code
+								foreach
+								processor used
+							Element:code
+								_ingest._value
+								key then the specified value will not be available to the processor inside the
+							Element:code
+								foreach
+								processor. The
+							Element:code
+								foreach
+								processor does restore the original value, so that value is available to processors after the
+							Element:code
+								foreach
+								processor.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that any other field from the document are accessible and modifiable like with all other processors. This processor just puts the current array element being read into
+							Element:code
+								_ingest._value
+								ingest metadata attribute, so that it may be pre-processed.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If the
+							Element:code
+								foreach
+								processor fails to process an element inside the array, and no
+							Element:code
+								on_failure
+								processor has been specified, then it aborts the execution and leaves the array unmodified.
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Table 19. Foreach Options
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:colgroup
+							Element:col
+							Element:col
+							Element:col
+							Element:col
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Required
+							Element:th
+								Default
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								field
+							Element:td
+							Element:p
+								yes
+							Element:td
+							Element:p
+								-
+							Element:td
+							Element:p
+								The array field
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								processor
+							Element:td
+							Element:p
+								yes
+							Element:td
+							Element:p
+								-
+							Element:td
+							Element:p
+								The processor to execute against each field
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Assume the following document:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "values" : ["foo", "bar", "baz"] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When this
+							Element:code
+								foreach
+								processor operates on this sample document:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "foreach" : { "field" : "values", "processor" : { "uppercase" : { "field" : "_ingest._value" } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then the document will look like this after preprocessing:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "values" : ["FOO", "BAR", "BAZ"] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Let’s take a look at another example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "persons" : [ { "id" : "1", "name" : "John Doe" }, { "id" : "2", "name" : "Jane Doe" } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this case, the
+							Element:code
+								id
+								field needs to be removed, so the following
+							Element:code
+								foreach
+								processor is used:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "foreach" : { "field" : "persons", "processor" : { "remove" : { "field" : "_ingest._value.id" } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After preprocessing the result is:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "persons" : [ { "name" : "John Doe" }, { "name" : "Jane Doe" } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The wrapped processor can have a
+							Element:code
+								on_failure
+								definition. For example, the
+							Element:code
+								id
+								field may not exist on all person objects. Instead of failing the index request, you can use an
+							Element:code
+								on_failure
+								block to send the document to the
+							Element:span
+								index for later inspection:
+							Element:em
+								failure_index
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "foreach" : { "field" : "persons", "processor" : { "remove" : { "field" : "_value.id", "on_failure" : [ { "set" : { "field", "_index", "value", "failure_index" } } ] } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this example, if the
+							Element:code
+								remove
+								processor does fail, then the array elements that have been processed thus far will be updated.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Another advanced example can be found in the
+							Element:a
+								attachment processor documentation
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								« Fail Processor
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								Grok Processor »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

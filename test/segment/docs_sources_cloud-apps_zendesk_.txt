@@ -1,0 +1,386 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Zendesk Source
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								From your workspace’s
+							Element:code
+								sources
+								page, click
+							Element:code
+								add source
+								.
+							Element:li
+							Element:p
+								Choose Zendesk.
+							Element:li
+							Element:p
+								Give the source a nickname and a schema name. The nickname will be used to designate the source in the Segment interface, and the schema name is the namespace you’ll be querying against in your warehouse. Both can be whatever you like, but we recommend sticking to something that reflects the source itself, like
+							Element:code
+								Zendesk
+								for nickname and
+							Element:code
+								zendesk
+								or
+							Element:code
+								zendesk_prod
+								for the schema name.
+							Element:p
+							Element:strong
+								Note
+								that you can add multiple instances if you have multiple Zendesk accounts. That’s why we allow you to customize the source’s nickname and schema name!
+							Element:p
+							Element:img
+							Element:li
+							Element:p
+								When you click
+							Element:strong
+								Connect
+								, you’ll be dropped into Zendesk’s OAuth flow. Once you sign in and grant permissions, you’ll be good to go!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Components
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sync
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Zendesk source is built with a sync component, which means we’ll make requests to their API on your behalf on a 3 hour interval to pull the latest data into Segment. In the initial sync, we’ll grab all the Zendesk objects (and their corresponding properties) according to the Collections Table below. The objects will be written into a separate schema, corresponding to the source instance’s schema name you designated upon creation (ie.
+										Element:code
+											zendesk_prod.charges
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our sync component uses an upsert API, so the data in your warehouse loaded via sync will reflect the latest state of the corresponding resource in Zendesk. For example, if
+										Element:code
+											ticket_status
+											goes from
+										Element:code
+											open
+											to
+										Element:code
+											closed
+											between syncs, on its next sync that tickets status will be
+										Element:code
+											closed
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The source syncs and warehouse syncs are independent processes. Source runs pull your data into the Segment Hub, and warehouse runs flush that data to your warehouse. Sources will sync with Segment every 3 hours. Depending on your Warehouses plan, we will push the Source data to your warehouse on the interval associated with your billing plan.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At the moment, we don’t support filtering which objects or properties get synced. If you’re interested in this feature, please let us know!
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Rate Limits
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Zendesk source uses both Zendesk’s
+										Element:a
+											Core API
+											and
+										Element:a
+											Incremental Exports API
+											. The source’s requests to the Incremental API do not count towards your Zendesk account’s rate limits, but requests to the Core API do. By default, we cap our requests to Zendesk’s Core API to a rate of 200 requests per minute to avoid triggering
+										Element:a
+											Zendesk’s Rate Limits
+											. If you’d like us to increase or decrease the request rate for your source, please
+										Element:a
+											let us know
+											, and we’ll get it set up. We’ll add support for this in the UI soon!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Collections
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Collections are the groupings of resources we pull from your source. In your warehouse, each collection gets its own table.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								For a complete visual breakdown of the Zendesk collections, all their properties, and ID linkages between objects,
+							Element:a
+								view the visual schema here
+							Element:strong
+								or
+							Element:a
+								download it in PDF form here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Collection
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+								groups
+							Element:td
+								object
+							Element:td
+								When support requests arrive in Zendesk, they can be assigned to a Group. Groups serve as the core element of ticket workflow; support agents are organized into Groups and tickets can be assigned to a Group only, or to an assigned agent within a Group. A ticket can never be assigned to an agent without also being assigned to a Group.
+							Element:tr
+							Element:td
+								tickets
+							Element:td
+								object
+							Element:td
+								Tickets are the means through which your End-users (customers) communicate with Agents in Zendesk.
+							Element:strong
+								Note
+								: We pull all tickets updated (or created) in the last year to start by default. If you need more, just let us know and we’ll do a run to pull further back in history.
+							Element:tr
+							Element:td
+								activities
+							Element:td
+								object
+							Element:td
+								The activity stream is a per agent event stream. It will give access to the most recent events that relate to the agent polling the API.
+							Element:tr
+							Element:td
+								attachments
+							Element:td
+								object
+							Element:td
+								This API is for attachments in tickets and forum posts in the Web portal.
+							Element:tr
+							Element:td
+								organizations
+							Element:td
+								object
+							Element:td
+								Just as agents can be segmented into groups in Zendesk, your customers (end-users) can be segmented into organizations.
+							Element:tr
+							Element:td
+								ticket_events
+							Element:td
+								events
+							Element:td
+								Returns a stream of changes that occurred on tickets. Each event is tied to an update on a ticket and contains all the fields that were updated in that change.
+							Element:strong
+								Note
+								: We pull 1 year of ticket events to start by default. If you need more, just let us know and we’ll do a run to pull further back in history.
+							Element:tr
+							Element:td
+								ticket_metrics
+							Element:td
+								object
+							Element:td
+								All kinds of aggregate metrics about a ticket
+							Element:tr
+							Element:td
+								satisfaction_ratings
+							Element:td
+								object
+							Element:td
+								If you have enabled satisfaction ratings for your account, this end point allows you to quickly retrieve all ratings.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have any questions or see anywhere we can improve our documentation, please
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:span
+							Element:span
+								Was this document helpful?
+							Element:span
+							Element:label
+							Element:span
+								Yes
+							Element:label
+							Element:span
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

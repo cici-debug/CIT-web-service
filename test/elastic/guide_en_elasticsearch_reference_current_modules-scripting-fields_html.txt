@@ -1,0 +1,649 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Accessing document fields and special variables
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Depending on where a script is used, it will have access to certain special variables and document fields.
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Update scripts
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A script used in the
+							Element:a
+								update
+								,
+							Element:a
+								update-by-query
+								, or
+							Element:a
+								reindex
+								API will have access to the
+							Element:code
+								ctx
+								variable which exposes:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:colgroup
+							Element:col
+							Element:col
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								ctx._source
+							Element:td
+							Element:p
+								Access to the document
+							Element:a
+								.
+							Element:code
+								_source
+								field
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								ctx.op
+							Element:td
+							Element:p
+								The operation that should be applied to the document:
+							Element:code
+								index
+								or
+							Element:code
+								delete
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								ctx._index
+								etc
+							Element:td
+							Element:p
+								Access to
+							Element:a
+								document meta-fields
+								, some of which may be read-only.
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Search and Aggregation scripts
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								With the exception of
+							Element:a
+								script fields
+								which are executed once per search hit, scripts used in search and aggregations will be executed once for every document which might match a query or an aggregation. Depending on how many documents you have, this could mean millions or billions of executions: these scripts need to be fast!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Field values can be accessed from a script using
+							Element:a
+								doc-values
+								, or
+							Element:a
+								stored fields or
+								, which are explained below.
+							Element:code
+								_source
+								field
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Scripts may also have access to the document’s relevance
+							Element:a
+								and, via the experimental
+							Element:code
+								_score
+							Element:code
+								_index
+								variable, to term statistics for
+							Element:a
+								advanced text scoring
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Accessing the score of a document within a script
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Scripts used in the
+										Element:a
+											, in
+										Element:code
+											function_score
+											query
+										Element:a
+											script-based sorting
+											, or in
+										Element:a
+											aggregations
+											have access to the
+										Element:code
+											_score
+											variable which represents the current relevance score of a document.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here’s an example of using a script in a
+										Element:a
+											to alter the relevance
+										Element:code
+											function_score
+											query
+										Element:code
+											_score
+											of each document:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index/my_type/1 { "text": "quick brown fox", "popularity": 1 } PUT my_index/my_type/2 { "text": "quick fox", "popularity": 5 } GET my_index/_search { "query": { "function_score": { "query": { "match": { "text": "quick brown fox" } }, "script_score": { "script": { "lang": "expression", "inline": "_score * doc['popularity']" } } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Doc Values
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By far the fastest most efficient way to access a field value from a script is to use the
+										Element:code
+											doc['field_name']
+											syntax, which retrieves the field value from
+										Element:a
+											doc values
+											. Doc values are a columnar field value store, enabled by default on all fields except for
+										Element:a
+											analyzed
+											.
+										Element:code
+											text
+											fields
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index/my_type/1 { "cost_price": 100 } GET my_index/_search { "script_fields": { "sales_price": { "script": { "lang": "expression", "inline": "doc['cost_price'] * markup", "params": { "markup": 0.2 } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Doc-values can only return "simple" field values like numbers, dates, geo- points, terms, etc, or arrays of these values if the field is multi-valued. It cannot return JSON objects.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Doc values and
+										Element:code
+											text
+											fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											doc['field']
+											syntax can also be used for
+										Element:a
+											analyzed
+											if
+										Element:code
+											text
+											fields
+										Element:a
+											is enabled, but
+										Element:code
+											fielddata
+										Element:span
+											: enabling fielddata on a
+										Element:strong
+											BEWARE
+										Element:code
+											text
+											field requires loading all of the terms into the JVM heap, which can be very expensive both in terms of memory and CPU. It seldom makes sense to access
+										Element:code
+											text
+											fields from scripts.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Stored Fields and
+										Element:code
+											_source
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											— fields explicitly marked as
+										Element:em
+											Stored fields
+										Element:a
+											— can be accessed using the
+										Element:code
+											"store": true
+										Element:code
+											_fields['field_name'].value
+											or
+										Element:code
+											_fields['field_name'].values
+											syntax.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The document
+										Element:a
+											, which is really just a special stored field, can be accessed using the
+										Element:code
+											_source
+										Element:code
+											_source.field_name
+											syntax. The
+										Element:code
+											_source
+											is loaded as a map-of-maps, so properties within object fields can be accessed as, for example,
+										Element:code
+											_source.name.first
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Prefer doc-values to stored fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Stored fields (which includes the stored
+										Element:code
+											_source
+											field) are much slower than doc-values. They are optimised for returning several fields per result, while doc values are optimised for accessing the value of a specific field in many documents.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It makes sense to use
+										Element:code
+											_source
+											or stored fields when generating a
+										Element:a
+											script field
+											for the top ten hits from a search result but, for other search and aggregation use cases, always prefer using doc values.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For instance:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "mappings": { "my_type": { "properties": { "title": {
+										Element:a
+										Element:span
+											"type": "text" }, "first_name": { "type": "text", "store": true }, "last_name": { "type": "text", "store": true } } } } } PUT my_index/my_type/1 { "title": "Mr", "first_name": "Barry", "last_name": "White" } GET my_index/_search { "script_fields": { "source": { "script": { "inline": "params._source.title + ' ' + params._source.first_name + ' ' + params._source.last_name"
+										Element:img
+										Element:a
+										Element:span
+											} }, "stored_fields": { "script": { "inline": "params._fields['first_name'].value + ' ' + params._fields['last_name'].value" } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											title
+											field is not stored and so cannot be used with the
+										Element:code
+											_fields[]
+											syntax.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											title
+											field can still be accessed from the
+										Element:code
+											_source
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Stored vs
+										Element:code
+											_source
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_source
+											field is just a special stored field, so the performance is similar to that of other stored fields. The
+										Element:code
+											_source
+											provides access to the original document body that was indexed (including the ability to distinguish
+										Element:code
+											null
+											values from empty fields, single-value arrays from plain scalars, etc).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The only time it really makes sense to use stored fields instead of the
+										Element:code
+											_source
+											field is when the
+										Element:code
+											_source
+											is very large and it is less costly to access a few small stored fields instead of the entire
+										Element:code
+											_source
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« How to use scripts
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Scripting and security »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

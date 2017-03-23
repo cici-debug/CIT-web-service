@@ -1,0 +1,565 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Adding Field Validation to the Record View
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This page explains how to add additional field validation to the record view. In the following examples, we will extend and override the stock Accounts record view to add custom validation. The custom validation will require the Office Phone field when the account type is set to "Customer" and also require the user to enter at least one email address.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Method 1: Extending the RecordView and CreateView Controllers
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								One way to validate fields on record view is by creating
+							Element:code
+								record
+								and
+							Element:code
+								create
+								view controllers. This method requires a duplication of code due to the hierarchy design, however, it does organize the code by module and extend the core functionality. To accomplish this, override and extend the create view controller. This handles the validation when a user is creating a new record. Once the controller has been properly extended, define the validation check and use the
+							Element:code
+								model.addValidationTask
+								method to append your function to the save validation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/modules/Accounts/clients/base/views/create/create.js
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								({ extendsFrom: 'CreateView', initialize: function (options) { this._super('initialize', [options]); //add validation tasks this.model.addValidationTask('check_account_type', _.bind(this._doValidateCheckType, this)); this.model.addValidationTask('check_email', _.bind(this._doValidateEmail, this)); }, _doValidateCheckType: function(fields, errors, callback) { //validate type requirements if (this.model.get('account_type') == 'Customer' && _.isEmpty(this.model.get('phone_office'))) { errors['phone_office'] = errors['phone_office'] || {}; errors['phone_office'].required = true; } callback(null, fields, errors); }, _doValidateEmail: function(fields, errors, callback) { //validate email requirements if (_.isEmpty(this.model.get('email'))) { errors['email'] = errors['email'] || {}; errors['email'].required = true; } callback(null, fields, errors); }, })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Next, duplicate the validation logic for the record view. This handles the validation when editing existing records.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/modules/Accounts/clients/base/views/record/record.js
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								({ /* because 'accounts' already has a record view, we need to extend it */ extendsFrom: 'AccountsRecordView', initialize: function (options) { this._super('initialize', [options]); //add validation tasks this.model.addValidationTask('check_account_type', _.bind(this._doValidateCheckType, this)); this.model.addValidationTask('check_email', _.bind(this._doValidateEmail, this)); }, _doValidateCheckType: function(fields, errors, callback) { //validate requirements if (this.model.get('account_type') == 'Customer' && _.isEmpty(this.model.get('phone_office'))) { errors['phone_office'] = errors['phone_office'] || {}; errors['phone_office'].required = true; } callback(null, fields, errors); }, _doValidateEmail: function(fields, errors, callback) { //validate email requirements if (_.isEmpty(this.model.get('email'))) { errors['email'] = errors['email'] || {}; errors['email'].required = true; } callback(null, fields, errors); }, })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once the files are in place, navigate to Admin > Repair > Quick Repair and Rebuild. More information on displaying custom error messages can be found in the
+							Element:a
+								Error Messages
+								section.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Method 2: Overriding the RecordView and CreateView Layouts
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Another method for defining your own custom validation is to override a module's
+							Element:code
+								record
+								and
+							Element:code
+								create
+								layouts to append a new view with your logic. The benefits of this method are that you can use the single view to house the validation logic, however, this means that you will have to override the layout. When overriding a layout, verify that the layout has not changed when upgrading your instance. Once the layouts are overridden, define the validation check and use the
+							Element:code
+								model.addValidationTask
+								method to append the function to the save validation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, create the custom view. For the accounts example, create the view validate-account:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/modules/Accounts/clients/base/views/validate-account/validate-account.js
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								({ className:"hidden", _render: function() { //No-op, Do nothing here }, bindDataChange: function() { //add validation tasks this.model.addValidationTask('check_account_type', _.bind(this._doValidateCheckType, this)); this.model.addValidationTask('check_email', _.bind(this._doValidateEmail, this)); }, _doValidateCheckType: function(fields, errors, callback) { //validate type requirements if (this.model.get('account_type') == 'Customer' && _.isEmpty(this.model.get('phone_office'))) { errors['phone_office'] = errors['phone_office'] || {}; errors['phone_office'].required = true; } callback(null, fields, errors); }, _doValidateEmail: function(fields, errors, callback) { //validate email requirements if (_.isEmpty(this.model.get('email'))) { errors['email'] = errors['email'] || {}; errors['email'].required = true; } callback(null, fields, errors); }, })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								More information on displaying custom error messages can be found in the
+							Element:a
+								Error Messages
+								section. Next, depending on the selected module, duplicate its create layout to the modules custom folder to handle record creation. In our Accounts example, we have an existing
+							Element:code
+								./modules/Accounts/clients/base/layouts/create/create.php
+								file so we need to duplicate this file to
+							Element:code
+								./custom/modules/Accounts/clients/base/layouts/create/create.php
+								. After this has been completed, append the new custom view to the components. append:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								array( 'view' => 'validate-account', ),
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/modules/Accounts/clients/base/layouts/create/create.php
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php $viewdefs['Accounts']['base']['layout']['create'] = array( 'components' => array( array( 'layout' => array( 'components' => array( array( 'layout' => array( 'components' => array( array( 'view' => 'create', ), array( 'view' => 'validate-account', ), ), 'type' => 'simple', 'name' => 'main-pane', 'span' => 8, ), ), array( 'layout' => array( 'components' => array(), 'type' => 'simple', 'name' => 'side-pane', 'span' => 4, ), ), array( 'layout' => array( 'components' => array( array( 'view' => array ( 'name' => 'dnb-account-create', 'label' => 'DNB Account Create', ), 'width' => 12, ), ), 'type' => 'simple', 'name' => 'dashboard-pane', 'span' => 4, ), ), array( 'layout' => array( 'components' => array( array( 'layout' => 'preview', ), ), 'type' => 'simple', 'name' => 'preview-pane', 'span' => 8, ), ), ), 'type' => 'default', 'name' => 'sidebar', 'span' => 12, ), ), ), 'type' => 'simple', 'name' => 'base', 'span' => 12, );
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Lastly, depending on the selected module, duplicate its record layout to the modules custom folder to handle editing a record. In the accounts example, we do not have an existing
+							Element:code
+								./modules/Accounts/clients/base/layouts/record/record.php
+								file so we duplicated the core
+							Element:code
+								./clients/base/layouts/record/record.php
+								to
+							Element:code
+								./custom/modules/Accounts/clients/base/layouts/record/record.php
+								. Since we are copying from the
+							Element:code
+								./clients/
+								core directory, modify:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								$viewdefs['base']['layout']['record'] = array(
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								$viewdefs['Accounts']['base']['layout']['record'] = array(
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After this has been completed, append the new custom view to the components:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								array( 'view' => 'validate-account', ),
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The resulting file is shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/modules/Accounts/clients/base/layouts/record/record.php
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php $viewdefs['Accounts']['base']['layout']['record'] = array( 'components' => array( array( 'layout' => array( 'components' => array( array( 'layout' => array( 'components' => array( array( 'view' => 'record', 'primary' => true, ), array( 'view' => 'validate-account', ), array( 'layout' => 'extra-info', ), array( 'layout' => array( 'name' => 'filterpanel', 'span' => 12, 'last_state' => array( 'id' => 'record-filterpanel', 'defaults' => array( 'toggle-view' => 'subpanels', ), ), 'availableToggles' => array( array( 'name' => 'subpanels', 'icon' => 'icon-table', 'label' => 'LBL_DATA_VIEW', ), array( 'name' => 'list', 'icon' => 'icon-table', 'label' => 'LBL_LISTVIEW', ), array( 'name' => 'activitystream', 'icon' => 'icon-th-list', 'label' => 'LBL_ACTIVITY_STREAM', ), ), 'components' => array( array( 'layout' => 'filter', 'targetEl' => '.filter', 'position' => 'prepend' ), array( 'view' => 'filter-rows', "targetEl" => '.filter-options' ), array( 'view' => 'filter-actions', "targetEl" => '.filter-options' ), array( 'layout' => 'activitystream', 'context' => array( 'module' => 'Activities', ), ), array( 'layout' => 'subpanels', ), ), ), ), ), 'type' => 'simple', 'name' => 'main-pane', 'span' => 8, ), ), array( 'layout' => array( 'components' => array( array( 'layout' => 'sidebar', ), ), 'type' => 'simple', 'name' => 'side-pane', 'span' => 4, ), ), array( 'layout' => array( 'components' => array( array( 'layout' => array( 'type' => 'dashboard', 'last_state' => array( 'id' => 'last-visit', ) ), 'context' => array( 'forceNew' => true, 'module' => 'Home', ), ), ), 'type' => 'simple', 'name' => 'dashboard-pane', 'span' => 4, ), ), array( 'layout' => array( 'components' => array( array( 'layout' => 'preview', ), ), 'type' => 'simple', 'name' => 'preview-pane', 'span' => 8, ), ), ), 'type' => 'default', 'name' => 'sidebar', 'span' => 12, ), ), ), 'type' => 'simple', 'name' => 'base', 'span' => 12, );
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once the files are in place, navigate to Admin > Repair > Quick Repair and Rebuild.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Error Messages
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When throwing a validation error, Sugar has several stock messages you may choose to use. They are listed below:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:strong
+								Error Key
+							Element:td
+							Element:strong
+								Label
+							Element:td
+							Element:strong
+								Description
+							Element:tr
+							Element:td
+								maxValue
+							Element:td
+								ERROR_MAXVALUE
+							Element:td
+								This maximum value of this field
+							Element:tr
+							Element:td
+								minValue
+							Element:td
+								ERROR_MINVALUE
+							Element:td
+								This minimum value of this field
+							Element:tr
+							Element:td
+								maxLength
+							Element:td
+								ERROR_MAX_FIELD_LENGTH
+							Element:td
+								The max length of this field
+							Element:tr
+							Element:td
+								minLength
+							Element:td
+								ERROR_MIN_FIELD_LENGTH
+							Element:td
+								The min length of this field
+							Element:tr
+							Element:td
+								datetime
+							Element:td
+								ERROR_DATETIME
+							Element:td
+								This field requires a valid date
+							Element:tr
+							Element:td
+								required
+							Element:td
+								ERROR_FIELD_REQUIRED
+							Element:td
+								This field is required
+							Element:tr
+							Element:td
+								email
+							Element:td
+								ERROR_EMAIL
+							Element:td
+								There is an invalid email address
+							Element:tr
+							Element:td
+								primaryEmail
+							Element:td
+								ERROR_PRIMARY_EMAIL
+							Element:td
+								No primary email address is set
+							Element:tr
+							Element:td
+								duplicateEmail
+							Element:td
+								ERROR_DUPLICATE_EMAIL
+							Element:td
+								There is a duplicate email address
+							Element:tr
+							Element:td
+								number
+							Element:td
+								ERROR_NUMBER
+							Element:td
+								This field requires a valid number
+							Element:tr
+							Element:td
+								isBefore
+							Element:td
+								ERROR_IS_BEFORE
+							Element:td
+								The date of this field can not be after another date
+							Element:tr
+							Element:td
+								isAfter
+							Element:td
+								ERROR_IS_AFTER
+							Element:td
+								The date of this field can not be before another date
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You also have the option of displaying multiple error messages at a time. The example below would throw an error message notifying the user that the selected field is required and that it is also not a number.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								errors['<field name>'] = errors['<field name>'] || {}; errors['<field name>'].required = true; errors['<field name>'].number = true;
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Custom Error Messages
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Custom error message can be used by appending your messages language key to
+							Element:code
+								app.error.errorName2Keys
+								when initializing the extended view. The example below demonstrates this process expanding on the example above:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/Extension/application/Ext/Language/en_us.err_custom_message.php
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php $app_strings['ERR_CUSTOM_MESSAGE'] = 'My custom error message.';
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/modules/Accounts/clients/base/views/record/record.js
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								({ extendsFrom: 'RecordView', initialize: function (options) { this._super('initialize', [options]); //add custom message key app.error.errorName2Keys['custom_message'] = 'ERR_CUSTOM_MESSAGE'; //add validation this.model.addValidationTask('check_account_type', _.bind(this._doValidateCheckType, this)); }, _doValidateCheckType: function(fields, errors, callback) { //validate requirements if (this.model.get('account_type') == 'Customer' && _.isEmpty(this.model.get('phone_office'))) { errors['phone_office'] = errors['phone_office'] || {}; errors['phone_office'].custom_message = true; } callback(null, fields, errors); } })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 11/09/2016 12:39pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

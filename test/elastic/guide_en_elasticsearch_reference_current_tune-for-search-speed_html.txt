@@ -1,0 +1,606 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Tune for search speed
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Give memory to the filesystem cache
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Elasticsearch heavily relies on the filesystem cache in order to make search fast. In general, you should make sure that at least half the available memory goes to the filesystem cache so that elasticsearch can keep hot regions of the index in physical memory.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Use faster hardware
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your search is I/O bound, you should investigate giving more memory to the filesystem cache (see above) or buying faster drives. In particular SSD drives are known to perform better than spinning disks. Always use local storage, remote filesystems such as
+										Element:code
+											NFS
+											or
+										Element:code
+											SMB
+											should be avoided. Also beware of virtualized storage such as Amazon’s
+										Element:code
+											Elastic Block Storage
+											. Virtualized storage works very well with Elasticsearch, and it is appealing since it is so fast and simple to set up, but it is also unfortunately inherently slower on an ongoing basis when compared to dedicated local storage. If you put an index on
+										Element:code
+											EBS
+											, be sure to use provisioned IOPS otherwise operations could be quickly throttled.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your search is CPU-bound, you should investigate buying faster CPUs.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Document modeling
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Documents should be modeled so that search-time operations are as cheap as possible.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In particular, joins should be avoided.
+										Element:a
+											can make queries several times slower and
+										Element:code
+											nested
+										Element:a
+											parent-child
+											relations can make queries hundreds of times slower. So if the same questions can be answered without joins by denormalizing documents, significant speedups can be expected.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Pre-index data
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You should leverage patterns in your queries to optimize the way data is indexed. For instance, if all your documents have a
+										Element:code
+											price
+											field and most queries run
+										Element:a
+											aggregations on a fixed list of ranges, you could make this aggregation faster by pre-indexing the ranges into the index and using a
+										Element:code
+											range
+										Element:a
+											aggregations.
+										Element:code
+											terms
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For instance, if documents look like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT index/type/1 { "designation": "spoon", "price": 13 }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											and search requests look like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET index/_search { "aggs": { "price_ranges": { "range": { "field": "price", "ranges": [ { "to": 10 }, { "from": 10, "to": 100 }, { "from": 100 } ] } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Then documents could be enriched by a
+										Element:code
+											price_range
+											field at index time, which should be mapped as a
+										Element:a
+											:
+										Element:code
+											keyword
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT index { "mappings": { "type": { "properties": { "price_range": { "type": "keyword" } } } } } PUT index/type/1 { "designation": "spoon", "price": 13, "price_range": "10-100" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And then search requests could aggregate this new field rather than running a
+										Element:code
+											range
+											aggregation on the
+										Element:code
+											price
+											field.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET index/_search { "aggs": { "price_ranges": { "terms": { "field": "price_range" } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Mappings
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The fact that some data is numeric does not mean it should always be mapped as a
+										Element:a
+											numeric field
+											. Typically, fields storing identifiers such as an
+										Element:code
+											ISBN
+											or any number identifying a record from another database, might benefit from being mapped as
+										Element:a
+											rather than
+										Element:code
+											keyword
+										Element:code
+											integer
+											or
+										Element:code
+											long
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Avoid scripts
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In general, scripts should be avoided. If they are absolutely needed, you should prefer the
+										Element:code
+											painless
+											and
+										Element:code
+											expressions
+											engines.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Search rounded dates
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Queries on date fields that use
+										Element:code
+											now
+											are typically not cacheable since the range that is being matched changes all the time. However switching to a rounded date is often acceptable in terms of user experience, and has the benefit of making better use of the query cache.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For instance the below query:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT index/type/1 { "my_date": "2016-05-11T16:30:55.328Z" } GET index/_search { "query": { "constant_score": { "filter": { "range": { "my_date": { "gte": "now-1h", "lte": "now" } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											could be replaced with the following query:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET index/_search { "query": { "constant_score": { "filter": { "range": { "my_date": { "gte": "now-1h/m", "lte": "now/m" } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In that case we rounded to the minute, so if the current time is
+										Element:code
+											16:31:29
+											, the range query will match everything whose value of the
+										Element:code
+											my_date
+											field is between
+										Element:code
+											15:31:00
+											and
+										Element:code
+											16:31:59
+											. And if several users run a query that contains this range in the same minute, the query cache could help speed things up a bit. The longer the interval that is used for rounding, the more the query cache can help, but beware that too aggressive rounding might also hurt user experience.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It might be tempting to split ranges into a large cacheable part and smaller not cacheable parts in order to be able to leverage the query cache, as shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET index/_search { "query": { "constant_score": { "filter": { "bool": { "should": [ { "range": { "my_date": { "gte": "now-1h", "lte": "now-1h/m" } } }, { "range": { "my_date": { "gt": "now-1h/m", "lt": "now/m" } } }, { "range": { "my_date": { "gte": "now/m", "lte": "now" } } } ] } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											However such practice might make the query run slower in some cases since the overhead introduced by the
+										Element:code
+											bool
+											query may defeat the savings from better leveraging the query cache.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Force-merge read-only indices
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Indices that are read-only would benefit from being
+										Element:a
+											merged down to a single segment
+											. This is typically the case with time-based indices: only the index for the current time frame is getting new documents while older indices are read-only.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Don’t force-merge indices that are still being written to — leave merging to the background merge process.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Warm up global ordinals
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Global ordinals are a data-structure that is used in order to run
+										Element:a
+											aggregations on
+										Element:code
+											terms
+										Element:a
+											fields. They are loaded lazily in memory because elasticsearch does not know which fields will be used in
+										Element:code
+											keyword
+										Element:code
+											terms
+											aggregations and which fields won’t. You can tell elasticsearch to load global ordinals eagerly at refresh-time by configuring mappings as described below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT index { "mappings": { "type": { "properties": { "foo": { "type": "keyword", "eager_global_ordinals": true } } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Warm up the filesystem cache
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the machine running elasticsearch is restarted, the filesystem cache will be empty, so it will take some time before the operating system loads hot regions of the index into memory so that search operations are fast. You can explicitly tell the operating system which files should be loaded into memory eagerly depending on the file extension using the
+										Element:a
+											setting.
+										Element:code
+											index.store.preload
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Loading data into the filesystem cache eagerly on too many indices or too many files will make search
+										Element:span
+											if the filesystem cache is not large enough to hold all the data. Use with caution.
+										Element:em
+											slower
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Tune for indexing speed
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Tune for disk usage »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

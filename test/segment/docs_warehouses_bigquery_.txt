@@ -1,0 +1,345 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					BigQuery
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment’s BigQuery connector makes it easy to load web, mobile, and third-party source data like Salesforce, Zendesk, and Google AdWords into a BigQuery data warehouse. This guide will explain how to set up BigQuery and start loading data into it.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Segment warehouse connector runs a periodic ETL (Extract - Transform - Load) process to pull raw events and objects and programmatically insert the structured data into your BigQuery cluster.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To do so, our connector first establishes an encrypted connection with the cluster over TLS. The connector then pulls the unstructured raw events from the S3 bucket and associated with the Segment source. The connector processes those raw events into a structured format, at which point a COPY command is executed to transfer the data from our bucket to your BigQuery cluster.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using BigQuery through Segment means you’ll get a fully managed data pipeline loaded into one of the most powerful and cost-effective data warehouses today.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setup
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, you’ll want to set up your BigQuery instance. Once you have an instance with the proper permissions, you’ll add your
+							Element:code
+								projectId
+								to Segment and we’ll begin the first sync.
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Navigate to the
+							Element:a
+								Google Developers Console
+							Element:li
+								If you don’t have a Cloud Platform setup,
+							Element:a
+								create a project
+								.
+							Element:strong
+								Note:
+								make sure to
+							Element:a
+								enable billing
+								, otherwise Segment will not be able to write into the cluster.
+							Element:li
+							Element:p
+								Go to
+							Element:code
+								IAM
+								>
+							Element:code
+								Project Name
+								>
+							Element:code
+								Project-Name
+							Element:p
+							Element:img
+							Element:li
+							Element:p
+								Add
+							Element:code
+								connector@segment-1119.iam.gserviceaccount.com
+								as a BigQuery User
+							Element:p
+							Element:img
+							Element:li
+							Element:p
+								In Segment, go to Workspace > Warehouses > Add Warehouse
+							Element:p
+							Element:img
+							Element:li
+							Element:p
+								Select
+							Element:code
+								BigQuery
+							Element:p
+							Element:img
+							Element:li
+							Element:p
+								Add your
+							Element:code
+								Project Id
+								from the BigQuery Console
+							Element:p
+							Element:img
+							Element:img
+							Element:li
+							Element:p
+								Click
+							Element:code
+								Connect
+								. Your data will begin loading!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Schema
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								BigQuery datasets are broken down into
+							Element:strong
+								tables
+								and
+							Element:strong
+								views
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Partitioned Tables
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Segment connector takes advantage of
+										Element:a
+											partitioned tables
+											. Partitioned tables allow you to query a subset of data, thus increasing query performance and decreasing costs.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To query a full table, you can query like this…
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											select * from <project-id>.<source-name>.<collection-name>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To query a specific partitioned table, you can query like this…
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											select * from <project-id>.<source-name>.<collection-name>$20160809
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Views
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Views
+											are is a virtual table defined by a SQL query. We use views in our de-duplication process to ensure that events that you are querying unique events, and the latest objects from third-party data. Whenever possible, we recommend that you query from these views.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Views are appended with
+										Element:code
+											_view
+											, which you can query like this…
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											select * from <project-id>.<source-name>.<collection-name>_view
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Best Practices
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are a few best practices tips that you should keep in mind as your query BigQuery.
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								BiqQuery charges based on the amount of data scanned by your queries. Views are a derived view over your tables that we use for de-duplication of events. Therefore, we recommend you query a specific view whenever possible to avoid duplicate events and historical objects. It’s important to note that BigQuery views are not cached.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:p
+								BigQuery’s views are logical views, not materialized views, which means that the query that defines the view is re-executed every time the view is queried. Queries are billed according to the total amount of data in all table fields referenced directly or indirectly by the top-level query.
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								To save money, you can query the view and set a destination table, and then query the destination table.
+							Element:li
+								If you typically start exploratory data analysis with
+							Element:code
+								SELECT *
+								consider specifying the fields to reduce costs.
+							Element:li
+								You can connect to BigQuery using a BI tool like Mode or Looker, or query directly from the BigQuery console.
+							Element:li
+								BigQuery now supports standard SQL, which you can enable via their query UI. This does not work with views, or with a query that utilizes table range functions.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Pricing
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								BigQuery offers both a scalable, pay-as-you-go pricing plan based on the amount of data scanned, or a flat-rate monthly cost. You can learn more about BigQuery pricing
+							Element:a
+								here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								BigQuery allows you to setup
+							Element:a
+								Cost Controls and Alerts
+								to help control and monitor costs. If you want to learn more about what BigQuery will cost you, they’ve provided
+							Element:a
+								this calculator
+								to estimate your costs.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Streaming Inserts
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment’s connector does not support streaming inserts at this time. If you have a need for streaming data into BigQuery, please
+							Element:a
+								contact us
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have any questions or see anywhere we can improve our documentation, please
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:span
+							Element:span
+								Was this document helpful?
+							Element:span
+							Element:label
+							Element:span
+								Yes
+							Element:label
+							Element:span
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					BigQuery
+				Element:li
+				Element:a
+					Postgres
+				Element:li
+				Element:a
+					Redshift
+				Element:li
+				Element:a
+					Schema

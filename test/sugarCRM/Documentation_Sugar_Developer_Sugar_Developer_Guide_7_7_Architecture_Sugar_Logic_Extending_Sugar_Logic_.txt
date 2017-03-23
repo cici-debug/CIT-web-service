@@ -1,0 +1,331 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Extending Sugar Logic
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								How to write custom Sugar Logic functions.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Writing a Custom Formula Function
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The most important feature of Sugar Logic is that it is simply and easily extendable. Both custom formula functions and custom actions can be added in an upgrade safe manner to allow almost any custom logic to be added to Sugar. Custom functions will be stored in ./
+							Element:span
+								custom/include/Expressions/Expression/
+							Element:span
+								{Type}
+							Element:span
+								/
+							Element:span
+								{Function_Name}
+							Element:span
+								.php
+								. The first step in writing a custom function is to decide what category the function falls under. Take for example a function for calculating the
+							Element:span
+								factorial
+								of a number. In this case we will be returning a number so we will create a file in ./
+							Element:span
+								custom/include/Expressions/Expression/
+							Element:span
+								Numeric
+							Element:span
+								/
+								called "
+							Element:span
+								FactorialExpression.php
+								". In the new PHP file we just created, we will define a class called
+							Element:span
+								FactorialExpression
+								that will extend
+							Element:span
+								NumericExpression
+								. All formula functions must follow the format "{functionName}Expression.php" and the class name must match the file name. Next we need to decide what parameters the function will accept. In this case, we need take in a single parameter, the number to return the factorial of. Since this class will be a sub-class of
+							Element:span
+								NumericExpression
+								, it by default accepts only
+							Element:span
+								numeric
+								types, we need not worry about specifying the type requirement.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Next, we must define the logic behind evaluating this expression. So we must override the abstract
+							Element:span
+								evaluate()
+								function. The parameters can be accessed by calling an internal function
+							Element:span
+								getParameters()
+								which returns the parameters passed in to this object. So with all this information we can go ahead and write the code for the function.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php require_once('include/Expressions/Expression/Numeric/NumericExpression.php'); class FactorialExpression extends NumericExpression { function evaluate() { $params = $this->getParameters(); // params is an Expression object, so evaluate it // to get its numerical value $number = $params->evaluate(); // exception handling if ( ! is_int( $number ) ) { throw new Exception("factorial: Only accepts integers"); } if ( $number < 0 ) { throw new Exception("factorial: The number must be positive"); } // special case 0! = 1 if ( $number == 0 ) return 1; // calculate the factorial $factorial = 1; for ( $i = 2 ; $i <= $number ; $i ++ ) { $factorial = $factorial * $i; } return $factorial; } // Define the javascript version of the function static function getJSEvaluate() { return <<<EOQ var params = this.getParameters(); var number = params.evaluate(); // reg-exp integer test if ( ! /^\d*$/.test(number) ) throw "factorial: Only accepts integers"; if ( number < 0 ) throw "factorial: The number must be postitive"; // special case, 0! = 1 if ( number == 0 ) return 1; // compute factorial var factorial = 1; for ( var i = 2 ; i <= number ; i ++ ) factorial = factorial * i; return factorial; EOQ; } function getParameterCount() { return 1; // we only accept a single parameter } static function getOperationName() { return "factorial"; // our function can be called by 'factorial' } } ?>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								One of the key features of Sugar Logic is that the functions should be defined in both php and javascript, and have the same functionality under both circumstances. As you can see above, the
+							Element:span
+								getJSEvaluate()
+								method should return the JavaScript equivalent of your
+							Element:span
+								evaluate()
+								method. The JavaScript code is compiled and assembled for you after you run the "Rebuild Sugar Logic Functions" script through the admin panel.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Writing a Custom Action
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using custom actions, you can easily create reusable custom logic or integrations that can include user-editable logic using the Sugar Formula Engine. Custom actions will be stored in "
+										Element:span
+											custom/include/Expressions/Actions/
+										Element:span
+											{ActionName}.
+										Element:span
+											php".
+											Actions files must end in "Action.php" and the class defined in the file must match the file name and extend the "AbstractAction" class. The basic functions that must be defined are "fire", "getDefinition", "getActionName", "getJavascriptClass", and "getJavscriptFire". Unlike functions, there is no requirement that an action works exactly the same both server and client side as this is not always sensible or feasible.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A simple action could be a "
+										Element:span
+											WarningAction
+											" that shows an alert warning the user that something may be wrong, and logs a message to the
+										Element:span
+											sugarcrm.log
+											file if triggered on the server side. It will take in a message as a formula so that the message can be customized at run time. We would do this by creating a php file in ./
+										Element:span
+											custom/include/Expressions/Actions/
+										Element:span
+											WarningAction.
+										Element:span
+											php as shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php require_once("include/Expressions/Actions/AbstractAction.php"); class WarningAction extends AbstractAction { protected $messageExp = ""; function SetZipCodeAction($params) { $this->messageExp = $params['message']; } /** * Returns the javascript class equavalent to this php class * @return string javascript. */ static function getJavascriptClass() { return <<<EOQ SUGAR.forms.WarningAction = function(message) { this.messageExp = message; }; //Use the sugar extend function to extend AbstractAction SUGAR.util.extend(SUGAR.forms.WarningAction, SUGAR.forms.AbstractAction, { //javascript exection code exec : function() { //assume the message is a formula var msg = SUGAR.forms.evalVariableExpression(this.messageExp); alert(msg.evaluate()); } }); EOQ; } /** * Returns the javascript code to generate this actions equivalent. * @return string javascript. */ function getJavascriptFire() { return "new SUGAR.forms.WarningAction('{$this->messageExp}')"; } /** * Applies the Action to the target. * @param SugarBean $target */ function fire(&$target) { //Parse the message formula and log it to fatal. $expr = Parser::replaceVariables($this->messageExp, $target); $result = Parser::evaluate($expr)->evaluate(); $GLOBALS['log']->warn($result); } /** * Returns the definition of this action in array format. */ function getDefinition() { return array("message" => $this->messageExp); } /** * Returns the short name used when defining dependencies that use this action. */ static function getActionName() { return "Warn"; } } ?>
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 10/08/2015 03:56pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

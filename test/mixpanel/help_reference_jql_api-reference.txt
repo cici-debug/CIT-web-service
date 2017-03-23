@@ -1,0 +1,6162 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					JQL: API reference
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This is reference documentation for the
+				Element:a
+					JQL API
+					, which makes it possible for Mixpanel users to write JavaScript code that analyzes their raw data in new ways.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The reference provides a number of examples. To run an example query from your browser, you can use this
+				Element:a
+					query console
+					. Just paste in the example code and hit "Run query".
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								API Concepts
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The JQL JavaScript code must define a
+							Element:span
+								main()
+								function. This JavaScript will be compiled, and the
+							Element:span
+								main()
+								function will be executed by the query engine. The return value of
+							Element:span
+								main()
+								must be a sequence of zero or more transformations applied to a collection of events, people records or joined records.
+							Element:br
+								Events are retrieved by calling the
+							Element:span
+								Events()
+								function.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example, the following query counts the number of events that happened on one day in 2016:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								function
+							Element:span
+								main
+							Element:span
+								()
+							Element:span
+								{
+							Element:span
+								return
+							Element:span
+								Events
+							Element:span
+								({
+							Element:span
+								from_date
+							Element:span
+								:
+							Element:span
+								"2016-01-04"
+							Element:span
+								,
+							Element:span
+								to_date
+							Element:span
+								:
+							Element:span
+								"2016-01-04"
+							Element:span
+								}).
+							Element:span
+								reduce
+							Element:span
+								(
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								reducer
+							Element:span
+								.
+							Element:span
+								count
+							Element:span
+								());
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Querying events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The events collection is fetched by calling
+											from_dateString The start of the date range to query events for. Format: "YYYY-MM-DD" to_dateString The end of the date range to query events for (inclusive). Format: "YYYY-MM-DD" event_selectorsArray An optional list of selector objects of the format
+										Element:code
+											Events()
+											with a single object argument that describes what events should be fetched. Below are supported fields:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											[{event: "your event name", selector: "Segmentation expression"}, ...]
+											. This will be used to pre-filter to only the events in this list. Segmentation expressions in event selectors can only access event properties, not user properties. More on Segmentation expressions:
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											tutorial
+											,
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											reference
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+											It is faster to filter events this way compared to using a
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											filter()
+											transformation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example usage
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											// Get all signups and purchases by users with
+										Element:span
+											// Yahoo email addresses from January 1st through January 2nd
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											'2016-01-01'
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											'2016-01-02'
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											'signup'
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											'purchase'
+										Element:span
+											,
+										Element:span
+											selector
+										Element:span
+											:
+										Element:span
+											'"yahoo" in properties["$email"]'
+										Element:span
+											}
+										Element:span
+											]
+										Element:span
+											})
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Event object specification
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The event objects returned from
+											nameString The name of the event. distinct_idString The distinct_id of the user associated with this event. If distinct_id was not sent with the event, this will be
+										Element:code
+											Events()
+											have the following attributes:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											undefined
+											. timeInteger The timestamp of the event, expressed as milliseconds since January 1, 1970 in
+									Node:
+									(type) c
+									(layer)3
+										Element:strong
+											your project's timezone, not UTC.
+											sampling_factorFloat The rate at which this event was sampled (if you are using Mixpanel's sampling feature). 0.05 means the event is being sampled at 5%. This is important for getting accurate counts of sampled events. If you are not using sampling, this will always be 1.0. propertiesObject An object containing all of the properties of the event.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Querying people
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The people collection is fetched by calling
+											user_selectorsArray An optional list of
+										Element:code
+											People()
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											{selector: "Segmentation expression"}
+											objects that restrict user records retrieved. A record is retreieved if it matches any of the expressions. Segmentation expression in user selectors expressions can only access user properties, not event properties. See also information on Segmentation expressions
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											as argument to Events()
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example usage
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											// get all users who signed up in 2016
+										Element:span
+											return
+										Element:span
+											People
+										Element:span
+											(
+										Element:span
+											).
+										Element:span
+											filter
+										Element:span
+											(
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											user
+										Element:span
+											){
+										Element:span
+											return
+										Element:span
+											user
+										Element:span
+											.
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											signup_date
+										Element:span
+											>=
+										Element:span
+											new
+										Element:span
+											Date
+										Element:span
+											(
+										Element:span
+											"2016-01-01"
+										Element:span
+											)
+										Element:span
+											&&
+										Element:span
+											user
+										Element:span
+											.
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											signup_date
+										Element:span
+											<
+										Element:span
+											new
+										Element:span
+											Date
+										Element:span
+											(
+										Element:span
+											"2017-01-01"
+										Element:span
+											);
+										Element:span
+											})
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											or, equivalently,
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											// get all users who signed up in 2016
+										Element:span
+											return
+										Element:span
+											People
+										Element:span
+											({
+										Element:span
+											user_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											selector
+										Element:span
+											:
+										Element:span
+											'has_prefix(string(user["signup_date"]), "2016")'
+										Element:span
+											}]
+										Element:span
+											});
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											User object specification
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The user objects returned from
+											distinct_idString The distinct_id of the user. timeInteger The timestamp of the most recent user record update, expressed as milliseconds since January 1, 1970 in your project's timezone, not UTC. last_seenInteger The timestamp of the most recent user record update provided via Set() method, expressed as milliseconds since January 1, 1970, in your project's timezone. propertiesObject An object containing all of the properties of the user.
+										Element:code
+											People()
+											have the following attributes:
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Combining events and people
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can combine (join) events and people records using
+											Apart from joined collection, join() accepts an optional third argument: an object with join options: typeString Join type:
+										Element:code
+											join(Events(), People())
+											expression.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											full
+											,
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											left
+											,
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											right
+											or
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											inner
+											. Default is a full join. selectorsArray An optional list of
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											{event: "event name", selector: "Segmentation expression"}
+											objects that restrict event/user pairs retrieved. A record is retreieved if it matches any of the selector objects. To learn more about selectors, refer to
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Segmentation API
+											and
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											Segmentation expression tutorial
+											. Segmentation expressions in join() selectors can access both events and user properties.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example usage
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											join
+										Element:span
+											(
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-06-01"
+										Element:span
+											,
+										Element:span
+											}),
+										Element:span
+											People
+										Element:span
+											(),
+										Element:span
+											// Fetch tuples that satisfy muliple conditions:
+										Element:span
+											// * There both event and user records.
+										Element:span
+											// * Event is sent from US.
+										Element:span
+											// * User age is above thirty.
+										Element:span
+											{
+										Element:span
+											type
+										Element:span
+											:
+										Element:span
+											"inner"
+										Element:span
+											,
+										Element:span
+											selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											selector
+										Element:span
+											:
+										Element:span
+											'properties["country"] == "US" and user["age"] > 30'
+										Element:span
+											}]
+										Element:span
+											}
+										Element:span
+											);
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Joined object specification
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The objects returned from
+											distinct_idString The distinct_id of both event and matching user. eventObject Event object. For users with no events, this property is
+										Element:code
+											join()
+											have the following attributes:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											undefined
+											userObject User object with
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											distinct_id
+											matching the event. For events without distinct id or when there's no matching user record, this property is
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											undefined
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											join()
+											operation details
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											You cannot apply any transformations to the collections inside
+										Element:span
+											join()
+											. For example, this is not legal:
+										Element:span
+											join(Events(...).map(...), People(...).filter())
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Passing parameters to a query
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The query engine creates and populates a
+										Element:code
+											params
+											object inside the global context. The object is constructed from a JSON blob passed as the
+										Element:span
+											params
+											argument to the JQL HTTP endpoint.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Query parameters allow you to write more flexible and reusable queries. We recommend populating Events
+										Element:code
+											from_date/to_date
+											using params to make the query code reusable across different date ranges.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, you could pass these params:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											params
+										Element:span
+											=
+										Element:span
+											{
+										Element:span
+											start_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											end_date
+										Element:span
+											:
+										Element:span
+											"2016-01-10"
+										Element:span
+											,
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"View Blog"
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											to this query:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											params
+										Element:span
+											.
+										Element:span
+											start_date
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											params
+										Element:span
+											.
+										Element:span
+											end_date
+										Element:span
+											,
+										Element:span
+											}).
+										Element:span
+											filter
+										Element:span
+											(
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											event
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											event
+										Element:span
+											.
+										Element:span
+											name
+										Element:span
+											==
+										Element:span
+											params
+										Element:span
+											.
+										Element:span
+											event
+										Element:span
+											})
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Using JQL via the HTTP API
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The HTTP API is the lowest-level way to use JQL. At its core, the API is very simple: you write a script, and you post it to an API endpoint with some authentication parameters.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											scriptString The script to run. paramsObject A JSON-encoded object that will be made available to the script as the
+										Element:strong
+											URI:
+										Element:span
+											https://mixpanel.com/api/2.0/jql
+										Element:br
+										Element:strong
+											HTTP method:
+										Element:span
+											POST
+										Element:br
+										Element:strong
+											Parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											params
+											global variable.
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:strong
+											Authentication:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To access the API, you need your API Secret (available in the
+										Element:a
+											Projects tab of your Account screen
+											). Your API Secret gives access to all of your data, so be sure to keep it secret!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To help keep your secret safe, all API requests must be made over HTTPS. Calls made over plain HTTP will be rejected - plain HTTP risks leaking your API Secret to the world. If this happens, please email
+										Element:a
+											support@mixpanel.com
+											for help rotating your API credentials.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Authentication to the API is performed via HTTP Basic Auth, using your API Secret as the Basic Auth username (and empty password). In most HTTP libraries, this involves setting an
+										Element:a
+											Authentication header
+											. When using
+										Element:span
+											cURL
+											, you just have to pass the
+										Element:span
+											-u
+											flag:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											# this uses a test project API secret, replace ce08d087255d5ceec741819a57174ce5
+										Element:span
+											# with your own API secret
+											curl https://mixpanel.com/api/2.0/jql
+										Element:span
+											\
+											-u ce08d087255d5ceec741819a57174ce5:
+										Element:span
+											\
+											--data-urlencode
+										Element:span
+											params
+										Element:span
+											=
+										Element:span
+											'{"from_date":"2016-01-01", "to_date": "2016-01-07"}'
+										Element:span
+											\
+											--data-urlencode
+										Element:span
+											script
+										Element:span
+											=
+										Element:span
+											'function main(){ return Events(params).groupBy(["name"], mixpanel.reducer.count()) }'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that appending a colon to your API Secret tells cURL you intentionally want to leave the HTTP Basic Auth password blank. Otherwise, cURL will prompt you for a password.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For longer scripts, you will likely want to keep the code in a file. If you had your script in a file called
+										Element:span
+											my_query.js
+											, you could run it using the following
+										Element:span
+											cURL
+											command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl https://mixpanel.com/api/2.0/jql
+										Element:span
+											\
+											-u YOUR_API_SECRET:
+										Element:span
+											\
+											--data-urlencode script@my_query.js
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API limits
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Queries will timeout after 2 minutes of run-time
+										Element:li
+											You cannot make remote network requests (using XMLHttpRequest) from JavaScript
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Writing a Platform report
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By combining JQL with
+										Element:a
+											Platform
+											, your custom analysis can exist alongside the rest of your Mixpanel data, where everyone in your company can see it.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here are some helpful resources:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											API Documentation for using JQL with Platform
+										Element:li
+										Element:a
+											Tutorial for writing a Platform report that uses JQL
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Transformations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Transformations are applied to collections, taking one collection as input and producing another. A transformation takes a user-defined function (or a built-in function) that controls how the transformation works.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The JQL API provides the following set of transformations, which can be chained together to do complex analysis.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														filter(function(item) {})
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Filter the collection by calling the provided function on each of its elements. If the function evaluates to
+													Element:span
+														true
+														, keep the element. Otherwise, discard it.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example usage
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// filter for "login" events from users who signed up in January.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											join
+										Element:span
+											(
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-04-01"
+										Element:span
+											}),
+										Element:span
+											People
+										Element:span
+											())
+										Element:span
+											.
+										Element:span
+											filter
+										Element:span
+											(
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											tuple
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											tuple
+										Element:span
+											.
+										Element:span
+											event
+										Element:span
+											&&
+										Element:span
+											tuple
+										Element:span
+											.
+										Element:span
+											user
+										Element:span
+											&&
+										Element:span
+											tuple
+										Element:span
+											.
+										Element:span
+											event
+										Element:span
+											.
+										Element:span
+											name
+										Element:span
+											==
+										Element:span
+											"login"
+										Element:span
+											&&
+										Element:span
+											tuple
+										Element:span
+											.
+										Element:span
+											user
+										Element:span
+											.
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											signup_date
+										Element:span
+											>=
+										Element:span
+											new
+										Element:span
+											Date
+										Element:span
+											(
+										Element:span
+											"2016-01-01"
+										Element:span
+											)
+										Element:span
+											&&
+										Element:span
+											tuple
+										Element:span
+											.
+										Element:span
+											user
+										Element:span
+											.
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											signup_date
+										Element:span
+											<=
+										Element:span
+											new
+										Element:span
+											Date
+										Element:span
+											(
+										Element:span
+											"2016-02-01"
+										Element:span
+											);
+										Element:span
+											});
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											map(function(item) {})
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Build a new collection by applying the provided function to each element of the input collection. The output collection contains the return value of the provided function for each element in the input collection, so an input collection of size N will result in an output collection of size N.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example usage
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Extract the email domain name for further analysis.
+										Element:span
+											// The resulting collection contains strings.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-01-07"
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											map
+										Element:span
+											(
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											event
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											var
+										Element:span
+											pos
+										Element:span
+											=
+										Element:span
+											event
+										Element:span
+											.
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											$email
+										Element:span
+											.
+										Element:span
+											indexOf
+										Element:span
+											(
+										Element:span
+											"@"
+										Element:span
+											);
+										Element:span
+											return
+										Element:span
+											event
+										Element:span
+											.
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											$email
+										Element:span
+											.
+										Element:span
+											slice
+										Element:span
+											(
+										Element:span
+											pos
+										Element:span
+											+
+										Element:span
+											1
+										Element:span
+											);
+										Element:span
+											});
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											reduce(function(accumulators, items) {})
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											reduce()
+											turns the input collection into just a single value.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It takes one argument - the reducer function, which must implement the following signature:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											accumulators
+										Element:span
+											,
+										Element:span
+											items
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											// Combine previously-aggregated "accumulators"
+										Element:span
+											// with new "items" and return the result.
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A reducer function accepts two arguments: an array of its previous results (accumulators), and an array of items to reduce. The first argument - accumulators - is used to break down the initial set of values into many calls of the reducer function. JQL runs the reduction in a hierarchical fashion, where some subsets of inputs are reduced to accumulator values first, and multiple accumulator values are combined subsequently. There are no guarantees on the order of input.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The example below is using a reduce function that counts elements up.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example usage
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Count events.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-01-07"
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											previous_counts
+										Element:span
+											,
+										Element:span
+											events
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											var
+										Element:span
+											count
+										Element:span
+											=
+										Element:span
+											events
+										Element:span
+											.
+										Element:span
+											length
+										Element:span
+											;
+										Element:span
+											for
+										Element:span
+											(
+										Element:span
+											var
+										Element:span
+											i
+										Element:span
+											=
+										Element:span
+											0
+										Element:span
+											;
+										Element:span
+											i
+										Element:span
+											<
+										Element:span
+											previous_counts
+										Element:span
+											.
+										Element:span
+											length
+										Element:span
+											;
+										Element:span
+											i
+										Element:span
+											++
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											count
+										Element:span
+											+=
+										Element:span
+											previous_counts
+										Element:span
+											[
+										Element:span
+											i
+										Element:span
+											];
+										Element:span
+											}
+										Element:span
+											return
+										Element:span
+											count
+										Element:span
+											;
+										Element:span
+											});
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Counting is a common use case, so JQL provides a built-in
+										Element:span
+											mixpanel.reducer.count()
+											that could be used above.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											groupBy([keys], function(accumulators, items) {})
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Group the collection according to the provided list of keys, then apply the provided reducer function to each group. The underlying action of
+										Element:span
+											groupBy()
+											is similar to the one of
+										Element:span
+											reduce()
+											- aggregating many input values into one. The output collection is different: while
+										Element:span
+											reduce()
+											aggregates everything into a single value,
+										Element:span
+											groupBy()
+											produces the collection with the following structure:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											<
+										Element:span
+											composite
+										Element:span
+											group
+										Element:span
+											key
+										Element:span
+											>
+										Element:span
+											,
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											<
+										Element:span
+											return
+										Element:span
+											value
+										Element:span
+											of
+										Element:span
+											reducer
+										Element:span
+											function
+										Element:span
+											>
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The group key is computed from a key specification - the first argument of a
+										Element:span
+											groupBy()
+											. This argument is a list containing property names or functions that compute a key from a collection element.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you use property names as keys, you can use a "." to access values inside nested objects. For example, if you had a list of objects that looked like
+										Element:br
+										Element:span
+											{"item": "tshirt", "info": {"size": "XL"}}
+											, you could group by
+										Element:br
+										Element:span
+											["item", "info.size"]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is common to use the dot notation to group on event properties. For example, in
+										Element:span
+											Events(...).groupBy(['properties.$city', 'properties.$browser'], ...)
+											each unique combination of a city and a browser becomes a group, so the following groups may be output:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											["New York", "Firefox"]
+										Element:li
+										Element:span
+											["San Francisco", "Firefox"]
+										Element:li
+										Element:span
+											["San Francisco", "Safari"]
+										Element:li
+											and many more.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-02-01"
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"Change Plan"
+										Element:span
+											}],
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											groupBy
+										Element:span
+											(
+										Element:span
+											[
+										Element:span
+											"properties.New Plan"
+										Element:span
+											,
+										Element:span
+											"properties.Previous Plan"
+										Element:span
+											,
+										Element:span
+											// use a function to dynamically calculate a day of the event.
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											ev
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											(
+										Element:span
+											new
+										Element:span
+											Date
+										Element:span
+											(
+										Element:span
+											ev
+										Element:span
+											.
+										Element:span
+											time
+										Element:span
+											)).
+										Element:span
+											toDateString
+										Element:span
+											();
+										Element:span
+											}
+										Element:span
+											],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											()
+										Element:span
+											);
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The group key can only include scalars - strings, numbers, booleans, nulls. If a group-by property evaluates to a list of multiple scalars, groupBy() can treat in two different ways:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Inline that list into group key. This is the default behavior; the following query computes, for every sequence of notification campaigns each user participated in, the total number of people records that have that sequence:
+										Element:br
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											People
+										Element:span
+											().
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											"properties.$campaigns"
+										Element:span
+											],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											());
+										Element:span
+											}
+										Element:li
+											Create a different group key for each list element. The following query computes the number of users that participated in each campaign.
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											People
+										Element:span
+											().
+										Element:span
+											groupBy
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											multiple_keys
+										Element:span
+											([
+										Element:span
+											"properties.$campaigns"
+										Element:span
+											]),
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											())
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A single query can use both key treatments, even with the same property, like in a query below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											People
+										Element:span
+											().
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											multiple_keys
+										Element:span
+											([
+										Element:span
+											"properties.$campaigns"
+										Element:span
+											]),
+										Element:span
+											"properties.$campaigns"
+										Element:span
+											],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											());
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											groupByUser(optional addtl keys, function(state, items) {})
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Group events by
+										Element:span
+											distinct_id
+											and optionally other keys, then apply the provided reducer function to each group.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This transformation is a specialization of
+										Element:span
+											groupBy()
+											that guarantees that the reduce function will process all events of a single user in temporal order.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This guarantee is reflected in the signature of the reduce function provided to
+										Element:span
+											groupByUser()
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											state
+										Element:span
+											,
+										Element:span
+											events
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											// Analyze events, aggregate in state. Return the new state.
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Its first argument is a single accumulator, not an array of accumulators as used in
+										Element:span
+											groupBy()
+											and
+										Element:span
+											reduce()
+											cases. Accumulator value is always the value of last call to the reduce function, initially being
+										Element:span
+											Undefined
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The difference in signature means that reducer function implementations can not be used interchangeably between
+										Element:span
+											groupByUser()
+											and
+										Element:span
+											groupBy()/reduce()
+											. Built-in reducers, however, can be used in both contexts.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The output of groupByUser() is a collection of objects with the following structure:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											<
+										Element:span
+											user
+										Element:span
+											distinct_id
+										Element:span
+											>
+										Element:span
+											]
+										Element:span
+											+
+										Element:span
+											<
+										Element:span
+											optional
+										Element:span
+											additional
+										Element:span
+											keys
+										Element:span
+											>
+										Element:span
+											,
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											<
+										Element:span
+											return
+										Element:span
+											value
+										Element:span
+											of
+										Element:span
+											reducer
+										Element:span
+											function
+										Element:span
+											>
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											groupByUser()
+											can only be applied to the source data collection. This means it must be called either on the
+										Element:span
+											Events(), People() or join()
+											collection directly, or on the collection returned by
+										Element:span
+											Events({ ... }).filter(...)
+											or
+										Element:span
+											People({ ... }).filter(...)
+											or
+										Element:span
+											join( ... ).filter(...)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A very common use-case for
+										Element:span
+											groupByUser()
+											is to compute some property of each user based on their behavior. For example, the code below computes what events users typically perform after a
+										Element:span
+											"login"
+											event.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Frequencies of events following "login"
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// For each user, find how often they perform each event
+										Element:span
+											// after signing up.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-02-01"
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											groupByUser
+										Element:span
+											(
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											state
+										Element:span
+											,
+										Element:span
+											events
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											state
+										Element:span
+											=
+										Element:span
+											state
+										Element:span
+											||
+										Element:span
+											{
+										Element:span
+											distribution
+										Element:span
+											:
+										Element:span
+											{}
+										Element:span
+											};
+										Element:span
+											if
+										Element:span
+											(
+										Element:span
+											events
+										Element:span
+											.
+										Element:span
+											length
+										Element:span
+											==
+										Element:span
+											0
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											state
+										Element:span
+											;
+										Element:span
+											}
+										Element:span
+											for
+										Element:span
+											(
+										Element:span
+											var
+										Element:span
+											i
+										Element:span
+											=
+										Element:span
+											0
+										Element:span
+											;
+										Element:span
+											i
+										Element:span
+											<
+										Element:span
+											events
+										Element:span
+											.
+										Element:span
+											length
+										Element:span
+											-
+										Element:span
+											1
+										Element:span
+											;
+										Element:span
+											++
+										Element:span
+											i
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											if
+										Element:span
+											(
+										Element:span
+											events
+										Element:span
+											[
+										Element:span
+											i
+										Element:span
+											].
+										Element:span
+											name
+										Element:span
+											==
+										Element:span
+											"login"
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											state
+										Element:span
+											.
+										Element:span
+											distribution
+										Element:span
+											[
+										Element:span
+											events
+										Element:span
+											[
+										Element:span
+											i
+										Element:span
+											+
+										Element:span
+											1
+										Element:span
+											].
+										Element:span
+											name
+										Element:span
+											]
+										Element:span
+											=
+										Element:span
+											state
+										Element:span
+											.
+										Element:span
+											distribution
+										Element:span
+											[
+										Element:span
+											events
+										Element:span
+											[
+										Element:span
+											i
+										Element:span
+											+
+										Element:span
+											1
+										Element:span
+											].
+										Element:span
+											name
+										Element:span
+											]
+										Element:span
+											||
+										Element:span
+											0
+										Element:span
+											;
+										Element:span
+											++
+										Element:span
+											state
+										Element:span
+											.
+										Element:span
+											distribution
+										Element:span
+											[
+										Element:span
+											events
+										Element:span
+											[
+										Element:span
+											i
+										Element:span
+											+
+										Element:span
+											1
+										Element:span
+											].
+										Element:span
+											name
+										Element:span
+											];
+										Element:span
+											}
+										Element:span
+											}
+										Element:span
+											// Previous call for this user may have contained
+										Element:span
+											// "login" as the last event.
+										Element:span
+											if
+										Element:span
+											(
+										Element:span
+											state
+										Element:span
+											.
+										Element:span
+											last_event_login
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											state
+										Element:span
+											.
+										Element:span
+											distribution
+										Element:span
+											[
+										Element:span
+											events
+										Element:span
+											[
+										Element:span
+											0
+										Element:span
+											].
+										Element:span
+											name
+										Element:span
+											]
+										Element:span
+											=
+										Element:span
+											state
+										Element:span
+											.
+										Element:span
+											distribution
+										Element:span
+											[
+										Element:span
+											events
+										Element:span
+											[
+										Element:span
+											0
+										Element:span
+											].
+										Element:span
+											name
+										Element:span
+											]
+										Element:span
+											||
+										Element:span
+											0
+										Element:span
+											;
+										Element:span
+											++
+										Element:span
+											state
+										Element:span
+											.
+										Element:span
+											distribution
+										Element:span
+											[
+										Element:span
+											events
+										Element:span
+											[
+										Element:span
+											0
+										Element:span
+											].
+										Element:span
+											name
+										Element:span
+											];
+										Element:span
+											}
+										Element:span
+											// If last event is "login", next call should see that.
+										Element:span
+											if
+										Element:span
+											(
+										Element:span
+											events
+										Element:span
+											[
+										Element:span
+											events
+										Element:span
+											.
+										Element:span
+											length
+										Element:span
+											-
+										Element:span
+											1
+										Element:span
+											].
+										Element:span
+											name
+										Element:span
+											==
+										Element:span
+											"login"
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											state
+										Element:span
+											.
+										Element:span
+											last_event_login
+										Element:span
+											=
+										Element:span
+											true
+										Element:span
+											;
+										Element:span
+											}
+										Element:span
+											return
+										Element:span
+											state
+										Element:span
+											;
+										Element:span
+											});
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is possible to compute more fine-grained aggregation with
+										Element:span
+											groupByUser()
+											by providing the list of additional keys as the first argument. User distinct_id always remains the implicit first key.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following example computes, for each user and each day, when they did their first event on that day.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Multiple groups per user
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// figure out the hour where the most users do something
+										Element:span
+											// for the first time that day
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-01-07"
+										Element:span
+											})
+										Element:span
+											// group the events for each user by day, then get
+										Element:span
+											// the first hour we saw them in each of those days.
+										Element:span
+											.
+										Element:span
+											groupByUser
+										Element:span
+											([
+										Element:span
+											getDay
+										Element:span
+											],
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											first_hour
+										Element:span
+											,
+										Element:span
+											events
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											if
+										Element:span
+											(
+										Element:span
+											first_hour
+										Element:span
+											===
+										Element:span
+											undefined
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											first_hour
+										Element:span
+											=
+										Element:span
+											(
+										Element:span
+											new
+										Element:span
+											Date
+										Element:span
+											(
+										Element:span
+											events
+										Element:span
+											[
+										Element:span
+											0
+										Element:span
+											].
+										Element:span
+											time
+										Element:span
+											)).
+										Element:span
+											getHours
+										Element:span
+											();
+										Element:span
+											}
+										Element:span
+											return
+										Element:span
+											first_hour
+										Element:span
+											;
+										Element:span
+											})
+										Element:span
+											}
+										Element:span
+											function
+										Element:span
+											getDay
+										Element:span
+											(
+										Element:span
+											event
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											(
+										Element:span
+											new
+										Element:span
+											Date
+										Element:span
+											(
+										Element:span
+											event
+										Element:span
+											.
+										Element:span
+											time
+										Element:span
+											)).
+										Element:span
+											toISOString
+										Element:span
+											().
+										Element:span
+											split
+										Element:span
+											(
+										Element:span
+											'T'
+										Element:span
+											)[
+										Element:span
+											0
+										Element:span
+											];
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											groupByUser()
+											places the same restriction on group keys as
+										Element:span
+											groupBy()
+											does: a key can only include scalars, and list keys can be treated in two different ways depending on presence of the
+										Element:span
+											mixpanel.multiple_keys()
+											decorator.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											flatten()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Flatten the collection by inlining array elements of the input collection. The contents of arrays in the input collection are placed into the output collection. Input elements that are not arrays are forwarded into the output collection without modification.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example usage
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Compute percentiles on counts for number
+										Element:span
+											// of events each user has done.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-01-07"
+										Element:span
+											})
+										Element:span
+											// Compute the number of events for each user.
+										Element:span
+											.
+										Element:span
+											groupByUser
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											())
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											numeric_percentiles
+										Element:span
+											(
+										Element:span
+											'value'
+										Element:span
+											,
+										Element:span
+											[
+										Element:span
+											10
+										Element:span
+											,
+										Element:span
+											25
+										Element:span
+											,
+										Element:span
+											50
+										Element:span
+											,
+										Element:span
+											75
+										Element:span
+											,
+										Element:span
+											90
+										Element:span
+											]))
+										Element:span
+											.
+										Element:span
+											flatten
+										Element:span
+											();
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											sortAsc(accessor)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sort the input collection by the provided sort key - either property name or a function. Sort key must be a scalar.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example usage
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Find the users who have used the product the least.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-01-07"
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											'properties.$email'
+										Element:span
+											],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											())
+										Element:span
+											.
+										Element:span
+											sortAsc
+										Element:span
+											(
+										Element:span
+											'value'
+										Element:span
+											);
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											sortDesc(accessor)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Similar to sortAsc(), but sort in descending order.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example usage
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Find the most popular events.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-01-07"
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											'name'
+										Element:span
+											],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											())
+										Element:span
+											.
+										Element:span
+											sortDesc
+										Element:span
+											(
+										Element:span
+											'value'
+										Element:span
+											);
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Chained aggregations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Chaining groupBy() operations in JQL can be used to compute complex statistics. The simplest case for chained aggregations is the query below that computes the number of unique users that had events from each country:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-06-01"
+										Element:span
+											,
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											groupByUser
+										Element:span
+											([
+										Element:span
+											"properties.country"
+										Element:span
+											],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											null
+										Element:span
+											())
+										Element:span
+											.
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											slice
+										Element:span
+											(
+										Element:span
+											"key"
+										Element:span
+											,
+										Element:span
+											1
+										Element:span
+											)],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											());
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The first
+										Element:span
+											.groupByUser()
+											transformation results in a collection of objects with the following structure:
+										Element:span
+											{key:[distinct_id, country], value: null}
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The second aggregation instructs JQL to strip off position 0 of the key holding the distinct_id, and aggregate again, counting results up. The result is going to be a number of unique users for each country.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											mixpanel.slice("key", <start>, <optional limit>)
+											is a built-in function that instructs JQL to strip away key components that don't fall into [start, limit) interval, coalescing some groups and producing a more coarse grouping.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This approach can be extended for computing more complex statistics. For example, here is median over a maximum number of events users had in each country:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-06-01"
+										Element:span
+											,
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											groupByUser
+										Element:span
+											([
+										Element:span
+											"properties.country"
+										Element:span
+											],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											())
+										Element:span
+											.
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											slice
+										Element:span
+											(
+										Element:span
+											"key"
+										Element:span
+											,
+										Element:span
+											1
+										Element:span
+											)],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											max
+										Element:span
+											(
+										Element:span
+											"value"
+										Element:span
+											))
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											numeric_percentiles
+										Element:span
+											(
+										Element:span
+											"value"
+										Element:span
+											,
+										Element:span
+											50
+										Element:span
+											));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Important note
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An important note on data serialization: the query engine is sometimes forced to serialize and transfer collections during transformations using JSON. Complex data types such as functions and dates are not preserved, so you should avoid storing these types in accumulator objects.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								JQL Builtins
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We provide a set of useful helper functions for use with the
+							Element:code
+								groupBy()
+								,
+							Element:code
+								groupByUser()
+								, and
+							Element:code
+								reduce()
+								transformations. These functions are provided by the query engine, so they are available with no extra work to you.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Some of built-in reducers, e.g.
+							Element:span
+								avg()
+								or
+							Element:span
+								sum()
+								, compute statistics over numeric collections. Each of the numeric built-in reducers accepts an optional first argument - an accessor - that instructs it how to convert the input object to a numeric value.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								An accessor can be a JavaScript function, a string with a dot-separated property path, or a built-in mapper function, like
+							Element:a
+								.
+							Element:span
+								mixpanel.numeric_bucket()
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example, the following query computes the average age of your users:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								function
+							Element:span
+								main
+							Element:span
+								()
+							Element:span
+								{
+							Element:span
+								return
+							Element:span
+								People
+							Element:span
+								().
+							Element:span
+								reduce
+							Element:span
+								(
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								reducer
+							Element:span
+								.
+							Element:span
+								avg
+							Element:span
+								(
+							Element:span
+								"properties.age"
+							Element:span
+								));
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example makes use of the property name accessor to
+							Element:span
+								mixpanel.reducer.avg()
+								built-in. A custom function could be used too; in the example below, that function computes length of an array property:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								function
+							Element:span
+								main
+							Element:span
+								()
+							Element:span
+								{
+							Element:span
+								return
+							Element:span
+								People
+							Element:span
+								().
+							Element:span
+								reduce
+							Element:span
+								(
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								reducer
+							Element:span
+								.
+							Element:span
+								avg
+							Element:span
+								(
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								u
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								return
+							Element:span
+								u
+							Element:span
+								.
+							Element:span
+								properties
+							Element:span
+								.
+							Element:span
+								$campaigns
+							Element:span
+								.
+							Element:span
+								length
+							Element:span
+								;
+							Element:span
+								}));
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														mixpanel.reducer.count()
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Count the number of elements in the collection (or group, if passed to
+													Element:span
+														groupBy()
+														). For example, you could use
+													Element:span
+														groupBy()
+														and this reducer to implement Mixpanel's Segmentation report.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code 0
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// count the number of events between two dates
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-08-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2015-08-30"
+										Element:span
+											}).
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											());
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result 0
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// 15834 total events
+										Element:span
+											[
+										Element:span
+											15834
+										Element:span
+											]
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code 1
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// count the number of people of each age
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											People
+										Element:span
+											().
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											"properties.age"
+										Element:span
+											],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											());
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result 1
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											0
+										Element:span
+											],
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											109
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											1
+										Element:span
+											],
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											120
+										Element:span
+											},
+										Element:span
+											...
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.sum(accessor)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sum a collection of numeric values together.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+											accessorFunction Optional property accessor to retrieve a numeric property from the item.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// compute the total number of notification hits
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											People
+										Element:span
+											()
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											sum
+										Element:span
+											(
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											u
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											u
+										Element:span
+											.
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											$campaigns
+										Element:span
+											.
+										Element:span
+											length
+										Element:span
+											;
+										Element:span
+											}));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											11301
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.numeric_summary(accessor)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Get a numeric summary of a collection. Returns the count, sum, and sum of squares for a collection of numeric values.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+											accessorFunction Optional property accessor to retrieve a numeric property from the item.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// understand page load times
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-10-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2015-10-02"
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											}],
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											numeric_summary
+										Element:span
+											(
+										Element:span
+											'properties.load_time_ms'
+										Element:span
+											));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// count = 221 events
+										Element:span
+											// sum(load time) == 32624 milliseconds
+										Element:span
+											// sum squares = 9199564 ms^2
+										Element:span
+											[{
+										Element:span
+											"count"
+										Element:span
+											:
+										Element:span
+											221
+										Element:span
+											,
+										Element:span
+											"sum"
+										Element:span
+											:
+										Element:span
+											32624
+										Element:span
+											,
+										Element:span
+											"sum_squares"
+										Element:span
+											:
+										Element:span
+											9199564
+										Element:span
+											}]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.avg(accessor)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Compute the average of a numeric collection.
+										Element:span
+											avg()
+											is a shortcut replacement for the two-step process: aggregate with
+										Element:span
+											numeric_summary()
+											, and follow-up with a
+										Element:span
+											.map()
+											step that computes average.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+											accessorFunction Optional property accessor to retrieve a numeric property from the item.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-06-01"
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											}]
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											avg
+										Element:span
+											(
+										Element:span
+											"properties.load_time_ms"
+										Element:span
+											));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											148.9087
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.numeric_percentiles(accessor, percentiles spec)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Compute percentiles of a numeric collection. Note: this built-in samples the numeric stream; it's output will differ from exact percentile value up to a fixed error bound. The result may also fluctuate between runs.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+											accessor:Function name of a numeric property or a function that computes number from input percentile:Number A percentile number, in (0, 100) interval (alternative 1) percentile:Array Array of percentile numbers (alternative 2)
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code 0
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Find median page load time
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-06-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-06-01"
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											}],
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											numeric_percentiles
+										Element:span
+											(
+										Element:span
+											"properties.load_time_ms"
+										Element:span
+											,
+										Element:span
+											50
+										Element:span
+											));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result 0
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											118
+										Element:span
+											]
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code 1
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Find 90th, 95th, 99th, 99.9th percentiles of page load time.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-06-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-06-01"
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											}],
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											numeric_percentiles
+										Element:span
+											(
+										Element:span
+											"properties.load_time_ms"
+										Element:span
+											,
+										Element:span
+											[
+										Element:span
+											90
+										Element:span
+											,
+										Element:span
+											95
+										Element:span
+											,
+										Element:span
+											99
+										Element:span
+											,
+										Element:span
+											99.9
+										Element:span
+											]));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result 1
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"percentile"
+										Element:span
+											:
+										Element:span
+											90
+										Element:span
+											,
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											356
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											"percentile"
+										Element:span
+											:
+										Element:span
+											95
+										Element:span
+											,
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											468
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											"percentile"
+										Element:span
+											:
+										Element:span
+											99
+										Element:span
+											,
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											732
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											"percentile"
+										Element:span
+											:
+										Element:span
+											99.9
+										Element:span
+											,
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											1725
+										Element:span
+											}
+										Element:span
+											]
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.min(accessor)/max(accessor)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Compute minimum (or maximum) element in a numeric collection.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+											accessor:Function Name of a numeric property, or a function that computes a number from input.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Find minimum page load time.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-06-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-06-01"
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											}],
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											min
+										Element:span
+											(
+										Element:span
+											"properties.load_time_ms"
+										Element:span
+											));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											0
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.min_by(accessor)/max_by(accessor)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Find the element in a collection that gives the minimum (or maximum) value of a numeric property.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+											accessorFunction Name of a numeric property, or a function that computes a number from input.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Find the pageview event with lowest load time.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-06-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-06-01"
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											}],
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											min_by
+										Element:span
+											(
+										Element:span
+											"properties.load_time_ms"
+										Element:span
+											));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"name"
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											,
+										Element:span
+											"distinct_id"
+										Element:span
+											:
+										Element:span
+											"8bcf7259-5c6c-4b10-9b8a-34148607aa95"
+										Element:span
+											,
+										Element:span
+											"time"
+										Element:span
+											:
+										Element:span
+											1437541412000
+										Element:span
+											,
+										Element:span
+											"sampling_factor"
+										Element:span
+											:
+										Element:span
+											1
+										Element:span
+											,
+										Element:span
+											"properties"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"$email"
+										Element:span
+											:
+										Element:span
+											"Sylvia.Harper@outlookx.com"
+										Element:span
+											,
+										Element:span
+											"$import"
+										Element:span
+											:
+										Element:span
+											true
+										Element:span
+											,
+										Element:span
+											"country"
+										Element:span
+											:
+										Element:span
+											"MX"
+										Element:span
+											,
+										Element:span
+											"load_time_ms"
+										Element:span
+											:
+										Element:span
+											0
+										Element:span
+											}
+										Element:span
+											}
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.top(limit)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Limit the response to the top N values of a collection. This function expects the input collection to be of the
+										Element:span
+											groupBy()
+											format:
+										Element:span
+											{ "key": [...], "value": <numeric value> }
+											. The output of this function is a collection containing a single item, the list of the top N items.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+											limitInteger The number of items to return
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// get the top 3 countries sending any event
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-06-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-06-01"
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											}]
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											"properties.country"
+										Element:span
+											],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											())
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											top
+										Element:span
+											(
+										Element:span
+											3
+										Element:span
+											));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											"USA"
+										Element:span
+											],
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											1234
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											"MEX"
+										Element:span
+											],
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											678
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											"CAN"
+										Element:span
+											],
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											345
+										Element:span
+											}
+										Element:span
+											]
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.object_merge()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Merge a collection of JavaScript objects into a single object. Numeric leaf values are summed.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// alternate way of calculating the same thing as
+										Element:span
+											// mixpanel.reducer.numeric_summary()
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-10-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2015-10-02"
+										Element:span
+											,
+										Element:span
+											event_selectors
+										Element:span
+											:
+										Element:span
+											[{
+										Element:span
+											event
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											}],
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											map
+										Element:span
+											(
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											event
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											var
+										Element:span
+											load_time_ms
+										Element:span
+											=
+										Element:span
+											event
+										Element:span
+											.
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											load_time_ms
+										Element:span
+											;
+										Element:span
+											return
+										Element:span
+											{
+										Element:span
+											count
+										Element:span
+											:
+										Element:span
+											1
+										Element:span
+											,
+										Element:span
+											sum
+										Element:span
+											:
+										Element:span
+											load_time_ms
+										Element:span
+											,
+										Element:span
+											sum_squares
+										Element:span
+											:
+										Element:span
+											load_time_ms
+										Element:span
+											*
+										Element:span
+											load_time_ms
+										Element:span
+											}
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											object_merge
+										Element:span
+											());
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[{
+										Element:span
+											"count"
+										Element:span
+											:
+										Element:span
+											221
+										Element:span
+											,
+										Element:span
+											"sum"
+										Element:span
+											:
+										Element:span
+											32624
+										Element:span
+											,
+										Element:span
+											"sum_squares"
+										Element:span
+											:
+										Element:span
+											9199564
+										Element:span
+											}]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.any()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Pick any input.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-10-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2015-10-02"
+										Element:span
+											,
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											filter
+										Element:span
+											(
+										Element:span
+											function
+										Element:span
+											(
+										Element:span
+											e
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											e
+										Element:span
+											.
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											country
+										Element:span
+											==
+										Element:span
+											"US"
+										Element:span
+											;
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											any
+										Element:span
+											());
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"name"
+										Element:span
+											:
+										Element:span
+											"pageview"
+										Element:span
+											,
+										Element:span
+											"distinct_id"
+										Element:span
+											:
+										Element:span
+											"75a54352-33c9-4606-9d5f-c5eca9b77b5d"
+										Element:span
+											,
+										Element:span
+											...
+										Element:span
+											}
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.reducer.null()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Always return null.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Dump distinct ids of users who had events in January 2016.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-01-31"
+										Element:span
+											,
+										Element:span
+											})
+										Element:span
+											.
+										Element:span
+											groupByUser
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											null
+										Element:span
+											())
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											"1f83aed1-63c4-48ec-aa44-91b90fc1917d"
+										Element:span
+											,
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											null
+										Element:span
+											},
+										Element:span
+											...
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.numeric_bucket(accessor, buckets spec)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Bucketize a numeric value by normalizing it to the lower boundary of the bucket it falls into. It is commonly used to reduce the number of distinct keys when aggregating over numeric values.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+											specArray List of bucket boundaries (alternative 1) specObject with bucket_size and offset fields specifying regular bucket intervals (alternative 2)
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code 0
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Bucketize all users into five age groups.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											People
+										Element:span
+											().
+										Element:span
+											groupBy
+										Element:span
+											(
+										Element:span
+											[
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											numeric_bucket
+										Element:span
+											(
+										Element:span
+											'properties.age'
+										Element:span
+											,
+										Element:span
+											[
+										Element:span
+											0
+										Element:span
+											,
+										Element:span
+											5
+										Element:span
+											,
+										Element:span
+											18
+										Element:span
+											,
+										Element:span
+											30
+										Element:span
+											,
+										Element:span
+											60
+										Element:span
+											])],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											());
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result 0
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											0
+										Element:span
+											],
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											539
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											5
+										Element:span
+											],
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											1041
+										Element:span
+											},
+										Element:span
+											...
+										Element:span
+											]
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code 1
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Bucketize all users into regular buckets by event count.
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2015-10-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2015-10-02"
+										Element:span
+											,
+										Element:span
+											}).
+										Element:span
+											groupByUser
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											())
+										Element:span
+											.
+										Element:span
+											groupBy
+										Element:span
+											(
+										Element:span
+											[
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											numeric_bucket
+										Element:span
+											(
+										Element:span
+											'value'
+										Element:span
+											,
+										Element:span
+											{
+										Element:span
+											bucket_size
+										Element:span
+											:
+										Element:span
+											10
+										Element:span
+											,
+										Element:span
+											offset
+										Element:span
+											:
+										Element:span
+											1
+										Element:span
+											})],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											());
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result 1
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											1
+										Element:span
+											],
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											422
+										Element:span
+											},
+										Element:span
+											{
+										Element:span
+											"key"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											11
+										Element:span
+											],
+										Element:span
+											"value"
+										Element:span
+											:
+										Element:span
+											15
+										Element:span
+											}
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											mixpanel.to_number(accessor)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Convert input into a number. mixpanel.to_number() is commonly used when executing numeric aggregations over a collection of mixed non-numeric data. When unable to interpret input as a number, return undefined.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Arguments
+											accessorFunction Name of property to convert (or a javascript function)
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Code
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Compute the distribution of signup times
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											People
+										Element:span
+											()
+										Element:span
+											.
+										Element:span
+											reduce
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											numeric_summary
+										Element:span
+											(
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											to_number
+										Element:span
+											(
+										Element:span
+											'properties.signup_date'
+										Element:span
+											)
+										Element:span
+											));
+										Element:span
+											}
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Result
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											[
+										Element:span
+											{
+										Element:span
+											"count"
+										Element:span
+											:
+										Element:span
+											4411
+										Element:span
+											,
+										Element:span
+											"sum"
+										Element:span
+											:
+										Element:span
+											6369278974417
+										Element:span
+											,
+										Element:span
+											"sum_squares"
+										Element:span
+											:
+										Element:span
+											9.1971
+										Element:span
+											e
+										Element:span
+											+
+										Element:span
+											21
+										Element:span
+											}
+										Element:span
+											]
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Time buckets
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											mixpanel.numeric_bucket()
+											can be used to segment events over calendar period, when applied to
+										Element:span
+											time
+											property.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-01-30"
+										Element:span
+											,
+										Element:span
+											}).
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											numeric_bucket
+										Element:span
+											(
+										Element:span
+											'time'
+										Element:span
+											,
+										Element:span
+											{
+										Element:span
+											bucket_size
+										Element:span
+											:
+										Element:span
+											86400
+										Element:span
+											*
+										Element:span
+											1000
+										Element:span
+											})],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											());
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											JQL defines several constants with bucket specs for widely used time bucket boundaries, when applied to milliseconds since Unix epoch.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											mixpanel.daily_time_buckets
+											- buckets for calendar days
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											mixpanel.weekly_time_buckets
+											- buckets for calendar weeks, starting on Monday
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											mixpanel.monlthly_time_buckets
+											- buckets for calendar months
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											mixpanel.quarterly_time_buckets
+											- buckets for calendar quarters: Jan - Mar, Apr - Jun, ...
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											mixpanel.annual_time_buckets
+											- buckets for calendar years
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following is an equivalent of the query above.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											function
+										Element:span
+											main
+										Element:span
+											()
+										Element:span
+											{
+										Element:span
+											return
+										Element:span
+											Events
+										Element:span
+											({
+										Element:span
+											from_date
+										Element:span
+											:
+										Element:span
+											"2016-01-01"
+										Element:span
+											,
+										Element:span
+											to_date
+										Element:span
+											:
+										Element:span
+											"2016-01-30"
+										Element:span
+											,
+										Element:span
+											}).
+										Element:span
+											groupBy
+										Element:span
+											([
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											numeric_bucket
+										Element:span
+											(
+										Element:span
+											'time'
+										Element:span
+											,
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											daily_time_buckets
+										Element:span
+											)],
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											reducer
+										Element:span
+											.
+										Element:span
+											count
+										Element:span
+											());
+										Element:span
+											}
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Notes
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Event sampling
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For projects that use probabilistic event sampling, this section describes how to properly account for it when computing statistics. Most projects don't use event sampling, so it's likely you don't need to read this section.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In projects that use event sampling, each event has a
+										Element:span
+											sampling_factor
+											property: a probability, between 0.0 and 1.0, for the event to be stored in Mixpanel. When counting sampled events, including each event with weight of
+										Element:span
+											1.0/sampling_factor
+											gives the correct expected event count.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following built-in reducers can account for sampling when created with an
+										Element:span
+											{account_for_sampling:true}
+											options object.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+											API Concepts
+										Element:li
+											computes a weighed count, with each event contributing
+										Element:span
+											mixpanel.reducer.count({account_for_sampling:true})
+										Element:span
+											1.0/sampling_factor
+										Element:li
+										Element:span
+											mixpanel.reducer.numeric_summary({account_for_sampling:true})
+											computes weighted summary, with each event contributing
+										Element:span
+											1.0/sampling_factor
+										Element:li
+										Element:span
+											mixpanel.reducer.sum({account_for_sampling:true})
+											computes a weighted sum
+										Element:li
+										Element:span
+											mixpanel.reducer.avg({account_for_sampling:true})
+											computes weighted average, analogous to
+										Element:span
+											numeric_summary()
+										Element:li
+										Element:span
+											mixpanel.reducer.numeric_percentiles({account_for_sampling:true})
+											computes percentiles on a weighted collection of numbers: each event is present
+										Element:span
+											1.0/sampling_factor
+											times in the collection
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+											Transformations
+										Element:li
+										Element:a
+											Overview
+										Element:li
+										Element:a
+											Querying events
+										Element:li
+										Element:a
+											Querying people
+										Element:li
+										Element:a
+											Combining events and people
+										Element:li
+										Element:a
+											Query parameters
+										Element:li
+										Element:a
+											API access
+										Element:li
+										Element:a
+											API limits
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+											Builtins
+										Element:li
+										Element:a
+											filter()
+										Element:li
+										Element:a
+											map()
+										Element:li
+										Element:a
+											reduce()
+										Element:li
+										Element:a
+											groupBy()
+										Element:li
+										Element:a
+											groupByUser()
+										Element:li
+										Element:a
+											flatten()
+										Element:li
+										Element:a
+											sortAsc()
+										Element:li
+										Element:a
+											sortDesc()
+										Element:li
+										Element:a
+											Chained aggregations
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+											Notes
+										Element:li
+										Element:a
+											Count inputs
+										Element:li
+										Element:a
+											Sum numbers
+										Element:li
+										Element:a
+											Summarize numbers
+										Element:li
+										Element:a
+											Compute average
+										Element:li
+										Element:a
+											Compute percentiles
+										Element:li
+										Element:a
+											Find minimum and maximum
+										Element:li
+										Element:a
+											Limit to the top N items
+										Element:li
+										Element:a
+											Merge objects
+										Element:li
+										Element:a
+											Pick any input
+										Element:li
+										Element:a
+											Produce nulls
+										Element:li
+										Element:a
+											Bucketize numbers
+										Element:li
+										Element:a
+											Convert to a number
+										Element:li
+										Element:a
+											Bucketize time
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Event sampling

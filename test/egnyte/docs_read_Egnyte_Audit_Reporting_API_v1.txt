@@ -1,0 +1,1199 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Audit Reporting API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Audit Reporting API allows you to programmatically generate and retrieve reports on login activity, file actions, and permission changes. The scope of these reports effectively gives you a 360° view of the activity in your account.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Note that the endpoint for the Audit Reporting API should always begin like this:
+					https://{Egnyte Domain}.egnyte.com
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Specific endpoints are listed with each method.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Formats
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Dates and Times
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Dates and times are in
+													Element:a
+														ISO 8601
+														format. For example, May 27, 2012 is represented as “2012-05-27”. Similarly 10:27:01pm on May 27, 2012 is represented as “2012-05-27T22:27:01Z”.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Audit Report Data
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Audit report data can be returned in either Comma Separated Value (.CSV) or JSON format. The desired format is specified when submitting a report generation request. The .CSV formatted response is identical to the corresponding .CSV file downloaded via the Egnyte audit report UI.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Retrieving Audit Reports
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Audit reports are generated asynchronously. After submitting a POST to trigger report generation, a reference to a job resource is returned. This job resource should be periodically polled (but no more frequently than once every 2 minutes) to track the generation status. The job resource will return HTTP code 200 with status message indicating “running” while the report is being generated. Once the report is ready, the job resource will return a 303 HTTP code with a reference to the URI for the completed report.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Restrictions
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+											Only admin users can generate reports.
+										Element:td
+											If a non-admin user attempts to call this API then an HTTP 403 error will be returned.
+										Element:tr
+										Element:td
+											Audit reporting must be available on Egnyte domain’s plan.
+										Element:td
+											If the domain’s plan does not support Audit Reporting then an HTTP 403 will be returned.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Common HTTP Headers
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														HTTP Request Headers
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Possible Value
+													Element:tr
+													Element:td
+														Content-Type
+													Element:td
+														Specifies the format of request body
+													Element:td
+														application/json
+													Element:tr
+													Element:td
+														Authorization
+													Element:td
+														This should use the the OAuth token you obtained through OAuth flow.
+													Element:td
+														Bearer {OAuth token}
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														HTTP Response Headers
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Possible Value
+													Element:tr
+													Element:td
+														Content-Type
+													Element:td
+														Specifies the format of response body
+													Element:td
+														application/json
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Common Response Codes
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Code
+										Element:th
+											Description
+										Element:tr
+										Element:td
+											202
+										Element:td
+											Successful operation—audit report generation initiated
+										Element:tr
+										Element:td
+											400
+										Element:td
+											Request is syntactically incorrect
+										Element:tr
+										Element:tr
+										Element:td
+											401
+										Element:td
+											Authorization failure
+										Element:tr
+										Element:td
+											404
+										Element:td
+											Report or job not found
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Error Messages
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Errors are returned in the HTTP Status Code of the response. Human readable error messages are returned in an “Errors” JSON object in the response body. An example is shown below.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											HTTP/1.1 404 NOT FOUND { "Errors": [ { "description": "Audit report does not exist.", "code": "404" } ] }
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:span
+								API Methods
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+							Element:span
+								Create Login Audit Report
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								POST
+								/pubapi/v1/audit/logins
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:span
+														Parameters:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														format
+													Element:td
+														Determines format of audit report data.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+													Element:span
+														csv
+														(Comma Separated Value) or
+													Element:span
+														json
+														(JSON format)
+													Element:tr
+													Element:td
+													Element:span
+														date_start
+													Element:td
+														Start of date range for report.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Any past date in YYYY-MM-DD format. Note that timestamp formats in this call will not be rejected; however, the time portion is ignored.
+													Element:tr
+													Element:td
+													Element:span
+														date_end
+													Element:td
+														End of date range for report.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Any date after the date_start value in YYYY-MM-DD format
+													Element:tr
+													Element:td
+													Element:span
+														events
+													Element:td
+														List of events to report on. At least one event must be specified.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+													Element:span
+														Alogins
+														,
+													Element:span
+														logouts
+														,
+													Element:span
+														account_lockouts
+														,
+													Element:span
+														password_resets
+														,
+													Element:span
+														failed_attempts
+													Element:tr
+													Element:td
+													Element:span
+														access_points
+													Element:td
+														List of Egnyte access points covered by report. If not specified or empty then report will cover all access points.
+													Element:td
+														No
+													Element:td
+													Element:span
+														Web
+														,
+													Element:span
+														FTP
+														,
+													Element:span
+														Mobile
+													Element:tr
+													Element:td
+													Element:span
+														users
+													Element:td
+														List of usernames to report on. If not specified or empty then report will cover all users.
+													Element:td
+														No
+													Element:td
+														Any Egnyte usernames within your account.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Request Body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "format": "json", "date_start": "2012-05-01", "date_end": "2012-05-20", "access_points": [ "web", "ftp" ], "users": [ "jsmith", "kjohnson" ], "events": [ "logins", "failed_attempts" ] }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Header
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Possible Value
+													Element:tr
+													Element:td
+														Location
+													Element:td
+														Specifies the URL location for an audit report, including the report ID.
+													Element:td
+														https://{domain}.egnyte.com/pubapi/v1/audit/jobs/{id}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Response Body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "id": "12345678", }
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Create File Audit Report
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/audit/files
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:span
+														Parameters:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														format
+													Element:td
+														Determines format of audit report data.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+													Element:span
+														csv
+														(Comma Separated Value) or
+													Element:span
+														json
+														(JSON format)
+													Element:tr
+													Element:td
+													Element:span
+														date_start
+													Element:td
+														Start of date range for report.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Any past date in YYYY-MM-DD format. Note that timestamp formats in this call will not be rejected; however, the time portion is ignored.
+													Element:tr
+													Element:td
+													Element:span
+														date_end
+													Element:td
+														End of date range for report.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Any date after the
+													Element:span
+														date_start
+														value in YYYY-MM-DD format
+													Element:tr
+													Element:td
+													Element:span
+														folders
+													Element:td
+														List of one or more absolute folder paths. At least one path must be specified, unless a value for the
+													Element:span
+														file
+														parameter is specified instead.
+													Element:td
+													Element:span
+														Yes
+														(unless a value for the file parameter is specified instead)
+													Element:td
+														Absolute folder path for the destination folder(s)
+													Element:tr
+													Element:td
+													Element:span
+														file
+													Element:td
+														Name of a specific file to report on. Supports use of ‘*’ wildcard (cannot start with ‘*’ however).
+													Element:td
+														No
+													Element:td
+														Absolute folder path for the destination file
+													Element:tr
+													Element:td
+													Element:span
+														users
+													Element:td
+														List of usernames to report on. If not specified or empty then report will cover all users.
+													Element:td
+														No
+													Element:td
+														Any Egnyte usernames within your account.
+													Element:tr
+													Element:td
+													Element:span
+														transaction_type
+													Element:td
+														List of one or more transactions to report on. If empty, then report will cover all access points.
+													Element:td
+														No
+													Element:td
+													Element:span
+														upload
+														,
+													Element:span
+														download
+														,
+													Element:span
+														preview
+														,
+													Element:span
+														delete
+														,
+													Element:span
+														copy
+														,
+													Element:span
+														move
+														,
+													Element:span
+														create_folder
+														,
+													Element:span
+														restore_trash
+														,
+													Element:span
+														delete_trash
+														,
+													Element:span
+														create_link
+														,
+													Element:span
+														delete_link
+														,
+													Element:span
+														download_link
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Request Body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "format": "json", "date_start": "2012-05-01", "date_end": "2012-05-20", "transaction_type": [ "download", "preview" ], "users": [ "jsmith", "kjohnson" ], "folders": [ "/Shared/Marketing", "/Shared/Engineering" ] }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Header
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Possible Value
+													Element:tr
+													Element:td
+														Location
+													Element:td
+														Specifies the URL location for an audit report, including the report ID.
+													Element:td
+														https://{domain}.egnyte.com/pubapi/v1/audit/jobs/{id}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Response Body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "id": "12345678", }
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Create Permissions Audit Report
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Generates a Permissions Audit Report
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/audit/permissions
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:span
+														Parameters:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														format
+													Element:td
+														Determines format of audit report data.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+													Element:span
+														csv
+														(Comma Separated Value) or
+													Element:span
+														json
+														(JSON format)
+													Element:tr
+													Element:td
+													Element:span
+														date_start
+													Element:td
+														Start of date range for report.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Any past date in YYYY-MM-DD format. Note that timestamp formats in this call will not be rejected; however, the time portion is ignored.
+													Element:tr
+													Element:td
+													Element:span
+														date_end
+													Element:td
+														End of date range for report.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Any date after the
+													Element:span
+														date_start
+														value in YYYY-MM-DD format
+													Element:tr
+													Element:td
+													Element:span
+														folders
+													Element:td
+														List of one or more absolute folder paths. At least one path must be specified.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Absolute folder path for the destination folder(s)
+													Element:tr
+													Element:td
+													Element:span
+														assigners
+													Element:td
+														List of users who have assigned permissions. If not specified or empty then report will cover all users.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Any Egnyte usernames within your account.
+													Element:tr
+													Element:td
+													Element:span
+														assignee_users
+													Element:td
+														List of users who have been granted permissions. If not specified or empty then report will not cover any users, just groups.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Any Egnyte usernames within your account.
+													Element:tr
+													Element:td
+													Element:span
+														assignee_groups
+													Element:td
+														List of groups that have been granted permissions. If not specified or empty, then report will not cover any users, just groups.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Any Egnyte group names within your account.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Request Body:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "format": "json", "date_start": "2012-05-01", "date_end": "2012-05-20", "assigner": [ "jsmith", "kjohnson" ], "assignee_users": [ "rbrown", "mjones" ], "folders": [ "/Shared/Marketing", "/Shared/Engineering" ] }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Header
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Possible Value
+													Element:tr
+													Element:td
+														Location
+													Element:td
+														Specifies the URL location for an audit report, including the report ID.
+													Element:td
+														https://{domain}.egnyte.com/pubapi/v1/audit/jobs/{id}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Response Body:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "id": "12345678", }
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Check Audit Report Generation Status
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Checks status of a requested audit report generation.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														GET
+														/pubapi/v1/audit/jobs/{id}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Header
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Possible Value
+													Element:tr
+													Element:td
+														Location
+													Element:td
+														Specifies the URL location for an audit report, including the report ID ((included once report generation is complete).
+													Element:td
+														https://domain.egnyte.com/pubapi/v1/audit/{type}/{id}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Response Body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "status": "running" } OR { "status": "completed" }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Codes:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Error
+													Element:th
+														Description
+													Element:tr
+													Element:td
+														200
+													Element:td
+														Report generation ongoing
+													Element:tr
+													Element:td
+														303
+													Element:td
+														Report generation complete
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Retrieve Audit Report
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Checks status of a requested audit report generation.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														GET
+														/pubapi/v1/audit/{type}/{id}
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Input one of the following types into the endpoint above:
+													Element:span
+														logins
+														,
+													Element:span
+														files
+														, or
+													Element:span
+														permissions
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following optional query string parameters are supported when requested response type for report data is JSON.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														offset
+													Element:td
+														Start at this event (0 = first event). If not specified, defaults to 0.
+													Element:td
+														No
+													Element:td
+														Any non-negative integer.
+													Element:tr
+													Element:td
+													Element:span
+														count
+													Element:td
+														Send this number of events. If not specified, all events will be sent.
+													Element:td
+														No
+													Element:td
+														Any non-negative integer.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Header:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Possible Value
+													Element:tr
+													Element:td
+														Content-Type
+													Element:td
+														Specifies the format of response body
+													Element:td
+														application/json
+													Element:br
+														OR
+													Element:br
+														text/csv
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Response Body (csv)
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														CSV file data (text)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														OR
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Response Bodies (JSON)
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Login Audit Report
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "total_count": 100, "offset": 10, "count": 2, "events": [ { "username": "jsmith", "event": "Failed Attempt", "ip_address": "198.51.100.0", "access": "Web", "time": "2013-05-26T18:35Z" }, { "username": "jsmith", "event": "Login", "ip_address": "198.51.100.0", "access": "Mobile", "time": "2013-05-26T20:06Z" } ] }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	File Audit Report
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "total_count": 100, "offset": 10, "count": 2, "events": [ { "username": "jsmith", "file": "/Shared/Documents/example.
+																Element:wbr
+																	txt", "target_path": "/Shared/Documents/subfolder", "transaction": "Move File", "access": "Mobile", "time": "2013-05-26T18:35Z" }, { "location": "Sunnyvale, California, US(198.51.100.0)", "folder": "/Shared/Documents/example", "link": "https://acme.egnyte.com/h-s/20130526/5b10bafb3c2742b6", "transaction": "DownloadLink", "access": "Web", "time": "2013-05-26T20: 06Z" } ] }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Permissions Audit Report
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "total_count": 100, "offset": 10, "count": 2, "events": [ { "folder": "/Shared/Marketing", "assignee": "jsmith", "assigner": "mjones", "change": "+Editor", "time": "2013-05-26T18:35Z" }, { "folder": "/Shared/Engineering", "assignee": "mjones", "assigner": "jsmith", "change": "Editor>>Owner", "time": "2013-05-26T20:06Z" } ] }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Codes:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Error
+													Element:th
+														Description
+													Element:tr
+													Element:td
+														200
+													Element:td
+														Successful operation—report data returned
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:span
+														version 51
+													Element:span
+														as of
+													Element:abbr
+														2 months ago
+													Element:span
+														by
+													Element:span
+													Element:a
+														Grant Yang
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:span
+														Previous:
+													Element:a
+														Group Management API
+													Element:li
+													Element:span
+														Up:
+													Element:a
+														Overview
+													Element:li
+													Element:span
+														Next:
+													Element:a
+														UI Integration Framework
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Docs Navigation
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Overview
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Authentication
+							Element:li
+							Element:a
+								File System API
+							Element:li
+							Element:a
+								Permissions API
+							Element:li
+							Element:a
+								Events API
+							Element:li
+							Element:a
+								Search API
+							Element:li
+							Element:a
+								Links API
+							Element:li
+							Element:a
+								User Management API
+							Element:li
+							Element:a
+								Group Management API
+							Element:li
+							Element:a
+								Audit Reporting API
+							Element:li
+							Element:a
+								UI Integration Framework
+							Element:li
+							Element:a
+								Trash API
+							Element:li
+							Element:a
+								Comments API
+							Element:li
+							Element:a
+								Metadata API
+							Element:li
+							Element:a
+								Embedded UI API
+							Element:li
+							Element:a
+								Bookmarks API
+							Element:li
+							Element:a
+								Folder Options API
+							Element:li
+							Element:a
+								Best Practices
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Get API Key
+							Element:li
+							Element:a
+								API Docs
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Explore APIs
+							Element:li
+							Element:a
+								Explore SDKs
+						Node:
+						(type) c
+						(layer)2
+							Element:noscript
+							Element:img

@@ -1,0 +1,488 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					What are best practices for identifying users?
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This tutorial will help you track newly registered users the right way. The process of shifting from an anonymous visitor to an identified user requires some special tracking.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Tracking signups correctly is a key step in your marketing funnels and identifying those new users is important so their information can be sent to your sales, support and email tools.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The best way to track new users is in client-side javascript on the welcome page after they signup, below we’ll explain why.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Choosing a userId
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Every identified user must be assigned a unique userId so they can be tracked consistently across different browsers or devices. When a new user registers, they should be assigned a userId at that point. Usually this userId is the same as the id that identifies them in your database.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Read
+										Element:a
+											our identify docs
+											for more information on choosing the best userId.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Identify the new user
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the userId exists for a new user two calls need to be made:
+										Element:a
+											identify
+											and
+										Element:a
+											track
+											. The calls must be made in that order, but you have some flexibility about when and where that happens.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Identify
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Identify
+											tells Segment (and all your enabled integrations) that
+										Element:code
+											12345
+											will be this user’s identity.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Track
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Track
+											tells Segment (and all your enabled integrations) which action identified that user.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: If you’re using Mixpanel you’ll also need to call
+										Element:a
+											alias
+											before
+										Element:a
+											identify
+											. Read the
+										Element:a
+											Mixpanel Alias docs
+											for details.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let’s look at
+										Element:a
+											Rdio
+											as an example. When a new visitor goes to their site that visitor is anonymous. As soon as the visitor connects their Facebook account, Rdio knows who they are and creates a user record.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As part of that new user record the person is assigned a userId. Let’s say the new userId is
+										Element:code
+											12345
+											. Rdio will then need to fire the following calls on the welcome page:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.identify('12345',{ name:'Jake Peterson', email:'friends@segment.com'});analytics.track('Account Created',{ authentication:'Facebook'})
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Identify
+											signals that the user of this browser is user
+										Element:code
+											12345
+											. And also sets name and email as traits of user
+										Element:code
+											12345
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Track
+											records an event that says
+										Element:code
+											12345
+											registered for an account via Facebook.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Advanced
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sending user traits from your server
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														There are some advantages to sending details about your users directly from your server once the become a registered user. Server-side
+													Element:a
+														identify
+														calls are invisible to the end user, making it a more secure transaction. Making calls from your server also isolates your tracking away from the wild world of web browsers, which means your tracking will be much more reliable.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you want to send user data that is pretty sensitive and you don’t want to expose that to the client, then you can make an
+													Element:code
+														.identify
+														call server-side with all the traits.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Let’s take the Rdio example from above. If they’re going to send traits from their server the client-side sequence on the welcome screen would become:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														analytics.identify('12345');analytics.track('Account Created',{ authentication:'Facebook'})
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														So far the user is only identified by their userId. Later, all the user’s traits can be filled in via Python (or any of our other server-side
+													Element:a
+														sources
+														).
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														analytics.identify('12345',{'email':'friends@segment.com','name':'Jake Peterson','friends':372,'city':'San Francisco','state':'CA','gender':'Male','age':25,'plan':'Free'})
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Aliasing server-side
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you plan on tracking anonymous visitors from the browser and only calling
+													Element:a
+														identify
+														from your servers you’ll need to call
+													Element:a
+														alias
+														for KISSmetrics and Mixpanel. That call links client-side anonymous visitors with server-side identified users. This isn’t recommended, but if you must go down this road, read the
+													Element:a
+														KISSmetrics
+														and
+													Element:a
+														Mixpanel
+														specific
+													Element:a
+														alias
+														docs.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Common questions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are a few things that might cause your numbers to be off.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Missing signups
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The most common problem people run into when tracking new user signups client-side is that only a portion of their new users are showing up in reports.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Usually this is caused by the page redirecting or reloading before the tracking calls get the chance to leave the page. That’s why we recommend making those calls when the welcome page loads after the new user registers rather than trying to squeeze in the tracking calls on the signup page itself.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Anonymous history is lost
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This is usually only an issue in
+													Element:a
+														Mixpanel
+														, since it’s the only integration that requires a call to
+													Element:a
+														alias
+														in the browser to link anonymous browsing history to a new identified user.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Remember that
+													Element:a
+														alias
+														must be called before
+													Element:a
+														identify
+														is called for that user. Even if you’re calling
+													Element:a
+														identify
+														server-side, it can’t happen before the client-side
+													Element:a
+														alias
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														When and how often to call identify
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														One of the most important things when it comes to tracking analytics is to identify the user. This is because when you call
+													Element:a
+														identify
+														with analytics.js, we will cache the
+													Element:code
+														userId
+														in the browser cookie and store all the user traits in local storage. We do this so that all your subsequent
+													Element:a
+														page
+														or
+													Element:a
+														track
+														calls will have the user data appended and properly attributed.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Since
+													Element:code
+														analytics.js
+														puts the
+													Element:code
+														userId
+														,
+													Element:code
+														anonymousId
+														, and traits in localStorage, you will want to be sure to call
+													Element:code
+														identify
+														on the client if you are passing in the UUID value for the
+													Element:code
+														userId
+														on the server. This way, subsequent
+													Element:code
+														track
+														and
+													Element:code
+														page
+														calls will stamp the
+													Element:code
+														userId
+														value passed through the client-side
+													Element:code
+														identify
+														call.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Note
+														: The user data will remain cached until you explicitly clear the browser cache or call
+													Element:a
+														reset
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														So don’t forget to call
+													Element:a
+														reset
+														upon user log out!
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Our recommendation for when and how often you should call
+													Element:a
+														identify
+														is as follows:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														After a user registers
+													Element:li
+														After a user logs in
+													Element:li
+														Upon loading any pages that are accessible by a logged in user
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The first two examples are pretty self-explanatory, but many might ask: why you would call
+													Element:code
+														identify
+														on every page load if we’re storing the
+													Element:code
+														userId
+														in the cookie?
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Let’s imagine this scenario:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														I log into your app.
+													Element:code
+														identify
+														is called. For whatever reason, I close the browser and don’t return until later. There’s no way of knowing where I will reenter your app from. I could start my session from anywhere. And because there are many tools out there that require an initial
+													Element:code
+														identify
+														call for certain features (e.g. Intercom chat widget) it’s important to tell your end tools who the user is when they first start their session. It’s better to be safe than sorry!
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you have any questions or see anywhere we can improve our documentation, please
+													Element:a
+														let us know
+														or kick off a conversation in the
+													Element:a
+														Segment Community
+														!
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:span
+													Element:span
+														Was this document helpful?
+													Element:span
+													Element:label
+													Element:span
+														Yes
+													Element:label
+													Element:span
+														No
+												Node:
+												(type) c
+												(layer)4
+													Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a

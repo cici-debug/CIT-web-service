@@ -1,0 +1,599 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Marketo Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					Marketo
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to Marketo in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you toggle on Marketo in Segment, this is what happens:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Our CDN is updated within 5-10 minutes. Then our snippet will start asynchronously loading Marketo’s Munchkin onto your page. This means you should remove Marketo’s snippet from your page.
+							Element:li
+								Marketo will start automatically recording visitor information.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Important Note:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our client-side and server-side integrations each require
+										Element:strong
+											different
+											credentials for authentication. Please read through the information below on
+										Element:code
+											identify
+											calls for further information.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page and Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For
+							Element:a
+								or
+							Element:code
+								Page
+							Element:a
+								methods, Segment uses
+							Element:code
+								Track
+							Element:a
+								Marketo’s Munchkin.js
+								. The URL is built from the Segment event and properties object into the form Marketo expects, so no need to worry about doing that yourself.
+							Element:code
+								visitWebPage
+								method
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To associate Track events to a particular Lead in Marketo from a server side library, you will need to pass the Munchkin.js cookie with your track calls.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Client-side
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:a
+											on Analytics.js, we call Marketo’s
+										Element:code
+											identify
+										Element:a
+											. Marketo
+										Element:code
+											associateLead
+										Element:strong
+											requires an email address
+											for this function, so if the
+										Element:code
+											traits
+											object you include in
+										Element:a
+											doesn’t have an email, the request won’t go through. Marketo’s client-side library,
+										Element:code
+											identify
+										Element:a
+											Munchkin
+											,
+										Element:strong
+											requires your API private key
+											for authentication along with your email, so please ensure that you have provided it in your Segment settings. We will not change the casing of traits on client-side identify calls.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.identify('1234', { email: 'friends@segment.com', name: 'Jake Peterson', company: 'Segment', favoriteColor: 'Blue' });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to properly sign the
+										Element:code
+											associateLead
+											request while keeping your account and data secure, we make a request to our API that calculates the appropriate SHA1 security hash for the user you’re identifying. We use this hash to sign the
+										Element:code
+											associateLead
+											request to Marketo.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that we will automatically send
+										Element:code
+											userId
+											as a trait. Normally, the
+										Element:code
+											userId
+											was sent as an
+										Element:code
+											id
+											inside the traits but Marketo silently ignores that field as they use it for their own purposes. So if you create a custom field inside Marketo for
+										Element:code
+											userId
+											, your leads will automatically have that field populated.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Server Side
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you can
+										Element:a
+											with a
+										Element:code
+											identify
+										Element:code
+											traits
+											object on any of the server-side languages, we make a call to Marketo’s
+										Element:code
+											syncLead
+											SOAP API action. This call either creates or a updates
+										Element:code
+											traits
+											on a lead based on the email address either in
+										Element:code
+											userId
+											or
+										Element:code
+											traits.email
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We will attempt to PascalCase server-side traits. So if you send
+										Element:code
+											secondFavoriteColor
+											as a trait, we will convert that to
+										Element:code
+											SecondFavoriteColor
+											, so you should set the trait
+										Element:strong
+											API name
+											in Marketo to
+										Element:code
+											SecondFavoriteColor
+											. If you send the trait as
+										Element:code
+											second_favorite_color
+											, we will convert that to
+										Element:code
+											Second_favorite_color
+											, so you should set the API name to be
+										Element:code
+											Second_favorite_color
+											(this is less than ideal; however, we plan to update this behavior in v2 of our Marketo integration, so staty tuned!).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that leads can only be synced every 30 seconds via the SOAP API. If you exceed the allowed request amount, you will see
+										Element:code
+											Exceeded lock attempts
+											errors in your debugger.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our server side integration with Marketo
+										Element:strong
+											requires your encryption key
+											along with your email for authentication, please ensure you have provided it in your Segment settings.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Remember to provide an email with every call as either the
+										Element:code
+											userId
+											or as a trait labeled “email”. Here’s a java example of that:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Analytics.identify("hj2kf92ds212", new Traits() .put("email", "tom@initech.com") .put("name", "Tom Smykowski"));
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Marketo uses cookies to keep track of visitors and their sessions while visiting your website. The cookie data is stored in the visitor’s browser, and is sent along to Marketo every time a new event occurs. This allows them to show a single unique lead between multiple page reloads.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your servers also have access to this cookie, so they can re-use it when you send server-side events to Segment. If you don’t use the existing cookie Segment will use either the userId or sessionId to make the server-side request to Marketo. When we create a new cookie, the client-side and server-side events from the same user will look like two distinct leads when viewed in Marketo. The cookieId takes precedence over all other keys, so if you send both the cookieId and the userId - the cookieId will match first and the userId for that lead will be updated.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To associate leads in server-side Marketo, there are currently three options with Segment:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Pass your Marketo cookies to Segment.
+										Element:li
+											Use the userId or sessionId when associating leads in Marketo.
+										Element:li
+											Ignore the additional visitors generated by passing different types of ids for each call (i.e. cookieId once, then the userId for the same user the second time).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you choose to pass the cookie with your calls, it will look like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											id:561-HYG-937&token:_mch-marketo.com-1374552656411-90718
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want our server-side integration to use your user’s Marketo Cookie, pass it to us in the
+										Element:code
+											context['Marketo'].marketoCookie
+											object.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here’s a Ruby example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Analytics.identify( user_id: '019mr8mf4r', traits: { email: 'Jake@segment.com', firstName: 'Jake', lastName: 'Peterson' }, context: { 'Marketo' => { marketoCookie: 'id:561-HYG-937&token:_mch-marketo.com-1374552656411-90718' } } )
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											If you choose to use the cookie approach, make sure to send the cookie along in your
+										Element:code
+											track
+											calls as well, as Marketo will need it on subsequent calls to tie activity to that user.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A
+										Element:code
+											track
+											call might look like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Analytics.track( user_id: '019mr8mf4r', event: 'Update Buying Period', properties: { newPeriod: '2016-01-01', lastName: 'Peterson', email: 'Jake@segment.com' }, context: { 'Marketo' => { marketoCookie: 'id:561-HYG-937&token:_mch-marketo.com-1374552656411-90718' } } )
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For more information about syncronising your Marketo leads, please
+										Element:a
+											visit their documentation
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Custom Fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To create a custom field in Marketo, follow Marketo’s
+										Element:a
+											documentation for creating a custom field
+											. Be sure that the
+										Element:strong
+											API Name
+											is
+										Element:code
+											PascalCase
+											‘d, as our integration will account for Marketo’s Pascal trait standards.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For instance, if you configure
+										Element:code
+											SomeTrait
+											in the
+										Element:strong
+											API Name
+											field (the
+										Element:strong
+											Name
+											value does not matter), you can pass in this field as
+										Element:code
+											someTrait
+											, and we will convert this to
+										Element:code
+											SomeTrait
+											when sending into Marketo. Note that if you configured
+										Element:strong
+											API Name
+											to be
+										Element:code
+											someTrait
+											, and passed it in as
+										Element:code
+											someTrait
+											in your call, this would fail to send.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+								✅
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Account ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your Account ID under
+										Element:strong
+											Admin > Integration > Munchkin > Tracking Code
+											in your
+										Element:a
+											Marketo account
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Encryption Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your Encryption Key under
+										Element:strong
+											Admin > Integration > Web Services > SOAP API
+											in your
+										Element:a
+											Marketo account
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Private Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your API Private Key under
+										Element:strong
+											Admin > Integration > Munchkin > API Configuration
+											in your
+										Element:a
+											Marketo account
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SOAP Endpoint
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your SOAP Endpoint under
+										Element:strong
+											Admin > Integration > Web Services > SOAP API
+											in your
+										Element:a
+											Marketo account
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											User ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your User ID under
+										Element:strong
+											Admin > Integration > Web Services > SOAP API
+											in your
+										Element:a
+											Marketo account
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											browser
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

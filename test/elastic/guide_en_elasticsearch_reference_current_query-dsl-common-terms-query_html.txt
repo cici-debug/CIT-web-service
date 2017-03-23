@@ -1,0 +1,571 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Common Terms Query
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								common
+								terms query is a modern alternative to stopwords which improves the precision and recall of search results (by taking stopwords into account), without sacrificing performance.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														The problem
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Every term in a query has a cost. A search for
+													Element:code
+														"The brown fox"
+														requires three term queries, one for each of
+													Element:code
+														"the"
+														,
+													Element:code
+														"brown"
+														and
+													Element:code
+														"fox"
+														, all of which are executed against all documents in the index. The query for
+													Element:code
+														"the"
+														is likely to match many documents and thus has a much smaller impact on relevance than the other two terms.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Previously, the solution to this problem was to ignore terms with high frequency. By treating
+													Element:code
+														"the"
+														as a
+													Element:span
+														, we reduce the index size and reduce the number of term queries that need to be executed.
+													Element:em
+														stopword
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The problem with this approach is that, while stopwords have a small impact on relevance, they are still important. If we remove stopwords, we lose precision, (eg we are unable to distinguish between
+													Element:code
+														"happy"
+														and
+													Element:code
+														"not happy"
+														) and we lose recall (eg text like
+													Element:code
+														"The The"
+														or
+													Element:code
+														"To be or not to be"
+														would simply not exist in the index).
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														The solution
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														common
+														terms query divides the query terms into two groups: more important (ie
+													Element:span
+														terms) and less important (ie
+													Element:em
+														low frequency
+													Element:span
+														terms which would previously have been stopwords).
+													Element:em
+														high frequency
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														First it searches for documents which match the more important terms. These are the terms which appear in fewer documents and have a greater impact on relevance.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Then, it executes a second query for the less important terms — terms which appear frequently and have a low impact on relevance. But instead of calculating the relevance score for
+													Element:span
+														matching documents, it only calculates the
+													Element:strong
+														all
+													Element:code
+														_score
+														for documents already matched by the first query. In this way the high frequency terms can improve the relevance calculation without paying the cost of poor performance.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If a query consists only of high frequency terms, then a single query is executed as an
+													Element:code
+														AND
+														(conjunction) query, in other words all terms are required. Even though each individual term will match many documents, the combination of terms narrows down the resultset to only the most relevant. The single query can also be executed as an
+													Element:code
+														OR
+														with a specific
+													Element:a
+														, in this case a high enough value should probably be used.
+													Element:code
+														minimum_should_match
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Terms are allocated to the high or low frequency groups based on the
+													Element:code
+														cutoff_frequency
+														, which can be specified as an absolute frequency (
+													Element:code
+														>=1
+														) or as a relative frequency (
+													Element:code
+														0.0 .. 1.0
+														). (Remember that document frequencies are computed on a per shard level as explained in the blog post
+													Element:a
+														Relevance is broken
+														.)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Perhaps the most interesting property of this query is that it adapts to domain specific stopwords automatically. For example, on a video hosting site, common terms like
+													Element:code
+														"clip"
+														or
+													Element:code
+														"video"
+														will automatically behave as stopwords without the need to maintain a manual list.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Examples
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In this example, words that have a document frequency greater than 0.1% (eg
+													Element:code
+														"this"
+														and
+													Element:code
+														"is"
+														) will be treated as
+													Element:span
+														.
+													Element:em
+														common terms
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "common": { "body": { "query": "this is bonsai cool", "cutoff_frequency": 0.001 } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The number of terms which should match can be controlled with the
+													Element:a
+														(
+													Element:code
+														minimum_should_match
+													Element:code
+														high_freq
+														,
+													Element:code
+														low_freq
+														),
+													Element:code
+														low_freq_operator
+														(default
+													Element:code
+														"or"
+														) and
+													Element:code
+														high_freq_operator
+														(default
+													Element:code
+														"or"
+														) parameters.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For low frequency terms, set the
+													Element:code
+														low_freq_operator
+														to
+													Element:code
+														"and"
+														to make all terms required:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "common": { "body": { "query": "nelly the elephant as a cartoon", "cutoff_frequency": 0.001, "low_freq_operator": "and" } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														which is roughly equivalent to:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "bool": { "must": [ { "term": { "body": "nelly"}}, { "term": { "body": "elephant"}}, { "term": { "body": "cartoon"}} ], "should": [ { "term": { "body": "the"}}, { "term": { "body": "as"}}, { "term": { "body": "a"}} ] } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Alternatively use
+													Element:a
+														to specify a minimum number or percentage of low frequency terms which must be present, for instance:
+													Element:code
+														minimum_should_match
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "common": { "body": { "query": "nelly the elephant as a cartoon", "cutoff_frequency": 0.001, "minimum_should_match": 2 } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														which is roughly equivalent to:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "bool": { "must": { "bool": { "should": [ { "term": { "body": "nelly"}}, { "term": { "body": "elephant"}}, { "term": { "body": "cartoon"}} ], "minimum_should_match": 2 } }, "should": [ { "term": { "body": "the"}}, { "term": { "body": "as"}}, { "term": { "body": "a"}} ] } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														minimum_should_match
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A different
+													Element:a
+														can be applied for low and high frequency terms with the additional
+													Element:code
+														minimum_should_match
+													Element:code
+														low_freq
+														and
+													Element:code
+														high_freq
+														parameters. Here is an example when providing additional parameters (note the change in structure):
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "common": { "body": { "query": "nelly the elephant not as a cartoon", "cutoff_frequency": 0.001, "minimum_should_match": { "low_freq" : 2, "high_freq" : 3 } } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														which is roughly equivalent to:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "bool": { "must": { "bool": { "should": [ { "term": { "body": "nelly"}}, { "term": { "body": "elephant"}}, { "term": { "body": "cartoon"}} ], "minimum_should_match": 2 } }, "should": { "bool": { "should": [ { "term": { "body": "the"}}, { "term": { "body": "not"}}, { "term": { "body": "as"}}, { "term": { "body": "a"}} ], "minimum_should_match": 3 } } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In this case it means the high frequency terms have only an impact on relevance when there are at least three of them. But the most interesting use of the
+													Element:a
+														for high frequency terms is when there are only high frequency terms:
+													Element:code
+														minimum_should_match
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "common": { "body": { "query": "how not to be", "cutoff_frequency": 0.001, "minimum_should_match": { "low_freq" : 2, "high_freq" : 3 } } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														which is roughly equivalent to:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "bool": { "should": [ { "term": { "body": "how"}}, { "term": { "body": "not"}}, { "term": { "body": "to"}}, { "term": { "body": "be"}} ], "minimum_should_match": "3<50%" } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The high frequency generated query is then slightly less restrictive than with an
+													Element:code
+														AND
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														common
+														terms query also supports
+													Element:code
+														boost
+														,
+													Element:code
+														analyzer
+														and
+													Element:code
+														disable_coord
+														as parameters.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Multi Match Query
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Query String Query »
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

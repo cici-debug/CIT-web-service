@@ -1,0 +1,428 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Converting Address' Country Field to a Dropdown
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Address fields in Sugar® are normally text fields, which allow users to enter in the appropriate information (e.g. street, city, and country) for the record. However, with multiple users working in Sugar, it is possible for data (e.g. country) to be entered in a variety of different ways (e.g. USA, U.S.A, and United States) when creating or editing the record. This can cause some issues when creating a report grouped by the Billing Country field, for example, as records with the same country will be grouped separately based on the different ways the country was entered.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This article will cover how to change the address' Billing Country field to a dropdown list which will allow users to select a single value (e.g. USA) and maintain consistency in data throughout the system.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note
+								: This article pertains to Sugar versions 6.x and 7.x.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Use Case
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this example, we will convert the Billing Country field in the Accounts module to a dropdown-type field to allow values to be selected from a dropdown list.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Prerequisites
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A part of making this change involves mapping the "countries_dom" dropdown list to your existing Billing Country field's values. This dropdown list can be accessed and modified via Admin > Dropdown Editor. For more information on editing dropdown lists, please refer to the
+							Element:a
+								Developer Tools
+								documentation. It is very important that the existing values in the Billing Country field exactly match the Item Name values in the "countries_dom" dropdown list in order for the values to convert properly. If the existing value (e.g. United States) does not match one of the country options (e.g. USA) in the dropdown list, then the new dropdown version of the Billing Country field will most likely default to a blank value for that record record.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To avoid such issues, please review and update all of your existing Billing Country text field values prior to making this change. For more information on updating many records at once via import, please refer to the
+							Element:a
+								Updating Records Via Import
+								article.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Steps to Complete
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Converting Field to Dropdown
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use the following steps to change the Billing Country field to a dropdown list:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											First, we will associate the Billing Country field in the Accounts module with the "countries_dom" dropdown. Locate the following directory in your Sugar file system:
+										Element:code
+											./custom/Extension/modules/Accounts/Ext/Vardefs/
+										Element:li
+											Locate a file called
+										Element:code
+											sugarfield_billing_address_country.php
+											which controls the billing_address_country field and add the following lines to the file. This will set the field type to
+										Element:code
+											'enum'
+											and define the dropdown (countries_dom) to use for the field.
+										Element:br
+										Element:strong
+											Note
+											: If this file or location does not exist, then you will need to first create this path and file.
+										Element:br
+											Your file should look like this:
+										Element:br
+										Element:pre
+											<?php $dictionary['Account']['fields']['billing_address_country']['type']='enum'; $dictionary['Account']['fields']['billing_address_country']['options']='countries_dom';
+										Element:li
+											Now, since the address block is handled uniquely in Sugar, we will also need to modify the template file in order to display the field as a dropdown anywhere the layout is being used in backward compatibility mode. To do this in an upgrade safe way, you will need to copy the file located in
+										Element:code
+											./include/SugarFields/Fields/Address/en_us.EditView.tpl
+											and place it in the following directory:
+										Element:code
+											./custom/include/SugarFields/Fields/Address/
+											.
+										Element:br
+											If you are using multiple languages in Sugar, you will need to make this change for each language-type in your system. For our example, we will be focusing on the "en_us" language.
+										Element:br
+										Element:strong
+											Note
+											: You will most likely need to create this directory as it likely does not already exist.
+										Element:li
+											Once the
+										Element:code
+											en_us.EditView.tpl
+											file is in the custom directory, locate the line for the input html element for the country field. The line of code should look similar to this:
+										Element:br
+										Element:pre
+											<input type="text" name="{{$country}}" id="{{$country}}" size="{{$displayParams.size|default:30}}" {{if !empty($vardef.len)}}maxlength='{{$vardef.len}}'{{/if}} value='{$fields.{{$country}}.value}' tabindex="{{$tabindex}}">
+										Element:li
+											Directly between the list shown above and the
+										Element:code
+											<td>
+											appearing before it, add the following lines to display the field as a dropdown:
+										Element:br
+										Element:pre
+											{if (!isset($config.enable_autocomplete) || $config.enable_autocomplete==false) && isset($fields.{{$country}}.options)} <select name="{{$country}}" id="{{$country}}" title=''> {if isset($fields.{{$country}}.value) && $fields.{{$country}}.value != ''} {html_options options=$fields.{{$country}}.options selected=$fields.{{$country}}.value} {else} {html_options options=$fields.{{$country}}.options selected=$fields.{{$country}}.default} {/if} </select> {else} <input type="text" name="{{$country}}" id="{{$country}}" size="{{$displayParams.size|default:30}}" {{if !empty($vardef.len)}}maxlength='{{$vardef.len}}'{{/if}} value='{$fields.{{$country}}.value}' tabindex="{{$tabindex}}"> {/if}
+										Element:li
+											Save the changes to the file.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the necessary change has been made, please navigate to Admin > Repair and perform a
+										Element:a
+											Quick Repair and Rebuild
+											in order for the change to take effect. Your Billing Country field will now display as a dropdown field in the Accounts module.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please note that only the Account module's Billing Country field will be converted to a dropdown field once this change is applied. If you wish to have the Shipping Country field converted to a dropdown as well, please follow the
+										Element:a
+											steps
+											above, but be sure to make the change specific to the "shipping_address_country" field. In addition, you can make this change for other modules (e.g. Contacts and Leads) as well by specifying the appropriate module name (e.g. Contacts) and field name (e.g. Primary Address Country) when going through the steps.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Updating the Field Type for List View Filter
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the appropriate changes have been made per the
+										Element:a
+											section
+											above, use the following steps to get the list view filter to recognize the change:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Navigate to Admin > Studio > Accounts > Layouts > Search.
+										Element:li
+											Drag the Billing Country field from the Default column to the Hidden column and click "Save & Deploy".
+										Element:br
+										Element:img
+										Element:li
+											Now drag the Billing Country field back to the Default column and click "Save & Deploy" again.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This will retrieve the Billing Country field in its new state and add it to the account's list view filter.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Application
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once the Billing Country field is converted successfully to a dropdown, all records that had an existing value in the field should have the matching country automatically selected. Going forward, users will simply need to select the appropriate country when entering address information in Sugar.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Please note that administrators can add additional country values as necessary to the "countries_dom" dropdown via Admin > Dropdown Editor. For more information on editing dropdown lists, please refer to the
+							Element:a
+								Developer Tools
+								documentation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Billing Country field will now appear as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For Accounts record view:
+							Element:br
+							Element:strong
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For Accounts list view filter:
+							Element:br
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 09/30/2016 12:26pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

@@ -1,0 +1,447 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Teams
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Teams provide the ability to limit access at the record level, allowing sharing flexibility across functional groups. Developers can
+							Element:a
+								manipulate teams programmatically
+								provided they understand Sugar's
+							Element:a
+								visibility framework
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more information on teams, please refer to the
+							Element:a
+								Team Management
+								documentation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note
+								: Teams are exclusive to commercial editions of Sugar (i.e. Professional, Enterprise, Ultimate).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Database Tables
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Table
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											teams
+										Element:td
+											Each record in this table represents a team in the system.
+										Element:tr
+										Element:td
+											team_sets
+										Element:td
+											Each record in this table represents a unique team combination. For example, each user's private team will have a corresponding team set entry in this table. A team set may also be comprised of one or more teams.
+										Element:tr
+										Element:td
+											team_sets_teams
+										Element:td
+											The team_sets_teams table maintains the relationships to determine which teams belong to a team set. Each table that previously used the team_id column to maintain team security now uses the team_set_id column's value to associate the record to team(s).
+										Element:tr
+										Element:td
+											team_sets_modules
+										Element:td
+											This table is used to manage team sets and keep track of which modules have records that are or were associated to a particular team set.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Never modify these tables without going through the PHP object methods. Manipuating the team sets with direct SQL may cause undesired side effects in the system due to how the validations and security methods work.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Module Team Fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to the team tables, each module table also contains a
+										Element:code
+											team_id
+											and
+										Element:code
+											team_set_id
+											column. The
+										Element:code
+											team_set_id
+											contains the id of a record in the
+										Element:code
+											team_sets
+											table that contains the unique combination of teams associated with the record. The
+										Element:code
+											team_id
+											will contain the id of the primary team designated for a record.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Team Sets (team_set_id)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As mentioned above, Sugar implemented this feature not as a many-to-many relationship but as a one-to-many relationship. On each table that had a
+													Element:code
+														team_id
+														field we added a 'team_set_id' field. We have also added a
+													Element:code
+														team_sets
+														table, which maintains the
+													Element:code
+														team_set_id
+														, and a
+													Element:code
+														team_sets_teams
+														table, which relates a team set to the teams. When performing a team based query we use the 'team_set_id' field on the module table to join to
+													Element:code
+														team_sets_teams.team_set_id
+														and then join all of the teams associated with that set. Given the list of teams from
+													Element:code
+														team_memberships
+														we can then decide if the user has access to the record.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Primary Team (team_id)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														team_id
+														is still being used, not only to support backwards compatibility with workflow and reports, but also to provide some additional features. When displaying a list, we use the team set to determine whether the user has access to the record. When displaying the data, we show the team from team id in the list. When the user performs a mouseover on that team, Sugar performs an Ajax call to display all of the teams associated with the record. This
+													Element:code
+														team_id
+														field is designated as the Primary Team because it is the first team shown in the list, and for sales territory management purposes, can designate the team that actually owns the record and can report on it.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Team Security
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											team_sets_teams
+											table allows the system to check for permissions on multiple teams. The following diagram illustrates table relationships in SugarBean's
+										Element:code
+											add_team_security_where_clause
+											method.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using the team_sets_teams table the system will determine which teams are associated with the
+										Element:code
+											team_set_id
+											and then look in the
+										Element:code
+											team_memberships
+											table for users that belong to the team(s).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											TeamSetLink
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Typically, any relationship in a class is handled by the
+										Element:code
+											data/Link2.php
+											class. As a part of dynamic teams, we introduced the ability to provide your own custom Link class to handle some of the functionality related to managing relationships. The
+										Element:code
+											team_security
+											parent vardefs in the Sugar objects contain the following in the 'teams' field definition:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											'link_class' => 'TeamSetLink', 'link_file' => 'modules/Teams/TeamSetLink.php',
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											link_class
+											entry defines the class name we are using, and the
+										Element:code
+											link_file
+											tells us where that class file is located. This class extends the legacy
+										Element:code
+											Link.php
+											and overrides some of the methods used to handle relationships such as 'add' and 'delete'.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Topics
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Manipulating Teams Programmatically
+							Element:p
+								How to manipulate team relationships.
+							Element:li
+							Element:a
+								Visibility Framework
+							Element:p
+								The visibility framework provides the capability to alter the queries Sugar uses to retrieve records from the database. This framework can allow for additional restrictions or specific logic to meet business requirements of hiding or showing only specific records. Visibility classes only apply to certain aspects of Sugar record retrieval, e.g. List Views, Dashlets, and Filter Lookups.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 10/11/2016 06:09pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

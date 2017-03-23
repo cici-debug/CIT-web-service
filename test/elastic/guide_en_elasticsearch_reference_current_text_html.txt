@@ -1,0 +1,597 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Text datatype
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A field to index full-text values, such as the body of an email or the description of a product. These fields are
+							Element:code
+								analyzed
+								, that is they are passed through an
+							Element:a
+								analyzer
+								to convert the string into a list of individual terms before being indexed. The analysis process allows Elasticsearch to search for individual words
+							Element:span
+								each full text field. Text fields are not used for sorting and seldom used for aggregations (although the
+							Element:em
+								within
+							Element:a
+								significant terms aggregation
+								is a notable exception).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you need to index structured content such as email addresses, hostnames, status codes, or tags, it is likely that you should rather use a
+							Element:a
+								field.
+							Element:code
+								keyword
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Below is an example of a mapping for a text field:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT my_index { "mappings": { "my_type": { "properties": { "full_name": { "type": "text" } } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sometimes it is useful to have both a full text (
+							Element:code
+								text
+								) and a keyword (
+							Element:code
+								keyword
+								) version of the same field: one for full text search and the other for aggregations and sorting. This can be achieved with
+							Element:a
+								multi-fields
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Parameters for text fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following parameters are accepted by
+										Element:code
+											text
+											fields:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											analyzer
+										Element:td
+										Element:p
+											The
+										Element:a
+											analyzer
+											which should be used for
+										Element:a
+											string fields, both at index-time and at search-time (unless overridden by the
+										Element:code
+											analyzed
+										Element:a
+											). Defaults to the default index analyzer, or the
+										Element:code
+											search_analyzer
+										Element:a
+											.
+										Element:code
+											standard
+											analyzer
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											boost
+										Element:td
+										Element:p
+											Mapping field-level query time boosting. Accepts a floating point number, defaults to
+										Element:code
+											1.0
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											eager_global_ordinals
+										Element:td
+										Element:p
+											Should global ordinals be loaded eagerly on refresh? Accepts
+										Element:code
+											true
+											or
+										Element:code
+											false
+											(default). Enabling this is a good idea on fields that are frequently used for (significant) terms aggregations.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											fielddata
+										Element:td
+										Element:p
+											Can the field use in-memory fielddata for sorting, aggregations, or scripting? Accepts
+										Element:code
+											true
+											or
+										Element:code
+											false
+											(default).
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											fielddata_frequency_filter
+										Element:td
+										Element:p
+											Expert settings which allow to decide which values to load in memory when
+										Element:code
+											fielddata
+											is enabled. By default all values are loaded.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											fields
+										Element:td
+										Element:p
+											Multi-fields allow the same string value to be indexed in multiple ways for different purposes, such as one field for search and a multi-field for sorting and aggregations, or the same string value analyzed by different analyzers.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											include_in_all
+										Element:td
+										Element:p
+											Whether or not the field value should be included in the
+										Element:a
+											field? Accepts
+										Element:code
+											_all
+										Element:code
+											true
+											or
+										Element:code
+											false
+											. Defaults to
+										Element:code
+											false
+											if
+										Element:a
+											is set to
+										Element:code
+											index
+										Element:code
+											no
+											, or if a parent
+										Element:a
+											field sets
+										Element:code
+											object
+										Element:code
+											include_in_all
+											to
+										Element:code
+											false
+											. Otherwise defaults to
+										Element:code
+											true
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											index
+										Element:td
+										Element:p
+											Should the field be searchable? Accepts
+										Element:code
+											true
+											(default) or
+										Element:code
+											false
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											index_options
+										Element:td
+										Element:p
+											What information should be stored in the index, for search and highlighting purposes. Defaults to
+										Element:code
+											positions
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											norms
+										Element:td
+										Element:p
+											Whether field-length should be taken into account when scoring queries. Accepts
+										Element:code
+											true
+											(default) or
+										Element:code
+											false
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											position_increment_gap
+										Element:td
+										Element:p
+											The number of fake term position which should be inserted between each element of an array of strings. Defaults to the
+										Element:code
+											position_increment_gap
+											configured on the analyzer which defaults to
+										Element:code
+											100
+											.
+										Element:code
+											100
+											was chosen because it prevents phrase queries with reasonably large slops (less than 100) from matching terms across field values.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											store
+										Element:td
+										Element:p
+											Whether the field value should be stored and retrievable separately from the
+										Element:a
+											field. Accepts
+										Element:code
+											_source
+										Element:code
+											true
+											or
+										Element:code
+											false
+											(default).
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											search_analyzer
+										Element:td
+										Element:p
+											The
+										Element:a
+											that should be used at search time on
+										Element:code
+											analyzer
+										Element:a
+											fields. Defaults to the
+										Element:code
+											analyzed
+										Element:code
+											analyzer
+											setting.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											search_quote_analyzer
+										Element:td
+										Element:p
+											The
+										Element:a
+											that should be used at search time when a phrase is encountered. Defaults to the
+										Element:code
+											analyzer
+										Element:code
+											search_analyzer
+											setting.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											similarity
+										Element:td
+										Element:p
+											Which scoring algorithm or
+										Element:span
+											should be used. Defaults to
+										Element:em
+											similarity
+										Element:code
+											classic
+											, which uses TF/IDF.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											term_vector
+										Element:td
+										Element:p
+											Whether term vectors should be stored for an
+										Element:a
+											field. Defaults to
+										Element:code
+											analyzed
+										Element:code
+											no
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Indexes imported from 2.x do not support
+										Element:code
+											text
+											. Instead they will attempt to downgrade
+										Element:code
+											text
+											into
+										Element:code
+											string
+											. This allows you to merge modern mappings with legacy mappings. Long lived indexes will have to be recreated before upgrading to 6.x but mapping downgrade gives you the opportunity to do the recreation on your own schedule.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« String datatype
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Token count datatype »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

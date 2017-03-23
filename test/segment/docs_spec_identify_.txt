@@ -1,0 +1,602 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Spec: Identify
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:code
+					identify
+					lets you tie a user to their actions and record traits about them. It includes a unique User ID and any optional traits you know about them like their email, name, etc.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Our recommendation for when and how often you should call identify is as follows:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					After a user registers
+				Element:li
+					After a user logs in
+				Element:li
+					Upon loading any pages that are accessible by a logged in user
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The first two examples are pretty self-explanatory, but many might ask: why you would call identify on every page load if we’re storing the userIdin the cookie?
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Let’s imagine this scenario:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					I log into your app. identify is called. For whatever reason, I close the browser and don’t return until later. There’s no way of knowing where I will reenter your app from. I could start my session from anywhere. And because there are many tools out there that require an initial identify call for certain features (e.g. Intercom chat widget) it’s important to tell your end tools who the user is when they first start their session. It’s better to be safe than sorry!
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Calling
+				Element:code
+					identify
+					in one of our
+				Element:a
+					libraries
+					is one of the first steps to getting started with Segment.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Here’s the payload of a typical
+				Element:code
+					identify
+					call with most
+				Element:a
+					common fields
+					removed:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "type": "identify", "traits": { "name": "Peter Gibbons", "email": "peter@initech.com", "plan": "premium", "logins": 5 }, "userId": "97980cfea0067" }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					And here’s the corresponding Javascript event that would generate the above payload:
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					analytics.identify("97980cfea0067", { name: "Peter Gibbons", email: "peter@initech.com", plan: "premium", logins: 5 });
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Beyond the common fields, an
+				Element:code
+					identify
+					call has the following fields:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tr
+				Element:th
+				Element:strong
+					Field
+				Element:th
+				Element:strong
+					Type
+				Element:th
+				Element:strong
+					Description
+				Element:tr
+				Element:td
+				Element:code
+					traits
+				Element:em
+					optional
+				Element:td
+					Object
+				Element:td
+					Free-form dictionary of traits of the user, like
+				Element:code
+					email
+					or
+				Element:code
+					name
+					.
+				Element:p
+					See the
+				Element:a
+					Traits field docs
+					for a list of reserved trait names
+				Element:tr
+				Element:td
+				Element:code
+					userId
+				Element:em
+					required
+				Element:td
+					String
+				Element:td
+					Unique identifier for the user in your database
+				Element:p
+					A
+				Element:code
+					userId
+				Element:em
+					or
+				Element:code
+					anonymousId
+					is required
+				Element:p
+					See the
+				Element:a
+					Identities docs
+					for more detail
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Example
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s a complete example of an
+							Element:code
+								identify
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "anonymousId": "507f191e810c19729de860ea", "channel": "browser", "context": { "ip": "8.8.8.8", "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36" }, "integrations": { "All": false, "Mixpanel": true, "Salesforce": true }, "messageId": "022bb90c-bbac-11e4-8dfc-aa07a5b093db", "receivedAt": "2015-02-23T22:28:55.387Z", "sentAt": "2015-02-23T22:28:55.111Z", "timestamp": "2015-02-23T22:28:55.111Z", "traits": { "name": "Peter Gibbons", "email": "peter@initech.com", "plan": "premium", "logins": 5, "address": { "street": "6th St", "city": "San Francisco", "state": "CA", "postalCode": "94103", "country": "USA" } }, "type": "identify", "userId": "97980cfea0067", "version": "1.1" }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identities
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								call specifies a customer identity that you can reference across the customer’s whole lifetime.
+							Element:strong
+								Every
+								, depending on how much you know about the user in question.
+							Element:code
+								identify
+								call must have a
+							Element:a
+								User ID
+								or an
+							Element:a
+								Anonymous ID
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Anonymous ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are certain cases where you don’t actually know who the user is according to your database, but you still want to be able tie them to traits, events or page views. For example, you may not know who a user is when tracking newsletter signups or anonymous page views.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In these cases, you should use an Anonymous ID.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Anonymous ID can be any pseudo-unique identifier. For example, on your servers you can use a session id. If you don’t have any readily available identifier, you can always generate a new random one—we recommend
+										Element:a
+											UUIDs
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											Our
+										Element:a
+											browser and mobile libraries
+										Element:strong
+											automatically
+											use Anonymous IDs under the covers to keep track of users as they navigate around your website or app, so you don’t need to worry about them when using those libraries.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											User ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											User IDs are a more permanent and robust identifier, like a database ID. Since these IDs are consistent across a customer’s lifetime,
+										Element:code
+											identify
+											calls should include a User ID as often as possible.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A User ID is usually the unique identifier that you recognize a user by in your own database. For example, if you’re using MongoDB it might look something like
+										Element:code
+											507f191e810c19729de860ea
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We recommend using database IDs instead of simple email addresses or usernames, because database IDs
+										Element:em
+											never
+											change. That guarantees that even if the user changes their email address, you can still recognize them as the same person in all of your analytics tools. And even better, you’ll be able to correlate analytics data with your own internal database.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Instead of using an email address or a username as a User ID, send them along as
+										Element:a
+											traits
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Traits
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Traits are pieces of information you know about a user that are included in an
+							Element:code
+								identify
+								call. These could be demographics like
+							Element:code
+								age
+								or
+							Element:code
+								gender
+								, account-specific like
+							Element:code
+								plan
+								, or even things like whether a user has seen a particular A/B test variation. Up to you!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We’ve reserved some traits that have semantic meanings for users, and we handle them in special ways. For example, we always expect
+							Element:code
+								email
+								to be a string of the user’s email address. We’ll send this on to integrations like
+							Element:em
+								Mailchimp
+								that require an email address for their tracking.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should
+							Element:strong
+								only use reserved traits for their intended meaning
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Reserved traits we’ve standardized:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:strong
+								Trait
+							Element:th
+							Element:strong
+								Type
+							Element:th
+							Element:strong
+								Description
+							Element:tr
+							Element:td
+							Element:code
+								address
+							Element:td
+								Object
+							Element:td
+								Street address of a user optionally containing:
+							Element:code
+								city
+								,
+							Element:code
+								country
+								,
+							Element:code
+								postalCode
+								,
+							Element:code
+								state
+								or
+							Element:code
+								street
+							Element:tr
+							Element:td
+							Element:code
+								age
+							Element:td
+								Number
+							Element:td
+								Age of a user
+							Element:tr
+							Element:td
+							Element:code
+								avatar
+							Element:td
+								String
+							Element:td
+								URL to an avatar image for the user
+							Element:tr
+							Element:td
+							Element:code
+								birthday
+							Element:td
+								Date
+							Element:td
+								User’s birthday
+							Element:tr
+							Element:td
+							Element:code
+								createdAt
+							Element:td
+								Date
+							Element:td
+								Date the user’s account was first created
+							Element:p
+								We recommend
+							Element:a
+								ISO-8601
+								date strings, but also accept Unix timestamps for convenience.
+							Element:tr
+							Element:td
+							Element:code
+								description
+							Element:td
+								String
+							Element:td
+								Description of the user
+							Element:tr
+							Element:td
+							Element:code
+								email
+							Element:td
+								String
+							Element:td
+								Email address of a user
+							Element:tr
+							Element:td
+							Element:code
+								firstName
+							Element:td
+								String
+							Element:td
+								First name of a user
+							Element:tr
+							Element:td
+							Element:code
+								gender
+							Element:td
+								String
+							Element:td
+								Gender of a user
+							Element:tr
+							Element:td
+							Element:code
+								id
+							Element:td
+								String
+							Element:td
+								Unique ID in your database for a user
+							Element:tr
+							Element:td
+							Element:code
+								lastName
+							Element:td
+								String
+							Element:td
+								Last name of a user
+							Element:tr
+							Element:td
+							Element:code
+								name
+							Element:td
+								String
+							Element:td
+								Full name of a user
+							Element:p
+								If you only pass a first and last name we’ll automatically fill in the full name for you.
+							Element:tr
+							Element:td
+							Element:code
+								phone
+							Element:td
+								String
+							Element:td
+								Phone number of a user
+							Element:tr
+							Element:td
+							Element:code
+								title
+							Element:td
+								String
+							Element:td
+								Title of a user, usually related to their position at a specific company
+							Element:p
+								Example: “VP of Engineering”
+							Element:tr
+							Element:td
+							Element:code
+								username
+							Element:td
+								String
+							Element:td
+								User’s username
+							Element:p
+								This should be unique to each user, like the usernames of Twitter or GitHub.
+							Element:tr
+							Element:td
+							Element:code
+								website
+							Element:td
+								String
+							Element:td
+								Website of a user
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								You might be used to some integrations recognizing special traits by slightly different names. For example, Mixpanel recognizes a
+							Element:code
+								$created
+								trait when the user’s account was first created, while Intercom recognizes the same trait as
+							Element:code
+								created_at
+								instead. Luckily, you don’t have to worry about those inconsistencies. Just pass us
+							Element:code
+								createdAt
+								.
+							Element:strong
+								We’ll handle all of the integration-specific conversions for you automatically.
+								Same goes for the rest of the reserved traits.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								You can pass traits using your preferred naming convention
+								, so in Javascript you can match the rest of your camel-case code by sending
+							Element:code
+								firstName
+								, while in Ruby you can match your snake-case code by sending
+							Element:code
+								first_name
+								. That way the API never seems alien to your code base.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have any questions or see anywhere we can improve our documentation, please
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:span
+							Element:span
+								Was this document helpful?
+							Element:span
+							Element:label
+							Element:span
+								Yes
+							Element:label
+							Element:span
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					Identify
+				Element:li
+				Element:a
+					Track
+				Element:li
+				Element:a
+					Page
+				Element:li
+				Element:a
+					Screen
+				Element:li
+				Element:a
+					Group
+				Element:li
+				Element:a
+					Alias
+				Element:li
+				Element:a
+					Common Fields
+				Element:li
+				Element:a
+					Semantic Events
+				Element:li
+				Element:a
+					Ecommerce
+				Element:li
+				Element:a
+					Mobile

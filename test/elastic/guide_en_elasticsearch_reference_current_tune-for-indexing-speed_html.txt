@@ -1,0 +1,467 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Tune for indexing speed
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Use bulk requests
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Bulk requests will yield much better performance than single-document index requests. In order to know the optimal size of a bulk request, you should run a benchmark on a single node with a single shard. First try to index 100 documents at once, then 200, then 400, etc. doubling the number of documents in a bulk request in every benchmark run. When the indexing speed starts to plateau then you know you reached the optimal size of a bulk request for your data. In case of tie, it is better to err in the direction of too few rather than too many documents. Beware that too large bulk requests might put the cluster under memory pressure when many of them are sent concurrently, so it is advisable to avoid going beyond a couple tens of megabytes per request even if larger requests seem to perform better.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Use multiple workers/threads to send data to Elasticsearch
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A single thread sending bulk requests is unlikely to be able to max out the indexing capacity of an Elasticsearch cluster. In order to use all resources of the cluster, you should send data from multiple threads or processes. In addition to making better use of the resources of the cluster, this should help reduce the cost of each fsync.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Make sure to watch for
+										Element:code
+											TOO_MANY_REQUESTS (429)
+											response codes (
+										Element:code
+											EsRejectedExecutionException
+											with the Java client), which is the way that Elasticsearch tells you that it cannot keep up with the current indexing rate. When it happens, you should pause indexing a bit before trying again, ideally with randomized exponential backoff.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Similarly to sizing bulk requests, only testing can tell what the optimal number of workers is. This can be tested by progressively increasing the number of workers until either I/O or CPU is saturated on the cluster.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Increase the refresh interval
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default
+										Element:a
+											is
+										Element:code
+											index.refresh_interval
+										Element:code
+											1s
+											, which forces Elasticsearch to create a new segment every second. Increasing this value (to say,
+										Element:code
+											30s
+											) will allow larger segments to flush and decreases future merge pressure.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Disable refresh and replicas for initial loads
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you need to load a large amount of data at once, you should disable refresh by setting
+										Element:code
+											index.refresh_interval
+											to
+										Element:code
+											-1
+											and set
+										Element:code
+											index.number_of_replicas
+											to
+										Element:code
+											0
+											. This will temporarily put your index at risk since the loss of any shard will cause data loss, but at the same time indexing will be faster since documents will be indexed only once. Once the initial loading is finished, you can set
+										Element:code
+											index.refresh_interval
+											and
+										Element:code
+											index.number_of_replicas
+											back to their original values.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Disable swapping
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You should make sure that the operating system is not swapping out the java process by
+										Element:a
+											disabling swapping
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Give memory to the filesystem cache
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The filesystem cache will be used in order to buffer I/O operations. You should make sure to give at least half the memory of the machine running elasticsearch to the filesystem cache.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Use auto-generated ids
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When indexing a document that has an explicit id, elasticsearch needs to check whether a document with the same id already exists within the same shard, which is a costly operation and gets even more costly as the index grows. By using auto-generated ids, Elasticsearch can skip this check, which makes indexing faster.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Use faster hardware
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If indexing is I/O bound, you should investigate giving more memory to the filesystem cache (see above) or buying faster drives. In particular SSD drives are known to perform better than spinning disks. Always use local storage, remote filesystems such as
+										Element:code
+											NFS
+											or
+										Element:code
+											SMB
+											should be avoided. Also beware of virtualized storage such as Amazon’s
+										Element:code
+											Elastic Block Storage
+											. Virtualized storage works very well with Elasticsearch, and it is appealing since it is so fast and simple to set up, but it is also unfortunately inherently slower on an ongoing basis when compared to dedicated local storage. If you put an index on
+										Element:code
+											EBS
+											, be sure to use provisioned IOPS otherwise operations could be quickly throttled.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Stripe your index across multiple SSDs by configuring a RAID 0 array. Remember that it will increase the risk of failure since the failure of any one SSD destroys the index. However this is typically the right tradeoff to make: optimize single shards for maximum performance, and then add replicas across different nodes so there’s redundancy for any node failures. You can also use
+										Element:a
+											snapshot and restore
+											to backup the index for further insurance.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Indexing buffer size
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your node is doing only heavy indexing, be sure
+										Element:a
+											is large enough to give at most 512 MB indexing buffer per shard doing heavy indexing (beyond that indexing performance does not typically improve). Elasticsearch takes that setting (a percentage of the java heap or an absolute byte-size), and uses it as a shared buffer across all active shards. Very active shards will naturally use this buffer more than shards that are performing lightweight indexing.
+										Element:code
+											indices.memory.index_buffer_size
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default is
+										Element:code
+											10%
+											which is often plenty: for example, if you give the JVM 10GB of memory, it will give 1GB to the index buffer, which is enough to host two shards that are heavily indexing.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Additional optimizations
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Many of the strategies outlined in
+										Element:a
+											also provide an improvement in the speed of indexing.
+										Element:em
+											Tune for disk usage
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Recipes
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Tune for search speed »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

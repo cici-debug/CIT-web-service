@@ -1,0 +1,890 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Mapping changes
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											string
+											fields replaced by
+										Element:code
+											text
+											/
+										Element:code
+											keyword
+											fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											string
+											field datatype has been replaced by the
+										Element:code
+											text
+											field for full text analyzed content, and the
+										Element:code
+											keyword
+											field for not-analyzed exact string values. For backwards compatibility purposes, during the 5.x series:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											string
+											fields on pre-5.0 indices will function as before.
+										Element:li
+											New
+										Element:code
+											string
+											fields can be added to pre-5.0 indices as before.
+										Element:li
+										Element:code
+											text
+											and
+										Element:code
+											keyword
+											fields can also be added to pre-5.0 indices.
+										Element:li
+											When adding a
+										Element:code
+											string
+											field to a new index, the field mapping will be rewritten as a
+										Element:code
+											text
+											or
+										Element:code
+											keyword
+											field if possible, otherwise an exception will be thrown. Certain configurations that were possible with
+										Element:code
+											string
+											fields are no longer possible with
+										Element:code
+											text
+											/
+										Element:code
+											keyword
+											fields such as enabling
+										Element:code
+											term_vectors
+											on a not-analyzed
+										Element:code
+											keyword
+											field.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Default string mappings
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											String mappings now have the following default mappings:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This allows to perform full-text search on the original field name and to sort and run aggregations on the sub keyword field.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Numeric fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Numeric fields are now indexed with a completely different data-structure, called BKD tree, that is expected to require less disk space and be faster for range queries than the previous way that numerics were indexed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Term queries will return constant scores now, while they used to return higher scores for rare terms due to the contribution of the document frequency, which this new BKD structure does not record. If scoring is needed, then it is advised to map the numeric fields as
+										Element:a
+											`keyword`s
+											too.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that this
+										Element:a
+											mapping do not need to replace the numeric mapping. For instance if you need both sorting and scoring on your numeric field, you could map it both as a number and a
+										Element:code
+											keyword
+										Element:code
+											keyword
+											using
+										Element:a
+											:
+										Element:code
+											fields
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "mappings": { "my_type": { "properties": { "my_number": { "type": "long", "fields": { "keyword": { "type": "keyword" } } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Also the
+										Element:code
+											precision_step
+											parameter is now irrelevant and will be rejected on indices that are created on or after 5.0.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											geo_point
+											fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Like Numeric fields the Geo point field now uses the new BKD tree structure. Since this structure is fundamentally designed for multi-dimension spatial data, the following field parameters are no longer needed or supported:
+										Element:code
+											geohash
+											,
+										Element:code
+											geohash_prefix
+											,
+										Element:code
+											geohash_precision
+											,
+										Element:code
+											lat_lon
+											. Geohashes are still supported from an API perspective, and can still be accessed using the
+										Element:code
+											.geohash
+											field extension, but they are no longer used to index geo point data.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											_timestamp
+											and
+										Element:code
+											_ttl
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_timestamp
+											and
+										Element:code
+											_ttl
+											fields were deprecated and are now removed. As a replacement for
+										Element:code
+											_timestamp
+											, you should populate a regular date field with the current timestamp on application side. For
+										Element:code
+											_ttl
+											, you should either use time-based indices when applicable, or cron a delete-by-query with a range query on a timestamp field
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											index
+											property
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											On all field datatypes (except for the deprecated
+										Element:code
+											string
+											field), the
+										Element:code
+											index
+											property now only accepts
+										Element:code
+											true
+											/
+										Element:code
+											false
+											instead of
+										Element:code
+											not_analyzed
+											/
+										Element:code
+											no
+											. The
+										Element:code
+											string
+											field still accepts
+										Element:code
+											analyzed
+											/
+										Element:code
+											not_analyzed
+											/
+										Element:code
+											no
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Doc values on unindexed fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Previously, setting a field to
+										Element:code
+											index:no
+											would also disable doc-values. Now, doc-values are enabled by default on all types but
+										Element:code
+											text
+											and
+										Element:code
+											binary
+											, regardless of the value of the
+										Element:code
+											index
+											property.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Floating points use
+										Element:code
+											float
+											instead of
+										Element:code
+											double
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When dynamically mapping a field containing a floating point number, the field now defaults to using
+										Element:code
+											float
+											instead of
+										Element:code
+											double
+											. The reasoning is that floats should be more than enough for most cases but would decrease storage requirements significantly.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											norms
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											norms
+											now take a boolean instead of an object. This boolean is the replacement for
+										Element:code
+											norms.enabled
+											. There is no replacement for
+										Element:code
+											norms.loading
+											since eager loading of norms is not useful anymore now that norms are disk-based.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											fielddata.format
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Setting
+										Element:code
+											fielddata.format: doc_values
+											in the mappings used to implicitly enable doc-values on a field. This no longer works: the only way to enable or disable doc-values is by using the
+										Element:code
+											doc_values
+											property of mappings.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											fielddata.filter.regex
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Regex filters are not supported anymore and will be dropped on upgrade.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Source-transform removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The source
+										Element:code
+											transform
+											feature has been removed. Instead, use an ingest pipeline.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Field mapping limits
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To prevent mapping explosions, the following limits are applied to indices created in 5.x:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											The maximum number of fields in an index is limited to 1000.
+										Element:li
+											The maximum depth for a field (1 plus the number of
+										Element:code
+											object
+											or
+										Element:code
+											nested
+											parents) is limited to 20.
+										Element:li
+											The maximum number of
+										Element:code
+											nested
+											fields in an index is limited to 50.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											See
+										Element:a
+											the section called “Settings to prevent mappings explosion
+										Element:a
+											edit
+											” for more.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											_parent
+											field no longer indexed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The join between parent and child documents no longer relies on indexed fields and therefore from 5.0.0 onwards the
+										Element:code
+											_parent
+											field is no longer indexed. In order to find documents that refer to a specific parent id, the new
+										Element:code
+											parent_id
+											query can be used. The GET response and hits inside the search response still include the parent id under the
+										Element:code
+											_parent
+											key.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Source
+										Element:code
+											format
+											option
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_source
+											mapping no longer supports the
+										Element:code
+											format
+											option. It will still be accepted for indices created before the upgrade to 5.0 for backwards compatibility, but it will have no effect. Indices created on or after 5.0 will reject this option.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Object notation
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Core types no longer support the object notation, which was used to provide per document boosts as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "value": "field_value", "boost": 42 }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Boost accuracy for queries on
+										Element:code
+											_all
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Per-field boosts on the
+										Element:code
+											_all
+											are now compressed into a single byte instead of the 4 bytes used previously. While this will make the index much more space-efficient, it also means that index time boosts will be less accurately encoded.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											_ttl
+											and
+										Element:code
+											_timestamp
+											cannot be created
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can no longer create indexes with
+										Element:code
+											_ttl
+											or
+										Element:code
+											_timestamp
+											enabled. Indexes with them enabled created before 5.0 will continue to work.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You should replace
+										Element:code
+											_timestamp
+											in new indexes by adding a field to your source either in the application producing the data or with an ingest pipline like this one:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT _ingest/pipeline/timestamp { "description" : "Adds a timestamp field at the current time", "processors" : [ { "set" : { "field": "timestamp", "value": "{{_ingest.timestamp}}" } } ] } PUT newindex/type/1?pipeline=timestamp { "example": "data" } GET newindex/type/1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which produces
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_source": { "example": "data", "timestamp": "2016-06-21T18:48:55.560+0000" }, ... }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have an old index created with 2.x that has
+										Element:code
+											_timestamp
+											enabled then you can migrate it to a new index with the a
+										Element:code
+											timestamp
+											field in the source with reindex:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _reindex { "source": { "index": "oldindex" }, "dest": { "index": "newindex" }, "script": { "lang": "painless", "inline": "ctx._source.timestamp = ctx._timestamp; ctx._timestamp = null" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can replace
+										Element:code
+											_ttl
+											with time based index names (preferred) or by adding a cron job which runs a delete-by-query on a timestamp field in the source document. If you had documents like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST index/type/_bulk {"index":{"_id":1}} {"example": "data", "timestamp": "2016-06-21T18:48:55.560+0000" } {"index":{"_id":2}} {"example": "data", "timestamp": "2016-04-21T18:48:55.560+0000" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Then you could delete all of the documents from before June 1st with:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST index/type/_delete_by_query { "query": { "range" : { "timestamp" : { "lt" : "2016-05-01" } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Keep in mind that deleting documents from an index is very expensive compared to deleting whole indexes. That is why time based indexes are recommended over this sort of thing and why
+										Element:code
+											_ttl
+											was deprecated in the first place.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Blank field names is not supported
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Blank field names in mappings is not allowed after 5.0.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Search and Query DSL changes
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Percolator changes »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

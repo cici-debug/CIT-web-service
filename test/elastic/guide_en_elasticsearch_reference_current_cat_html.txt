@@ -1,0 +1,528 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:a
+					cat APIs
+				Element:a
+					edit
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Introduction
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								JSON is great… for computers. Even if it’s pretty-printed, trying to find relationships in the data is tedious. Human eyes, especially when looking at an ssh terminal, need compact and aligned text. The cat API aims to meet this need.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All the cat commands accept a query string parameter
+							Element:code
+								help
+								to see all the headers and info they provide, and the
+							Element:code
+								/_cat
+								command alone lists all the available commands.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:a
+								Common parameters
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Verbose
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each of the commands accepts a query string parameter
+										Element:code
+											v
+											to turn on verbose output. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_cat/master?v
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Might respond with:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											id host ip node u_n93zwxThWHi1PDBJAGAg 127.0.0.1 127.0.0.1 u_n93zw
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Help
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each of the commands accepts a query string parameter
+										Element:code
+											help
+											which will output its available columns. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_cat/master?help
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Might respond respond with:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											id | | node id host | h | host name ip | | ip address node | n | node name
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Headers
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each of the commands accepts a query string parameter
+										Element:code
+											h
+											which forces only those columns to appear. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_cat/nodes?h=ip,port,heapPercent,name
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Responds with:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											127.0.0.1 9300 27 sLBaIGK
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also request multiple columns using simple wildcards like
+										Element:code
+											/_cat/thread_pool?h=ip,bulk.*
+											to get all headers (or aliases) starting with
+										Element:code
+											bulk.
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Numeric formats
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Many commands provide a few types of numeric output, either a byte, size or a time value. By default, these types are human-formatted, for example,
+										Element:code
+											3.5mb
+											instead of
+										Element:code
+											3763212
+											. The human values are not sortable numerically, so in order to operate on these values where order is important, you can change it.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Say you want to find the largest index in your cluster (storage used by all the shards, not number of documents). The
+										Element:code
+											/_cat/indices
+											API is ideal. We only need to tweak two things. First, we want to turn off human mode. We’ll use a byte-level resolution. Then we’ll pipe our output into
+										Element:code
+											sort
+											using the appropriate column, which in this case is the eighth one.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											% curl '192.168.56.10:9200/_cat/indices?bytes=b' | sort -rnk8 green wiki2 3 0 10000 0 105274918 105274918 green wiki1 3 0 10000 413 103776272 103776272 green foo 1 0 227 0 2065131 2065131
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to change the
+										Element:a
+											time units
+											, use
+										Element:code
+											time
+											parameter.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to change the
+										Element:a
+											size units
+											, use
+										Element:code
+											size
+											parameter.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to change the
+										Element:a
+											byte units
+											, use
+										Element:code
+											bytes
+											parameter.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Response as text, json, smile, yaml or cbor
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											% curl 'localhost:9200/_cat/indices?format=json&pretty' [ { "pri.store.size": "650b", "health": "yellow", "status": "open", "index": "twitter", "pri": "5", "rep": "1", "docs.count": "0", "docs.deleted": "0", "store.size": "650b" } ]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Currently supported formats (for the
+										Element:code
+											?format=
+											parameter): - text (default) - json - smile - yaml - cbor
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Alternatively you can set the "Accept" HTTP header to the appropriate media format. All formats above are supported, the GET parameter takes precedence over the header. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											% curl '192.168.56.10:9200/_cat/indices?pretty' -H "Accept: application/json" [ { "pri.store.size": "650b", "health": "yellow", "status": "open", "index": "twitter", "pri": "5", "rep": "1", "docs.count": "0", "docs.deleted": "0", "store.size": "650b" } ]
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Sort
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each of the commands accepts a query string parameter
+										Element:code
+											s
+											which sorts the table by the columns specified as the parameter value. Columns are specified either by name or by alias, and are provided as a comma separated string. By default, sorting is done in ascending fashion. Appending
+										Element:code
+											:desc
+											to a column will invert the ordering for that column.
+										Element:code
+											:asc
+											is also accepted but exhibits the same behavior as the default sort order.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, with a sort string
+										Element:code
+											s=column1,column2:desc,column3
+											, the table will be sorted in ascending order by column1, in descending order by column2, and in ascending order by column3.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET _cat/templates?v&s=order:desc,template
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											returns:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											name template order version pizza_pepperoni *pepperoni* 2 sushi_california_roll *avocado* 1 1 pizza_hawaiian *pineapples* 1
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Force Merge
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											cat aliases »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

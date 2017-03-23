@@ -1,0 +1,654 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Date Histogram Aggregation
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A multi-bucket aggregation similar to the
+							Element:a
+								histogram
+								except it can only be applied on date values. Since dates are represented in elasticsearch internally as long values, it is possible to use the normal
+							Element:code
+								histogram
+								on dates as well, though accuracy will be compromised. The reason for this is in the fact that time based intervals are not fixed (think of leap years and on the number of days in a month). For this reason, we need special support for time based data. From a functionality perspective, this histogram supports the same features as the normal
+							Element:a
+								histogram
+								. The main difference is that the interval can be specified by date/time expressions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Requesting bucket intervals of a month.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "aggs" : { "articles_over_time" : { "date_histogram" : { "field" : "date", "interval" : "month" } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Available expressions for interval:
+							Element:code
+								year
+								,
+							Element:code
+								quarter
+								,
+							Element:code
+								month
+								,
+							Element:code
+								week
+								,
+							Element:code
+								day
+								,
+							Element:code
+								hour
+								,
+							Element:code
+								minute
+								,
+							Element:code
+								second
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Time values can also be specified via abbreviations supported by
+							Element:a
+								time units
+								parsing. Note that fractional time values are not supported, but you can address this by shifting to another time unit (e.g.,
+							Element:code
+								1.5h
+								could instead be specified as
+							Element:code
+								90m
+								).
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "aggs" : { "articles_over_time" : { "date_histogram" : { "field" : "date", "interval" : "90m" } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Keys
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Internally, a date is represented as a 64 bit number representing a timestamp in milliseconds-since-the-epoch. These timestamps are returned as the bucket
+										Element:code
+											key
+											s. The
+										Element:code
+											key_as_string
+											is the same timestamp converted to a formatted date string using the format specified with the
+										Element:code
+											format
+											parameter:
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If no
+										Element:code
+											format
+											is specified, then it will use the first date
+										Element:a
+											format
+											specified in the field mapping.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "articles_over_time" : { "date_histogram" : { "field" : "date", "interval" : "1M", "format" : "yyyy-MM-dd"
+										Element:a
+										Element:span
+											} } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Supports expressive date
+										Element:a
+											format pattern
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Response:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggregations": { "articles_over_time": { "buckets": [ { "key_as_string": "2013-02-02", "key": 1328140800000, "doc_count": 1 }, { "key_as_string": "2013-03-02", "key": 1330646400000, "doc_count": 2 }, ... ] } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Time Zone
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Date-times are stored in Elasticsearch in UTC. By default, all bucketing and rounding is also done in UTC. The
+										Element:code
+											time_zone
+											parameter can be used to indicate that bucketing should use a different time zone.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Time zones may either be specified as an ISO 8601 UTC offset (e.g.
+										Element:code
+											+01:00
+											or
+										Element:code
+											-08:00
+											) or as a timezone id, an identifier used in the TZ database like
+										Element:code
+											America/Los_Angeles
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Consider the following example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index/log/1 { "date": "2015-10-01T00:30:00Z" } PUT my_index/log/2 { "date": "2015-10-01T01:30:00Z" } GET my_index/_search?size=0 { "aggs": { "by_day": { "date_histogram": { "field": "date", "interval": "day" } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											UTC is used if no time zone is specified, which would result in both of these documents being placed into the same day bucket, which starts at midnight UTC on 1 October 2015:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"aggregations": { "by_day": { "buckets": [ { "key_as_string": "2015-10-01T00:00:00.000Z", "key": 1443657600000, "doc_count": 2 } ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If a
+										Element:code
+											time_zone
+											of
+										Element:code
+											-01:00
+											is specified, then midnight starts at one hour before midnight UTC:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET my_index/_search?size=0 { "aggs": { "by_day": { "date_histogram": { "field": "date", "interval": "day", "time_zone": "-01:00" } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now the first document falls into the bucket for 30 September 2015, while the second document falls into the bucket for 1 October 2015:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"aggregations": { "by_day": { "buckets": [ { "key_as_string": "2015-09-30T00:00:00.000-01:00",
+										Element:a
+										Element:span
+											"key": 1443571200000, "doc_count": 1 }, { "key_as_string": "2015-10-01T00:00:00.000-01:00",
+										Element:img
+										Element:a
+										Element:span
+											"key": 1443657600000, "doc_count": 1 } ] } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											key_as_string
+											value represents midnight on each day in the specified time zone.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When using time zones that follow DST (daylight savings time) changes, buckets close to the moment when those changes happen can have slightly different sizes than would be expected from the used
+										Element:code
+											interval
+											. For example, consider a DST start in the
+										Element:code
+											CET
+											time zone: on 27 March 2016 at 2am, clocks were turned forward 1 hour to 3am local time. When using
+										Element:code
+											day
+											as
+										Element:code
+											interval
+											, the bucket covering that day will only hold data for 23 hours instead of the usual 24 hours for other buckets. The same is true for shorter intervals like e.g. 12h. Here, we will have only a 11h bucket on the morning of 27 March when the DST shift happens.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Offset
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											offset
+											parameter is used to change the start value of each bucket by the specified positive (
+										Element:code
+											+
+											) or negative offset (
+										Element:code
+											-
+											) duration, such as
+										Element:code
+											1h
+											for an hour, or
+										Element:code
+											1d
+											for a day. See
+										Element:a
+											the section called “Time units
+										Element:a
+											edit
+											” for more possible time duration options.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For instance, when using an interval of
+										Element:code
+											day
+											, each bucket runs from midnight to midnight. Setting the
+										Element:code
+											offset
+											parameter to
+										Element:code
+											+6h
+											would change each bucket to run from 6am to 6am:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index/log/1 { "date": "2015-10-01T05:30:00Z" } PUT my_index/log/2 { "date": "2015-10-01T06:30:00Z" } GET my_index/_search?size=0 { "aggs": { "by_day": { "date_histogram": { "field": "date", "interval": "day", "offset": "+6h" } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Instead of a single bucket starting at midnight, the above request groups the documents into buckets starting at 6am:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"aggregations": { "by_day": { "buckets": [ { "key_as_string": "2015-09-30T06:00:00.000Z", "key": 1443592800000, "doc_count": 1 }, { "key_as_string": "2015-10-01T06:00:00.000Z", "key": 1443679200000, "doc_count": 1 } ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The start
+										Element:code
+											offset
+											of each bucket is calculated after the
+										Element:code
+											time_zone
+											adjustments have been made.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Scripts
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Like with the normal
+										Element:a
+											histogram
+											, both document level scripts and value level scripts are supported. It is also possible to control the order of the returned buckets using the
+										Element:code
+											order
+											settings and filter the returned buckets based on a
+										Element:code
+											min_doc_count
+											setting (by default all buckets between the first bucket that matches documents and the last one are returned). This histogram also supports the
+										Element:code
+											extended_bounds
+											setting, which enables extending the bounds of the histogram beyond the data itself (to read more on why you’d want to do that please refer to the explanation
+										Element:a
+											here
+											).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Missing value
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											missing
+											parameter defines how documents that are missing a value should be treated. By default they will be ignored but it is also possible to treat them as if they had a value.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "publish_date" : { "date_histogram" : { "field" : "publish_date", "interval": "year", "missing": "2000-01-01"
+										Element:a
+										Element:span
+											} } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Documents without a value in the
+										Element:code
+											publish_date
+											field will fall into the same bucket as documents that have the value
+										Element:code
+											2000-01-01
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Children Aggregation
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Date Range Aggregation »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

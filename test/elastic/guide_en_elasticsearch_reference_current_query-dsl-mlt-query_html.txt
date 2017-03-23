@@ -1,0 +1,643 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								More Like This Query
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The More Like This Query (MLT Query) finds documents that are "like" a given set of documents. In order to do so, MLT selects a set of representative terms of these input documents, forms a query using these terms, executes the query and returns the results. The user controls the input documents, how the terms should be selected and how the query is formed.
+							Element:code
+								more_like_this
+								can be shortened to
+							Element:code
+								mlt
+							Element:span
+								[
+								.
+							Element:span
+								5.0.0
+								]
+							Element:span
+								Deprecated in 5.0.0. use
+							Element:code
+								more_like_this
+								instead
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The simplest use case consists of asking for documents that are similar to a provided piece of text. Here, we are asking for all movies that have some text similar to "Once upon a time" in their "title" and in their "description" fields, limiting the number of selected terms to 12.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /_search { "query": { "more_like_this" : { "fields" : ["title", "description"], "like" : "Once upon a time", "min_term_freq" : 1, "max_query_terms" : 12 } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A more complicated use case consists of mixing texts with documents already existing in the index. In this case, the syntax to specify a document is similar to the one used in the
+							Element:a
+								Multi GET API
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /_search { "query": { "more_like_this" : { "fields" : ["title", "description"], "like" : [ { "_index" : "imdb", "_type" : "movies", "_id" : "1" }, { "_index" : "imdb", "_type" : "movies", "_id" : "2" }, "and potentially some more text here as well" ], "min_term_freq" : 1, "max_query_terms" : 12 } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Finally, users can mix some texts, a chosen set of documents but also provide documents not necessarily present in the index. To provide documents not present in the index, the syntax is similar to
+							Element:a
+								artificial documents
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /_search { "query": { "more_like_this" : { "fields" : ["name.first", "name.last"], "like" : [ { "_index" : "marvel", "_type" : "quotes", "doc" : { "name": { "first": "Ben", "last": "Grimm" }, "tweet": "You got no idea what I'd... what I'd give to be invisible." } }, { "_index" : "marvel", "_type" : "quotes", "_id" : "2" } ], "min_term_freq" : 1, "max_query_terms" : 12 } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											How it Works
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Suppose we wanted to find all documents similar to a given input document. Obviously, the input document itself should be its best match for that type of query. And the reason would be mostly, according to
+										Element:a
+											Lucene scoring formula
+											, due to the terms with the highest tf-idf. Therefore, the terms of the input document that have the highest tf-idf are good representatives of that document, and could be used within a disjunctive query (or
+										Element:code
+											OR
+											) to retrieve similar documents. The MLT query simply extracts the text from the input document, analyzes it, usually using the same analyzer at the field, then selects the top K terms with highest tf-idf to form a disjunctive query of these terms.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The fields on which to perform MLT must be indexed and of type
+										Element:code
+											string
+											. Additionally, when using
+										Element:code
+											like
+											with documents, either
+										Element:code
+											_source
+											must be enabled or the fields must be
+										Element:code
+											stored
+											or store
+										Element:code
+											term_vector
+											. In order to speed up analysis, it could help to store term vectors at index time.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, if we wish to perform MLT on the "title" and "tags.raw" fields, we can explicitly store their
+										Element:code
+											term_vector
+											at index time. We can still perform MLT on the "description" and "tags" fields, as
+										Element:code
+											_source
+											is enabled by default, but there will be no speed up on analysis for these fields.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT /imdb { "mappings": { "movies": { "properties": { "title": { "type": "text", "term_vector": "yes" }, "description": { "type": "text" }, "tags": { "type": "text", "fields" : { "raw": { "type" : "text", "analyzer": "keyword", "term_vector" : "yes" } } } } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Parameters
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The only required parameter is
+										Element:code
+											like
+											, all other parameters have sensible defaults. There are three types of parameters: one to specify the document input, the other one for term selection and for query formation.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Document Input Parameters
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:colgroup
+													Element:col
+													Element:col
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														like
+													Element:td
+													Element:p
+														The only
+													Element:span
+														parameter of the MLT query is
+													Element:strong
+														required
+													Element:code
+														like
+														and follows a versatile syntax, in which the user can specify free form text and/or a single or multiple documents (see examples above). The syntax to specify documents is similar to the one used by the
+													Element:a
+														Multi GET API
+														. When specifying documents, the text is fetched from
+													Element:code
+														fields
+														unless overridden in each document request. The text is analyzed by the analyzer at the field, but could also be overridden. The syntax to override the analyzer at the field follows a similar syntax to the
+													Element:code
+														per_field_analyzer
+														parameter of the
+													Element:a
+														Term Vectors API
+														. Additionally, to provide documents not necessarily present in the index,
+													Element:a
+														artificial documents
+														are also supported.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														unlike
+													Element:td
+													Element:p
+														The
+													Element:code
+														unlike
+														parameter is used in conjunction with
+													Element:code
+														like
+														in order not to select terms found in a chosen set of documents. In other words, we could ask for documents
+													Element:code
+														like: "Apple"
+														, but
+													Element:code
+														unlike: "cake crumble tree"
+														. The syntax is the same as
+													Element:code
+														like
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														fields
+													Element:td
+													Element:p
+														A list of fields to fetch and analyze the text from. Defaults to the
+													Element:code
+														_all
+														field for free text and to all possible fields for document inputs.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														like_text
+													Element:td
+													Element:p
+														The text to find documents like it.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														ids
+														or
+													Element:code
+														docs
+													Element:td
+													Element:p
+														A list of documents following the same syntax as the
+													Element:a
+														Multi GET API
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Term Selection Parameters
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:colgroup
+													Element:col
+													Element:col
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														max_query_terms
+													Element:td
+													Element:p
+														The maximum number of query terms that will be selected. Increasing this value gives greater accuracy at the expense of query execution speed. Defaults to
+													Element:code
+														25
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														min_term_freq
+													Element:td
+													Element:p
+														The minimum term frequency below which the terms will be ignored from the input document. Defaults to
+													Element:code
+														2
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														min_doc_freq
+													Element:td
+													Element:p
+														The minimum document frequency below which the terms will be ignored from the input document. Defaults to
+													Element:code
+														5
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														max_doc_freq
+													Element:td
+													Element:p
+														The maximum document frequency above which the terms will be ignored from the input document. This could be useful in order to ignore highly frequent words such as stop words. Defaults to unbounded (
+													Element:code
+														0
+														).
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														min_word_length
+													Element:td
+													Element:p
+														The minimum word length below which the terms will be ignored. The old name
+													Element:code
+														min_word_len
+														is deprecated. Defaults to
+													Element:code
+														0
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														max_word_length
+													Element:td
+													Element:p
+														The maximum word length above which the terms will be ignored. The old name
+													Element:code
+														max_word_len
+														is deprecated. Defaults to unbounded (
+													Element:code
+														0
+														).
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														stop_words
+													Element:td
+													Element:p
+														An array of stop words. Any word in this set is considered "uninteresting" and ignored. If the analyzer allows for stop words, you might want to tell MLT to explicitly ignore them, as for the purposes of document similarity it seems reasonable to assume that "a stop word is never interesting".
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														analyzer
+													Element:td
+													Element:p
+														The analyzer that is used to analyze the free form text. Defaults to the analyzer associated with the first field in
+													Element:code
+														fields
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Query Formation Parameters
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:colgroup
+													Element:col
+													Element:col
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														minimum_should_match
+													Element:td
+													Element:p
+														After the disjunctive query has been formed, this parameter controls the number of terms that must match. The syntax is the same as the
+													Element:a
+														minimum should match
+														. (Defaults to
+													Element:code
+														"30%"
+														).
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														boost_terms
+													Element:td
+													Element:p
+														Each term in the formed query could be further boosted by their tf-idf score. This sets the boost factor to use when using this feature. Defaults to deactivated (
+													Element:code
+														0
+														). Any other positive value activates terms boosting with the given boost factor.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														include
+													Element:td
+													Element:p
+														Specifies whether the input documents should also be included in the search results returned. Defaults to
+													Element:code
+														false
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														boost
+													Element:td
+													Element:p
+														Sets the boost value of the whole query. Defaults to
+													Element:code
+														1.0
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Specialized queries
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Template Query »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

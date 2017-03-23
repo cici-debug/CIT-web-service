@@ -1,0 +1,733 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Web Accessibility
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Learn about the Sugar Accessibility Plugin for Sidecar.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Introduction
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Making your application accessible -- per the standards defined by the W3C's
+							Element:a
+								WAI specifications
+								-- is a hard thing to do and even harder to maintain. The goal of the
+							Element:strong
+								Sugar Accessibility Plugin for Sidecar
+								is to automatically apply rules to your rendered HTML, so that you don't have to be concerned with all of the intricacies of accessibility.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								With respect to programmatically applying accessibility rules, you can generally assume that the rules fall into one of three categories:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Rules that are dependent on the context of the element's use and cannot be applied programmatically because the context is never clear.
+							Element:li
+								Rules that can be applied programmatically, but only when the context is clear.
+							Element:li
+								Rules that can always be applied programmatically.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We plan to continue to develop this plugin to address more and more accessibility concerns in an abstract way, with the intention of completely covering the latter two cases. In the meantime, the plugin handles two very specific cases: and (2) One from the third category.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								How It Works
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The plugin listens to the
+							Element:code
+								render
+								event for all
+							Element:code
+								View.Component
+								objects that are created. Anytime a component is rendered, the plugin runs its own plugins (hereinafter referred to as "helpers") on the component. Each of these helpers is responsible for determining if any modifications are necessary in order for the component's HTML to meet accessibility standards and then carrying out those changes in the DOM. This behavior is done automatically as a part of the sidecar framework, so you do not need to do anything to start using it.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sometimes, a component that you write will modify the HTML after it has been rendered. The plugin has no means of becoming aware of these changes to the HTML and you will have to tell it to look for rules to apply. One example is found in
+							Element:code
+								View.Fields.Base.ActionmenuField
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When the user selects all records in a list view, an alert is flashed indicating that all visible records are now selected. Within this alert, a link can be clicked to select all records, even those that are not currently visible. A new
+							Element:code
+								onclick
+								event listener is registered for this link. And because this link is added to the DOM after the component is rendered, the author of the component must make sure that the new HTML meets accessibility requirements. Here is how that is done:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								var $el = $('a#select-all'); $el.on('click', function() {...}); app.accessiblity.run($el, 'click');
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This will only run the
+							Element:code
+								click
+								helper. If you want to run all helpers, then call
+							Element:code
+								app.accessiblity.run($el)
+								(without the second parameter). But be aware that some helpers only support
+							Element:code
+								View.Component
+								objects, while others support either
+							Element:code
+								View.Component
+								objects or jQuery DOM elements. So running all helpers on a jQuery DOM element may fail, or at least fail to apply some accessibility rules as expected.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When the logger is configured for
+							Element:code
+								debug
+								mode, messages are logged indicating which helpers are being run and which helpers could not be run when intended.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Plugins
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A plugin (or helper) is a module that applies an accessibility rule to a
+							Element:code
+								View.Component
+								(or jQuery DOM element). At runtime, these helpers can be found in
+							Element:code
+								app.accessibility.helpers
+								and implement a
+							Element:code
+								run
+								method. The
+							Element:code
+								run
+								method takes a
+							Element:code
+								View.Component
+								(or jQuery DOM element) and then checks its HTML to determine if anything needs to be done in order to make the HTML compliant with accessibility standards related to the rule or task with which the helper is concerned. If any changes are necessary, the helper then modifies the HTML to comply.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Click
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											click
+											helper is responsible for making an element compliant with accessibility standards when click events are bound to said element. Since this helper only deals with
+										Element:code
+											onclick
+											events, it only inspects elements within the component that include
+										Element:code
+											onclick
+											event listeners.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the tag name cannot be determined for an element being inspected, then there is no way of knowing whether or not the element is accessible. Thus, the element is assumed to be compliant.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Inherently focusable elements are those elements that require no intervention. These elements include:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											button
+										Element:li
+											input
+										Element:li
+											select
+										Element:li
+											textarea
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Conditionally focusable elements are those elements that require intervention under certain circumstances. In the case of
+										Element:code
+											<a>
+											and
+										Element:code
+											<area>
+											tags, these elements are compliant as long as they contain an
+										Element:code
+											href
+											attribute. These elements include:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											a
+										Element:li
+											area
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All other elements are not inherently focusable and require a
+										Element:code
+											tabindex
+											attribute of
+										Element:code
+											-1
+											if a
+										Element:code
+											tabindex
+											attribute does not already exist. This helper adds
+										Element:code
+											tabindex="-1"
+											to any elements within the component that are not compliant.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When the logger is configured for
+										Element:code
+											debug
+											mode, messages are logged...
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											In the event that no
+										Element:code
+											onclick
+											events were found within the component. Thus, no action is taken.
+										Element:li
+											In the event that an element being inspected has no tag name.
+										Element:li
+											To report the type of element being made compliant.
+										Element:li
+											To report the type of element that is already found to be compliant.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Label
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											label
+											helper adds an aria-label to the form element found within the component. This helper only inspects elements that can be found via the component's
+										Element:code
+											fieldTag
+											selector and is consdered a "best effort" approach.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+										Element:p
+											This helper will only work on
+										Element:code
+											View.Field
+											components since it is extremely unlikely for the
+										Element:code
+											fieldTag
+											selector for
+										Element:code
+											View.Layout
+											or
+										Element:code
+											View.View
+											components to match form elements.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A form element is considered to be compliant if the
+										Element:code
+											aria-label
+											attribute is already present or if its tag is not one that requires a label. These elements include:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											button
+										Element:li
+											input
+										Element:li
+											select
+										Element:li
+											textarea
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This helper adds
+										Element:code
+											aria-label="{label}"
+											to the element that needs to be made compliant.
+										Element:code
+											View.Field.label
+											is the label that is assigned to the attribute. The component must be a
+										Element:code
+											View.Component
+											. Plain jQuery DOM elements are not sufficient since they do not include a
+										Element:code
+											label
+											property.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								API
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SUGAR.accessibility.init()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Initializes the accessibility module to execute all accessibility helpers on components as they are rendered. This is called by the application during bootstrapping.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SUGAR.accessibility.run()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Loads the accessibility helpers that are to be run and executes them on the component.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Arguments
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Required
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														component
+													Element:td
+														View.Component/jQuery
+													Element:td
+														true
+													Element:td
+														The element to test for accessibility compliance.
+													Element:tr
+													Element:td
+														helper
+													Element:td
+														String/Array
+													Element:td
+														false
+													Element:td
+														One or more names of specified helpers to run. All registered helpers will be run if undefined.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														Void
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SUGAR.accessibility.whichHelpers()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Get the helpers registered on a specific element.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Name
+										Element:td
+										Element:strong
+											Type
+										Element:td
+										Element:strong
+											Required
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											helper
+										Element:td
+											String/Array
+										Element:td
+											true
+										Element:td
+											One or more names of specified helpers to run.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														Array
+														- The accessibility helpers that were requested. Filters out any named helpers that are not registered. All registered helpers are returned if no helper names are provided as a parameter.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SUGAR.accessibility.getElementTag()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Generates a human-readable string for identifying an element. For example,
+										Element:code
+											a[name="link"][class="btn btn-link"][href="http://www.sugarcrm.com/"]
+											. Primarily used for logging purposes, this method is useful for debugging.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Arguments
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Required
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														$el
+													Element:td
+														jQuery
+													Element:td
+														true
+													Element:td
+														The element for which the tag should be generated.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														String
+														- A string representing an element's tag, with all attributes. The element's selector, if one exists, is returned when a representation cannot be reasonably generated.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Last modified: 04/13/2016 10:52pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

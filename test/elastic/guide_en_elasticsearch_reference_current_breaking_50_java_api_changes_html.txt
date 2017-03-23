@@ -1,0 +1,1837 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Java API changes
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Transport client has been moved
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Java transport client has been moved to its own module which can be referenced using:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<dependency> <groupId>org.elasticsearch.client</groupId> <artifactId>transport</artifactId> <version>5.0.0</version> </dependency>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The transport client is now created using the following snippet:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											TransportClient client = new PreBuiltTransportClient(Settings.EMPTY) .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("host1"), 9300)) .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("host2"), 9300));
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For more information please see the
+										Element:a
+											Java client documentation
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Count api has been removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The deprecated count api has been removed from the Java api, use the search api instead and set size to 0.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following call
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											client.prepareCount(indices).setQuery(query).get();
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											can be replaced with
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											client.prepareSearch(indices).setSource(new SearchSourceBuilder().size(0).query(query)).get();
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Suggest api has been removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The suggest api has been removed from the Java api, use the suggest option in search api, it has been optimized for suggest-only request.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following call
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											client.prepareSuggest(indices).addSuggestion("foo", SuggestBuilders.completionSuggestion("field").text("s")).get();
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											can be replaced with
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											client.prepareSearch(indices).suggest(new SuggestBuilder().addSuggestion("foo", SuggestBuilders.completionSuggestion("field").text("s"))).get();
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Elasticsearch will no longer detect logging implementations
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Elasticsearch now logs using Log4j 2. Previously if Log4j wasn’t on the classpath it made some effort to degrade to SLF4J or Java logging. Now it will fail to work without the Log4j 2 API. The log4j-over-slf4j bridge ought to work when using the Java client. The log4j-1.2-api bridge is used for third-party dependencies that still use the Log4j 1 API. The Elasticsearch server now only supports Log4j 2 as configured by
+										Element:code
+											log4j2.properties
+											and will fail if Log4j isn’t present.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Groovy dependencies
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In previous versions of Elasticsearch, the Groovy scripting capabilities depended on the
+										Element:code
+											org.codehaus.groovy:groovy-all
+											artifact. In addition to pulling in the Groovy language, this pulls in a very large set of functionality, none of which is needed for scripting within Elasticsearch. Aside from the inherent difficulties in managing such a large set of dependencies, this also increases the surface area for security issues. This dependency has been reduced to the core Groovy language
+										Element:code
+											org.codehaus.groovy:groovy
+											artifact.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											DocumentAlreadyExistsException removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											DocumentAlreadyExistsException
+											is removed and a
+										Element:code
+											VersionConflictEngineException
+											is thrown instead (with a better error description). This will influence code that use the
+										Element:code
+											IndexRequest.opType()
+											or
+										Element:code
+											IndexRequest.create()
+											to index a document only if it doesn’t already exist.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											writeConsistencyLevel removed on write requests
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In previous versions of Elasticsearch, the various write requests had a
+										Element:code
+											setWriteConsistencyLevel
+											method to set the shard consistency level for write operations. However, the semantics of write consistency were ambiguous as this is just a pre-operation check to ensure the specified number of shards were available before the operation commenced. The write consistency level did not guarantee that the data would be replicated to those number of copies by the time the operation finished. The
+										Element:code
+											setWriteConsistencyLevel
+											method on these write requests has been changed to
+										Element:code
+											setWaitForActiveShards
+											, which can take a numerical value up to the total number of shard copies or
+										Element:code
+											ActiveShardCount.ALL
+											for all shard copies. The default is to just wait for the primary shard to be active before proceeding with the operation. See the section on
+										Element:a
+											wait for active shards
+											for more details.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This change affects
+										Element:code
+											IndexRequest
+											,
+										Element:code
+											IndexRequestBuilder
+											,
+										Element:code
+											BulkRequest
+											,
+										Element:code
+											BulkRequestBuilder
+											,
+										Element:code
+											UpdateRequest
+											,
+										Element:code
+											UpdateRequestBuilder
+											,
+										Element:code
+											DeleteRequest
+											, and
+										Element:code
+											DeleteRequestBuilder
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Changes to Query Builders
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														BoostingQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed setters for mandatory positive/negative query. Both arguments now have to be supplied at construction time already and have to be non-null.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														SpanContainingQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed setters for mandatory big/little inner span queries. Both arguments now have to be supplied at construction time already and have to be non-null. Updated static factory methods in QueryBuilders accordingly.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														SpanOrQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Making sure that query contains at least one clause by making initial clause mandatory in constructor. Renaming method to add clauses from
+													Element:code
+														clause(SpanQueryBuilder)
+														to
+													Element:code
+														addClause(SpanQueryBuilder)
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														SpanNearQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed setter for mandatory slop parameter, needs to be set in constructor now. Also making sure that query contains at least one clause by making initial clause mandatory in constructor. Updated the static factory methods in QueryBuilders accordingly. Renaming method to add clauses from
+													Element:code
+														clause(SpanQueryBuilder)
+														to
+													Element:code
+														addClause(SpanQueryBuilder)
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														SpanNotQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed setter for mandatory include/exclude span query clause, needs to be set in constructor now. Updated the static factory methods in QueryBuilders and tests accordingly.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														SpanWithinQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed setters for mandatory big/little inner span queries. Both arguments now have to be supplied at construction time already and have to be non-null. Updated static factory methods in QueryBuilders accordingly.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														WrapperQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed
+													Element:code
+														wrapperQueryBuilder(byte[] source, int offset, int length)
+														. Instead simply use
+													Element:code
+														wrapperQueryBuilder(byte[] source)
+														. Updated the static factory methods in QueryBuilders accordingly.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														QueryStringQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed ability to pass in boost value using
+													Element:code
+														field(String field)
+														method in form e.g.
+													Element:code
+														field^2
+														. Use the
+													Element:code
+														field(String, float)
+														method instead.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Operator
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed the enums called
+													Element:code
+														Operator
+														from
+													Element:code
+														MatchQueryBuilder
+														,
+													Element:code
+														QueryStringQueryBuilder
+														,
+													Element:code
+														SimpleQueryStringBuilder
+														, and
+													Element:code
+														CommonTermsQueryBuilder
+														in favour of using the enum defined in
+													Element:code
+														org.elasticsearch.index.query.Operator
+														in an effort to consolidate the codebase and avoid duplication.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														queryName and boost support
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Support for
+													Element:code
+														queryName
+														and
+													Element:code
+														boost
+														has been streamlined to all of the queries. That is a breaking change till queries get sent over the network as serialized json rather than in
+													Element:code
+														Streamable
+														format. In fact whenever additional fields are added to the json representation of the query, older nodes might throw error when they find unknown fields.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														InnerHitsBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														InnerHitsBuilder now has a dedicated addParentChildInnerHits and addNestedInnerHits methods to differentiate between inner hits for nested vs. parent / child documents. This change makes the type / path parameter mandatory.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														MatchQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Moving MatchQueryBuilder.Type and MatchQueryBuilder.ZeroTermsQuery enum to MatchQuery.Type. Also reusing new Operator enum.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														MoreLikeThisQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed
+													Element:code
+														MoreLikeThisQueryBuilder.Item#id(String id)
+														,
+													Element:code
+														Item#doc(BytesReference doc)
+														,
+													Element:code
+														Item#doc(XContentBuilder doc)
+														. Use provided constructors instead.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed
+													Element:code
+														MoreLikeThisQueryBuilder#addLike
+														in favor of texts and/or items being provided at construction time. Using arrays there instead of lists now.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed
+													Element:code
+														MoreLikeThisQueryBuilder#addUnlike
+														in favor to using the
+													Element:code
+														unlike
+														methods which take arrays as arguments now rather than the lists used before.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The deprecated
+													Element:code
+														docs(Item... docs)
+														,
+													Element:code
+														ignoreLike(Item... docs)
+														,
+													Element:code
+														ignoreLike(String... likeText)
+														,
+													Element:code
+														addItem(Item... likeItems)
+														have been removed.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														GeoDistanceQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removing individual setters for lon() and lat() values, both values should be set together using point(lon, lat).
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														GeoDistanceRangeQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removing setters for to(Object …) and from(Object …) in favour of the only two allowed input arguments (String, Number). Removing setter for center point (point(), geohash()) because parameter is mandatory and should already be set in constructor. Also removing setters for lt(), lte(), gt(), gte() since they can all be replaced by equivalent calls to to/from() and includeLower()/includeUpper().
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														GeoPolygonQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Require shell of polygon already to be specified in constructor instead of adding it pointwise. This enables validation, but makes it necessary to remove the addPoint() methods.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														MultiMatchQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Moving MultiMatchQueryBuilder.ZeroTermsQuery enum to MatchQuery.ZeroTermsQuery. Also reusing new Operator enum.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Removed ability to pass in boost value using
+													Element:code
+														field(String field)
+														method in form e.g.
+													Element:code
+														field^2
+														. Use the
+													Element:code
+														field(String, float)
+														method instead.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														MissingQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The MissingQueryBuilder which was deprecated in 2.2.0 is removed. As a replacement use ExistsQueryBuilder inside a mustNot() clause. So instead of using
+													Element:code
+														new MissingQueryBuilder(name)
+														now use
+													Element:code
+														new BoolQueryBuilder().mustNot(new ExistsQueryBuilder(name))
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														NotQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The NotQueryBuilder which was deprecated in 2.1.0 is removed. As a replacement use BoolQueryBuilder with added mustNot() clause. So instead of using
+													Element:code
+														new NotQueryBuilder(filter)
+														now use
+													Element:code
+														new BoolQueryBuilder().mustNot(filter)
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														TermsQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Remove the setter for
+													Element:code
+														termsLookup()
+														, making it only possible to either use a TermsLookup object or individual values at construction time. Also moving individual settings for the TermsLookup (lookupIndex, lookupType, lookupId, lookupPath) to the separate TermsLookup class, using constructor only and moving checks for validation there. Removed
+													Element:code
+														TermsLookupQueryBuilder
+														in favour of
+													Element:code
+														TermsQueryBuilder
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														FunctionScoreQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														add
+														methods have been removed, all filters and functions must be provided as constructor arguments by creating an array of
+													Element:code
+														FunctionScoreQueryBuilder.FilterFunctionBuilder
+														objects, containing one element for each filter/function pair.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														scoreMode
+														and
+													Element:code
+														boostMode
+														can only be provided using corresponding enum members instead of string values: see
+													Element:code
+														FilterFunctionScoreQuery.ScoreMode
+														and
+													Element:code
+														CombineFunction
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														CombineFunction.MULT
+														has been renamed to
+													Element:code
+														MULTIPLY
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														IdsQueryBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For simplicity, only one way of adding the ids to the existing list (empty by default) is left:
+													Element:code
+														addIds(String...)
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														ShapeBuilders
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														InternalLineStringBuilder
+														is removed in favour of
+													Element:code
+														LineStringBuilder
+														,
+													Element:code
+														InternalPolygonBuilder
+														in favour of PolygonBuilder` and
+													Element:code
+														Ring
+														has been replaced with
+													Element:code
+														LineStringBuilder
+														. Also the abstract base classes
+													Element:code
+														BaseLineStringBuilder
+														and
+													Element:code
+														BasePolygonBuilder
+														haven been merged with their corresponding implementations.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														RescoreBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														RecoreBuilder.Rescorer
+														was merged with
+													Element:code
+														RescoreBuilder
+														, which now is an abstract superclass. QueryRescoreBuilder currently is its only implementation.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														PhraseSuggestionBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The inner DirectCandidateGenerator class has been moved out to its own class called DirectCandidateGeneratorBuilder.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														SortBuilders
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														sortMode
+														setter in
+													Element:code
+														FieldSortBuilder
+														,
+													Element:code
+														GeoDistanceSortBuilder
+														and
+													Element:code
+														ScriptSortBuilder
+														now accept a
+													Element:code
+														SortMode
+														enum instead of a String constant. Also the getter returns the same enum type.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														SuggestBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														setText
+														method has been changed to
+													Element:code
+														setGlobalText
+														to make the intent more clear, and a
+													Element:code
+														getGlobalText
+														method has been added.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														addSuggestion
+														method now required the user specified suggestion name, previously used in the ctor of each suggestion.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														SuggestionBuilder
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														field
+														setter has been deleted. Instead the field name needs to be specified as constructor argument.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											SearchSourceBuilder
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All methods which take an
+										Element:code
+											XContentBuilder
+											,
+										Element:code
+											BytesReference
+										Element:code
+											Map<String, Object>
+											or
+										Element:code
+											bytes[]
+											have been removed in favor of providing the relevant builder object for that feature (e.g.
+										Element:code
+											HighlightBuilder
+											,
+										Element:code
+											AggregationBuilder
+											,
+										Element:code
+											SuggestBuilder
+											) . This means that all search requests can now be validated at call time which results in much clearer errors.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											defaultResourceWindowSize(int)
+											method has been removed. The window size should be set explicitly on all
+										Element:code
+											RescoreBuilder
+											objects.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											SearchRequestBuilder
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All methods which take an
+										Element:code
+											XContentBuilder
+											,
+										Element:code
+											BytesReference
+										Element:code
+											Map<String, Object>
+											or
+										Element:code
+											bytes[]
+											have been removed in favor of providing the relevant builder object for that feature (e.g.
+										Element:code
+											HighlightBuilder
+											,
+										Element:code
+											AggregationBuilder
+											,
+										Element:code
+											SuggestBuilder
+											) . This means that all search requests can now be validated at call time which results in much clearer errors.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All highlighter methods have been removed in favor of a single
+										Element:code
+											highlighter(HighlightBuilder)
+											method.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											setExtraSource(SearchSourceBuilder)
+											method has been removed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											setTemplateSource(String)
+											and
+										Element:code
+											setTemplateSource(BytesReference)
+											methods have been removed. Use
+										Element:code
+											setTemplate(Template)
+											instead.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											setRescorer(Rescorer)
+											and
+										Element:code
+											setRescorer(Rescorer, int)
+											have been removed in favor of
+										Element:code
+											setRescorer(RescoreBuilder)
+											and
+										Element:code
+											setRescorer(RescoreBuilder, int)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											SearchRequest
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All
+										Element:code
+											source
+											methods have been removed in favor of a single
+										Element:code
+											source(SearchSourceBuilder)
+											method. This means that all search requests can now be validated at call time which results in much clearer errors.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All
+										Element:code
+											extraSource
+											methods have been removed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All
+										Element:code
+											template
+											methods have been removed in favor of a new Search Template API. A new
+										Element:code
+											SearchTemplateRequest
+											now accepts a template and a
+										Element:code
+											SearchRequest
+											and must be executed using the new
+										Element:code
+											SearchTemplateAction
+											action.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											SearchResponse
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sort values for
+										Element:code
+											string
+											fields are now return as
+										Element:code
+											java.lang.String
+											objects rather than
+										Element:code
+											org.elasticsearch.common.text.Text
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											AggregationBuilder
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All methods which take an
+										Element:code
+											XContentBuilder
+											,
+										Element:code
+											BytesReference
+										Element:code
+											Map<String, Object>
+											or
+										Element:code
+											bytes[]
+											have been removed in favor of providing the relevant builder object (i.e.
+										Element:code
+											subAggregation(AggregationBuilder)
+											or
+										Element:code
+											subAggregation(PipelineAggregationBuilder)
+											). This means that all requests can now be validated at call time which results in much clearer errors.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											ValidateQueryRequest
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											source(QuerySourceBuilder)
+											,
+										Element:code
+											source(Map)
+											,
+										Element:code
+											source(XContentBuilder)
+											,
+										Element:code
+											source(String)
+											,
+										Element:code
+											source(byte[])
+											,
+										Element:code
+											source(byte[], int, int)
+											,
+										Element:code
+											source(BytesReference)
+											and
+										Element:code
+											source()
+											have been removed in favor of using
+										Element:code
+											query(QueryBuilder)
+											and
+										Element:code
+											query()
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											ValidateQueryRequestBuilder
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											setSource()
+											methods have been removed in favor of using
+										Element:code
+											setQuery(QueryBuilder)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											ExplainRequest
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											source(QuerySourceBuilder)
+											,
+										Element:code
+											source(Map)
+											,
+										Element:code
+											source(BytesReference)
+											and
+										Element:code
+											source()
+											have been removed in favor of using
+										Element:code
+											query(QueryBuilder)
+											and
+										Element:code
+											query()
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											ExplainRequestBuilder
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											setQuery(BytesReference)
+											method have been removed in favor of using
+										Element:code
+											setQuery(QueryBuilder)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											ClusterStatsResponse
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Removed the
+										Element:code
+											getMemoryAvailable
+											method from
+										Element:code
+											OsStats
+											, which could be previously accessed calling
+										Element:code
+											clusterStatsResponse.getNodesStats().getOs().getMemoryAvailable()
+											. It is now replaced with
+										Element:code
+											clusterStatsResponse.getNodesStats().getOs().getMem()
+											which exposes
+										Element:code
+											getTotal()
+											,
+										Element:code
+											getFree()
+											,
+										Element:code
+											getUsed()
+											,
+										Element:code
+											getFreePercent()
+											and
+										Element:code
+											getUsedPercent()
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											setRefresh(boolean) has been removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											setRefresh(boolean)
+											has been removed in favor of
+										Element:code
+											setRefreshPolicy(RefreshPolicy)
+											because there are now three options (NONE, IMMEDIATE, and WAIT_FOR).
+										Element:code
+											setRefresh(IMMEDIATE)
+											has the same behavior as
+										Element:code
+											setRefresh(true)
+											used to have. See
+										Element:code
+											setRefreshPolicy
+											's javadoc for more.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Remove properties support
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some Java APIs (e.g.,
+										Element:code
+											IndicesAdminClient#setSettings
+											) would support Java properties syntax (line-delimited key=value pairs). This support has been removed.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Render Search Template Java API has been removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Render Search Template Java API including
+										Element:code
+											RenderSearchTemplateAction
+											,
+										Element:code
+											RenderSearchTemplateRequest
+											and
+										Element:code
+											RenderSearchTemplateResponse
+											has been removed in favor of a new
+										Element:code
+											simulate
+											option in the Search Template Java API. This Search Template API is now included in the
+										Element:code
+											lang-mustache
+											module and the
+										Element:code
+											simulate
+											flag must be set on the
+										Element:code
+											SearchTemplateRequest
+											object.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											AnalyzeRequest
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											tokenFilters(String...)
+											and
+										Element:code
+											charFilters(String...)
+											methods have been removed in favor of using
+										Element:code
+											addTokenFilter(String)
+											/
+										Element:code
+											addTokenFilter(Map)
+											and
+										Element:code
+											addCharFilter(String)
+											/
+										Element:code
+											addCharFilter(Map)
+											each filters
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											AnalyzeRequestBuilder
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											setTokenFilters(String...)
+											and
+										Element:code
+											setCharFilters(String...)
+											methods have been removed in favor of using
+										Element:code
+											addTokenFilter(String)
+											/
+										Element:code
+											addTokenFilter(Map)
+											and
+										Element:code
+											addCharFilter(String)
+											/
+										Element:code
+											addCharFilter(Map)
+											each filters
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											ClusterHealthRequest
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											waitForRelocatingShards(int)
+											method has been removed in favor of
+										Element:code
+											waitForNoRelocatingShards(boolean)
+											which instead uses a boolean flag to denote whether the cluster health operation should wait for there to be no relocating shards in the cluster before returning.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											ClusterHealthRequestBuilder
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											setWaitForRelocatingShards(int)
+											method has been removed in favor of
+										Element:code
+											setWaitForNoRelocatingShards(boolean)
+											which instead uses a boolean flag to denote whether the cluster health operation should wait for there to be no relocating shards in the cluster before returning.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											BlobContainer Interface for Snapshot/Restore
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some methods have been removed from the
+										Element:code
+											BlobContainer
+											interface for Snapshot/Restore repositories. In particular, the following three methods have been removed:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:code
+											deleteBlobs(Collection<String>)
+											(use
+										Element:code
+											deleteBlob(String)
+											instead)
+										Element:li
+										Element:code
+											deleteBlobsByPrefix(String)
+											(use
+										Element:code
+											deleteBlob(String)
+											instead)
+										Element:li
+										Element:code
+											writeBlob(String, BytesReference)
+											(use
+										Element:code
+											writeBlob(String, InputStream, long)
+											instead)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											deleteBlob
+											methods that took multiple blobs as arguments were deleted because no atomic guarantees can be made about either deleting all blobs or deleting none of them, and exception handling in such a situation is ambiguous and best left to the caller. Hence, all delete blob calls use the singular
+										Element:code
+											deleteBlob(String)
+											method.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The extra
+										Element:code
+											writeBlob
+											method offered no real advantage to the interface and all calls to
+										Element:code
+											writeBlob(blobName, bytesRef)
+											can be replaced with:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											try (InputStream stream = bytesRef.streamInput()) { blobContainer.writeBlob(blobName, stream, bytesRef.length()); }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For any custom implementation of the
+										Element:code
+											BlobContainer
+											interface, these three methods must be removed.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											NodeBuilder removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											NodeBuilder has been removed. While using Node directly within an application is not officially supported, it can still be constructed with the
+										Element:code
+											Node(Settings)
+											constructor.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« CAT API changes
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Packaging »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,786 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Plugin changes
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The command
+							Element:code
+								bin/plugin
+								has been renamed to
+							Element:code
+								bin/elasticsearch-plugin
+								. The structure of the plugin ZIP archive has changed. All the plugin files must be contained in a top-level directory called
+							Element:code
+								elasticsearch
+								. If you use the gradle build, this structure is automatically generated.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Plugins isolation
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											isolated
+											option has been removed. Each plugin will have its own classloader.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Site plugins removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Site plugins have been removed. Site plugins should be reimplemented as Kibana plugins.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Multicast plugin removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Multicast has been removed. Use unicast discovery, or one of the cloud discovery plugins.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Plugins with custom query implementations
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Plugins implementing custom queries need to implement the
+										Element:code
+											fromXContent(QueryParseContext)
+											method in their
+										Element:code
+											QueryParser
+											subclass rather than
+										Element:code
+											parse
+											. This method will take care of parsing the query from
+										Element:code
+											XContent
+											format into an intermediate query representation that can be streamed between the nodes in binary format, effectively the query object used in the java api. Also, the query builder needs to be registered as a
+										Element:code
+											NamedWriteable
+											. This is all done by implementing the
+										Element:code
+											SearchPlugin
+											interface and overriding the
+										Element:code
+											getQueries
+											method. The query object can then transform itself into a lucene query through the new
+										Element:code
+											toQuery(QueryShardContext)
+											method, which returns a lucene query to be executed on the data node.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Similarly, plugins implementing custom score functions need to implement the
+										Element:code
+											fromXContent(QueryParseContext)
+											method in their
+										Element:code
+											ScoreFunctionParser
+											subclass rather than
+										Element:code
+											parse
+											. This method will take care of parsing the function from
+										Element:code
+											XContent
+											format into an intermediate function representation that can be streamed between the nodes in binary format, effectively the function object used in the java api. The function object can then transform itself into a lucene function through the new
+										Element:code
+											toFunction(QueryShardContext)
+											method, which returns a lucene function to be executed on the data node.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Cloud AWS plugin changes
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Cloud AWS plugin has been split in two plugins:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Discovery EC2 plugin
+										Element:li
+										Element:a
+											Repository S3 plugin
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Proxy settings for both plugins have been renamed:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											from
+										Element:code
+											cloud.aws.proxy_host
+											to
+										Element:code
+											cloud.aws.proxy.host
+										Element:li
+											from
+										Element:code
+											cloud.aws.ec2.proxy_host
+											to
+										Element:code
+											cloud.aws.ec2.proxy.host
+										Element:li
+											from
+										Element:code
+											cloud.aws.s3.proxy_host
+											to
+										Element:code
+											cloud.aws.s3.proxy.host
+										Element:li
+											from
+										Element:code
+											cloud.aws.proxy_port
+											to
+										Element:code
+											cloud.aws.proxy.port
+										Element:li
+											from
+										Element:code
+											cloud.aws.ec2.proxy_port
+											to
+										Element:code
+											cloud.aws.ec2.proxy.port
+										Element:li
+											from
+										Element:code
+											cloud.aws.s3.proxy_port
+											to
+										Element:code
+											cloud.aws.s3.proxy.port
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Cloud Azure plugin changes
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Cloud Azure plugin has been split in three plugins:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Discovery Azure plugin
+										Element:li
+										Element:a
+											Repository Azure plugin
+										Element:li
+										Element:a
+											Store SMB plugin
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you were using the
+										Element:code
+											cloud-azure
+											plugin for snapshot and restore, you had in
+										Element:code
+											elasticsearch.yml
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											cloud: azure: storage: account: your_azure_storage_account key: your_azure_storage_key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You need to give a unique id to the storage details now as you can define multiple storage accounts:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											cloud: azure: storage: my_account: account: your_azure_storage_account key: your_azure_storage_key
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Cloud GCE plugin changes
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Cloud GCE plugin has been renamed to
+										Element:a
+											Discovery GCE plugin
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Delete-By-Query plugin removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Delete-By-Query plugin has been removed in favor of a new
+										Element:a
+											Delete By Query API
+											implementation in core. It now supports throttling, retries and cancellation but no longer supports timeouts. Instead use the
+										Element:a
+											cancel API
+											to cancel deletes that run too long.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Mapper Attachments plugin deprecated
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Mapper attachments has been deprecated. Users should use now the
+										Element:a
+											plugin.
+										Element:code
+											ingest-attachment
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Passing of Java System Properties
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Previously, Java system properties could be passed to the plugin command by passing
+										Element:code
+											-D
+											style arguments directly to the plugin script. This is no longer permitted and such system properties must be passed via ES_JAVA_OPTS.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Custom plugins path
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The ability to specify a custom plugins path via
+										Element:code
+											path.plugins
+											has been removed.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											ScriptPlugin
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Plugins that register custom scripts should implement
+										Element:code
+											ScriptPlugin
+											and remove their
+										Element:code
+											onModule(ScriptModule)
+											implementation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											AnalysisPlugin
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Plugins that register custom analysis components should implement
+										Element:code
+											AnalysisPlugin
+											and remove their
+										Element:code
+											onModule(AnalysisModule)
+											implementation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											MapperPlugin
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Plugins that register custom mappers should implement
+										Element:code
+											MapperPlugin
+											and remove their
+										Element:code
+											onModule(IndicesModule)
+											implementation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											ActionPlugin
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Plugins that register custom actions should implement
+										Element:code
+											ActionPlugin
+											and remove their
+										Element:code
+											onModule(ActionModule)
+											implementation.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Plugins that register custom
+										Element:code
+											RestHandler`s should implement `ActionPlugin
+											and remove their
+										Element:code
+											onModule(NetworkModule)
+											implemnetation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											SearchPlugin
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Plugins that register custom search time behavior (
+										Element:code
+											Query
+											,
+										Element:code
+											Suggester
+											,
+										Element:code
+											ScoreFunction
+											,
+										Element:code
+											FetchSubPhase
+											,
+										Element:code
+											Highlighter
+											, etc) should implement
+										Element:code
+											SearchPlugin
+											and remove their
+										Element:code
+											onModule(SearchModule)
+											implementation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											SearchParseElement
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											SearchParseElement
+											interface has been removed. Custom search request sections can only be provided under the
+										Element:code
+											ext
+											element. Plugins can plug in custom parsers for those additional sections by providing a
+										Element:code
+											SearchPlugin.SearchExtSpec
+											, which consists of a
+										Element:code
+											SearchExtParser
+											implementation that can parse`XContent` into a
+										Element:code
+											SearchExtBuilder
+											implementation. The parsing happens now in the coordinating node. The result of parsing is serialized to the data nodes through transport layer together with the rest of the search request and stored in the search context for later retrieval.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Testing Custom Plugins
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											ESIntegTestCase#pluginList
+											has been removed. Use
+										Element:code
+											Arrays.asList
+											instead. It isn’t needed now that all plugins require Java 1.8.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Mapper-Size plugin
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The metadata field
+										Element:code
+											_size
+											is not accessible in aggregations, scripts and when sorting for indices created in 2.x. If these features are needed in your application it is required to reindex the data with Elasticsearch 5.x.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Packaging
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Filesystem related changes »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

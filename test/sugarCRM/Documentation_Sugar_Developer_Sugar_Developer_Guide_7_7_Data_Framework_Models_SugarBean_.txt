@@ -1,0 +1,569 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					SugarBean
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The SugarBean class supports all the model operations to and from the database. Any module that interacts with the database utilizes the SugarBean class, which contains methods to create, read/retrieve, update, and delete records in the database (CRUD), as well as fetch related records.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								CRUD Handling
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The SugarBean handles the most basic functions of the Sugar database, allowing you to create, retrieve, update, and delete data.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating and Retrieving Records
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The BeanFactory class is used for bean loading. The class should be used whenever you are creating or retrieving bean objects. It will automatically handle any classes required for the bean. More information on this can be found in the
+										Element:a
+											BeanFactory
+											section.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Obtaining the Id of a Recently Saved Bean
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For new records, a GUID is generated and assigned to the record id field. Saving new or existing records returns a single value to the calling routine, which is the
+													Element:code
+														id
+														attribute of the saved record. The id has the following format:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You can retrieve a newly created record's id with the following:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														//Create bean $bean = BeanFactory::newBean($module); //Populate bean fields $bean->name = 'Example Record'; //Save $bean->save(); //Retrieve the bean id $record_id = $bean->id;
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Saving a Bean with a Specific ID
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Saving a record with a specific id requires the
+													Element:code
+														id
+														and
+													Element:code
+														new_with_id
+														attribute of the bean to be set as follows:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														//Create bean $bean = BeanFactory::newBean($module); //Set the record id $bean->id = '38c90c70-7788-13a2-668d-513e2b8df5e1'; $bean->new_with_id = true; //Populate bean fields $bean->name = 'Example Record'; //Save $bean->save();
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Setting
+													Element:code
+														new_with_id
+														to true prevents the save method from creating a new
+													Element:code
+														id
+														value and uses the assigned id attribute. If the
+													Element:code
+														id
+														attribute is empty and the
+													Element:code
+														new_with_id
+														attribute is set to true, the save will fail.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Distinguishing New from Existing Records
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To identify whether or not a record is new or existing, you can check the
+													Element:code
+														fetched_rows
+														property. If the
+													Element:code
+														$bean
+														has a
+													Element:code
+														fetched_row
+														, it was loaded from the database. An example is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														if (!isset($bean->fetched_row['id'])) { //new record } else { //existing record }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you are working with a logic hook such as
+													Element:code
+														or
+													Element:a
+														before_save
+													Element:code
+														, you should check the
+													Element:a
+														after_save
+													Element:code
+														arguments.isUpdate
+														property to determine this as shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php if (!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); class logic_hooks_class { function hook_method($bean, $event, $arguments) { if (isset($arguments['isUpdate']) && $arguments['isUpdate'] == false) { //new record } else { //existing record } } } ?>
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Retrieving a Bean by Unique Field
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Sometimes developers have a need to fetch a record based on a unique field other than the id. In previous versions you were able to use the
+													Element:code
+														retrieve_by_string_fields()
+														method to accomplish this, however, that has now been deprecated. To search and fetch records, you should use the
+													Element:a
+														SugarQuery
+														builder. An example of this is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														require_once('include/SugarQuery/SugarQuery.php'); $sugarQuery = new SugarQuery(); //fetch the bean of the module to query $bean = BeanFactory::newBean('<modules>'); //create first query $sql = new SugarQuery(); $sql->select('id'); $sql->from($bean); $sql->Where()->equals('<field>', '<unique value>'); $result = $sql->execute(); $count = count($result); if ($count == 0) { //no results were found } elseif ($count == 1) { //one result was found $bean = BeanFactory::getBean('<module>', $result[0]['id']); } else { //multiple results were found }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Updating a Bean
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can update a bean by fetching a record and then updating the property:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//Retrieve bean $bean = BeanFactory::retrieveBean($module, $id); //Fields to update $bean->name = 'Updated Name'; //Save $bean->save();
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: Disabling row-level security when accessing a bean should be set to true only when it is absolutely necessary to bypass security, for example, when updating a Lead record from a custom Entry Point. An example of accessing the bean while bypassing row security is:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$bean = BeanFactory::retrieveBean($module, $record_id, array('disable_row_level_security' => true));
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Updating a Bean Without Changing the Date Modified
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The SugarBean class contains an attribute called
+										Element:code
+											update_date_modified
+											, which is set to true when the class is instantiated and means that the
+										Element:code
+											date_modified
+											attribute is updated to the current database date timestamp. Setting
+										Element:code
+											update_date_modified
+											to false would result in the
+										Element:code
+											date_modified
+											attribute not being set with the current database date timestamp.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//Retrieve bean $bean = BeanFactory::retrieveBean($module, $id); //Set modified flag $bean->update_date_modified = false; //Fields to update $bean->name = 'Updated Name'; //Save $bean->save();
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: Disabling row-level security when accessing a bean should be set to true only when it is absolutely necessary to bypass security, for example, when updating a Lead record from a custom Entry Point. An example of accessing the bean while bypassing row security is:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$bean = BeanFactory::retrieveBean($module, $record_id, array('disable_row_level_security' => true));
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Deleting a Bean
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Deleting a bean can be done by fetching it then calling the
+										Element:code
+											mark_deleted()
+											method which makes sure any relationships with related records are removed as well:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//Retrieve bean $bean = BeanFactory::retrieveBean($module, $id); //Set deleted to true $bean->mark_deleted(); //Save $bean->save();
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: Disabling row-level security when accessing a bean should be set to true only when it is absolutely necessary to bypass security, for example, when updating a Lead record from a custom Entry Point. An example of accessing the bean while bypassing row security is:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$bean = BeanFactory::retrieveBean($module, $record_id, array('disable_row_level_security' => true));
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Fetching Relationships
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This section explains how the SugarBean class can be used to fetch related information from the database.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Fetching Related Records
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To fetch related records, load the relationship using the link:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//If relationship is loaded if ($bean->load_relationship($link)) { //Fetch related beans $relatedBeans = $bean->$link->getBeans(); }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An example of this is to load the contacts related to an account:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//Load Account $bean = BeanFactory::getBean('Accounts', $id); //If relationship is loaded if ($bean->load_relationship('contacts')) { //Fetch related beans $relatedBeans = $bean->contacts->getBeans(); }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Fetching a Parent Record
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Fetching a parent record is similar to fetching child records in that you will still need to load the relationship using the link:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//If relationship is loaded if ($bean->load_relationship($link)) { //Fetch related beans $relatedBeans = $bean->$link->getBeans(); $parentBean = false; if (!empty($relatedBeans)) { //order the results reset($relatedBeans); //first record in the list is the parent $parentBean = current($relatedBeans); } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An example of this is to load a contact and fetch its parent account:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//Load Contact $bean = BeanFactory::getBean('Contacts', $id); //If relationship is loaded if ($bean->load_relationship('accounts')) { //Fetch related beans $relatedBeans = $bean->accounts->getBeans(); $parentBean = false; if (!empty($relatedBeans)) { //order the results reset($relatedBeans); //first record in the list is the parent $parentBean = current($relatedBeans); } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 08/08/2016 03:30pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

@@ -1,0 +1,855 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Index API
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The index API adds or updates a typed JSON document in a specific index, making it searchable. The following example inserts the JSON document into the "twitter" index, under a type called "tweet" with an id of 1:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT twitter/tweet/1 { "user" : "kimchy", "post_date" : "2009-11-15T14:12:12", "message" : "trying out Elasticsearch" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The result of the above index operation is:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "_shards" : { "total" : 2, "failed" : 0, "successful" : 2 }, "_index" : "twitter", "_type" : "tweet", "_id" : "1", "_version" : 1, "created" : true, "result" : created }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								_shards
+								header provides information about the replication process of the index operation.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								total
+								- Indicates to how many shard copies (primary and replica shards) the index operation should be executed on.
+							Element:li
+							Element:code
+								successful
+								- Indicates the number of shard copies the index operation succeeded on.
+							Element:li
+							Element:code
+								failed
+								- An array that contains replication related errors in the case an index operation failed on a replica shard.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The index operation is successful in the case
+							Element:code
+								successful
+								is at least 1.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Replica shards may not all be started when an indexing operation successfully returns (by default, only the primary is required, but this behavior can be
+							Element:a
+								changed
+								). In that case,
+							Element:code
+								total
+								will be equal to the total shards based on the
+							Element:code
+								number_of_replicas
+								setting and
+							Element:code
+								successful
+								will be equal to the number of shards started (primary plus replicas). If there were no failures, the
+							Element:code
+								failed
+								will be 0.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Automatic Index Creation
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The index operation automatically creates an index if it has not been created before (check out the
+										Element:a
+											create index API
+											for manually creating an index), and also automatically creates a dynamic type mapping for the specific type if one has not yet been created (check out the
+										Element:a
+											put mapping
+											API for manually creating a type mapping).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The mapping itself is very flexible and is schema-free. New fields and objects will automatically be added to the mapping definition of the type specified. Check out the
+										Element:a
+											mapping
+											section for more information on mapping definitions.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Automatic index creation can be disabled by setting
+										Element:code
+											action.auto_create_index
+											to
+										Element:code
+											false
+											in the config file of all nodes. Automatic mapping creation can be disabled by setting
+										Element:code
+											index.mapper.dynamic
+											to
+										Element:code
+											false
+											per-index as an index setting.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Automatic index creation can include a pattern based white/black list, for example, set
+										Element:code
+											action.auto_create_index
+											to
+										Element:code
+											+aaa*,-bbb*,+ccc*,-*
+											(+ meaning allowed, and - meaning disallowed).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Versioning
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each indexed document is given a version number. The associated
+										Element:code
+											version
+											number is returned as part of the response to the index API request. The index API optionally allows for
+										Element:a
+											optimistic concurrency control
+											when the
+										Element:code
+											version
+											parameter is specified. This will control the version of the document the operation is intended to be executed against. A good example of a use case for versioning is performing a transactional read-then-update. Specifying a
+										Element:code
+											version
+											from the document initially read ensures no changes have happened in the meantime (when reading in order to update, it is recommended to set
+										Element:code
+											preference
+											to
+										Element:code
+											_primary
+											). For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT twitter/tweet/1?version=2 { "message" : "elasticsearch now has versioning support, double cool!" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											versioning is completely real time, and is not affected by the near real time aspects of search operations. If no version is provided, then the operation is executed without any version checks.
+										Element:strong
+											NOTE:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, internal versioning is used that starts at 1 and increments with each update, deletes included. Optionally, the version number can be supplemented with an external value (for example, if maintained in a database). To enable this functionality,
+										Element:code
+											version_type
+											should be set to
+										Element:code
+											external
+											. The value provided must be a numeric, long value greater or equal to 0, and less than around 9.2e+18. When using the external version type, instead of checking for a matching version number, the system checks to see if the version number passed to the index request is greater than the version of the currently stored document. If true, the document will be indexed and the new version number used. If the value provided is less than or equal to the stored document’s version number, a version conflict will occur and the index operation will fail.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											External versioning supports the value 0 as a valid version number. This allows the version to be in sync with an external versioning system where version numbers start from zero instead of one. It has the side effect that documents with version number equal to zero cannot neither be updated using the
+										Element:a
+											Update-By-Query API
+											nor be deleted using the
+										Element:a
+											Delete By Query API
+											as long as their version number is equal to zero.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A nice side effect is that there is no need to maintain strict ordering of async indexing operations executed as a result of changes to a source database, as long as version numbers from the source database are used. Even the simple case of updating the elasticsearch index using data from a database is simplified if external versioning is used, as only the latest version will be used if the index operations are out of order for whatever reason.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Version types
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Next to the
+													Element:code
+														internal
+														&
+													Element:code
+														external
+														version types explained above, Elasticsearch also supports other types for specific use cases. Here is an overview of the different version types and their semantics.
+												Node:
+												(type) c
+												(layer)4
+													Element:dl
+													Element:dt
+													Element:span
+													Element:code
+														internal
+													Element:dd
+														only index the document if the given version is identical to the version of the stored document.
+													Element:dt
+													Element:span
+													Element:code
+														external
+														or
+													Element:code
+														external_gt
+													Element:dd
+														only index the document if the given version is strictly higher than the version of the stored document
+													Element:span
+														if there is no existing document. The given version will be used as the new version and will be stored with the new document. The supplied version must be a non-negative long number.
+													Element:strong
+														or
+													Element:dt
+													Element:span
+													Element:code
+														external_gte
+													Element:dd
+														only index the document if the given version is
+													Element:span
+														or higher than the version of the stored document. If there is no existing document the operation will succeed as well. The given version will be used as the new version and will be stored with the new document. The supplied version must be a non-negative long number.
+													Element:strong
+														equal
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:span
+														: The
+													Element:strong
+														NOTE
+													Element:code
+														external_gte
+														version type is meant for special use cases and should be used with care. If used incorrectly, it can result in loss of data. There is another option,
+													Element:code
+														force
+														, which is deprecated because it can cause primary and replica shards to diverge.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Operation Type
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The index operation also accepts an
+										Element:code
+											op_type
+											that can be used to force a
+										Element:code
+											create
+											operation, allowing for "put-if-absent" behavior. When
+										Element:code
+											create
+											is used, the index operation will fail if a document by that id already exists in the index.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is an example of using the
+										Element:code
+											op_type
+											parameter:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT twitter/tweet/1?op_type=create { "user" : "kimchy", "post_date" : "2009-11-15T14:12:12", "message" : "trying out Elasticsearch" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Another option to specify
+										Element:code
+											create
+											is to use the following uri:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT twitter/tweet/1/_create { "user" : "kimchy", "post_date" : "2009-11-15T14:12:12", "message" : "trying out Elasticsearch" }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Automatic ID Generation
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The index operation can be executed without specifying the id. In such a case, an id will be generated automatically. In addition, the
+										Element:code
+											op_type
+											will automatically be set to
+										Element:code
+											create
+											. Here is an example (note the
+										Element:span
+											used instead of
+										Element:strong
+											POST
+										Element:span
+											):
+										Element:strong
+											PUT
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST twitter/tweet/ { "user" : "kimchy", "post_date" : "2009-11-15T14:12:12", "message" : "trying out Elasticsearch" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The result of the above index operation is:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_shards" : { "total" : 2, "failed" : 0, "successful" : 2 }, "_index" : "twitter", "_type" : "tweet", "_id" : "6a8ca01c-7896-48e9-81cc-9f70661fcb32", "_version" : 1, "created" : true, "result": "created" }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Routing
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, shard placement — or
+										Element:code
+											routing
+											— is controlled by using a hash of the document’s id value. For more explicit control, the value fed into the hash function used by the router can be directly specified on a per-operation basis using the
+										Element:code
+											routing
+											parameter. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST twitter/tweet?routing=kimchy { "user" : "kimchy", "post_date" : "2009-11-15T14:12:12", "message" : "trying out Elasticsearch" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the example above, the "tweet" document is routed to a shard based on the
+										Element:code
+											routing
+											parameter provided: "kimchy".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When setting up explicit mapping, the
+										Element:code
+											_routing
+											field can be optionally used to direct the index operation to extract the routing value from the document itself. This does come at the (very minimal) cost of an additional document parsing pass. If the
+										Element:code
+											_routing
+											mapping is defined and set to be
+										Element:code
+											required
+											, the index operation will fail if no routing value is provided or extracted.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Parents & Children
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A child document can be indexed by specifying its parent when indexing. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT blogs { "mappings": { "tag_parent": {}, "blog_tag": { "_parent": { "type": "tag_parent" } } } } PUT blogs/blog_tag/1122?parent=1111 { "tag" : "something" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When indexing a child document, the routing value is automatically set to be the same as its parent, unless the routing value is explicitly specified using the
+										Element:code
+											routing
+											parameter.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Distributed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The index operation is directed to the primary shard based on its route (see the Routing section above) and performed on the actual node containing this shard. After the primary shard completes the operation, if needed, the update is distributed to applicable replicas.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Wait For Active Shards
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To improve the resiliency of writes to the system, indexing operations can be configured to wait for a certain number of active shard copies before proceeding with the operation. If the requisite number of active shard copies are not available, then the write operation must wait and retry, until either the requisite shard copies have started or a timeout occurs. By default, write operations only wait for the primary shards to be active before proceeding (i.e.
+										Element:code
+											wait_for_active_shards=1
+											). This default can be overridden in the index settings dynamically by setting
+										Element:code
+											index.write.wait_for_active_shards
+											. To alter this behavior per operation, the
+										Element:code
+											wait_for_active_shards
+											request parameter can be used.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Valid values are
+										Element:code
+											all
+											or any positive integer up to the total number of configured copies per shard in the index (which is
+										Element:code
+											number_of_replicas+1
+											). Specifying a negative value or a number greater than the number of shard copies will throw an error.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, suppose we have a cluster of three nodes,
+										Element:code
+											A
+											,
+										Element:code
+											B
+											, and
+										Element:code
+											C
+											and we create an index
+										Element:code
+											index
+											with the number of replicas set to 3 (resulting in 4 shard copies, one more copy than there are nodes). If we attempt an indexing operation, by default the operation will only ensure the primary copy of each shard is available before proceeding. This means that even if
+										Element:code
+											B
+											and
+										Element:code
+											C
+											went down, and
+										Element:code
+											A
+											hosted the primary shard copies, the indexing operation would still proceed with only one copy of the data. If
+										Element:code
+											wait_for_active_shards
+											is set on the request to
+										Element:code
+											3
+											(and all 3 nodes are up), then the indexing operation will require 3 active shard copies before proceeding, a requirement which should be met because there are 3 active nodes in the cluster, each one holding a copy of the shard. However, if we set
+										Element:code
+											wait_for_active_shards
+											to
+										Element:code
+											all
+											(or to
+										Element:code
+											4
+											, which is the same), the indexing operation will not proceed as we do not have all 4 copies of each shard active in the index. The operation will timeout unless a new node is brought up in the cluster to host the fourth copy of the shard.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is important to note that this setting greatly reduces the chances of the write operation not writing to the requisite number of shard copies, but it does not completely eliminate the possibility, because this check occurs before the write operation commences. Once the write operation is underway, it is still possible for replication to fail on any number of shard copies but still succeed on the primary. The
+										Element:code
+											_shards
+											section of the write operation’s response reveals the number of shard copies on which replication succeeded/failed.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_shards" : { "total" : 2, "failed" : 0, "successful" : 2 } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Refresh
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Control when the changes made by this request are visible to search. See
+										Element:a
+											refresh
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Noop Updates
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When updating a document using the index api a new version of the document is always created even if the document hasn’t changed. If this isn’t acceptable use the
+										Element:code
+											_update
+											api with
+										Element:code
+											detect_noop
+											set to true. This option isn’t available on the index api because the index api doesn’t fetch the old source and isn’t able to compare it against the new source.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There isn’t a hard and fast rule about when noop updates aren’t acceptable. It’s a combination of lots of factors like how frequently your data source sends updates that are actually noops and how many queries per second elasticsearch runs on the shard with receiving the updates.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Timeout
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The primary shard assigned to perform the index operation might not be available when the index operation is executed. Some reasons for this might be that the primary shard is currently recovering from a gateway or undergoing relocation. By default, the index operation will wait on the primary shard to become available for up to 1 minute before failing and responding with an error. The
+										Element:code
+											timeout
+											parameter can be used to explicitly specify how long it waits. Here is an example of setting it to 5 minutes:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT twitter/tweet/1?timeout=5m { "user" : "kimchy", "post_date" : "2009-11-15T14:12:12", "message" : "trying out Elasticsearch" }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Reading and Writing documents
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Get API »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

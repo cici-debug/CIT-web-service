@@ -1,0 +1,356 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					How Do I Speed Up My Redshift Queries?
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Waiting minutes and minutes, maybe even an hour, for your queries to compute is an unfortunate reality for many growing companies. Whether your data has grown faster than your cluster, or you’re running too many jobs in parallel, there are lots of reasons your queries might be slowing down.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					To help you improve your query performance, this guide takes you through common issues and how to mitigate them.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Common Causes for Slow Queries
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											1. Not enough space
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As your data volume grows and your team writes more queries, you might be running out of space in your cluster.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To check if you’re getting close to your max, run this query. It will tell you the percentage of storage used in your cluster. We recommend never exceeding 75-80% of your storage capacity. If you’re nearing capacity, consider adding some more nodes.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											SELECT sum(pct_used) FROM svv_table_info;
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Learn how to resize your cluster here.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											2. Inefficient queries
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Another thing you’ll want to check is if your queries are efficient. For example, if you’re scanning an entire dataset with a query, you’re probably not making the best use of your compute resources.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A few tips for writing performant queries:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Consider using
+										Element:code
+											INNER joins
+											as they are are more efficient that
+										Element:code
+											LEFT joins
+											.
+										Element:li
+											Stay away from
+										Element:code
+											UNION
+											whenever possible.
+										Element:li
+											Specify multiple levels of conditionals when you can.
+										Element:li
+											Use
+										Element:a
+											to show the query execution plan and cost.
+										Element:code
+											EXPLAIN
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To learn more about writing beautiful SQL, check out these resources:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Periscope on Query Performance
+										Element:li
+										Element:a
+											Mode on Performance Tuning SQL Queries
+										Element:li
+										Element:a
+											Chartio on Improving Query Performance
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											3. Multiple ETL processes and queries running
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some databases like Redshift have limited computing resources. Running multiple queries or ETL processes that insert data into your warehouse at the same time will compete for compute power.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have multiple ETL processes loading into your warehouse at the same time, especially when analysts are also trying to run queries, everything will slow down. Try to schedule them at different times and when your cluster is least active.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’re a Segment Business Tier customer, you can schedule your sync times under Warehouses Settings.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition, you might want to take advantage of Redshift’s
+										Element:a
+											Workload Management
+											that helps ensure fast-running queries won’t get stuck behind long ones.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											4. Default WLM Queue Configuration
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As mentioned before, Redshift schedules and prioritizes queries using
+										Element:a
+											Workload Management
+											. Each queue is configured to distribute resources in ways that can optimize for your use-case.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default configuration is a single queue with only 5 queries running concurrently, but we’ve discovered that the default only works well for very low-volume warehouses. More often than not, adjusting this configuration can significantly improve your sync times.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Before our SQL statements, we use
+										Element:code
+											set query_group to "segment";
+											to group all of our queries together. This allows you to easily create a queue just for Segment that can be isolated from your own queries. The maximum concurrency that Redshift supports is 50 across
+										Element:em
+											all
+											query groups, and resources like memory are distributed evenly across all those queries.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our initial recommendation is for 2 WLM queues:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											a queue for the
+										Element:code
+											segment
+											query group with a concurrency of
+										Element:code
+											10
+										Element:li
+											leave the default queue with a concurrency of
+										Element:code
+											5
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Generally, we are responsible for most writes in the databases we connect to, so having a higher concurrency allows us to write as quickly as possible. However, if you are also using the same database for your own ETL process, you may want to use the same concurrency for both groups. In addition, you may even require additional queues if you have other applications writing to the database.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each cluster may have different needs, so feel free to stray from this recommendation if another configuration works better for your use-case. AWS provides some
+										Element:a
+											guidelines
+											, and of course you can always
+										Element:a
+											contact us
+											as we’re more than happy to share what we have learned while working with Redshift.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Pro-tips for Segment Warehouses
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In addition to following performance best practices, here are a few more optimizations to consider if you’re using Segment Warehouses.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Factors that affect load times
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When Segment is actively loading data into your data warehouse, we’re competing for cluster space and storage with any other jobs you might be running. Here are the parameters that influence your load time for Segment Warehouses.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											Volume of data.
+											Our pipeline needs to load and deduplicate data for each sync, so simply having more volume means these operations will take longer.
+										Element:li
+										Element:strong
+											Number of sources.
+											When we start a sync of your data into your warehouse, we kick off a new job for every source you have in Segment. So the more sources you have, the longer your load time could take. This is where the WLM queue and the concurrency setting can make a big difference.
+										Element:li
+										Element:strong
+											Number and size of columns.
+											Column sizes and the number of columns also affect load time. If you have very long property values or lots of properties per event, the load may take longer as well.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Performance optimizations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To make sure you have enough headroom for quick queries while using Segment Warehouses, here are some tips!
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											Size up your cluster.
+											If you find your queries are getting slow at key times during the day, add more nodes to give enough room for us to load data and for your team to run their queries.
+										Element:li
+										Element:strong
+											Disable unused sources.
+											If you’re not actively analyzing data from a source, consider disabling the source for your Warehouse (available for business tier). If you don’t use a source anymore—perhaps you were just playing around with it for testing, you might even want to remove it completely. This will kick off fewer jobs in our ETL process.
+										Element:li
+										Element:strong
+											Schedule syncs during off times.
+											If you’re concerned about query times and you don’t mind data that’s a little stale, you can schedule your syncs to run when most of your team isn’t actively using the database. (Available for business tier customers.)
+										Element:li
+										Element:strong
+											Schedule regular vacuums.
+											Make sure to schedule regular vacuums for your cluster, so old deleted data isn’t taking up space. (You can do this through Segment if you’re on the business tier.)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We hope these steps will speed up your workflow! If you need any other help, feel free to
+										Element:a
+											contact us
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a

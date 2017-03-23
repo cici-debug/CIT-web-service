@@ -1,0 +1,566 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Diversified Sampler Aggregation
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This functionality is experimental and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but experimental features are not subject to the support SLA of official GA features.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A filtering aggregation used to limit any sub aggregations' processing to a sample of the top-scoring documents. Diversity settings are used to limit the number of matches that share a common value such as an "author".
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Example use cases:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Tightening the focus of analytics to high-relevance matches rather than the potentially very long tail of low-quality matches
+							Element:li
+								Removing bias from analytics by ensuring fair representation of content from different sources
+							Element:li
+								Reducing the running cost of aggregations that can produce useful results using only samples e.g.
+							Element:code
+								significant_terms
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "query": { "match": { "text": "iphone" } }, "aggs": { "sample": { "diversified_sampler": { "shard_size": 200, "field" : "user.id" }, "aggs": { "keywords": { "significant_terms": { "field": "text" } } } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Response:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ ... "aggregations": { "sample": { "doc_count": 1000,
+							Element:a
+							Element:span
+								"keywords": {
+							Element:img
+							Element:a
+							Element:span
+								"doc_count": 1000, "buckets": [ ... { "key": "bend", "doc_count": 58, "score": 37.982536582524276, "bg_count": 103 }, .... }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								1000 documents were sampled in total because we asked for a maximum of 200 from an index with 5 shards. The cost of performing the nested significant_terms aggregation was therefore limited rather than unbounded.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The results of the significant_terms aggregation are not skewed by any single over-active Twitter user because we asked for a maximum of one tweet from any one user in our sample.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											shard_size
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											shard_size
+											parameter limits how many top-scoring documents are collected in the sample processed on each shard. The default value is 100.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Controlling diversity
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											=
+										Element:code
+											field
+											or
+										Element:code
+											script
+											and
+										Element:code
+											max_docs_per_value
+											settings are used to control the maximum number of documents collected on any one shard which share a common value. The choice of value (e.g.
+										Element:code
+											author
+											) is loaded from a regular
+										Element:code
+											field
+											or derived dynamically by a
+										Element:code
+											script
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The aggregation will throw an error if the choice of field or script produces multiple values for a document. It is currently not possible to offer this form of de-duplication using many values, primarily due to concerns over efficiency.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Any good market researcher will tell you that when working with samples of data it is important that the sample represents a healthy variety of opinions rather than being skewed by any single voice. The same is true with aggregations and sampling with these diversify settings can offer a way to remove the bias in your content (an over-populated geography, a large spike in a timeline or an over-active forum spammer).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Field
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Controlling diversity using a field:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "sample" : { "diversified_sampler" : { "field" : "author", "max_docs_per_value" : 3 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that the
+										Element:code
+											max_docs_per_value
+											setting applies on a per-shard basis only for the purposes of shard-local sampling. It is not intended as a way of providing a global de-duplication feature on search results.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Script
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Controlling diversity using a script:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "sample" : { "diversified_sampler" : { "script" : { "lang" : "painless", "inline" : "doc['author'].value + '/' + doc['genre'].value" } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note in the above example we chose to use the default
+										Element:code
+											max_docs_per_value
+											setting of 1 and combine author and genre fields to ensure each shard sample has, at most, one match for an author/genre pair.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											execution_hint
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When using the settings to control diversity, the optional
+										Element:code
+											execution_hint
+											setting can influence the management of the values used for de-duplication. Each option will hold up to
+										Element:code
+											shard_size
+											values in memory while performing de-duplication but the type of value held can be controlled as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											hold field values directly (
+										Element:code
+											map
+											)
+										Element:li
+											hold ordinals of the field as determined by the Lucene index (
+										Element:code
+											global_ordinals
+											)
+										Element:li
+											hold hashes of the field values - with potential for hash collisions (
+										Element:code
+											bytes_hash
+											)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default setting is to use
+										Element:code
+											global_ordinals
+											if this information is available from the Lucene index and reverting to
+										Element:code
+											map
+											if not. The
+										Element:code
+											bytes_hash
+											setting may prove faster in some cases but introduces the possibility of false positives in de-duplication logic due to the possibility of hash collisions. Please note that Elasticsearch will ignore the choice of execution hint if it is not applicable and that there is no backward compatibility guarantee on these hints.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Limitations
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Cannot be nested under
+													Element:code
+														breadth_first
+														aggregations
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Being a quality-based filter the sampler aggregation needs access to the relevance score produced for each document. It therefore cannot be nested under a
+													Element:code
+														terms
+														aggregation which has the
+													Element:code
+														collect_mode
+														switched from the default
+													Element:code
+														depth_first
+														mode to
+													Element:code
+														breadth_first
+														as this discards scores. In this situation an error will be thrown.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Limited de-dup logic.
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The de-duplication logic in the diversify settings applies only at a shard level so will not apply across shards.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														No specialized syntax for geo/date fields
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Currently the syntax for defining the diversifying values is defined by a choice of
+													Element:code
+														field
+														or
+													Element:code
+														script
+														- there is no added syntactical sugar for expressing geo or date units such as "7d" (7 days). This support may be added in a later release and users will currently have to create these sorts of values using a script.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Date Range Aggregation
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Filter Aggregation »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,379 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Full cluster restart upgrade
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Elasticsearch requires a full cluster restart when upgrading across major versions. Rolling upgrades are not supported across major versions. Consult this
+							Element:a
+								table
+								to verify that a full cluster restart is required.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The process to perform an upgrade with a full cluster restart is as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+							Element:span
+							Element:strong
+								Disable shard allocation
+							Element:p
+								When you shut down a node, the allocation process will immediately try to replicate the shards that were on that node to other nodes in the cluster, causing a lot of wasted I/O. This can be avoided by disabling allocation before shutting down a node:
+							Element:pre
+								PUT _cluster/settings { "persistent": { "cluster.routing.allocation.enable": "none" } }
+							Element:li
+							Element:p
+							Element:span
+							Element:strong
+								Perform a synced flush
+							Element:p
+								Shard recovery will be much faster if you stop indexing and issue a
+							Element:a
+								synced-flush
+								request:
+							Element:pre
+								POST _flush/synced
+							Element:p
+								A synced flush request is a “best effort” operation. It will fail if there are any pending indexing operations, but it is safe to reissue the request multiple times if necessary.
+							Element:li
+							Element:p
+							Element:span
+							Element:strong
+								Shutdown and upgrade all nodes
+							Element:p
+								Stop all Elasticsearch services on all nodes in the cluster. Each node can be upgraded following the same procedure described in
+							Element:a
+								[upgrade-node]
+								.
+							Element:li
+							Element:p
+							Element:span
+							Element:strong
+								Upgrade any plugins
+							Element:p
+								Elasticsearch plugins must be upgraded when upgrading a node. Use the
+							Element:code
+								elasticsearch-plugin
+								script to install the correct version of any plugins that you need.
+							Element:li
+							Element:p
+							Element:span
+							Element:strong
+								Start the cluster
+							Element:p
+								If you have dedicated master nodes — nodes with
+							Element:code
+								node.master
+								set to
+							Element:code
+								true
+								(the default) and
+							Element:code
+								node.data
+								set to
+							Element:code
+								false
+								— then it is a good idea to start them first. Wait for them to form a cluster and to elect a master before proceeding with the data nodes. You can check progress by looking at the logs.
+							Element:p
+								As soon as the
+							Element:a
+								minimum number of master-eligible nodes
+								have discovered each other, they will form a cluster and elect a master. From that point on, the
+							Element:a
+								and
+							Element:code
+								_cat/health
+							Element:a
+								APIs can be used to monitor nodes joining the cluster:
+							Element:code
+								_cat/nodes
+							Element:pre
+								GET _cat/health GET _cat/nodes
+							Element:p
+								Use these APIs to check that all nodes have successfully joined the cluster.
+							Element:li
+							Element:p
+							Element:span
+							Element:strong
+								Wait for yellow
+							Element:p
+								As soon as each node has joined the cluster, it will start to recover any primary shards that are stored locally. Initially, the
+							Element:a
+								request will report a
+							Element:code
+								_cat/health
+							Element:code
+								status
+								of
+							Element:code
+								red
+								, meaning that not all primary shards have been allocated.
+							Element:p
+								Once each node has recovered its local shards, the
+							Element:code
+								status
+								will become
+							Element:code
+								yellow
+								, meaning all primary shards have been recovered, but not all replica shards are allocated. This is to be expected because allocation is still disabled.
+							Element:li
+							Element:p
+							Element:span
+							Element:strong
+								Reenable allocation
+							Element:p
+								Delaying the allocation of replicas until all nodes have joined the cluster allows the master to allocate replicas to nodes which already have local shard copies. At this point, with all the nodes in the cluster, it is safe to reenable shard allocation:
+							Element:pre
+								PUT _cluster/settings { "persistent": { "cluster.routing.allocation.enable": "all" } }
+							Element:p
+								The cluster will now start allocating replica shards to all data nodes. At this point it is safe to resume indexing and searching, but your cluster will recover more quickly if you can delay indexing and searching until all shards have recovered.
+							Element:p
+								You can monitor progress with the
+							Element:a
+								and
+							Element:code
+								_cat/health
+							Element:a
+								APIs:
+							Element:code
+								_cat/recovery
+							Element:pre
+								GET _cat/health GET _cat/recovery
+							Element:p
+								Once the
+							Element:code
+								status
+								column in the
+							Element:code
+								_cat/health
+								output has reached
+							Element:code
+								green
+								, all primary and replica shards have been successfully allocated.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								« Rolling upgrades
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								Reindex to upgrade »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

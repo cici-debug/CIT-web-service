@@ -1,0 +1,509 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Shard request cache
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When a search request is run against an index or against many indices, each involved shard executes the search locally and returns its local results to the
+							Element:span
+								, which combines these shard-level results into a “global” result set.
+							Element:em
+								coordinating node
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The shard-level request cache module caches the local results on each shard. This allows frequently used (and potentially heavy) search requests to return results almost instantly. The requests cache is a very good fit for the logging use case, where only the most recent index is being actively updated — results from older indices will be served directly from the cache.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, the requests cache will only cache the results of search requests where
+							Element:code
+								size=0
+								, so it will not cache
+							Element:code
+								hits
+								, but it will cache
+							Element:code
+								hits.total
+								,
+							Element:a
+								aggregations
+								, and
+							Element:a
+								suggestions
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Most queries that use
+							Element:code
+								now
+								(see
+							Element:a
+								the section called “Date Math
+							Element:a
+								edit
+								”) cannot be cached.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Cache invalidation
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The cache is smart — it keeps the same
+													Element:span
+														promise as uncached search.
+													Element:em
+														near real-time
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Cached results are invalidated automatically whenever the shard refreshes, but only if the data in the shard has actually changed. In other words, you will always get the same results from the cache as you would for an uncached search request.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The longer the refresh interval, the longer that cached entries will remain valid. If the cache is full, the least recently used cache keys will be evicted.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The cache can be expired manually with the
+													Element:a
+														:
+													Element:code
+														clear-cache
+														API
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /kimchy,elasticsearch/_cache/clear?request_cache=true
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Enabling and disabling caching
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The cache is enabled by default, but can be disabled when creating a new index as follows:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT /my_index { "settings": { "index.requests.cache.enable": false } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														It can also be enabled or disabled dynamically on an existing index with the
+													Element:a
+														API:
+													Element:code
+														update-settings
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT /my_index/_settings { "index.requests.cache.enable": true }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Enabling and disabling caching per request
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														request_cache
+														query-string parameter can be used to enable or disable caching on a
+													Element:span
+														basis. If set, it overrides the index-level setting:
+													Element:strong
+														per-request
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /my_index/_search?request_cache=true { "size": 0, "aggs": { "popular_colors": { "terms": { "field": "colors" } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If your query uses a script whose result is not deterministic (e.g. it uses a random function or references the current time) you should set the
+													Element:code
+														request_cache
+														flag to
+													Element:code
+														false
+														to disable caching for that request.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Requests
+													Element:code
+														size
+														is greater than 0 will not be cached even if the request cache is enabled in the index settings. To cache these requests you will need to use the query-string parameter detailed here.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Cache key
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The whole JSON body is used as the cache key. This means that if the JSON changes — for instance if keys are output in a different order — then the cache key will not be recognised.
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Most JSON libraries support a
+													Element:span
+														mode which ensures that JSON keys are always emitted in the same order. This canonical mode can be used in the application to ensure that a request is always serialized in the same way.
+													Element:em
+														canonical
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Cache settings
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The cache is managed at the node level, and has a default maximum size of
+													Element:code
+														1%
+														of the heap. This can be changed in the
+													Element:code
+														config/elasticsearch.yml
+														file with:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														indices.requests.cache.size: 2%
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Also, you can use the
+													Element:code
+														indices.requests.cache.expire
+														setting to specify a TTL for cached results, but there should be no reason to do so. Remember that stale results are automatically invalidated when the index is refreshed. This setting is provided for completeness' sake only.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Monitoring cache usage
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The size of the cache (in bytes) and the number of evictions can be viewed by index, with the
+													Element:a
+														API:
+													Element:code
+														indices-stats
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_stats/request_cache?human
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														or by node with the
+													Element:a
+														API:
+													Element:code
+														nodes-stats
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_nodes/stats/indices/request_cache?human
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Indexing Buffer
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Indices Recovery »
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

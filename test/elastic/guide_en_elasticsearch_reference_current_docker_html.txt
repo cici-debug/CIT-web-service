@@ -1,0 +1,849 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Install Elasticsearch with Docker
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Elasticsearch is also available as a Docker image. The image is built with
+							Element:a
+								X-Pack
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Security note
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											X-Pack
+											is preinstalled in this image. Please take a few minutes to familiarize yourself with
+										Element:a
+											X-Pack Security
+											and how to change default passwords. The default password for the
+										Element:code
+											elastic
+											user is
+										Element:code
+											changeme
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											X-Pack includes a trial license for 30 days. After that, you can obtain one of the
+										Element:a
+											available subscriptions
+											or
+										Element:a
+											disable Security
+											. The Basic license is free and includes the
+										Element:a
+											Monitoring
+											extension.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Obtaining Elasticsearch for Docker is as simple as issuing a
+										Element:code
+											docker pull
+											command against the Elastic Docker registry.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Docker image can be retrieved with the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											docker pull docker.elastic.co/elasticsearch/elasticsearch:5.2.2
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Running Elasticsearch from the command line
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Development mode
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Elasticsearch can be quickly started for development or testing use with the following command:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														docker run -p 9200:9200 -e "http.host=0.0.0.0" -e "transport.host=127.0.0.1" docker.elastic.co/elasticsearch/elasticsearch:5.2.2
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Production mode
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														vm_max_map_count
+														kernel setting needs to be set to at least
+													Element:code
+														262144
+														for production use. Depending on your platform:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:p
+														Linux
+													Element:p
+														The
+													Element:code
+														vm_map_max_count
+														setting should be set permanently in /etc/sysctl.conf:
+													Element:pre
+														$ grep vm.max_map_count /etc/sysctl.conf vm.max_map_count=262144
+													Element:p
+														To apply the setting on a live system type:
+													Element:code
+														sysctl -w vm.max_map_count=262144
+													Element:li
+													Element:p
+														OSX with
+													Element:a
+														Docker for Mac
+													Element:p
+														The
+													Element:code
+														vm_max_map_count
+														setting must be set within the xhyve virtual machine:
+													Element:pre
+														$ screen ~/Library/Containers/com.docker.docker/Data/com.docker.driver.amd64-linux/tty
+													Element:p
+														Log in with
+													Element:span
+														and no password. Then configure the
+													Element:em
+														root
+													Element:code
+														sysctl
+														setting as you would for Linux:
+													Element:pre
+														sysctl -w vm.max_map_count=262144
+													Element:li
+													Element:p
+														OSX with
+													Element:a
+														Docker Toolbox
+													Element:p
+														The
+													Element:code
+														vm_max_map_count
+														setting must be set via docker-machine:
+													Element:pre
+														docker-machine ssh sudo sysctl -w vm.max_map_count=262144
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following example brings up a cluster comprising two Elasticsearch nodes. To bring up the cluster, use the
+													Element:a
+														and just type:
+													Element:code
+														docker-compose.yml
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														docker-compose up
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														docker-compose
+														is not pre-installed with Docker on Linux. Instructions for installing it can be found on the
+													Element:a
+														docker-compose webpage
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The node
+													Element:code
+														elasticsearch1
+														listens on
+													Element:code
+														localhost:9200
+														while
+													Element:code
+														elasticsearch2
+														talks to
+													Element:code
+														elasticsearch1
+														over a Docker network.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This example also uses
+													Element:a
+														Docker named volumes
+														, called
+													Element:code
+														esdata1
+														and
+													Element:code
+														esdata2
+														which will be created if not already present.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+													Element:code
+														docker-compose.yml
+														:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														version: '2' services: elasticsearch1: image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2 container_name: elasticsearch1 environment: - cluster.name=docker-cluster - bootstrap.memory_lock=true - "ES_JAVA_OPTS=-Xms512m -Xmx512m" ulimits: memlock: soft: -1 hard: -1 nofile: soft: 65536 hard: 65536 mem_limit: 1g cap_add: - IPC_LOCK volumes: - esdata1:/usr/share/elasticsearch/data ports: - 9200:9200 networks: - esnet elasticsearch2: image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2 environment: - cluster.name=docker-cluster - bootstrap.memory_lock=true - "ES_JAVA_OPTS=-Xms512m -Xmx512m" - "discovery.zen.ping.unicast.hosts=elasticsearch1" ulimits: memlock: soft: -1 hard: -1 nofile: soft: 65536 hard: 65536 mem_limit: 1g cap_add: - IPC_LOCK volumes: - esdata2:/usr/share/elasticsearch/data networks: - esnet volumes: esdata1: driver: local esdata2: driver: local networks: esnet: driver: bridge
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To stop the cluster, type
+													Element:code
+														docker-compose down
+														. Data volumes will persist, so it’s possible to start the cluster again with the same data using
+													Element:code
+														docker-compose up
+														. To destroy the cluster
+													Element:span
+														just type
+													Element:strong
+														and the data volumes
+													Element:code
+														docker-compose down -v
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Inspect status of cluster:
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -u elastic http://127.0.0.1:9200/_cat/health Enter host password for user 'elastic': 1472225929 15:38:49 docker-cluster green 2 2 4 2 0 0 0 0 - 100.0%
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Log messages go to the console and are handled by the configured Docker logging driver. By default you can access logs with
+													Element:code
+														docker logs
+														.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Configuring Elasticsearch with Docker
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Elasticsearch loads its configuration from files under
+										Element:code
+											/usr/share/elasticsearch/config/
+											. These configuration files are documented in
+										Element:a
+											and
+										Element:em
+											Configuring Elasticsearch
+										Element:a
+											Setting JVM options
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The image offers several methods for configuring Elasticsearch settings with the conventional approach being to provide customized files, i.e.
+										Element:code
+											elasticsearch.yml
+											, but it’s also possible to use environment variables to set options:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														A. Present the parameters via Docker environment variables
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For example, to define the cluster name with
+													Element:code
+														docker run
+														you can pass
+													Element:code
+														-e "cluster.name=mynewclustername"
+														. Double quotes are required.
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														There is a difference between defining
+													Element:a
+														default settings
+														and normal settings. The former are prefixed with
+													Element:code
+														default.
+														and cannot override normal settings, if defined.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														B. Bind-mounted configuration
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Create your custom config file and mount this over the image’s corresponding file. For example, bind-mounting a
+													Element:code
+														custom_elasticsearch.yml
+														with
+													Element:code
+														docker run
+														can be accomplished with the parameter:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														-v full_path_to/custom_elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														custom_elasticsearch.yml
+														should be readable by uid:gid
+													Element:code
+														1000:1000
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														C. Customized image
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In some environments, it may make more sense to prepare a custom image containing your configuration. A
+													Element:code
+														Dockerfile
+														to achieve this may be as simple as:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														FROM docker.elastic.co/elasticsearch/elasticsearch:5.2.2 ADD elasticsearch.yml /usr/share/elasticsearch/config/ USER root RUN chown elasticsearch:elasticsearch config/elasticsearch.yml USER elasticsearch
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You could then build and try the image with something like:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														docker build --tag=elasticsearch-custom . docker run -ti -v /usr/share/elasticsearch/data elasticsearch-custom
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														D. Override the image’s default
+													Element:a
+														CMD
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Options can be passed as command-line options to the Elasticsearch process by overriding the default command for the image. For example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														docker run <various parameters> bin/elasticsearch -Ecluster.name=mynewclustername
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Notes for production use and defaults
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We have collected a number of best practices for production use.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Any Docker parameters mentioned below assume the use of
+										Element:code
+											docker run
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											It is important to correctly set capabilities and ulimits via the Docker CLI. As seen earlier in the example
+										Element:a
+											docker-compose.yml
+											, the following options are required:
+										Element:pre
+											--cap-add=IPC_LOCK --ulimit memlock=-1:-1 --ulimit nofile=65536:65536
+										Element:li
+										Element:p
+											Ensure
+										Element:code
+											bootstrap.memory_lock
+											is set to
+										Element:code
+											true
+											as explained in "
+										Element:a
+											Disable swapping
+											".
+										Element:p
+											This can be achieved through any of the
+										Element:a
+											configuration methods
+											, e.g. by setting the appropriate environments variable with
+										Element:code
+											-e "bootstrap.memory_lock=true"
+											.
+										Element:li
+											The image
+										Element:a
+											exposes
+											TCP ports 9200 and 9300. For clusters it is recommended to randomize the published ports with
+										Element:code
+											--publish-all
+											, unless you are pinning one container per host.
+										Element:li
+											Use the
+										Element:code
+											ES_JAVA_OPTS
+											environment variable to set heap size, e.g. to use 16GB use
+										Element:code
+											-e ES_JAVA_OPTS="-Xms16g -Xmx16g"
+											with
+										Element:code
+											docker run
+											. It is also recommended to set a
+										Element:a
+											memory limit
+											for the container.
+										Element:li
+											Pin your deployments to a specific version of the Elasticsearch Docker image, e.g.
+										Element:code
+											docker.elastic.co/elasticsearch/elasticsearch:5.2.2
+											.
+										Element:li
+										Element:p
+											Always use a volume bound on
+										Element:code
+											/usr/share/elasticsearch/data
+											, as shown in the
+										Element:a
+											production example
+											, for the following reasons:
+										Element:ol
+										Element:li
+											The data of your elasticsearch node won’t be lost if the container is killed
+										Element:li
+											Elasticsearch is I/O sensitive and the Docker storage driver is not ideal for fast I/O
+										Element:li
+											It allows the use of advanced
+										Element:a
+											Docker volume plugins
+										Element:li
+											If you are using the devicemapper storage driver (default on at least RedHat (rpm) based distributions) make sure you are not using the default
+										Element:code
+											loop-lvm
+											mode. Configure docker-engine to use
+										Element:a
+											direct-lvm
+											instead.
+										Element:li
+											Consider centralizing your logs by using a different
+										Element:a
+											logging driver
+											. Also note that the default json-file logging driver is not ideally suited for production use.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Next steps
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You now have a test Elasticsearch environment set up. Before you start serious development or go into production with Elasticsearch, you will need to do some additional setup:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Learn how to
+										Element:a
+											configure Elasticsearch
+											.
+										Element:li
+											Configure
+										Element:a
+											important Elasticsearch settings
+											.
+										Element:li
+											Configure
+										Element:a
+											important system settings
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Install Elasticsearch on Windows
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Configuring Elasticsearch »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

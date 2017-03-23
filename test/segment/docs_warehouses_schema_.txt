@@ -1,0 +1,1364 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Schema Reference
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The table below describes the schema in Segment Warehouses:
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:tr
+				Element:td
+				Element:code
+					<source>.aliases
+				Element:td
+					A table with all of your
+				Element:code
+					alias
+					method calls. This table will include all of the
+				Element:code
+					traits
+					you identify users by as top-level columns, for example
+				Element:code
+					<source>.aliases.email
+					.
+				Element:tr
+				Element:td
+				Element:code
+					<source>.groups
+				Element:td
+					A table with all of your
+				Element:code
+					group
+					method calls. This table will include all of the
+				Element:code
+					traits
+					you record for groups as top-level columns, for example
+				Element:code
+					<source>.groups.employee_count
+					.
+				Element:tr
+				Element:td
+				Element:code
+					<source>.accounts
+				Element:td
+				Element:em
+					CURRENTLY IN BETA
+					A table with unique
+				Element:code
+					group
+					method calls. Group calls are upserted into this table (updated if an existing entry exists, appended otherwise). This table holds the latest state of a group.
+				Element:tr
+				Element:td
+				Element:code
+					<source>.identifies
+				Element:td
+					A table with all of your
+				Element:code
+					identify
+					method calls. This table will include all of the
+				Element:code
+					traits
+					you identify users by as top-level columns, for example
+				Element:code
+					<source>.identifies.email
+					.
+				Element:tr
+				Element:td
+				Element:code
+					<source>.users
+				Element:td
+					A table with unique
+				Element:code
+					identify
+					calls.
+				Element:code
+					identify
+					calls are upserted on
+				Element:code
+					user_id
+					into this table (updated if an existing entry exists, appended otherwise). This table holds the latest state of of a user. The
+				Element:code
+					id
+					column in the users table is equivalent to the
+				Element:code
+					user_id
+					column in the identifies table. Also note that this table won’t have an
+				Element:code
+					anonymous_id
+					column since a user can have multiple anonymousIds. To get at a user’s anonymousIds, you’ll need to query the identifies table.
+				Element:em
+					If you observe any duplicates in the users table, please
+				Element:a
+					contact us
+					.
+				Element:tr
+				Element:td
+				Element:code
+					<source>.pages
+				Element:td
+					A table with all of your
+				Element:code
+					page
+					method calls. This table will include all of the
+				Element:code
+					properties
+					you record for pages as top-level columns, for example
+				Element:code
+					<source>.pages.title
+					.
+				Element:tr
+				Element:td
+				Element:code
+					<source>.screens
+				Element:td
+					A table with all of your
+				Element:code
+					screen
+					method calls. This table will include all of the
+				Element:code
+					properties
+					you record for screens as top-level columns, for example
+				Element:code
+					<source>.screens.title
+					.
+				Element:tr
+				Element:td
+				Element:code
+					<source>.tracks
+				Element:td
+					A table with all of your
+				Element:code
+					track
+					method calls. This table will only include a few standardized properties that are all common to all events:
+				Element:code
+					anonymous_id
+					,
+				Element:code
+					context_*
+					,
+				Element:code
+					event
+					,
+				Element:code
+					event_text
+					,
+				Element:code
+					received_at
+					,
+				Element:code
+					sent_at
+					, and
+				Element:code
+					user_id
+					. This is because every event that you send to Segment has completely different properties. For querying by the custom properties, use the
+				Element:code
+					<source>.<event>
+					tables instead.
+				Element:tr
+				Element:td
+				Element:code
+					<source>.<event>
+				Element:td
+					For
+				Element:code
+					track
+					calls, each event like
+				Element:code
+					Signed Up
+					or
+				Element:code
+					Order Completed
+					also has it’s own table (eg.
+				Element:code
+					initech.clocked_in
+					) with columns for each of the event’s distinct
+				Element:code
+					properties
+					(eg.
+				Element:code
+					initech.clocked_in.time
+					).
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identifies
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your
+							Element:code
+								identifies
+								table is where all of your
+							Element:code
+								.identify()
+								method calls are stored. Query it to find out user-level information. It has the following columns:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:td
+								The anonymous ID of the user.
+							Element:tr
+							Element:td
+							Element:code
+								context_<key>
+							Element:td
+								Non-user-related context fields sent with each identify call.
+							Element:tr
+							Element:td
+							Element:code
+								id
+							Element:td
+								The unique ID of the identify call itself.
+							Element:tr
+							Element:td
+							Element:code
+								received_at
+							Element:td
+								When the identify call was received by Segment.
+							Element:tr
+							Element:td
+							Element:code
+								sent_at
+							Element:td
+								When the identify call was triggered by the user.
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+								The unique ID of the user.
+							Element:tr
+							Element:td
+							Element:code
+								<trait>
+							Element:td
+								Each trait of the user you record is created as it’s own column, and the column type is automatically inferred from your data. For example, you might have columns like
+							Element:code
+								email
+								and
+							Element:code
+								first_name
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To see a list of the columns in the
+							Element:code
+								identifies
+								table for your
+							Element:code
+								<source>
+								run:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT column_name AS Columns FROM columns WHERE schema_name = '<source>' AND table_name = 'identifies' ORDER by column_name
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								Columns
+							Element:tbody
+							Element:tr
+							Element:td
+								anonymous_id
+							Element:tr
+							Element:td
+								context_ip
+							Element:tr
+							Element:td
+								email
+							Element:tr
+							Element:td
+								…
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your
+							Element:code
+								identifies
+								table is where you can do all sorts of querying about your users and their traits. For example, if you wanted to see the number of unique users you’ve seen on your site each day:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT DATE(sent_at) AS Day, COUNT(DISTINCT(user_id)) AS Users FROM <source>.identifies GROUP BY day ORDER BY day
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Groups
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your
+							Element:code
+								groups
+								table is where all of your
+							Element:code
+								group
+								method calls are stored. Query it to find out group-level information. It has the following columns:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:td
+								The anonymous ID of the user.
+							Element:tr
+							Element:td
+							Element:code
+								context_<key>
+							Element:td
+								Non-user-related context fields sent with each group call.
+							Element:tr
+							Element:td
+							Element:code
+								group_id
+							Element:td
+								The unique ID of the group.
+							Element:tr
+							Element:td
+							Element:code
+								id
+							Element:td
+								The unique ID of the group call itself.
+							Element:tr
+							Element:td
+							Element:code
+								received_at
+							Element:td
+								When the group call was received by Segment.
+							Element:tr
+							Element:td
+							Element:code
+								sent_at
+							Element:td
+								When the group call was triggered by the user.
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+								The unique ID of the user.
+							Element:tr
+							Element:td
+							Element:code
+								<trait>
+							Element:td
+								Each trait of the group you record is created as it’s own column, and the column type is automatically inferred from your data. For example, you might have columns like
+							Element:code
+								email
+								and
+							Element:code
+								name
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To see a list of the columns in the
+							Element:code
+								groups
+								table for your
+							Element:code
+								<source>
+								run:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT column_name AS Columns FROM columns WHERE schema_name = '<source>' AND table_name = 'groups' ORDER by column_name
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								Columns
+							Element:tbody
+							Element:tr
+							Element:td
+								anonymous_id
+							Element:tr
+							Element:td
+								context_ip
+							Element:tr
+							Element:td
+								…
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To see a list of all of the groups using your product run:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT name AS Company FROM <source>.groups GROUP BY name
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								Company
+							Element:tbody
+							Element:tr
+							Element:td
+								Comcast
+							Element:tr
+							Element:td
+								Rdio
+							Element:tr
+							Element:td
+								Warner Brothers
+							Element:tr
+							Element:td
+								…
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Pages & Screens
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your
+							Element:code
+								pages
+								and
+							Element:code
+								screens
+								tables are where all of your
+							Element:code
+								page
+								and
+							Element:code
+								screen
+								method calls are stored. Query it to find out information about page views or screen views. It has the following columns:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:td
+								The anonymous ID of the user.
+							Element:tr
+							Element:td
+							Element:code
+								context_<key>
+							Element:td
+								Non-user-related context fields sent with each page or screen call.
+							Element:tr
+							Element:td
+							Element:code
+								id
+							Element:td
+								The unique ID of the page or screen call itself.
+							Element:tr
+							Element:td
+							Element:code
+								received_at
+							Element:td
+								When the page or screen call was received by Segment.
+							Element:tr
+							Element:td
+							Element:code
+								sent_at
+							Element:td
+								When the page or screen call was triggered by the user.
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+								The unique ID of the user.
+							Element:tr
+							Element:td
+							Element:code
+								<property>
+							Element:td
+								Each property of your pages or screens is created as it’s own column, and the column type is automatically inferred from your data. For example, you might have columns like
+							Element:code
+								referrer
+								and
+							Element:code
+								title
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To see a list of the columns in the
+							Element:code
+								pages
+								table for your
+							Element:code
+								<source>
+								run:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT column_name AS Columns FROM columns WHERE schema_name = '<source>' AND table_name = 'pages' ORDER by column_name
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								Columns
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:tr
+							Element:td
+							Element:code
+								context_ip
+							Element:tr
+							Element:td
+							Element:code
+								referrer
+							Element:tr
+							Element:td
+							Element:code
+								...
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The pages table can give you interesting information about page views that happen on your site, for example you can see the number of page views grouped by week:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT DATE(sent_at) AS Day, COUNT(*) AS Views FROM <source>.pages GROUP BY day ORDER BY day
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								Day
+							Element:td
+							Element:strong
+								Views
+							Element:tr
+							Element:td
+								2015-01-14
+							Element:td
+								2,203,198
+							Element:tr
+							Element:td
+								2015-01-15
+							Element:td
+								2,393,020
+							Element:tr
+							Element:td
+								2015-07-21
+							Element:td
+								1,920,290
+							Element:tr
+							Element:td
+								…
+							Element:td
+								…
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Tracks
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your
+							Element:code
+								tracks
+								table is where all of your
+							Element:code
+								track
+								method calls are stored. Query it to find out information about the events your users have triggered. It has the following columns:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:td
+								The anonymous ID of the user.
+							Element:tr
+							Element:td
+							Element:code
+								context_<key>
+							Element:td
+								Non-user-related context fields sent with each identify call.
+							Element:tr
+							Element:td
+							Element:code
+								event
+							Element:td
+								The slug of the event name, mapping to an event-specific table.
+							Element:tr
+							Element:td
+							Element:code
+								event_text
+							Element:td
+								The name of the event.
+							Element:tr
+							Element:td
+							Element:code
+								id
+							Element:td
+								An ID attached to the event at execution time and used for deduplication at the server level.
+							Element:tr
+							Element:td
+							Element:code
+								received_at
+							Element:td
+								When the identify call was received by Segment.
+							Element:tr
+							Element:td
+							Element:code
+								sent_at
+							Element:td
+								When the identify call was triggered by the user.
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+								The unique ID of the user.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your
+							Element:code
+								tracks
+								table is a rollup of all of the different event-specific tables, for quick querying of just a single type. For example, you could see the count of how many unique users signed up each day:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT DATE(sent_at) AS Day, COUNT(DISTINCT(user_id)) AS Users FROM segment.tracks WHERE event = 'signed_up' GROUP BY day ORDER BY day
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								Day
+							Element:td
+							Element:strong
+								Users
+							Element:tr
+							Element:td
+								2015-01-14
+							Element:td
+								25,198
+							Element:tr
+							Element:td
+								2015-01-15
+							Element:td
+								31,020
+							Element:tr
+							Element:td
+								2015-07-21
+							Element:td
+								19,290
+							Element:tr
+							Element:td
+								…
+							Element:td
+								…
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Event Tables
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your event tables are a series of table for each custom event you record to Segment. We break them out into their own tables because the properties, and thus the columns, differ for each event. Query these tables to find out information about specific properties of your custom events. They have the following columns:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:td
+								The anonymous ID of the user.
+							Element:tr
+							Element:td
+							Element:code
+								context_<key>
+							Element:td
+								Non-user-related context fields sent with each track call.
+							Element:tr
+							Element:td
+							Element:code
+								event
+							Element:td
+								The slug of the event name, so you can join the
+							Element:code
+								tracks
+								table.
+							Element:tr
+							Element:td
+							Element:code
+								event_text
+							Element:td
+								The name of the event.
+							Element:tr
+							Element:td
+							Element:code
+								id
+							Element:td
+								The unique ID of the track call itself.
+							Element:tr
+							Element:td
+							Element:code
+								received_at
+							Element:td
+								When the track call was received by Segment.
+							Element:tr
+							Element:td
+							Element:code
+								sent_at
+							Element:td
+								When the track call was triggered by the user.
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+								The unique ID of the user.
+							Element:td
+							Element:code
+								<property>
+							Element:td
+								Each property of your track calls is created as it’s own column, and the column type is automatically inferred from your data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To see a list of all of the event tables for a given
+							Element:code
+								<source>
+								you can run:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT schema as source, "table" as Event FROM disk WHERE schema = '<source>' AND "table" != 'aliases' AND "table" != 'groups' AND "table" != 'identifies' AND "table" != 'pages' AND "table" != 'screens' AND "table" != 'tracks' ORDER BY "table"
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								source
+							Element:td
+							Element:strong
+								Event
+							Element:tbody
+							Element:tr
+							Element:td
+								production
+							Element:td
+								signed_up
+							Element:tr
+							Element:td
+								production
+							Element:td
+								completed_order
+							Element:tr
+							Element:td
+								…
+							Element:td
+								…
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To see a list of the columns in one of your event tables run:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT column_name AS Columns FROM columns WHERE schema_name = '<source>' AND table_name = '<event>' ORDER by column_name
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								Columns
+							Element:tbody
+							Element:tr
+							Element:td
+								anonymous_id
+							Element:tr
+							Element:td
+								context_ip
+							Element:tr
+							Element:td
+								…
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								If you send us an array, we will stringify it in Redshift. That way you don’t end up having to pollute your events. It won’t work perfectly if you have a lot of array elements but should work decently to store and query those. We also flatten nested objects.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Tracks vs. Events Tables
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To see all of the tables for your organization, you can run this query:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT schema || '.' || "table" AS table, rows FROM disk ORDER BY 1
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The source.event tables have all of the same columns as the source.track tables, but they also include columns specific to the properties of each event.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								So if you’re recording an event like:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.track('Register', { plan: 'Pro Annual', accountType: 'Facebook' });
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then you can expect to see columns named
+							Element:code
+								plan
+								and
+							Element:code
+								account_type
+								as well as the default
+							Element:code
+								event
+								,
+							Element:code
+								id
+								, etc. That way you can write queries against any of the custom data send in track calls.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								Because
+							Element:code
+								properties
+								and
+							Element:code
+								traits
+								are added as un-prefixed columns to your tables, there is a chance of collision with our reserved column names. For this reason, properties with the same name as reserved column name (eg.
+							Element:code
+								user_id
+								) will be discarded.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your event tables are one of the more powerful datasets in Segment SQL. They allow you to clearly see which actions users are performing when interacting with your product.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Because every source has different events, what you can do with them will vary. Here’s an example where you can see how many “Enterprise” users signed up for each day:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT DATE(sent_at) AS Day, COUNT(DISTINCT(user_id)) AS Users FROM <source>.signed_up WHERE account_type = 'Enterprise' GROUP BY day ORDER BY day
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								Day
+							Element:td
+							Element:strong
+								Users
+							Element:tr
+							Element:td
+								2015-01-14
+							Element:td
+								258
+							Element:tr
+							Element:td
+								2015-01-15
+							Element:td
+								320
+							Element:tr
+							Element:td
+								2015-07-21
+							Element:td
+								190
+							Element:tr
+							Element:td
+								…
+							Element:td
+								…
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s an example that queries the daily revenue for an ecommerce store:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SELECT DATE(sent_at) AS Day, SUM(total) AS Revenue FROM <source>.completed_order GROUP BY day ORDER BY day
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:td
+							Element:strong
+								Day
+							Element:td
+							Element:strong
+								Revenue
+							Element:tr
+							Element:td
+								2014-07-19
+							Element:td
+								$2,630
+							Element:tr
+							Element:td
+								2014-07-20
+							Element:td
+								$1,595
+							Element:tr
+							Element:td
+								2014-07-21
+							Element:td
+								$2,350
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											New Columns
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Columns are created for new event properties and traits. We process the incoming data to Segment in batches, based on either data size or an interval of time. If the table doesn’t exist we lock and create the table. If the table exists but new columns need to be created, we perform a diff and alter the table to append new columns.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											We create tables for each of your custom events, and columns for each event’s custom properties. Redshift itself has limits on how many can be created, so we do not allow unbounded event or property spaces in your data. Instead of recording events like “Ordered Product 15”, use a single property of “Product Number” or similar._
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When we process a new batch and discover a new column needs to be added, we take the most recent occurrence of a column and choose its datatype.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The datatypes that we support right now are:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											-
+										Element:code
+											timestamp
+											-
+										Element:code
+											integer
+											-
+										Element:code
+											float
+											-
+										Element:code
+											boolean
+											-
+										Element:code
+											varchar
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Column Sizing
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After analyzing the data from dozens of customers we set the string column length limit at 512 characters. Longer strings are truncated. We found this was the sweet spot for good performance and ignoring non-useful data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We special-case compression for some known columns like event names and timestamps. The others default to LZO. We may add look-ahead sampling down the road, but from inspecting the datasets today this would be unnecessary complexity.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After a column is created, Redshift doesn’t allow altering. Swapping and renaming may work down the road, but this would likely cause thrashing and performance issues. If you would like to change the column size, see our
+							Element:a
+								docs here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Timestamps
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are four timestamps associated with every Segment API call:
+							Element:code
+								timestamp
+								,
+							Element:code
+								original_timestamp
+								,
+							Element:code
+								sent_at
+								and
+							Element:code
+								received_at
+								. All four timestamps are passed through to your Warehouse for every ETL’d event. In most cases the timestamps are fairly close together, but they have different meanings which are important.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								timestamp
+								is the UTC-converted timestamp which is set by the Segment library at the time the event is created. The
+							Element:code
+								timestamp
+								may also be overridden by passing it as an attribute in a server-side call. If you are importing historical events via a server-side library, this is the timestamp you’ll want to reference in your queries!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								original_timestamp
+								is the original timestamp set by the Segment library at the time the event is created. Given the possible inconsistencies with how the timestamp field can be passed in a Segment API call, our APIs make a best effort to convert the
+							Element:code
+								original_timestamp
+								to the ISO standard and UTC timezone. Generally, this timestamp should be ignored in favor of the
+							Element:code
+								timestamp
+								column.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								sent_at
+								is the UTC timestamp set by library when the Segment API call was sent.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								received_at
+								is UTC timestamp set by the Segment API when the API receives the payload from client or server. All tables use received_at for the sort key.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								IMPORTANT:
+								We highly recommend using the
+							Element:code
+								received_at
+								timestamp for all queries based on time. The reason for this is two-fold. First, the
+							Element:code
+								sent_at
+								timestamp relies on a client’s device clock being accurate, which is generally unreliable. Secondly, we set
+							Element:code
+								received_at
+								as the sort key in Redshift schemas, which means queries will execute much faster when using
+							Element:code
+								received_at
+								. You can continue to use
+							Element:code
+								timestamp
+								or
+							Element:code
+								sent_at
+								timestamps in queries if
+							Element:code
+								received_at
+								doesn’t work for your analysis, but the queries will take longer to complete.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								Here’s additional documentation
+								on timestamps in the context of our spec.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								id
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Each row in your database will have an
+							Element:code
+								id
+								which is equivalent to the messageId which is passed through in the raw JSON events. The
+							Element:code
+								id
+								is a unique message id associated with the row.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								uuid and uuid_ts
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								uuid
+								column is used to prevent duplicates. You can ignore this column.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								uuid_ts
+								column is used to keep track of when the specific event was last processed by our connector, specifically for deduping and debugging purposes. You can generally ignore this column.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sort Key
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All tables use
+							Element:code
+								received_at
+								for the sort key. Amazon Redshift stores your data on disk in sorted order according to the sort key. The Redshift query optimizer uses sort order when it determines optimal query plans.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								More Help
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								How do I send custom data to my warehouse?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								How do I give users permissions to my warehouse?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Check out our help center for
+							Element:a
+								Frequently Asked Questions around our Redshift product
+								and
+							Element:a
+								a list of helpful queries to get you started
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have any questions or see anywhere we can improve our documentation, please
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:span
+							Element:span
+								Was this document helpful?
+							Element:span
+							Element:label
+							Element:span
+								Yes
+							Element:label
+							Element:span
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					BigQuery
+				Element:li
+				Element:a
+					Postgres
+				Element:li
+				Element:a
+					Redshift
+				Element:li
+				Element:a
+					Schema

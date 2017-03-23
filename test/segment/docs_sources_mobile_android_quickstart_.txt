@@ -1,0 +1,529 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Quickstart: Android
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This tutorial will help you start sending analytics data from your Android app to Segment and any of our integrations, using our Android library. As soon as you’re setup you’ll be able to turn on any new integrations with the flip of a switch!
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If you want to dive deeper at any point, check out the
+				Element:a
+					Android Source Reference
+					.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 1: Install the Library
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The recommended way to install the library for Android is with a build system like Gradle. This makes it dead simple to upgrade versions and add integrations. The library is distributed via
+							Element:a
+								Maven Central
+								. Simply add the
+							Element:code
+								analytics
+								module to your
+							Element:code
+								build.gradle
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								dependencies { compile 'com.segment.analytics.android:analytics:4.+' }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Including Additional Client Side SDKs
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the interest of keeping our SDK lightweight, the
+										Element:code
+											analytics
+											artifact only installs the Segment integration. This means that all your data will be sent via Segment’s servers to any tools you’ve enabled with server-side-compatible integrations.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You’ll likely want to bundle some additional integrations client side. For many advanced marketing automation and analytics tools, we offer the option of including their SDK or electing to send data server to server, depending on the features you need. Most optimization, deep linking, error tracking, and survey tools must be included on the device to leverage their core feature set.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In those cases, you’ll need to take some additional steps as shown in the
+										Element:a
+											library reference documentation
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now that the SDK is installed and setup, you’re ready to…
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 2. Initialize the Client
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We recommend initializing the client in your
+							Element:code
+								Application
+								subclass.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								// Create an analytics client with the given context and Segment write key. Analytics analytics = new Analytics.Builder(context, YOUR_WRITE_KEY) .trackApplicationLifecycleEvents() // Enable this to record certain application events automatically! .recordScreenViews() // Enable this to record screen views automatically! .build(); // Set the initialized instance as a globally accessible instance. Analytics.setSingletonInstance(analytics);
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Notes
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Automatically tracking lifecycle events (
+							Element:code
+								Application Opened
+								,
+							Element:code
+								Application Installed
+								,
+							Element:code
+								Application Updated
+								) and is optional, but highly recommended to hit the ground running with core events! See
+							Element:a
+								below
+								for more info!
+							Element:li
+								This only installs the Segment integration. This means that all your data will be sent server side to tools. If you need to bundle additional integrations client side, you’ll need to take some additional steps as
+							Element:a
+								shown here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 3. Add Permissions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Ensure that the necessary permissions are declared in your application’s
+							Element:code
+								AndroidManifest.xml
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<!-- Required for internet. --> <uses-permission android:name="android.permission.INTERNET"/>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 4. Identify Users
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								method is one of our core API methods. It’s how you tie one of your users and their actions to a recognizable userId. It also lets you record traits about the user, like their email, name, account type, etc. You can read more about it in the
+							Element:a
+								identify reference
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When and where you call
+							Element:code
+								identify
+								depends on how your users are authenticated, but doing it in the
+							Element:code
+								onCreate
+								method of your
+							Element:a
+								Application
+								class would be most common, as long as you know who your user is. If your user is still anonymous, you should skip this part and we’ll attribute the subsequent events to an
+							Element:code
+								anonymousId
+								instead.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s what a basic call to
+							Element:code
+								identify
+								might look like:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.with(context).identify("f4ca124298", new Traits().putName("Michael Bolton").putEmail("mbolton@initech.com"));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That’s identifying Michael by his unique User ID (the one you know him by in your database) and labeling him with
+							Element:code
+								name
+								and
+							Element:code
+								email
+								traits.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Hold up though!
+								When you actually put that code in your Android app, you’ll need to replace all those hard-coded strings with details about the currently logged-in user.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you’ve added an
+							Element:code
+								identify
+								call, you’re ready to move on to…
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 5. Track Actions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The track method is how you record any actions your users perform. Each action is known by a name, like “Purchased a T-Shirt”. You can also record properties specific to those actions. You can read more about
+							Element:code
+								track
+								in the
+							Element:a
+								track reference
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, our SDK can automatically track a few key common events, such as the
+							Element:strong
+								Application Installed
+								,
+							Element:strong
+								Application Updated
+								and
+							Element:strong
+								Application Opened
+								. Simply enable this option during initialization.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics analytics = new Analytics.Builder(context, writeKey) .trackApplicationLifecycleEvents() .build();
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll also want to track events that are indicators of success for your mobile app, like
+							Element:strong
+								Signed Up
+								,
+							Element:strong
+								Purchased Item
+								or
+							Element:strong
+								Bookmarked Article
+								. We recommend tracking just a few important events. You can always add more later!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s what a call to
+							Element:code
+								track
+								might look like when a user signs up:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.with(context).track("Signed up", new Properties().putValue("plan", "Enterprise"));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That’s just telling us that your user just triggered the
+							Element:strong
+								Signed Up
+								event and chose your hypothetical
+							Element:code
+								'Enterprise'
+								plan. Properties are simple key-value pairs that can be anything you want to record, for example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.with(context).track("Bookmarked Article", new Properties() .putValue("title", "Snow Fall") .putValue("subtitle", "The Avalance at Tunnel Creek") .putValue("author", "John Branch"));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to track events that are indicators of success for your mobile app, like
+							Element:strong
+								Signed Up
+								,
+							Element:strong
+								Purchased Item
+								or
+							Element:strong
+								Bookmarked Article
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, we recommend tracking just a few important events. You can always add more later!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you’ve added a few
+							Element:code
+								track
+								calls,
+							Element:strong
+								you’re done!
+								You successfully instrumented your app! Now you’re ready to turn on any integration you fancy from our interface, margarita in hand.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What’s Next?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We just walked through the quickest way to get started with Segment using Analytics for Android. You might also want to check out our full
+							Element:a
+								Analytics for Android reference
+								to see what else is possible, or read about the
+							Element:a
+								Tracking API methods
+								to get a sense for the bigger picture.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have any questions or see anywhere we can improve our documentation, please
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:span
+							Element:span
+								Was this document helpful?
+							Element:span
+							Element:label
+							Element:span
+								Yes
+							Element:label
+							Element:span
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

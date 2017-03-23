@@ -1,0 +1,970 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+							Element:code
+								_all
+								field
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								_all
+								field is a special
+							Element:span
+								field which concatenates the values of all of the other fields into one big string, using space as a delimiter, which is then
+							Element:em
+								catch-all
+							Element:a
+								analyzed
+								and indexed, but not stored. This means that it can be searched, but not retrieved.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								_all
+								field allows you to search for values in documents without knowing which field contains the value. This makes it a useful option when getting started with a new dataset. For instance:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT my_index/user/1
+							Element:a
+							Element:span
+								{ "first_name": "John", "last_name": "Smith", "date_of_birth": "1970-10-24" } GET my_index/_search { "query": { "match": { "_all": "john smith 1970" } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								_all
+								field will contain the terms: [
+							Element:code
+								"john"
+								,
+							Element:code
+								"smith"
+								,
+							Element:code
+								"1970"
+								,
+							Element:code
+								"10"
+								,
+							Element:code
+								"24"
+								]
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											All values treated as strings
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											date_of_birth
+											field in the above example is recognised as a
+										Element:code
+											date
+											field and so will index a single term representing
+										Element:code
+											1970-10-24 00:00:00 UTC
+											. The
+										Element:code
+											_all
+											field, however, treats all values as strings, so the date value is indexed as the three string terms:
+										Element:code
+											"1970"
+											,
+										Element:code
+											"24"
+											,
+										Element:code
+											"10"
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is important to note that the
+										Element:code
+											_all
+											field combines the original values from each field as a string. It does not combine the
+										Element:span
+											from each field.
+										Element:em
+											terms
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_all
+											field is just a
+										Element:a
+											field, and accepts the same parameters that other string fields accept, including
+										Element:code
+											text
+										Element:code
+											analyzer
+											,
+										Element:code
+											term_vectors
+											,
+										Element:code
+											index_options
+											, and
+										Element:code
+											store
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_all
+											field can be useful, especially when exploring new data using simple filtering. However, by concatenating field values into one big string, the
+										Element:code
+											_all
+											field loses the distinction between short fields (more relevant) and long fields (less relevant). For use cases where search relevance is important, it is better to query individual fields specifically.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_all
+											field is not free: it requires extra CPU cycles and uses more disk space. If not needed, it can be completely
+										Element:a
+											disabled
+											or customised on a
+										Element:a
+											per-field basis
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Using the
+										Element:code
+											_all
+											field in queries
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											and
+										Element:code
+											query_string
+										Element:a
+											queries query the
+										Element:code
+											simple_query_string
+										Element:code
+											_all
+											field by default, unless another field is specified:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET _search { "query": { "query_string": { "query": "john smith 1970" } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The same goes for the
+										Element:code
+											?q=
+											parameter in
+										Element:a
+											URI search requests
+											(which is rewritten to a
+										Element:code
+											query_string
+											query internally):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET _search?q=john+smith+1970
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Other queries, such as the
+										Element:a
+											and
+										Element:code
+											match
+										Element:a
+											queries require you to specify the
+										Element:code
+											term
+										Element:code
+											_all
+											field explicitly, as per the
+										Element:a
+											first example
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Disabling the
+										Element:code
+											_all
+											field
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_all
+											field can be completely disabled per-type by setting
+										Element:code
+											enabled
+											to
+										Element:code
+											false
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "mappings": { "type_1": {
+										Element:a
+										Element:span
+											"properties": {...} }, "type_2": {
+										Element:img
+										Element:a
+										Element:span
+											"_all": { "enabled": false }, "properties": {...} } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											_all
+											field in
+										Element:code
+											type_1
+											is enabled.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											_all
+											field in
+										Element:code
+											type_2
+											is completely disabled.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											_all
+											field is disabled, then URI search requests and the
+										Element:code
+											query_string
+											and
+										Element:code
+											simple_query_string
+											queries will not be able to use it for queries (see
+										Element:a
+											Using the
+											). You can configure them to use a different field with the
+										Element:code
+											_all
+											field in queries
+										Element:code
+											index.query.default_field
+											setting:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "mappings": { "my_type": { "_all": { "enabled": false
+										Element:a
+										Element:span
+											}, "properties": { "content": { "type": "text" } } } }, "settings": { "index.query.default_field": "content"
+										Element:img
+										Element:a
+										Element:span
+											} }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											_all
+											field is disabled for the
+										Element:code
+											my_type
+											type.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											query_string
+											query will default to querying the
+										Element:code
+											content
+											field in this index.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Excluding fields from
+										Element:code
+											_all
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Individual fields can be included or excluded from the
+										Element:code
+											_all
+											field with the
+										Element:a
+											setting.
+										Element:code
+											include_in_all
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Index boosting and the
+										Element:code
+											_all
+											field
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Individual fields can be
+										Element:span
+											at index time, with the
+										Element:em
+											boosted
+										Element:a
+											parameter. The
+										Element:code
+											boost
+										Element:code
+											_all
+											field takes these boosts into account:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT myindex { "mappings": { "mytype": { "properties": { "title": {
+										Element:a
+										Element:span
+											"type": "text", "boost": 2 }, "content": {
+										Element:img
+										Element:a
+										Element:span
+											"type": "text" } } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											When querying the
+										Element:code
+											_all
+											field, words that originated in the
+										Element:code
+											title
+											field are twice as relevant as words that originated in the
+										Element:code
+											content
+											field.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using index-time boosting with the
+										Element:code
+											_all
+											field has a significant impact on query performance. Usually the better solution is to query fields individually, with optional query time boosting.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Custom
+										Element:code
+											_all
+											fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While there is only a single
+										Element:code
+											_all
+											field per index, the
+										Element:a
+											parameter allows the creation of multiple
+										Element:code
+											copy_to
+										Element:span
+											. For instance,
+										Element:em
+											custom
+										Element:code
+											_all
+											fields
+										Element:code
+											first_name
+											and
+										Element:code
+											last_name
+											fields can be combined together into the
+										Element:code
+											full_name
+											field:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT myindex { "mappings": { "mytype": { "properties": { "first_name": { "type": "text", "copy_to": "full_name"
+										Element:a
+										Element:span
+											}, "last_name": { "type": "text", "copy_to": "full_name"
+										Element:img
+										Element:a
+										Element:span
+											}, "full_name": { "type": "text" } } } } } PUT myindex/mytype/1 { "first_name": "John", "last_name": "Smith" } GET myindex/_search { "query": { "match": { "full_name": "John Smith" } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											first_name
+											and
+										Element:code
+											last_name
+											values are copied to the
+										Element:code
+											full_name
+											field.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Highlighting and the
+										Element:code
+											_all
+											field
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A field can only be used for
+										Element:a
+											highlighting
+											if the original string value is available, either from the
+										Element:a
+											field or as a stored field.
+										Element:code
+											_source
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_all
+											field is not present in the
+										Element:code
+											_source
+											field and it is not stored by default, and so cannot be highlighted. There are two options. Either
+										Element:a
+											store the
+											or highlight the
+										Element:code
+											_all
+											field
+										Element:a
+											original fields
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Store the
+													Element:code
+														_all
+														field
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If
+													Element:code
+														store
+														is set to
+													Element:code
+														true
+														, then the original field value is retrievable and can be highlighted:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT myindex { "mappings": { "mytype": { "_all": { "store": true } } } } PUT myindex/mytype/1 { "first_name": "John", "last_name": "Smith" } GET _search { "query": { "match": { "_all": "John Smith" } }, "highlight": { "fields": { "_all": {} } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Of course, storing the
+													Element:code
+														_all
+														field will use significantly more disk space and, because it is a combination of other fields, it may result in odd highlighting results.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														_all
+														field also accepts the
+													Element:code
+														term_vector
+														and
+													Element:code
+														index_options
+														parameters, allowing the use of the fast vector highlighter and the postings highlighter.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Highlight original fields
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You can query the
+													Element:code
+														_all
+														field, but use the original fields for highlighting as follows:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT myindex { "mappings": { "mytype": { "_all": {} } } } PUT myindex/mytype/1 { "first_name": "John", "last_name": "Smith" } GET _search { "query": { "match": { "_all": "John Smith"
+													Element:a
+													Element:span
+														} }, "highlight": { "fields": { "*_name": {
+													Element:img
+													Element:a
+													Element:span
+														"require_field_match": false
+													Element:img
+													Element:a
+													Element:span
+														} } } }
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tr
+													Element:td
+													Element:p
+													Element:a
+													Element:span
+													Element:img
+													Element:td
+													Element:p
+														The query inspects the
+													Element:code
+														_all
+														field to find matching documents.
+													Element:tr
+													Element:td
+													Element:p
+													Element:a
+													Element:span
+													Element:img
+													Element:td
+													Element:p
+														Highlighting is performed on the two name fields, which are available from the
+													Element:code
+														_source
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:a
+													Element:span
+													Element:img
+													Element:td
+													Element:p
+														The query wasn’t run against the name fields, so set
+													Element:code
+														require_field_match
+														to
+													Element:code
+														false
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Meta-Fields
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+													Element:code
+														_field_names
+														field »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

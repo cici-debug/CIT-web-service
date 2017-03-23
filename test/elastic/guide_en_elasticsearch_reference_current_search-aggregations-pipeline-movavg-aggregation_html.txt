@@ -1,0 +1,1437 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Moving Average Aggregation
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This functionality is experimental and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but experimental features are not subject to the support SLA of official GA features.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Given an ordered series of data, the Moving Average aggregation will slide a window across the data and emit the average value of that window. For example, given the data
+							Element:code
+								[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+								, we can calculate a simple moving average with windows size of
+							Element:code
+								5
+								as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								(1 + 2 + 3 + 4 + 5) / 5 = 3
+							Element:li
+								(2 + 3 + 4 + 5 + 6) / 5 = 4
+							Element:li
+								(3 + 4 + 5 + 6 + 7) / 5 = 5
+							Element:li
+								etc
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Moving averages are a simple method to smooth sequential data. Moving averages are typically applied to time-based data, such as stock prices or server metrics. The smoothing can be used to eliminate high frequency fluctuations or random noise, which allows the lower frequency trends to be more easily visualized, such as seasonality.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Syntax
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A
+										Element:code
+											moving_avg
+											aggregation looks like this in isolation:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "moving_avg": { "buckets_path": "the_sum", "model": "holt", "window": 5, "gap_policy": "insert_zeros", "settings": { "alpha": 0.8 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Table 9.
+										Element:code
+											moving_avg
+											Parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+											Parameter Name
+										Element:td
+										Element:p
+											Description
+										Element:td
+										Element:p
+											Required
+										Element:td
+										Element:p
+											Default Value
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											buckets_path
+										Element:td
+										Element:p
+											Path to the metric of interest (see
+										Element:a
+											for more details
+										Element:code
+											buckets_path
+											Syntax
+										Element:td
+										Element:p
+											Required
+										Element:td
+										Element:p
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											model
+										Element:td
+										Element:p
+											The moving average weighting model that we wish to use
+										Element:td
+										Element:p
+											Optional
+										Element:td
+										Element:p
+										Element:code
+											simple
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											gap_policy
+										Element:td
+										Element:p
+											Determines what should happen when a gap in the data is encountered.
+										Element:td
+										Element:p
+											Optional
+										Element:td
+										Element:p
+										Element:code
+											insert_zeros
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											window
+										Element:td
+										Element:p
+											The size of window to "slide" across the histogram.
+										Element:td
+										Element:p
+											Optional
+										Element:td
+										Element:p
+										Element:code
+											5
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											minimize
+										Element:td
+										Element:p
+											If the model should be algorithmically minimized. See
+										Element:a
+											Minimization
+											for more details
+										Element:td
+										Element:p
+											Optional
+										Element:td
+										Element:p
+										Element:code
+											false
+											for most models
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											settings
+										Element:td
+										Element:p
+											Model-specific settings, contents which differ depending on the model specified.
+										Element:td
+										Element:p
+											Optional
+										Element:td
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											moving_avg
+											aggregations must be embedded inside of a
+										Element:code
+											histogram
+											or
+										Element:code
+											date_histogram
+											aggregation. They can be embedded like any other metric aggregation:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /_search { "size": 0, "aggs": { "my_date_histo":{
+										Element:a
+										Element:span
+											"date_histogram":{ "field":"timestamp", "interval":"day" }, "aggs":{ "the_sum":{ "sum":{ "field": "lemmings" }
+										Element:img
+										Element:a
+										Element:span
+											}, "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum" }
+										Element:img
+										Element:a
+										Element:span
+											} } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											A
+										Element:code
+											date_histogram
+											named "my_date_histo" is constructed on the "timestamp" field, with one-day intervals
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											A
+										Element:code
+											sum
+											metric is used to calculate the sum of a field. This could be any metric (sum, min, max, etc)
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Finally, we specify a
+										Element:code
+											moving_avg
+											aggregation which uses "the_sum" metric as its input.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Moving averages are built by first specifying a
+										Element:code
+											histogram
+											or
+										Element:code
+											date_histogram
+											over a field. You can then optionally add normal metrics, such as a
+										Element:code
+											sum
+											, inside of that histogram. Finally, the
+										Element:code
+											moving_avg
+											is embedded inside the histogram. The
+										Element:code
+											buckets_path
+											parameter is then used to "point" at one of the sibling metrics inside of the histogram (see
+										Element:a
+											the section called “
+										Element:code
+											buckets_path
+											Syntax
+										Element:a
+											edit
+											” for a description of the syntax for
+										Element:code
+											buckets_path
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Models
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											moving_avg
+											aggregation includes four different moving average "models". The main difference is how the values in the window are weighted. As data-points become "older" in the window, they may be weighted differently. This will affect the final average for that window.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Models are specified using the
+										Element:code
+											model
+											parameter. Some models may have optional configurations which are specified inside the
+										Element:code
+											settings
+											parameter.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Simple
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														simple
+														model calculates the sum of all values in the window, then divides by the size of the window. It is effectively a simple arithmetic mean of the window. The simple model does not perform any time-dependent weighting, which means the values from a
+													Element:code
+														simple
+														moving average tend to "lag" behind the real data.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum", "window" : 30, "model" : "simple" } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A
+													Element:code
+														simple
+														model has no special settings to configure
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The window size can change the behavior of the moving average. For example, a small window (
+													Element:code
+														"window": 10
+														) will closely track the data and only smooth out small scale fluctuations:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Figure 1. Moving average with window of size 10
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In contrast, a
+													Element:code
+														simple
+														moving average with larger window (
+													Element:code
+														"window": 100
+														) will smooth out all higher-frequency fluctuations, leaving only low-frequency, long term trends. It also tends to "lag" behind the actual data by a substantial amount:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Figure 2. Moving average with window of size 100
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Linear
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											linear
+											model assigns a linear weighting to points in the series, such that "older" datapoints (e.g. those at the beginning of the window) contribute a linearly less amount to the total average. The linear weighting helps reduce the "lag" behind the data’s mean, since older points have less influence.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum", "window" : 30, "model" : "linear" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A
+										Element:code
+											linear
+											model has no special settings to configure
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Like the
+										Element:code
+											simple
+											model, window size can change the behavior of the moving average. For example, a small window (
+										Element:code
+											"window": 10
+											) will closely track the data and only smooth out small scale fluctuations:
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 3. Linear moving average with window of size 10
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In contrast, a
+										Element:code
+											linear
+											moving average with larger window (
+										Element:code
+											"window": 100
+											) will smooth out all higher-frequency fluctuations, leaving only low-frequency, long term trends. It also tends to "lag" behind the actual data by a substantial amount, although typically less than the
+										Element:code
+											simple
+											model:
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 4. Linear moving average with window of size 100
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											EWMA (Exponentially Weighted)
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											ewma
+											model (aka "single-exponential") is similar to the
+										Element:code
+											linear
+											model, except older data-points become exponentially less important, rather than linearly less important. The speed at which the importance decays can be controlled with an
+										Element:code
+											alpha
+											setting. Small values make the weight decay slowly, which provides greater smoothing and takes into account a larger portion of the window. Larger valuers make the weight decay quickly, which reduces the impact of older values on the moving average. This tends to make the moving average track the data more closely but with less smoothing.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default value of
+										Element:code
+											alpha
+											is
+										Element:code
+											0.3
+											, and the setting accepts any float from 0-1 inclusive.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The EWMA model can be
+										Element:a
+											Minimized
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum", "window" : 30, "model" : "ewma", "settings" : { "alpha" : 0.5 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 5. EWMA with window of size 10, alpha = 0.2
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 6. EWMA with window of size 10, alpha = 0.7
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Holt-Linear
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											holt
+											model (aka "double exponential") incorporates a second exponential term which tracks the data’s trend. Single exponential does not perform well when the data has an underlying linear trend. The double exponential model calculates two values internally: a "level" and a "trend".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The level calculation is similar to
+										Element:code
+											ewma
+											, and is an exponentially weighted view of the data. The difference is that the previously smoothed value is used instead of the raw value, which allows it to stay close to the original series. The trend calculation looks at the difference between the current and last value (e.g. the slope, or trend, of the smoothed data). The trend value is also exponentially weighted.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Values are produced by multiplying the level and trend components.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default value of
+										Element:code
+											alpha
+											is
+										Element:code
+											0.3
+											and
+										Element:code
+											beta
+											is
+										Element:code
+											0.1
+											. The settings accept any float from 0-1 inclusive.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Holt-Linear model can be
+										Element:a
+											Minimized
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum", "window" : 30, "model" : "holt", "settings" : { "alpha" : 0.5, "beta" : 0.5 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In practice, the
+										Element:code
+											alpha
+											value behaves very similarly in
+										Element:code
+											holt
+											as
+										Element:code
+											ewma
+											: small values produce more smoothing and more lag, while larger values produce closer tracking and less lag. The value of
+										Element:code
+											beta
+											is often difficult to see. Small values emphasize long-term trends (such as a constant linear trend in the whole series), while larger values emphasize short-term trends. This will become more apparently when you are predicting values.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 7. Holt-Linear moving average with window of size 100, alpha = 0.5, beta = 0.2
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 8. Holt-Linear moving average with window of size 100, alpha = 0.5, beta = 0.7
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Holt-Winters
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											holt_winters
+											model (aka "triple exponential") incorporates a third exponential term which tracks the seasonal aspect of your data. This aggregation therefore smooths based on three components: "level", "trend" and "seasonality".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The level and trend calculation is identical to
+										Element:code
+											holt
+											The seasonal calculation looks at the difference between the current point, and the point one period earlier.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Holt-Winters requires a little more handholding than the other moving averages. You need to specify the "periodicity" of your data: e.g. if your data has cyclic trends every 7 days, you would set
+										Element:code
+											period: 7
+											. Similarly if there was a monthly trend, you would set it to
+										Element:code
+											30
+											. There is currently no periodicity detection, although that is planned for future enhancements.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two varieties of Holt-Winters: additive and multiplicative.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														"Cold Start"
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Unfortunately, due to the nature of Holt-Winters, it requires two periods of data to "bootstrap" the algorithm. This means that your
+													Element:code
+														window
+														must always be
+													Element:span
+														twice the size of your period. An exception will be thrown if it isn’t. It also means that Holt-Winters will not emit a value for the first
+													Element:strong
+														at least
+													Element:code
+														2 * period
+														buckets; the current algorithm does not backcast.
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Figure 9. Holt-Winters showing a "cold" start where no values are emitted
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Because the "cold start" obscures what the moving average looks like, the rest of the Holt-Winters images are truncated to not show the "cold start". Just be aware this will always be present at the beginning of your moving averages!
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Additive Holt-Winters
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Additive seasonality is the default; it can also be specified by setting
+													Element:code
+														"type": "add"
+														. This variety is preferred when the seasonal affect is additive to your data. E.g. you could simply subtract the seasonal effect to "de-seasonalize" your data into a flat trend.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The default values of
+													Element:code
+														alpha
+														and
+													Element:code
+														gamma
+														are
+													Element:code
+														0.3
+														while
+													Element:code
+														beta
+														is
+													Element:code
+														0.1
+														. The settings accept any float from 0-1 inclusive. The default value of
+													Element:code
+														period
+														is
+													Element:code
+														1
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The additive Holt-Winters model can be
+													Element:a
+														Minimized
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum", "window" : 30, "model" : "holt_winters", "settings" : { "type" : "add", "alpha" : 0.5, "beta" : 0.5, "gamma" : 0.5, "period" : 7 } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Figure 10. Holt-Winters moving average with window of size 120, alpha = 0.5, beta = 0.7, gamma = 0.3, period = 30
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:br
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Multiplicative Holt-Winters
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Multiplicative is specified by setting
+													Element:code
+														"type": "mult"
+														. This variety is preferred when the seasonal affect is multiplied against your data. E.g. if the seasonal affect is x5 the data, rather than simply adding to it.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The default values of
+													Element:code
+														alpha
+														and
+													Element:code
+														gamma
+														are
+													Element:code
+														0.3
+														while
+													Element:code
+														beta
+														is
+													Element:code
+														0.1
+														. The settings accept any float from 0-1 inclusive. The default value of
+													Element:code
+														period
+														is
+													Element:code
+														1
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The multiplicative Holt-Winters model can be
+													Element:a
+														Minimized
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Multiplicative Holt-Winters works by dividing each data point by the seasonal value. This is problematic if any of your data is zero, or if there are gaps in the data (since this results in a divid-by-zero). To combat this, the
+													Element:code
+														mult
+														Holt-Winters pads all values by a very small amount (1*10
+													Element:sup
+														-10
+														) so that all values are non-zero. This affects the result, but only minimally. If your data is non-zero, or you prefer to see
+													Element:code
+														NaN
+														when zero’s are encountered, you can disable this behavior with
+													Element:code
+														pad: false
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum", "window" : 30, "model" : "holt_winters", "settings" : { "type" : "mult", "alpha" : 0.5, "beta" : 0.5, "gamma" : 0.5, "period" : 7, "pad" : true } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Prediction
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All the moving average model support a "prediction" mode, which will attempt to extrapolate into the future given the current smoothed, moving average. Depending on the model and parameter, these predictions may or may not be accurate.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Predictions are enabled by adding a
+										Element:code
+											predict
+											parameter to any moving average aggregation, specifying the number of predictions you would like appended to the end of the series. These predictions will be spaced out at the same interval as your buckets:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum", "window" : 30, "model" : "simple", "predict" : 10 } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											simple
+											,
+										Element:code
+											linear
+											and
+										Element:code
+											ewma
+											models all produce "flat" predictions: they essentially converge on the mean of the last value in the series, producing a flat:
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 11. Simple moving average with window of size 10, predict = 50
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In contrast, the
+										Element:code
+											holt
+											model can extrapolate based on local or global constant trends. If we set a high
+										Element:code
+											beta
+											value, we can extrapolate based on local constant trends (in this case the predictions head down, because the data at the end of the series was heading in a downward direction):
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 12. Holt-Linear moving average with window of size 100, predict = 20, alpha = 0.5, beta = 0.8
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In contrast, if we choose a small
+										Element:code
+											beta
+											, the predictions are based on the global constant trend. In this series, the global trend is slightly positive, so the prediction makes a sharp u-turn and begins a positive slope:
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 13. Double Exponential moving average with window of size 100, predict = 20, alpha = 0.5, beta = 0.1
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											holt_winters
+											model has the potential to deliver the best predictions, since it also incorporates seasonal fluctuations into the model:
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Figure 14. Holt-Winters moving average with window of size 120, predict = 25, alpha = 0.8, beta = 0.2, gamma = 0.7, period = 30
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Minimization
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some of the models (EWMA, Holt-Linear, Holt-Winters) require one or more parameters to be configured. Parameter choice can be tricky and sometimes non-intuitive. Furthermore, small deviations in these parameters can sometimes have a drastic effect on the output moving average.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For that reason, the three "tunable" models can be algorithmically
+										Element:span
+											. Minimization is a process where parameters are tweaked until the predictions generated by the model closely match the output data. Minimization is not fullproof and can be susceptible to overfitting, but it often gives better results than hand-tuning.
+										Element:strong
+											minimized
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Minimization is disabled by default for
+										Element:code
+											ewma
+											and
+										Element:code
+											holt_linear
+											, while it is enabled by default for
+										Element:code
+											holt_winters
+											. Minimization is most useful with Holt-Winters, since it helps improve the accuracy of the predictions. EWMA and Holt-Linear are not great predictors, and mostly used for smoothing data, so minimization is less useful on those models.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Minimization is enabled/disabled via the
+										Element:code
+											minimize
+											parameter:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum", "model" : "holt_winters", "window" : 30, "minimize" : true,
+										Element:a
+										Element:span
+											"settings" : { "period" : 7 } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Minimization is enabled with the
+										Element:code
+											minimize
+											parameter
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When enabled, minimization will find the optimal values for
+										Element:code
+											alpha
+											,
+										Element:code
+											beta
+											and
+										Element:code
+											gamma
+											. The user should still provide appropriate values for
+										Element:code
+											window
+											,
+										Element:code
+											period
+											and
+										Element:code
+											type
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Minimization works by running a stochastic process called
+										Element:span
+											. This process will usually generate a good solution, but is not guaranteed to find the global optimum. It also requires some amount of additional computational power, since the model needs to be re-run multiple times as the values are tweaked. The run-time of minimization is linear to the size of the window being processed: excessively large windows may cause latency.
+										Element:strong
+											simulated annealing
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, minimization fits the model to the last
+										Element:code
+											n
+											values, where
+										Element:code
+											n = window
+											. This generally produces better forecasts into the future, since the parameters are tuned around the end of the series. It can, however, generate poorer fitting moving averages at the beginning of the series.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Percentiles Bucket Aggregation
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Cumulative Sum Aggregation »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

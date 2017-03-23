@@ -1,0 +1,419 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Synonym Graph Token Filter
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This functionality is experimental and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but experimental features are not subject to the support SLA of official GA features.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								synonym_graph
+								token filter allows to easily handle synonyms, including multi-word synonyms correctly during the analysis process.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to properly handle multi-word synonyms this token filter creates a "graph token stream" during processing. For more information on this topic and its various complexities, please read the
+							Element:a
+								Lucene’s TokenStreams are actually graphs
+								blog post.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This token filter is designed to be used as part of a search analyzer only. If you want to apply synonyms during indexing please use the standard
+							Element:a
+								synonym token filter
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The graph token stream created by this token filter requires special query handling. Currently only the
+							Element:a
+								Match
+								and
+							Element:a
+								Multi Match
+								queries can do this. Using it with any other type of analyzed query will potentially result in incorrect search results.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Synonyms are configured using a configuration file. Here is an example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "index" : { "analysis" : { "analyzer" : { "search_synonyms" : { "tokenizer" : "whitespace", "filter" : ["graph_synonyms"] } }, "filter" : { "graph_synonyms" : { "type" : "synonym_graph", "synonyms_path" : "analysis/synonym.txt" } } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The above configures a
+							Element:code
+								search_synonyms
+								filter, with a path of
+							Element:code
+								analysis/synonym.txt
+								(relative to the
+							Element:code
+								config
+								location). The
+							Element:code
+								search_synonyms
+								analyzer is then configured with the filter. Additional settings are:
+							Element:code
+								ignore_case
+								(defaults to
+							Element:code
+								false
+								), and
+							Element:code
+								expand
+								(defaults to
+							Element:code
+								true
+								).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								tokenizer
+								parameter controls the tokenizers that will be used to tokenize the synonym, and defaults to the
+							Element:code
+								whitespace
+								tokenizer.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Two synonym formats are supported: Solr, WordNet.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Solr synonyms
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following is a sample format of the file:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														# Blank lines and lines starting with pound are comments. # Explicit mappings match any token sequence on the LHS of "=>" # and replace with all alternatives on the RHS. These types of mappings # ignore the expand parameter in the schema. # Examples: i-pod, i pod => ipod, sea biscuit, sea biscit => seabiscuit # Equivalent synonyms may be separated with commas and give # no explicit mapping. In this case the mapping behavior will # be taken from the expand parameter in the schema. This allows # the same synonym file to be used in different synonym handling strategies. # Examples: ipod, i-pod, i pod foozball , foosball universe , cosmos lol, laughing out loud # If expand==true, "ipod, i-pod, i pod" is equivalent # to the explicit mapping: ipod, i-pod, i pod => ipod, i-pod, i pod # If expand==false, "ipod, i-pod, i pod" is equivalent # to the explicit mapping: ipod, i-pod, i pod => ipod # Multiple synonym mapping entries are merged. foo => foo bar foo => baz # is equivalent to foo => foo bar, baz
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You can also define synonyms for the filter directly in the configuration file (note use of
+													Element:code
+														synonyms
+														instead of
+													Element:code
+														synonyms_path
+														):
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "filter" : { "synonym" : { "type" : "synonym_graph", "synonyms" : [ "lol, laughing out loud", "universe, cosmos" ] } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														However, it is recommended to define large synonyms set in a file using
+													Element:code
+														synonyms_path
+														, because specifying them inline increases cluster size unnecessarily.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														WordNet synonyms
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Synonyms based on
+													Element:a
+														WordNet
+														format can be declared using
+													Element:code
+														format
+														:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "filter" : { "synonym" : { "type" : "synonym_graph", "format" : "wordnet", "synonyms" : [ "s(100000001,1,'abstain',v,1,0).", "s(100000001,2,'refrain',v,1,0).", "s(100000001,3,'desist',v,1,0)." ] } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Using
+													Element:code
+														synonyms_path
+														to define WordNet synonyms in a file is supported as well.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Synonym Token Filter
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Compound Word Token Filter »
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

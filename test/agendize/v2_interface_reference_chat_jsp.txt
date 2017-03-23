@@ -1,0 +1,213 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Click-to-Chat
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					With the Chat Client Javascript API you can create your own user interface to integrate the Agendize chat tools on your website (desktop or mobile).
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Process
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The working process is:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											A new chat session request is sent to the server.
+										Element:li
+											If one or more operators are available, the chat is launched. If not, an offline event is received.
+										Element:li
+											The user can send and receive messages.
+										Element:li
+											A new chat session request is sent to the server.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Use
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First step, you have to declare the Javascript Chat API:
+											<script type="text/javascript" src="http://www.agendize.com/web/chat.js"></script>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In your Javascript initialization code, you have to create a chat object:
+											var chat = new ChatClient({id: '214089', timeout: 10000, persistent: true});
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The chat object options are:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Description
+										Element:th
+											Type
+										Element:th
+											Required
+										Element:th
+											Default Value
+										Element:tbody
+										Element:tr
+										Element:td
+											id
+										Element:td
+											Your Chat Button ID
+										Element:td
+											String
+										Element:td
+											Y
+										Element:td
+										Element:tr
+										Element:td
+											timeout
+										Element:td
+											Duration interval to get new message from server (in milliseconds)
+										Element:td
+											integer
+										Element:td
+											N
+										Element:td
+											1000
+										Element:tr
+										Element:td
+											persistent
+										Element:td
+											Keeps the same chat session when the user browse between differents web pages
+										Element:td
+											boolean
+										Element:td
+											N
+										Element:td
+											true
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next step, you can create your event listeners to launch your own code when a chat event is received. The available event listener are:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Name
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											chat.started
+										Element:td
+											Chat is started
+										Element:tr
+										Element:td
+											chat.offline
+										Element:td
+											All operator are offline
+										Element:tr
+										Element:td
+											chat.online
+										Element:td
+											Operator(s) are available to chat
+										Element:tr
+										Element:td
+											chat.close
+										Element:td
+											Chat is closed
+										Element:tr
+										Element:td
+											chat.incoming.message
+										Element:td
+											A new message is received
+										Element:tr
+										Element:td
+											chat.message.sent
+										Element:td
+											The message has been sent
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example:
+											chat.addEventListener('chat.started', function(chatId){ alert('Chat started'); }); chat.addEventListener('chat.offline', function(){ alert('No online operator'); }); chat.addEventListener('chat.online', function(){ alert('Operators are online'); }); chat.addEventListener('chat.close', function(chatId){ alert('chat closed'); }); chat.addEventListener('chat.incoming.message', function(chatId, date, mode, body, messageId, operator){ if (mode == 'operator') alert('New message receive at ' + date + ', sent by ' + operator + ': ' + body); else alert('New message from me at ' + date + ': ' + body); }); chat.addEventListener('chat.message.sent', function(chatId, body){ alert('your message has been sent'); document.forms[0].m.value = ''; });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The last step is to use the start chat function:
+											chat.start('my name', 'me@acne.com, 'I need help!');
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And let your user send a message to operator:
+											chat.send('Hello, can you help me?');
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can stop and close the chat:
+											if (chat.isConnected()) chat.close()
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Full Example
+											<html> <head> <script type="text/javascript" src="http://www.agendize.com/web/chat.js"></script> <script type="text/javascript"> var chat = new ChatClient({id: '214089', timeout: 10000, persistent: true}); chat.addEventListener('chat.started', function(chatId){ document.getElementById('form').style.display = 'none'; document.getElementById('chat').style.display = 'block'; }); chat.addEventListener('chat.offline', function(){ alert('no online operator'); }); chat.addEventListener('chat.online', function(){ alert('Operators are online'); }); chat.addEventListener('chat.close', function(chatId){ alert('chat closed'); }); chat.addEventListener('chat.incoming.message', function(chatId, date, mode, body, messageId, operator){ if (!document.getElementById(messageId)) { var p = document.createElement('p'); if (mode == 'operator'){ p.style.color = '#00B32D'; p.innerHTML = '<' + operator + '> '; } else if (mode == 'user'){ p.style.color = '#00F'; p.innerHTML = '&ltyou> '; } p.innerHTML += body; p.id = messageId; document.getElementById('messages').appendChild(p); } }); chat.addEventListener('chat.message.sent', function(chatId, body){ alert('your message has been sent'); document.forms[0].m.value = ''; }); function createChat(nickname, email, question){ chat.start(nickname, email, question); } function quitChat(){ if (chat.isConnected()) chat.close() } </script> <style type="text/css"> *{ font-family: Arial; font-size: 11px; } #messages, #form{ height: 250px; border: solid 1px #808080; } #form label{ display: block; } #chat{ display: none; width: 250px; } #form{ padding: 5px; width: 250px; } #messages p{ padding: 0; margin: 0; } </style> </head> <body> <form name="form" action=""> <div id="form"> <p>To chat with us, please fill the form below!</p> <p> <input name="username" type="text" size="20"/> </p> <p> <label>Your email address:</label> <input name="email" type="text" size="20"/> </p> <p> <label>Your Question:</label> <input name="question" type="text" size="20"/> </p> <p> <input type="button" onclick="createChat(document.forms[0].username.value, document.forms[0].email.value, document.forms[0].question.value)" value="Start Chat"/> </p> </div> <div id="chat> <div id="messages"</div> <div> <textarea name="m" style="width: 100%" name="text"></textarea> </div> <div style="text-align: center"> <input type="button" onclick="chat.send(document.forms[0].m.value)" value="send"/> </div> </div> </form> </body> </html>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Agendize
+											|
+										Element:a
+											Support
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last update: Jan 25, 2017 - Copyright © 2017 Agendize. All rights reserved.

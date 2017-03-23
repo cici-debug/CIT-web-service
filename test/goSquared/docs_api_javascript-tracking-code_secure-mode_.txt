@@ -1,0 +1,216 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Secure Mode
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Secure Mode is an optional setting for the JavaScript Analytics code that provides an additional layer of security for
+				Element:a
+					GoSquared People
+					and Live Chat.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					It ensures that tracked pageviews, events and Chat messages can only be attributed to the genuine person actually sending them. This prevents a malicious visitor from being able to impersonate/spoof events using somebody else's
+				Element:code
+					id
+					.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How does it work?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to identifying a user with an
+										Element:code
+											id
+											, you can also sign any pageviews/events from that
+										Element:code
+											id
+											with a keyed-hash that authenticates the user. We call this hash a 'Person Signature'.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The 'Person Signature' should be generated on your server by combining the user
+										Element:code
+											id
+											with your project's 'Secure Mode Secret' using a
+										Element:a
+											SHA-256 HMAC function
+											(keyed-hash message authentication code). The output of the function would be your 'Person Signature' – which you would then inject into the tracking code when the identified visitor loads a page.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Why is this more secure?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Only your server and GoSquared have knowledge of the 'Secure Mode Secret' that was used to generate the 'Person Signature'.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When using Secure Mode, GoSquared can compare the 'Person Signature' in your tracking code to the 'Person Signature' we would expect to be generated for that user
+										Element:code
+											id
+											. If the 'Person Signatures' match, their activity is tracked. If the 'Person Signatures' don't match, we ignore their activity. Therefore it is impossible for anybody else to spoof activity that has not been signed by your server.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											What about anonymous visitors?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If a user hasn't been identified yet, GoSquared will automatically handle Secure Mode for anonymous visitors.
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting up Secure Mode
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Secure Mode can only be configured for identified users. Therefore it is a pre-requisite that you must have implemented the
+							Element:a
+								identify function
+								first. When a visitor is identified on your site, the tracking code on your site will also have to provide a 'Person Signature' that authenticates that the visitor is truly who they say they are.
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								Log-in to your
+							Element:a
+								Project Settings
+								to generate a Secure Mode Secret for your project. If you have more than one site, each one will have its own unique Secret. You should not share them publicly.
+							Element:strong
+								Leave the Secure Mode toggle OFF until you have completed all the steps.
+							Element:li
+							Element:p
+								Paste the Secure Mode Secret into you SHA-256 HMAC function on your server. Combine this with the
+							Element:code
+								id
+								of the currently online person to generate a 'Person Signature'.
+							Element:li
+							Element:p
+								Inject the 'Person Signature' into the tracking code on your webpage.
+							Element:li
+							Element:p
+								When you are confident that you are successfully generating and injecting the 'Person Signature' you need to switch the Secure Mode toggle ON in
+							Element:a
+								Project Settings
+								. Turning on Secure Mode means that any pageviews/events without a 'Person Signature' will be ignored.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								It is highly recommended that you test your Secure Mode implementation on a test site first before turning it on for your main site.
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Usage
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To sign requests with the JavaScript tracker, you'll need to generate the
+							Element:code
+								person-signature
+								on your servers, then pass it to the Tracker via your webpage content:
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								// the standard Analytics code !function(g,s,q,r,d){r=g[r]=g[r]||function(){(r.q=r.q||[]).push( arguments)};d=s.createElement(q);q=s.getElementsByTagName(q)[0]; d.src='//d1l6p2sc9645hc.cloudfront.net/tracker.js';q.parentNode. insertBefore(d,q)}(window,document,'script','_gs'); _gs('your-project-token'); //your identify code _gs('identify', {id: 123456}): //your person signature that is injected by your server _gs('auth', 'PERSON_SIGNATURE');
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The signature is a
+							Element:code
+								SHA-256 HMAC
+								in hex format. The HMAC shared secret is your
+							Element:code
+								, and the value is the
+							Element:a
+								Secure Mode Secret
+							Element:code
+								id
+								of the person being tracked. Most platforms ship with libraries for easily generating HMAC signatures.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														NodeJS Example
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														var crypto = require('crypto'); var hmac = crypto.createHmac('sha256', 'Secure Mode Secret'); hmac.update('id-of-the-person'); var sig = hmac.digest('hex'); // Inject the signature into your page content, for example: var ejsTemplate = "_gs('auth', '<%= YOUR_PERSON_SIGNATURE_HERE %>');";
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														PHP Example
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														_gs('auth', '<?php echo hash_hmac('sha256', 'id', 'Secure Mode Secret'); ?>');

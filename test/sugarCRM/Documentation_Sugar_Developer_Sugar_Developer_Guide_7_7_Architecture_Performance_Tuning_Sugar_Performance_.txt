@@ -1,0 +1,475 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Sugar Performance
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As your company uses Sugar over time, the size of your database will naturally grow and, without the proper maintenance, performance will inevitably begin to degrade. The purpose of this article is to review some of the most common recommendations for increasing the performance in Sugar to help increase the system's efficiency for your users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								This guide is intended for on-site installations. Customers hosted on on-demand should file a support case for any performance issues.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								General Settings in Sugar
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following recommendations can be modified in the Sugar admin interface
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Do Not Set Listview and Subpanel Items Per Page to Excessive Settings.
+								Under Admin > System Settings, there are two settings 'Listview items per page' and 'Subpanel items per page'. The defaults for these settings are 20 and 10 respectively. When increasing these values, it should be expected that general system wide performance will be impacted. We generally recommend to keep listview settings to 100 or less and subpanel settings to be set to 10 or less to keep system performance optimal.
+							Element:li
+							Element:strong
+								Make sure 'Developer Mode' is disabled under Admin > System Settings.
+								This setting should never be enabled in a production environment as it causes cached files to be rebuilt on every page load.
+							Element:li
+							Element:strong
+								Set the 'Log Level' to 'Fatal' and 'Maximum log size' to '10M' under Admin > System Settings.
+								The log level should only be set to more verbose levels when troubleshooting the application as it will cause a performance degradation as user activity increases.
+							Element:li
+							Element:strong
+								Ensure the scheduled job, 'Prune Database on the 1st of Month', is set to 'Active'.
+								This will go through your database and delete any records that have been deleted by your users. Sugar only soft deletes records when a user deletes a record and over time, this will cause performance degradation if these records are not removed from the database.
+							Element:li
+							Element:strong
+								Make sure 'Tracker Performance' and 'Tracker Queries' are disabled under Admin > Tracker.
+								These settings are intended to help diagnose performance issues and should never be left enabled in a production environment.
+							Element:li
+							Element:strong
+								Ensure large scheduler jobs are running at slower intervals under Admin > Scheduler.
+								Jobs such as 'Check Inbound Mailboxes' can decrease overall performance if they are running every minute and polling a lot of data. It is important to set these jobs to every 5 or 10 minutes to help offset the performance impacts for your users.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sugar Performance Settings
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											BWC Modules
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For modules running in Backward Compatibility mode, the following settings can be used to speed up performance:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Drop the absolute totals from listviews
+											: Eliminates performing expensive count queries on the database when populating listviews and subpanels.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$sugar_config['disable_count_query'] = true;
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Disable automatic searches on listviews
+											: Forces a user to perform a search when they access a listview rather than loading the results from their last search.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$sugar_config['save_query'] = 'populate_only';
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Disable client IP verification
+											: Eliminates the system checking to see if the user is accessing Sugar from the IP address of their last page load.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$sugar_config['verify_client_ip'] = false;
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Hide all subpanels
+											: Increases performance by collapsing all subpanels when accessing a detailview every time and not querying for data until a user explicitly expands a subpanel
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$sugar_config['hide_subpanels'] = true;
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Hide subpanels per session
+											: Increases performance by collapsing all subpanels when accessing a detailview when the user logs in but any subpanels expanded during the user's session will remain expanded until the user logs out
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$sugar_config['hide_subpanels_on_login'] = true;
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								General Environment Checks
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Depending on your environment and version of Sugar, there may be additional changes your system administrator can make to improve performance.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								If your instance is running Sugar 6.3.x or lower, we highly recommend upgrading to 6.4.x or 6.5.x.
+								Beginning in 6.4.x, we made a number of query improvement to address overall application performance. With 6.5.x, we drastically improved the UI to improve the speed of page loads.
+							Element:li
+							Element:strong
+								If your instance of Sugar is version 6.3.x or higher with a MySQL database, we highly recommend upgrading the MySQL 5.5.
+								MySQL 5.5 offers performance improvements in a number of areas over 5.1 such as subselects in queries.
+							Element:li
+							Element:strong
+								If you are using MySQL as your database, we strongly recommend using InnoDB.
+								InnoDB is tested to be better performing than MyISAM and should be the default configuration for using MySQL with Sugar.
+							Element:li
+							Element:strong
+								If you are running PHP 5.2.x, we strongly recommend upgrading to a supported version of PHP 5.3.
+								Our current list of supported PHP versions can be found on our
+							Element:a
+								Supported Platforms
+								page.
+							Element:li
+							Element:strong
+								If you are using a single server setup (web server and database on the same server), we have the following recommendations.
+							Element:ul
+							Element:li
+								The server should have a minimum of 8 GB of RAM and roughly follow the 60/40 rule (60% for database / 40% for web server). On a 8 GB server, this would mean 4.8 GB for database and 3.2 GB for web server.
+							Element:li
+								Make sure the following parameters are set for MySQL (assumption is that the engine is InnoDB)
+							Element:ul
+							Element:li
+								innodb_buffer_pool_size = 4294967296 (4 GB in size)
+							Element:li
+								innodb_log_buffer_size = anywhere from 10485760 (10 MB - Minimal writes) to 104857600 (100 MB - Lots of writes)
+							Element:li
+							Element:strong
+								If you are using IE 8 or lower, we recommend upgrading to IE 9 or using Google Chrome.
+								Earlier versions of IE 8 exhibit poor performance with our application and we recommend updating your browser to IE 9 or changing to Chrome.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								PHP Caching
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Whether your instance of Sugar is deployed on a Linux or Windows server, you should utilize opcode caching to ensure optimal performance. For Linux servers, APC is the recommended opcode cache for PHP with the following guidelines and settings:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Use the latest stable version.
+							Element:li
+							Element:code
+								apc.shm
+								size should be close to your program size. For Sugar, that's at least 150 MB (default for apc.shm is 32 MB). When in doubt, more is always better.
+							Element:li
+							Element:code
+								apc.stat_ctime
+								should be enabled. This will ensure file changes are noticed. You should note that this may increase the
+							Element:code
+								stat()
+								activity to your NFS.
+							Element:li
+							Element:code
+								apc.file_update_protection
+								should be enabled. This helps the system when trying to add multiple files to the cache at the same time.
+							Element:li
+								If your installation of Sugar is located on a network filesystem such as NFS or CIFS, make sure
+							Element:code
+								apc.stat
+								is enabled.
+							Element:li
+							Element:code
+								apc.ttl
+								should be set to 0. This parameter disables garbage collection and can cause fragmentation. Earlier APC releases had locking issues that made caches with many entries take forever to be garbage collected.
+							Element:li
+							Element:code
+								apc.shm_segments
+								should be set to the default of 1. If you think you really need multiple shm_segments, you must also read the documentation on
+							Element:code
+								apc.mmap_file_mask
+								as well and understand and set that value accordingly. If you don't understand
+							Element:code
+								apc.mmap_file_mask
+								, you should leave
+							Element:code
+								apc.shm_segments
+								at the default value.
+							Element:li
+								APC ships with an additional
+							Element:code
+								apc.php
+								file that when hit with a browser, will show settings, cache information, and fragmentation. If you suspect APC problems, this is a great tool to start checking things out.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 04/04/2016 04:14pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

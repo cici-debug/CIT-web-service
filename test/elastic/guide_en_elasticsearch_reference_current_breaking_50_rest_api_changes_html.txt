@@ -1,0 +1,650 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								REST API changes
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Strict REST query string parameter parsing
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Previous versions of Elasticsearch ignored unrecognized URL query string parameters. This means that extraneous parameters or parameters containing typographical errors would be silently accepted by Elasticsearch. This is dangerous from an end-user perspective because it means a submitted request will silently execute not as intended. This leniency has been removed and Elasticsearch will now fail any request that contains unrecognized query string parameters.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											id values longer than 512 bytes are rejected
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When specifying an
+										Element:code
+											_id
+											value longer than 512 bytes, the request will be rejected.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											/_optimize
+											endpoint removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The deprecated
+										Element:code
+											/_optimize
+											endpoint has been removed. The
+										Element:code
+											/_forcemerge
+											endpoint should be used in lieu of optimize.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											GET
+											HTTP verb for
+										Element:code
+											/_forcemerge
+											is no longer supported, please use the
+										Element:code
+											POST
+											HTTP verb.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Index creation endpoint only accepts
+										Element:code
+											PUT
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It used to be possible to create an index by either calling
+										Element:code
+											PUT index_name
+											or
+										Element:code
+											POST index_name
+											. Only the former is now supported.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											HEAD {index}/{type}
+											replaced with
+										Element:code
+											HEAD {index}/_mapping/{type}
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The endpoint for checking whether a type exists has been changed from
+										Element:code
+											{index}/{type}
+											to
+										Element:code
+											{index}/_mapping/{type}
+											in order to prepare for the removal of types when
+										Element:code
+											HEAD {index}/{id}
+											will be used to check whether a document exists in an index. The old endpoint will keep working until 6.0.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Removed
+										Element:code
+											mem
+											section from
+										Element:code
+											/_cluster/stats
+											response
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											mem
+											section contained only the
+										Element:code
+											total
+											value, which was actually the memory available throughout all nodes in the cluster. The section contains now
+										Element:code
+											total
+											,
+										Element:code
+											free
+											,
+										Element:code
+											used
+											,
+										Element:code
+											used_percent
+											and
+										Element:code
+											free_percent
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Revised node roles aggregate returned by
+										Element:code
+											/_cluster/stats
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											client
+											,
+										Element:code
+											master_only
+											,
+										Element:code
+											data_only
+											and
+										Element:code
+											master_data
+											fields have been removed in favor of
+										Element:code
+											master
+											,
+										Element:code
+											data
+											,
+										Element:code
+											ingest
+											and
+										Element:code
+											coordinating_only
+											. A node can contribute to multiple counts as it can have multiple roles. Every node is implicitly a coordinating node, so whenever a node has no explicit roles, it will be counted as coordinating only.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Removed shard
+										Element:code
+											version
+											information from
+										Element:code
+											/_cluster/state
+											routing table
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We now store allocation id’s of shards in the cluster state and use that to select primary shards instead of the version information.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Node roles are not part of node attributes anymore
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Node roles are now returned in a specific section, called
+										Element:code
+											roles
+											, as part of nodes stats and nodes info response. The new section is an array that holds all the different roles that each node fulfills. In case the array is returned empty, that means that the node is a coordinating only node.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Forbid unquoted JSON
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Previously, JSON documents were allowed with unquoted field names, which isn’t strictly JSON and broke some Elasticsearch clients. If documents were already indexed with unquoted fields in a previous vesrion of Elasticsearch, some operations may throw errors. To accompany this, a commented out JVM option has been added to the
+										Element:code
+											jvm.options
+											file:
+										Element:code
+											-Delasticsearch.json.allow_unquoted_field_names
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that this option is provided solely for migration purposes and will be removed in Elasticsearch 6.0.0.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Analyze API changes
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											filters
+											and
+										Element:code
+											char_filters
+											parameters have been renamed
+										Element:code
+											filter
+											and
+										Element:code
+											char_filter
+											. The
+										Element:code
+											token_filters
+											parameter has been removed. Use
+										Element:code
+											filter
+											instead.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											DELETE /_query
+											endpoint removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											DELETE /_query
+											endpoint provided by the Delete-By-Query plugin has been removed and replaced by the
+										Element:a
+											Delete By Query API
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Create stored script endpoint removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											PUT /_scripts/{lang}/{id}/_create
+											endpoint that previously allowed to create indexed scripts has been removed. Indexed scripts have been replaced by
+										Element:a
+											stored scripts
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Create stored template endpoint removed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											PUT /_search/template/{id}/_create
+											endpoint that previously allowed to create indexed template has been removed. Indexed templates have been replaced by
+										Element:a
+											Pre-registered templates
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Remove properties support
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some REST endpoints (e.g., cluster update index settings) supported detecting content in the Java properties format (line-delimited key=value pairs). This support has been removed.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											wait_for_relocating_shards
+											is now
+										Element:code
+											wait_for_no_relocating_shards
+											in
+										Element:code
+											/_cluster/health
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											wait_for_relocating_shards
+											parameter that used to take a number is now simply a boolean flag
+										Element:code
+											wait_for_no_relocating_shards
+											, which if set to true, means the request will wait (up until the configured timeout) for the cluster to have no shard relocations before returning. Defaults to false, which means the operation will not wait.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« HTTP changes
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											CAT API changes »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

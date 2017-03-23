@@ -1,0 +1,162 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					How do I import historical data
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					When transitioning over to Segment customers commonly want to import historical data to tools they are migrating to or evaluating.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Note:
+					Historical imports can only be done into integrations that can accept historical timestamp’ed data. Most analytics tools like Mixpanel, Amplitude, Kissmetrics, etc. can handle that type of data just fine. One common integration that does not accept historical data is Google Analytics since their API cannot accept historical data.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Use any
+				Element:a
+					server-side library
+					, which send requests in batches to improve performance. Once you have data to import, follow the steps below:
+			Node:
+			(type) c
+			(layer)1
+				Element:ol
+				Element:li
+				Element:p
+					Export or collect the data to be imported.
+				Element:p
+					Include timestamp data in your export if the data needs to appear in end tools in a historical reference. For instance if you are importing emails and it is relevant when they joined your email list, you may need to export the timestamp.
+				Element:strong
+					If no timestamp is specified when importing, the data will show a timestamp from the time the data was received
+					.
+				Element:li
+				Element:p
+					Decide which integrations need to receive the data.
+				Element:p
+				Element:strong
+					By default, data coming into Segment will be relayed to all integrations turned on in the Segment dashboard.
+					To limit data to specific integrations the integrations object must be modified. With historical data, you often only want to send the data to a specific integration or into your data warehouse. For example, in
+				Element:a
+					Node.js
+					set the integrations object as follows.
+				Element:pre
+				Element:code
+					analytics.track({ event: 'Upgraded Membership', userId: '97234974', integrations: { 'All': false, 'Vero': true, 'Google Analytics': false }})
+				Element:li
+				Element:p
+					Write an application or worker to send the data to Segment
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					You will need to cycle through each set of data and map it to a Segment server-side library method or build an array matching the
+				Element:a
+					HTTP Import API format
+					.
+				Element:strong
+					Please note
+					, we recommend using a Segment library for this process, as they will set contextual message fields like
+				Element:code
+					message_id
+					(used for deduping) and
+				Element:code
+					sent_at
+					(used for correctly client clock skew) that our API will use to ensure correct behavior upon ingestion. The server-side libraries will automatically batch requests to optimize for performance and prevent linear request volume. This batching behavior is modifiable. Some of the libraries implement a configurable max queue size that may discard messages if you enqueue requests much faster than the client can flush them. We recommend overriding the max queue size parameter for the library to a high value you’re comfortable you can remain under in your batch job.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					One of our Success Engineers wrote an alpha prototype Node.js app for importing data utilizing the HTTP API, which we’ve included below:
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Example Node.js import application
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If a server-side library doesn’t meet your needs, use the Segment
+				Element:a
+					bulk import HTTP API
+					.
+				Element:strong
+					Please note
+					, if you’re using the HTTP API directly to replay data you’ve exported from Segment, we recommend removing the original
+				Element:code
+					sent_at
+					,
+				Element:code
+					message_id
+					, and
+				Element:code
+					project_id
+					fields from the archived message before forwarding them to Segment.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Our friends at
+				Element:a
+					MarketLytics
+					have written up their experience using the alpha prototype importer and offer some
+				Element:a
+					helpful visuals and tips
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If you have any questions or see anywhere we can improve our documentation, please
+				Element:a
+					let us know
+					or kick off a conversation in the
+				Element:a
+					Segment Community
+					!
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+				Element:span
+				Element:span
+					Was this document helpful?
+				Element:span
+				Element:label
+				Element:span
+					Yes
+				Element:label
+				Element:span
+					No
+			Node:
+			(type) c
+			(layer)1
+				Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a

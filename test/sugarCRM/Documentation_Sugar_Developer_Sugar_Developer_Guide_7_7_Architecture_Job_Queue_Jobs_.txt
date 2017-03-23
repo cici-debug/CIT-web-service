@@ -1,0 +1,461 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Scheduler Jobs
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Jobs are the individual runs of the specified function from a scheduler. This article will outline the various parts of a Scheduler Job.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Properties
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											name
+											: Name of the job
+										Element:li
+										Element:strong
+											scheduler_id
+											: ID of the scheduler that created the job. This may be empty as schedulers are not required to create jobs
+										Element:li
+										Element:strong
+											execute_time
+											: Time when job is ready to be executed
+										Element:li
+										Element:strong
+											status
+											: Status of the job
+										Element:li
+										Element:strong
+											resolution
+											: Notes whether or not the job was successful
+										Element:li
+										Element:strong
+											message
+											: Contains messages produced by the job, including errors
+										Element:li
+										Element:strong
+											target
+											: Function or URL called by the job
+										Element:li
+										Element:strong
+											data
+											: Data attached to the job
+										Element:li
+										Element:strong
+											requeue
+											: Boolean to determine whether the job will be replaced in the queue upon failure
+										Element:li
+										Element:strong
+											retry_count :
+											Determines how many times the system will retry the job before failure
+										Element:li
+										Element:strong
+											failure_count
+											: The number f times the job has failed
+										Element:li
+										Element:strong
+											job_delay
+											: The delay (in seconds) between each job run
+										Element:li
+										Element:strong
+											assigned_user_id
+											: User ID of which the job will be executed as
+										Element:li
+										Element:strong
+											client
+											: The name of the client owning the job
+										Element:li
+										Element:strong
+											percent_complete
+											: For postponed jobs, this can be used to determine how much of the job has been completed
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating a Job
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To create job, you must first create an instance of SchedulesJobs class and use submitJob in SugarJobQueue. An example is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $jq = new SugarJobQueue(); $job = new SchedulersJob(); $job->name = "My Job"; $job->target = "function::myjob"; $jobid = $jq->submitJob($job); echo "Created job $jobid!";
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Job Targets
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Job target contains two components, type and name, separated by "::". Type can be:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											function :
+											Name or static method name (using :: syntax). This function will be passed the job object as the first parameter and if
+										Element:strong
+											data
+											is not empty, it will be passed as the second parameter.
+										Element:li
+										Element:strong
+											url
+											: External URL to call when running the job
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Running the Job
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The job is run via the runJob() function in SchedulersJob. This function will return a boolean success value according to the value returned by the target function. For URL targets, the HTTP error code being less than 400 will return success.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the function updated the job status from 'running', the return value of a function is ignored. Currently, the postponing of a URL job is not supported.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Job status
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Jobs can be in following statuses:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											queued
+											: The job is waiting in the queue to be executed
+										Element:li
+										Element:strong
+											running
+											: The job is currently being executed
+										Element:li
+										Element:strong
+											done
+											: The job has executed and completed
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Job Resolution
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Job resolution is set when the job is finished and can be:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											queued
+											: The job is still not finished
+										Element:li
+										Element:strong
+											success
+											: The job has completed successfully
+										Element:li
+										Element:strong
+											failure
+											: The job has failed
+										Element:li
+										Element:strong
+											partial
+											: The job is partially done but needs to be completed
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Job Logic Hooks
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The scheduler jobs module has two additional logic hooks that can be used to monitor jobs. The additional hooks that can be used are shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								job_failure_retry
+								: Executed when a job fails but will be retried
+							Element:li
+							Element:strong
+								job_failure
+								: Executed when the job fails for the final time
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can find more information on these hooks in the
+							Element:a
+								Job Queue Hooks
+								section.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Topics
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Creating Custom Jobs
+							Element:p
+								How to create and execute your own custom jobs.
+							Element:li
+							Element:a
+								Queuing Logic Hook Actions
+							Element:p
+								This example will demonstrate how to pass tasks to the job queue. This enables you to send longer running jobs such as sending emails, calling web services, or doing other resource intensive jobs to be handled asynchronously by the cron in the background.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 03/29/2016 03:45pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

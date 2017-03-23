@@ -1,0 +1,598 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					AppsFlyer Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					AppsFlyer
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to AppsFlyer in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					AppsFlyer is the market leader in mobile advertising attribution and analytics, helping marketers to pinpoint their targeting, optimize their ad spend and boost their ROI.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Mobile Integration
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								AppsFlyer is a packaged integration for iOS and Android. You will need to add their integration to your SDK.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Server-Side Integration
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								AppsFlyer also has a server side
+							Element:a
+								HTTP API
+								that is intended for augmentative use along side their mobile SDK. The use case for using the server side integration in conjuction to the mobile SDK is to attribute out-of-app events such as website or brick and mortar purchases that you want to tie back to a certain attributed user/device.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Important
+								: Keep in mind that the server side integration is not meant to
+							Element:em
+								supplant
+								the client side SDK! In order for AppsFlyer to do proper attribution you must bundle their mobile SDK! The server side integration should not be used alone.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Getting Started
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you toggle on AppsFlyer for your mobile app in Segment, take the following steps:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Enter your unique
+										Element:strong
+											AppsFlyer Dev Key
+											, which is accessible from your AppsFlyer account, in Segment’s integration settings.
+										Element:li
+											Follow the instructions on AppsFlyer’s integrations page in the Segment app for adding the packaged AppsFlyer SDK (for iOS, a simple one-liner to add to your Podfile).
+										Element:li
+											After you build and release to the app store, we start translating and sending your data to AppsFlyer automatically.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Important:
+											If you plan on using the server side integration for an Android project, please make sure to enter your
+										Element:strong
+											Android App ID
+											. If you are using only the mobile SDK, Android projects only require the
+										Element:strong
+											AppsFlyer Dev Key
+											. iOS projects always require both the
+										Element:strong
+											AppsFlyer Dev Key
+											and the
+										Element:strong
+											Apple App ID
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you call
+							Element:code
+								.identify()
+								, we will use AppsFlyer’s
+							Element:code
+								setCustomerUserID
+								to send the
+							Element:code
+								userId
+								that was passed in. We will lookup and send the following
+							Element:code
+								traits
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								email
+							Element:li
+							Element:code
+								firstName
+							Element:li
+							Element:code
+								lastName
+							Element:li
+							Element:code
+								username
+							Element:li
+							Element:code
+								currencyCode
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We will send these traits using AppsFlyer’s
+							Element:code
+								setAdditionalData
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								identify
+								calls are not supported via AppsFlyer’s HTTP API at the moment. You can only send
+							Element:code
+								.identify
+								calls if you have the AppsFlyer SDK bundled.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you call
+							Element:code
+								track
+								, we translate it automatically and send the event to AppsFlyer.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We include all the event properties as callback parameters on the AppsFlyer event, and automatically translate
+							Element:code
+								properties.revenue
+								to the appropriate AppsFlyer purchase event properties based on our spec’d properties.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Finally, we automatically use AppsFlyer’s transactionId-based de-duplication when you send an an orderId (see the e-commerce spec).
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Server-Side Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As mentioned before, if you’d like to send offline events to tie back to a certain device, you can use our server side integration to do so.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														However, AppsFlyer requires that you send the
+													Element:strong
+														AppsFlyer Device ID
+														which is unique to each device and can only be retrieved by using their SDK. Please refer to their
+													Element:a
+														docs
+														on how to retrieve this value. We recommend storing this value in your own database so that you can access it from other platforms such as your server or website.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once you have the
+													Element:strong
+														AppsFlyer Device ID
+														, you must send it with each event as a integration specific option:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														// node.js example analytics.track({ event: 'Membership Upgraded', userId: '97234974', integrations: { AppsFlyer: { appsFlyerId: '1415211453000-6513894' } } });
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you’d like to send the
+													Element:strong
+														IDFA
+														,
+													Element:strong
+														Bundle ID
+														, or
+													Element:strong
+														Advertising ID
+														, please follow our
+													Element:a
+														spec
+														and place them in the proper
+													Element:code
+														context
+														object.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														We will look up for the following semantic properties:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:code
+														ip
+														(this should be the
+													Element:code
+														ip
+														of your customer)
+													Element:li
+													Element:code
+														timestamp
+														(refer to AppsFlyer’s docs on
+													Element:a
+														how they process timestamps
+														. Since our libraries generate a
+													Element:a
+														timestamp
+														, we will always set this value)
+													Element:li
+													Element:code
+														currency
+														(defaults to
+													Element:code
+														"USD"
+														)
+													Element:li
+													Element:code
+														revenue
+														(For
+													Element:code
+														Order Completed / Completed Order
+														events, we will use
+													Element:code
+														total
+														, otherwise we will use
+													Element:code
+														properties.revenue
+														)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All other custom
+													Element:code
+														properties
+														will be sent inside
+													Element:code
+														eventValue
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Note:
+														Be sure to calibrate/update the time window in AppsFlyer’s dashboard to see your events!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Other Features
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Revenue Tracking
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The integration automatically recognizes spec’d
+										Element:code
+											revenue
+											property and translates them to AppsFlyer’s revenue tracking method.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Transaction De-duplication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The integration automatically recognizes the spec’d orderId property, and sends it as the transaction id to AppsFlyer for revenue de-duplication.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											In-App Purchase Receipts
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The integration does not currently support in-app purchase receipts. If this is important to you, please email support@appsflyer.com.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Deeplinking
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The integration does not automatically support out-of-the-box deeplinking (you need to write code here regardless!).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Therefore, you can use AppsFlyer’s OneLink integration which is a single, smart, tracking link that can be used to track on both Android and iOS. OneLink tracking links can launch your app when it is already installed instead of redirecting the user to the app store.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For more details, please review the
+										Element:a
+											AppsFlyer OneLink Setup Guide
+											. More information is available in the AppsFlyer SDK Integration Guides (
+										Element:a
+											iOS
+											,
+										Element:a
+											Android
+											) and Segment’s mobile FAQs (
+										Element:a
+											iOS
+											,
+										Element:a
+											Android
+											).
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+							Element:td
+								✅
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+								✅
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This integration
+							Element:em
+								requires
+								a
+							Element:strong
+								Device-based
+								Connection Mode for
+							Element:strong
+								Mobile
+								data. Follow the steps above to ensure you have packaged the AppsFlyer SDK with Segment’s.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Android App ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your Android App’s ID. Find this in your AppsFlyer’s ‘My App’ dashboard. It should look something like ‘com.appsflyer.myapp’. This is required for Android projects if you want to send events using the server side integration.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Apple App Id (iOS)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your App’s ID, which is accessible from iTunes or in AppsFlyer’s ‘My App’ dashboard. This is optional for Android projects, and only required for iOS projects.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											AppsFlyer Dev Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your unique developer ID from AppsFlyer, which is accessible from your AppsFlyer account.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Enable HTTP fallback (Android)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If selected, HTTPS calls will fallback on HTTP
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Track Attribution Data
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Send attribution data to Segment and other tools as a track call (mobile libraries only).
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											android
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											ios
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

@@ -1,0 +1,591 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Geo Bounding Box Query
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A query allowing to filter hits based on a point location using a bounding box. Assuming the following indexed document:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT /my_locations { "mappings": { "location": { "properties": { "pin": { "properties": { "location": { "type": "geo_point" } } } } } } } PUT /my_locations/location/1 { "pin" : { "location" : { "lat" : 40.12, "lon" : -71.34 } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then the following simple query can be executed with a
+							Element:code
+								geo_bounding_box
+								filter:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /_search { "query": { "bool" : { "must" : { "match_all" : {} }, "filter" : { "geo_bounding_box" : { "pin.location" : { "top_left" : { "lat" : 40.73, "lon" : -74.1 }, "bottom_right" : { "lat" : 40.01, "lon" : -71.12 } } } } } } }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Query Options
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:colgroup
+													Element:col
+													Element:col
+													Element:thead
+													Element:tr
+													Element:th
+														Option
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														_name
+													Element:td
+													Element:p
+														Optional name field to identify the filter
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														ignore_malformed
+													Element:td
+													Element:p
+													Element:span
+														[
+														Set to
+													Element:span
+														5.0.0
+														]
+													Element:span
+														Deprecated in 5.0.0. Use
+													Element:code
+														validation_method
+														instead
+													Element:code
+														true
+														to accept geo points with invalid latitude or longitude (default is
+													Element:code
+														false
+														).
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														validation_method
+													Element:td
+													Element:p
+														Set to
+													Element:code
+														IGNORE_MALFORMED
+														to accept geo points with invalid latitude or longitude, set to
+													Element:code
+														COERCE
+														to also try to infer correct latitude or longitude. (default is
+													Element:code
+														STRICT
+														).
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														type
+													Element:td
+													Element:p
+														Set to one of
+													Element:code
+														indexed
+														or
+													Element:code
+														memory
+														to defines whether this filter will be executed in memory or indexed. See
+													Element:a
+														Type
+														below for further details Default is
+													Element:code
+														memory
+														.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Accepted Formats
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In much the same way the geo_point type can accept different representations of the geo point, the filter can accept it as well:
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Lat Lon As Properties
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search { "query": { "bool" : { "must" : { "match_all" : {} }, "filter" : { "geo_bounding_box" : { "pin.location" : { "top_left" : { "lat" : 40.73, "lon" : -74.1 }, "bottom_right" : { "lat" : 40.01, "lon" : -71.12 } } } } } } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Lat Lon As Array
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Format in
+																Element:code
+																	[lon, lat]
+																	, note, the order of lon/lat here in order to conform with
+																Element:a
+																	GeoJSON
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search { "query": { "bool" : { "must" : { "match_all" : {} }, "filter" : { "geo_bounding_box" : { "pin.location" : { "top_left" : [-74.1, 40.73], "bottom_right" : [-71.12, 40.01] } } } } } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Lat Lon As String
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Format in
+																Element:code
+																	lat,lon
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search { "query": { "bool" : { "must" : { "match_all" : {} }, "filter" : { "geo_bounding_box" : { "pin.location" : { "top_left" : "40.73, -74.1", "bottom_right" : "40.01, -71.12" } } } } } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Geohash
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search { "query": { "bool" : { "must" : { "match_all" : {} }, "filter" : { "geo_bounding_box" : { "pin.location" : { "top_left" : "dr5r9ydj2y73", "bottom_right" : "drj7teegpus6" } } } } } }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Vertices
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The vertices of the bounding box can either be set by
+													Element:code
+														top_left
+														and
+													Element:code
+														bottom_right
+														or by
+													Element:code
+														top_right
+														and
+													Element:code
+														bottom_left
+														parameters. More over the names
+													Element:code
+														topLeft
+														,
+													Element:code
+														bottomRight
+														,
+													Element:code
+														topRight
+														and
+													Element:code
+														bottomLeft
+														are supported. Instead of setting the values pairwise, one can use the simple names
+													Element:code
+														top
+														,
+													Element:code
+														left
+														,
+													Element:code
+														bottom
+														and
+													Element:code
+														right
+														to set the values separately.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "bool" : { "must" : { "match_all" : {} }, "filter" : { "geo_bounding_box" : { "pin.location" : { "top" : 40.73, "left" : -74.1, "bottom" : 40.01, "right" : -71.12 } } } } } }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														geo_point Type
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The filter
+													Element:span
+														the
+													Element:strong
+														requires
+													Element:code
+														geo_point
+														type to be set on the relevant field.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Multi Location Per Document
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The filter can work with multiple locations / points per document. Once a single location / point matches the filter, the document will be included in the filter
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Type
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The type of the bounding box execution by default is set to
+													Element:code
+														memory
+														, which means in memory checks if the doc falls within the bounding box range. In some cases, an
+													Element:code
+														indexed
+														option will perform faster (but note that the
+													Element:code
+														geo_point
+														type must have lat and lon indexed in this case). Note, when using the indexed option, multi locations per document field are not supported. Here is an example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_search { "query": { "bool" : { "must" : { "match_all" : {} }, "filter" : { "geo_bounding_box" : { "pin.location" : { "top_left" : { "lat" : 40.73, "lon" : -74.1 }, "bottom_right" : { "lat" : 40.10, "lon" : -71.12 } }, "type" : "indexed" } } } } }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Ignore Unmapped
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When set to
+													Element:code
+														true
+														the
+													Element:code
+														ignore_unmapped
+														option will ignore an unmapped field and will not match any documents for this query. This can be useful when querying multiple indexes which might have different mappings. When set to
+													Element:code
+														false
+														(the default value) the query will throw an exception if the field is not mapped.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« GeoShape Query
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Geo Distance Query »
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,418 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Layoutdefs
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								Layoutdefs
+								extension adds or overrides subpanel definitions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note
+								: This extension is only applicable to modules running in backward compatibility mode.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Properties
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following extension properties are available. For more information, please refer to the
+							Element:a
+								Extension Property
+								documentation.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:strong
+								Property
+							Element:td
+							Element:strong
+								Value
+							Element:tr
+							Element:td
+								Extension Scope
+							Element:td
+								Module
+							Element:tr
+							Element:td
+								Sugar Variable
+							Element:td
+								$layout_defs
+							Element:tr
+							Element:td
+								Extension Directory
+							Element:td
+								./custom/Extension/modules/<module>/Ext/Layoutdefs/
+							Element:tr
+							Element:td
+								Compiled Extension File
+							Element:td
+								./custom/<module>/Ext/Layoutdefs/layoutdefs.ext.php
+							Element:tr
+							Element:td
+								Manifest Installdef
+							Element:td
+								$installdefs['layoutdefs']
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Implementation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following sections illustrate the various ways to implement a customization to a Sugar instance.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											File System
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When working directly with the filesystem, you can create a file in
+										Element:code
+											./custom/Extension/modules/<module>/Ext/Layoutdefs/
+											to add Layout Definition files to the system. The following example will add a subpanel definition for a module relationship:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/<module>/Ext/Layoutdefs/<file>.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $layout_defs["<module>"]["subpanel_setup"]['<subpanel key>'] = array ( 'order' => 100, 'module' => '<related module>', 'subpanel_name' => 'default', 'sort_order' => 'asc', 'sort_by' => 'id', 'title_key' => 'LBL_SUBPANEL_TITLE', 'get_subpanel_data' => '<subpanel key>', 'top_buttons' => array ( array ( 'widget_class' => 'SubPanelTopButtonQuickCreate', ), array ( 'widget_class' => 'SubPanelTopSelectButton', 'mode' => 'MultiSelect', ), ), );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please note that, if you are attempting to override parts of an existing subpanel definition, you should specify the exact index rather than redefining the entire array. An example of overriding the subpanel
+										Element:code
+											top_buttons
+											index is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $layout_defs["<module>"]["subpanel_setup"]["<subpanel key>"]["top_buttons"] = array( array( 'widget_class' => 'SubPanelTopButtonQuickCreate', ), );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, navigate to Admin > Repair > Quick Repair and Rebuild. The system will then rebuild the extensions and compile your customizations to
+										Element:code
+											./custom/modules/<module>/Ext/Layoutdefs/layoutdefs.ext.php
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Module Loadable Package
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When building a module loadable package, you can use the
+										Element:code
+											$installdefs['layoutdefs']
+											index to install the extension file.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Installdef Properties
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														from
+													Element:td
+														String
+													Element:td
+														The base path of the file to be installed
+													Element:tr
+													Element:td
+														to_module
+													Element:td
+														String
+													Element:td
+														The key for the module where the file will be installed
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The example below demonstrates the proper install definition that should be used in the
+													Element:code
+														./manifest.php
+														file in order to add the Layout Definition Extension file to the system. When using this approach, Sugar will automatically execute Rebuild Extensions to reflect the customizations added with the Layout definition.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./manifest.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $manifest = array( ... ); $installdefs = array( 'id' => 'layoutdefs_Example', 'layoutdefs' => array( array( 'from' => '<basepath>/Files/custom/Extension/modules/<module>/Ext/Layoutdefs/<file>.php', 'to_module' => '<module>', ) ) );
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Alternatively, you may use the
+													Element:code
+														$installdefs['copy']
+														index to copy the file. When using this approach, you may need to manually run repair actions such as a Quick Repair and Rebuild. For more information on the
+													Element:code
+														$installdefs['copy']
+														index and module-loadable packages, please refer to the
+													Element:a
+														Introduction to the Manifest
+														page.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Last modified: 01/04/2017 10:25am
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

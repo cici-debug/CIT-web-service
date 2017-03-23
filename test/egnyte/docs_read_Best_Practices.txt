@@ -1,0 +1,543 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Best Practices
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Using Access Tokens
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have an API key, your next step is to use that key to authenticate to get an access token to use for all API requests. Please check the
+										Element:a
+											authentication
+											documentation page to see how to authenticate for your type of key and application.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you get a token, you must cache it for use in regular API calls rather than making a token request each time you make an API request. Though tokens do not expire, tokens will stop working if a user changes their password.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All API actions are executed within the permission context of the user. You can only access resources (e.g. files or folders) that the user has permissions to access. If you are using an administrative account, you can optionally use a feature called User Impersonation to perform an action on behalf of a user. Impersonated calls are executed in the context of the user being impersonated and are noted in our audit reports as impersonated calls.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Rate Limiting
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our API rate limits restrict both the number of calls per day and number of calls per second. Our API rate limits and daily usage limits are enforced per access token rather than against the entire key. So, even if one user exceeds their quota under your key, other users will still be able to access Egnyte through your application. Integrations should be built with inherent support for receiving and handling these throttles. The default settings for all tokens issued under a key are:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Description
+										Element:th
+											Limit
+										Element:tr
+										Element:td
+											API Key
+										Element:td
+											1,000 API calls per day per token
+										Element:br
+											2 API calls per second per token
+										Element:tr
+										Element:td
+											OAuth token endpoint (Public app flow)
+										Element:td
+											100 token requests per hour
+										Element:tr
+										Element:td
+											OAuth token endpoint (Internal app flow)
+										Element:td
+											10 token requests per user per hour
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you anticipate that your API call volume will exceed these limits when your application is in production, please contact us and we can discuss other arrangements.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your API call is throttled you will see a response with a 403 HTTP status code with one of two possible values for the
+										Element:span
+											X-Mashery-Error-Code
+											header field:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Error
+										Element:th
+											Description
+										Element:tr
+										Element:td
+										Element:span
+											ERR_403_DEVELOPER_OVER_QPS
+										Element:td
+											Exceeded per second throttle
+										Element:tr
+										Element:td
+										Element:span
+											ERR_403_DEVELOPER_OVER_RATE
+										Element:td
+											Exceeded daily quota
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:span
+											Retry-After
+											header will be set to the number of seconds until the relevant throttle will next be reset.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to the general API endpoint rate limiting, the OAuth token endpoint (/puboauth/token) is also rate limited. For the Publicly Available Application authentication flow, the limit is 100 token requests per hour. For the Internal Application authentication flow, the limit is 10 calls/user/hour. When throttled, you will see a response with a 409 HTTP status code. The
+										Element:span
+											Retry-After
+											header will be set to the number of seconds until the throttle will next be reset. In general, you will not encounter this limit since you should be requesting a token only once per user and persisting it rather than requesting a token repeatedly.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Formats
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														File System Paths in URLs
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When you're putting file paths in URLs, the individual elements of folder paths in the URL must be URL encoded. However the intervening forward slashes must not be escaped. For example, this path:
+													Element:span
+														/Shared/example?path/$file.txt
+														should be encoded as
+													Element:span
+														/Shared/example%3Fpath/%24file.txt
+														. This is particularly important for the
+													Element:a
+														file system
+														and
+													Element:a
+														permission
+														API endpoints.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Timestamps
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Dates and times are in
+													Element:a
+														ISO 8601
+														format. For example, May 27, 2014 is represented as
+													Element:span
+														2014-05-27
+														. Similarly 10:27:01pm on May 27, 2014 is represented as
+													Element:span
+														2014-05-27T22:27:01Z
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Impersonation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Public API allows admin users to impersonate any other user by providing their username or e-mail address associated with the account. To impersonate, you need to make an API call with OAuth token of an admin user and one of the following headers.
+											X-Egnyte-Act-As: username X-Egnyte-Act-As-Email: email
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You only need one of the headers. If two are provided, X-Egnyte-Act-As-Email will be ignored.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Impersonation Example to Create Folder
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														HTTP
+													Element:li
+													Element:a
+														cURL
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /pubapi/v1/fs/Shared/test HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q Content-Type: application/json { "X-Egnyte-Act-As-Email": "test@test.com" }
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -v -X POST -H "Authorization: Bearer 68zc95e3xv954u6k3hbnma3q" -H "Content-Type: application/json" --data '{"X-Egnyte-Act-As-Email":"test@test.com"}' https://apidemo.egnyte.com/pubapi/v1/fs/Shared/test
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Common HTTP Headers
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														HTTP Request Headers
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Value
+													Element:th
+														Description
+													Element:tr
+													Element:td
+														Content-Type
+													Element:td
+													Element:span
+														application/json
+													Element:td
+														Specifies the format of request body
+													Element:tr
+													Element:td
+														Authorization
+													Element:td
+													Element:span
+														Bearer {OAuth token}
+													Element:td
+														This must use the the OAuth token you obtained through the OAuth flow.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														HTTP Response Headers
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Value
+													Element:th
+														Description
+													Element:tr
+													Element:td
+														Content-Type
+													Element:td
+													Element:span
+														application/json
+													Element:td
+														Specifies the format of request body
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Common Response Codes
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											HTTP Code
+										Element:th
+											Description
+										Element:tr
+										Element:td
+											200
+										Element:td
+											Successful operation
+										Element:tr
+										Element:td
+											201
+										Element:td
+											Successful creation
+										Element:tr
+										Element:td
+											204
+										Element:td
+											Successful creation with no response body content
+										Element:tr
+										Element:td
+											400
+										Element:td
+											Request is syntactically incorrect
+										Element:tr
+										Element:td
+											401
+										Element:td
+											Authentication failure
+										Element:tr
+										Element:td
+											403
+										Element:td
+											Authorization failure
+										Element:tr
+										Element:td
+											404
+										Element:td
+											Item or path not found
+										Element:tr
+										Element:td
+											409
+										Element:td
+											Conflict with an existing resource.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Error Messages
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Errors are returned in the HTTP Status Code of the response. The response body also includes an array of errors that provide a more descriptive description of the error. If multiple errors were found, the API will include multiple entries.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											HTTP/1.1 404 NOT FOUND {"Errors": [{"description": "Link does not exist.","code": "404"}]}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											version 3
+										Element:span
+											as of
+										Element:abbr
+											7 months ago
+										Element:span
+											by
+										Element:span
+										Element:a
+											Cara de Freitas Bart
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Previous:
+										Element:a
+											Folder Options API
+										Element:li
+										Element:span
+											Up:
+										Element:a
+											Overview
+										Element:li
+										Element:span
+											Next:
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Docs Navigation
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Overview
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Authentication
+							Element:li
+							Element:a
+								File System API
+							Element:li
+							Element:a
+								Permissions API
+							Element:li
+							Element:a
+								Events API
+							Element:li
+							Element:a
+								Search API
+							Element:li
+							Element:a
+								Links API
+							Element:li
+							Element:a
+								User Management API
+							Element:li
+							Element:a
+								Group Management API
+							Element:li
+							Element:a
+								Audit Reporting API
+							Element:li
+							Element:a
+								UI Integration Framework
+							Element:li
+							Element:a
+								Trash API
+							Element:li
+							Element:a
+								Comments API
+							Element:li
+							Element:a
+								Metadata API
+							Element:li
+							Element:a
+								Embedded UI API
+							Element:li
+							Element:a
+								Bookmarks API
+							Element:li
+							Element:a
+								Folder Options API
+							Element:li
+							Element:a
+								Best Practices
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Get API Key
+							Element:li
+							Element:a
+								API Docs
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Explore APIs
+							Element:li
+							Element:a
+								Explore SDKs
+						Node:
+						(type) c
+						(layer)2
+							Element:noscript
+							Element:img

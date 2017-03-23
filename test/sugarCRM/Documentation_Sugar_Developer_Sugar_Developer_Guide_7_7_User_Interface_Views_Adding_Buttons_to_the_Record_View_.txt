@@ -1,0 +1,467 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Adding Buttons to the Record View
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example explains how to create additional buttons on the record view and add events. We will extend and override the stock Accounts record view to add a custom button. The custom button will be called "Validate Postal Code" and ping the Zippopotamus REST service to validate the records billing state and postal code.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Steps To Complete
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This tutorial requires the following steps, which are explained in the sections below:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:a
+								Defining the Metadata
+							Element:li
+							Element:a
+								Adding Custom Buttons
+							Element:li
+							Element:a
+								Defining the Button Label
+							Element:li
+							Element:a
+								Extending and Overriding the Controller
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Defining the Metadata
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To add a button to the record view, you will first need to create the custom metadata for the view if it doesn't exist. You can easily do this by opening and saving your modules record layout in studio. Depending on your module, the path will then be
+										Element:code
+											./custom/modules/<module>/clients/base/views/record/record.php
+											. Once your file is in place, you will need to copy the button array from
+										Element:code
+											./clients/base/views/record/record.php
+											and add it to the
+										Element:code
+											$viewdefs['<module>']['base']['view']['record']
+											portion of your metadata array. An example of the button array is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											'buttons' => array( array( 'type' => 'button', 'name' => 'cancel_button', 'label' => 'LBL_CANCEL_BUTTON_LABEL', 'css_class' => 'btn-invisible btn-link', 'showOn' => 'edit', ), array( 'type' => 'rowaction', 'event' => 'button:save_button:click', 'name' => 'save_button', 'label' => 'LBL_SAVE_BUTTON_LABEL', 'css_class' => 'btn btn-primary', 'showOn' => 'edit', 'acl_action' => 'edit', ), array( 'type' => 'actiondropdown', 'name' => 'main_dropdown', 'primary' => true, 'showOn' => 'view', 'buttons' => array( array( 'type' => 'rowaction', 'event' => 'button:edit_button:click', 'name' => 'edit_button', 'label' => 'LBL_EDIT_BUTTON_LABEL', 'acl_action' => 'edit', ), array( 'type' => 'shareaction', 'name' => 'share', 'label' => 'LBL_RECORD_SHARE_BUTTON', 'acl_action' => 'view', ), array( 'type' => 'pdfaction', 'name' => 'download-pdf', 'label' => 'LBL_PDF_VIEW', 'action' => 'download', 'acl_action' => 'view', ), array( 'type' => 'pdfaction', 'name' => 'email-pdf', 'label' => 'LBL_PDF_EMAIL', 'action' => 'email', 'acl_action' => 'view', ), array( 'type' => 'divider', ), array( 'type' => 'rowaction', 'event' => 'button:find_duplicates_button:click', 'name' => 'find_duplicates_button', 'label' => 'LBL_DUP_MERGE', 'acl_action' => 'edit', ), array( 'type' => 'rowaction', 'event' => 'button:duplicate_button:click', 'name' => 'duplicate_button', 'label' => 'LBL_DUPLICATE_BUTTON_LABEL', 'acl_module' => $module, ), array( 'type' => 'rowaction', 'event' => 'button:audit_button:click', 'name' => 'audit_button', 'label' => 'LNK_VIEW_CHANGE_LOG', 'acl_action' => 'view', ), array( 'type' => 'divider', ), array( 'type' => 'rowaction', 'event' => 'button:delete_button:click', 'name' => 'delete_button', 'label' => 'LBL_DELETE_BUTTON_LABEL', 'acl_action' => 'delete', ), ), ), array( 'name' => 'sidebar_toggle', 'type' => 'sidebartoggle', ), ),
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											When copying this array into your metadata, you will need to replace
+										Element:code
+											$module
+											with the text string of your module's name.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For standard button types, the button definitions will contain the following properties:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Property
+										Element:td
+										Element:strong
+											Potential Values
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											type
+										Element:td
+											button, rowaction, shareaction, actiondropdown
+										Element:td
+											The widget type
+										Element:tr
+										Element:td
+											name
+										Element:td
+										Element:td
+											The name of the button
+										Element:tr
+										Element:td
+											label
+										Element:td
+										Element:td
+											The label string key for the display text of the button
+										Element:tr
+										Element:td
+											css_class
+										Element:td
+										Element:td
+											The CSS class to append to the button
+										Element:tr
+										Element:td
+											showOn
+										Element:td
+											edit, view
+										Element:td
+											The ACL action of the button
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For this example, we will add the custom button to the main dropdown. For actiondropdown types, there is an additional buttons array for you to specify the dropdown list of buttons. The button definitions in this array will contain the following properties:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Property
+										Element:td
+										Element:strong
+											Potential Values
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											type
+										Element:td
+											button, rowaction, shareaction, actiondropdown
+										Element:td
+											The widget type; Most custom buttons are 'rowaction'
+										Element:tr
+										Element:td
+											event
+										Element:td
+											button:button_name:click
+										Element:td
+											The event name of the button
+										Element:tr
+										Element:td
+											name
+										Element:td
+										Element:td
+											The name of the button
+										Element:tr
+										Element:td
+											label
+										Element:td
+										Element:td
+											The label string key for the display text of the button
+										Element:tr
+										Element:td
+											acl_action
+										Element:td
+											edit, view
+										Element:td
+											The ACL action of the button
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Adding Custom Buttons
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For this example, modify the accounts' metadata to add the button definition to main_dropdown:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											array( 'type' => 'rowaction', 'event' => 'button:validate_postal_code:click', 'name' => 'validate_postal_code', 'label' => 'LBL_VALIDATE_POSTAL_CODE', 'acl_action' => 'view', ),
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A full example is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/Accounts/clients/base/views/record/record.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $viewdefs['Accounts'] = array ( 'base' => array ( 'view' => array ( 'record' => array ( 'buttons' => array ( 0 => array ( 'type' => 'button', 'name' => 'cancel_button', 'label' => 'LBL_CANCEL_BUTTON_LABEL', 'css_class' => 'btn-invisible btn-link', 'showOn' => 'edit', ), 1 => array ( 'type' => 'rowaction', 'event' => 'button:save_button:click', 'name' => 'save_button', 'label' => 'LBL_SAVE_BUTTON_LABEL', 'css_class' => 'btn btn-primary', 'showOn' => 'edit', 'acl_action' => 'edit', ), 2 => array ( 'type' => 'actiondropdown', 'name' => 'main_dropdown', 'primary' => true, 'showOn' => 'view', 'buttons' => array ( 0 => array ( 'type' => 'rowaction', 'event' => 'button:edit_button:click', 'name' => 'edit_button', 'label' => 'LBL_EDIT_BUTTON_LABEL', 'acl_action' => 'edit', ), 1 => array ( 'type' => 'shareaction', 'name' => 'share', 'label' => 'LBL_RECORD_SHARE_BUTTON', 'acl_action' => 'view', ), 2 => array ( 'type' => 'rowaction', 'event' => 'button:validate_postal_code:click', 'name' => 'validate_postal_code', 'label' => 'LBL_VALIDATE_POSTAL_CODE', 'acl_action' => 'view', ), 3 => array ( 'type' => 'divider', ), 4 => array ( 'type' => 'rowaction', 'event' => 'button:duplicate_button:click', 'name' => 'duplicate_button', 'label' => 'LBL_DUPLICATE_BUTTON_LABEL', 'acl_module' => 'Accounts', ), 5 => array ( 'type' => 'rowaction', 'event' => 'button:audit_button:click', 'name' => 'audit_button', 'label' => 'LNK_VIEW_CHANGE_LOG', 'acl_action' => 'view', ), 6 => array ( 'type' => 'divider', ), 7 => array ( 'type' => 'rowaction', 'event' => 'button:delete_button:click', 'name' => 'delete_button', 'label' => 'LBL_DELETE_BUTTON_LABEL', 'acl_action' => 'delete', ), ), ), 3 => array ( 'name' => 'sidebar_toggle', 'type' => 'sidebartoggle', ), ), 'panels' => array ( 0 => array ( 'name' => 'panel_header', 'header' => true, 'fields' => array ( 0 => array ( 'name' => 'picture', 'type' => 'avatar', 'width' => 42, 'height' => 42, 'dismiss_label' => true, 'readonly' => true, ), 1 => 'name', 2 => array ( 'name' => 'favorite', 'label' => 'LBL_FAVORITE', 'type' => 'favorite', 'dismiss_label' => true, ), 3 => array ( 'name' => 'follow', 'label' => 'LBL_FOLLOW', 'type' => 'follow', 'readonly' => true, 'dismiss_label' => true, ), ), ), 1 => array ( 'name' => 'panel_body', 'columns' => 2, 'labelsOnTop' => true, 'placeholders' => true, 'fields' => array ( 0 => 'website', 1 => 'industry', 2 => 'parent_name', 3 => 'account_type', 4 => 'assigned_user_name', 5 => 'phone_office', ), ), 2 => array ( 'name' => 'panel_hidden', 'hide' => true, 'columns' => 2, 'labelsOnTop' => true, 'placeholders' => true, 'fields' => array ( 0 => array ( 'name' => 'fieldset_address', 'type' => 'fieldset', 'css_class' => 'address', 'label' => 'LBL_BILLING_ADDRESS', 'fields' => array ( 0 => array ( 'name' => 'billing_address_street', 'css_class' => 'address_street', 'placeholder' => 'LBL_BILLING_ADDRESS_STREET', ), 1 => array ( 'name' => 'billing_address_city', 'css_class' => 'address_city', 'placeholder' => 'LBL_BILLING_ADDRESS_CITY', ), 2 => array ( 'name' => 'billing_address_state', 'css_class' => 'address_state', 'placeholder' => 'LBL_BILLING_ADDRESS_STATE', ), 3 => array ( 'name' => 'billing_address_postalcode', 'css_class' => 'address_zip', 'placeholder' => 'LBL_BILLING_ADDRESS_POSTALCODE', ), 4 => array ( 'name' => 'billing_address_country', 'css_class' => 'address_country', 'placeholder' => 'LBL_BILLING_ADDRESS_COUNTRY', ), ), ), 1 => array ( 'name' => 'fieldset_shipping_address', 'type' => 'fieldset', 'css_class' => 'address', 'label' => 'LBL_SHIPPING_ADDRESS', 'fields' => array ( 0 => array ( 'name' => 'shipping_address_street', 'css_class' => 'address_street', 'placeholder' => 'LBL_SHIPPING_ADDRESS_STREET', ), 1 => array ( 'name' => 'shipping_address_city', 'css_class' => 'address_city', 'placeholder' => 'LBL_SHIPPING_ADDRESS_CITY', ), 2 => array ( 'name' => 'shipping_address_state', 'css_class' => 'address_state', 'placeholder' => 'LBL_SHIPPING_ADDRESS_STATE', ), 3 => array ( 'name' => 'shipping_address_postalcode', 'css_class' => 'address_zip', 'placeholder' => 'LBL_SHIPPING_ADDRESS_POSTALCODE', ), 4 => array ( 'name' => 'shipping_address_country', 'css_class' => 'address_country', 'placeholder' => 'LBL_SHIPPING_ADDRESS_COUNTRY', ), 5 => array ( 'name' => 'copy', 'label' => 'NTC_COPY_BILLING_ADDRESS', 'type' => 'copy', 'mapping' => array ( 'billing_address_street' => 'shipping_address_street', 'billing_address_city' => 'shipping_address_city', 'billing_address_state' => 'shipping_address_state', 'billing_address_postalcode' => 'shipping_address_postalcode', 'billing_address_country' => 'shipping_address_country', ), ), ), ), 2 => array ( 'name' => 'phone_alternate', 'label' => 'LBL_OTHER_PHONE', ), 3 => 'email', 4 => 'phone_fax', 5 => 'campaign_name', 6 => array ( 'name' => 'description', 'span' => 12, ), 7 => 'sic_code', 8 => 'ticker_symbol', 9 => 'annual_revenue', 10 => 'employees', 11 => 'ownership', 12 => 'rating', 13 => array ( 'name' => 'date_entered_by', 'readonly' => true, 'type' => 'fieldset', 'label' => 'LBL_DATE_ENTERED', 'fields' => array ( 0 => array ( 'name' => 'date_entered', ), 1 => array ( 'type' => 'label', 'default_value' => 'LBL_BY', ), 2 => array ( 'name' => 'created_by_name', ), ), ), 14 => 'team_name', 15 => array ( 'name' => 'date_modified_by', 'readonly' => true, 'type' => 'fieldset', 'label' => 'LBL_DATE_MODIFIED', 'fields' => array ( 0 => array ( 'name' => 'date_modified', ), 1 => array ( 'type' => 'label', 'default_value' => 'LBL_BY', ), 2 => array ( 'name' => 'modified_by_name', ), ), 'span' => 12, ), ), ), ), 'templateMeta' => array ( 'useTabs' => false, 'tabDefs' => array ( 'LBL_RECORD_BODY' => array ( 'newTab' => false, 'panelDefault' => 'expanded', ), 'LBL_RECORD_SHOWMORE' => array ( 'newTab' => false, 'panelDefault' => 'expanded', ), ), ), ), ), ), );
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Defining the Button Label
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, define the label for the button:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Accounts/Ext/Language/en_us.validatePostalCode.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $mod_strings['LBL_VALIDATE_POSTAL_CODE'] = 'Validate Postal Code';
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Extending and Overriding the Controller
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the button has been added to the metadata, extend and override the record view controller:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/Accounts/clients/base/views/record/record.js
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											({ extendsFrom: 'RecordView', zipJSON: {}, initialize: function (options) { app.view.invokeParent(this, {type: 'view', name: 'record', method: 'initialize', args:[options]}); //add listener for custom button this.context.on('button:validate_postal_code:click', this.validate_postal_code, this); }, validate_postal_code: function() { //example of getting field data from current record var AcctID = this.model.get('id'); var currentCity = this.model.get('billing_address_city'); var currentZip = this.model.get('billing_address_postalcode'); //jQuery AJAX call to Zippopotamus REST API $.ajax({ url: 'http://api.zippopotam.us/us/' + currentZip, success: function(data) { this.zipJSON = data; var city = this.zipJSON.places[0]['place name']; if (city === currentCity) { app.alert.show('address-ok', { level: 'success', messages: 'City and Zipcode match.', autoClose: true }); } else { app.alert.show('address-ok', { level: 'error', messages: 'City and Zipcode do not match.', autoClose: false }); } } }); } })
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the files are in place, navigate to Admin > Repair > Quick Repair and Rebuild.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 03/29/2016 09:26am
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

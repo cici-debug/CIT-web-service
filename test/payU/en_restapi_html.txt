@@ -1,0 +1,4229 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					REST API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Simplest and most convenient PayU integration protocol.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					1 Introduction
+				Element:li
+				Element:a
+					2 Creating a new order
+				Element:ul
+				Element:li
+				Element:a
+					2.1 Via payment form
+				Element:li
+				Element:a
+					2.2 Via API
+				Element:li
+				Element:a
+					2.3 Cards-only form
+				Element:li
+				Element:a
+					3 Notifications
+				Element:ul
+				Element:li
+				Element:a
+					3.1 Order status
+				Element:li
+				Element:a
+					3.2 Refund status
+				Element:li
+				Element:a
+					4 Refunds
+				Element:li
+				Element:a
+					5 Cancellation
+				Element:li
+				Element:a
+					6 Order capture
+				Element:li
+				Element:a
+					7 Data retrieve
+				Element:ul
+				Element:li
+				Element:a
+					7.1 Order data
+				Element:li
+				Element:a
+					7.2 Transaction data
+				Element:li
+				Element:a
+					8 Transparent integration
+				Element:ul
+				Element:li
+				Element:a
+					8.1 Payment methods retrieve
+				Element:li
+				Element:a
+					8.2 Information requirements
+				Element:li
+				Element:a
+					8.3 Card form
+				Element:li
+				Element:a
+					9 References
+				Element:ul
+				Element:li
+				Element:a
+					9.1 Signing the form
+				Element:li
+				Element:a
+					9.2 Signing API calls
+				Element:li
+				Element:a
+					9.3 Verification of notifications signature
+				Element:li
+				Element:a
+					9.4 Form parameters
+				Element:li
+				Element:a
+					9.5 JSON requests description
+				Element:li
+				Element:a
+					9.6 Status codes
+				Element:li
+				Element:a
+					9.7 Available language versions
+			Node:
+			(type) c
+			(layer)1
+				Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								1 Introduction
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Overview
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This document describes integration with the REST API 2.1 for the PayU payment service. It presents various methods of implementing online payments in e-shops via different PayU services and is dedicated primarily to developers wanting to implement the PayU payment system in an e-shop.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For information on older versions of the API, email PayU technical support
+													Element:a
+														tech@payu.pl
+														.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											About the PayU REST API
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Click
+										Element:a
+											here
+											to find out how to start cooperating with PayU.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Before integrating with the PayU payment system, ensure the Point of Sale type
+										Element:i
+											is enabled for processing payments (you can check this in the Management Panel).
+										Element:b
+											Checkout - Express Payment
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Service description
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two stages to processing a payment in an e-shop via PayU:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											A buyer places an order on an e-shop webpage.
+										Element:li
+											PayU confirms that the payment has been settled correctly.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Stage 1: buyer places an order.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The process is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											The buyer clicks on a button that is linked to the PayU payment service.
+										Element:li
+											The PayU system presents an order summary webpage, where the buyer confirms the payment, then redirects the buyer to a bank website.
+										Element:li
+											The buyer accepts the payment on the bank website. The buyer is redirected back to the PayU system.
+										Element:li
+											The merchant system confirms the transaction was successful and thanks the buyer.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Stage 2: payment settlement (optional).
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											The PayU system notifies the merchant system that the payment order status has changed as per its lifecycle.
+										Element:li
+											The merchant system confirms receipt of the notification.
+									Node:
+									(type) c
+									(layer)3
+										Element:blockquote
+											Current payment status is available in the Management Panel.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Accessing the API
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Host address
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The address of the PayU service is:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											https://secure.payu.com/
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Point of sale test data
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When testing your integration with PayU it is possible to use the following data:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POS ID (pos_id):
+										Element:b
+											145227
+											Second key (MD5):
+										Element:b
+											13a980d4f851f3d9a1cfc792fb1f5e50
+											OAuthClientSecret (MD5):
+										Element:b
+											12f071174cb7eb79d4aac5bc2f07563f
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Technical support
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In case you need to contact PayU technical support to investigate some specific API call, please use
+										Element:a
+											tech@payu.pl
+											address and provide the value of
+										Element:code
+											Correlation-Id
+											header returned in the response.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								2 Creating a new order
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								2.1 Integration of payment form
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								The code snippet below is an example of a simple form that enables the buyer to make a payment on an e-shop webpage.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								<form method="post" action="https://secure.payu.com/api/v2_1/orders"> <input type="hidden" name="customerIp" value="123.123.123.123"> <input type="hidden" name="merchantPosId" value="145227"> <input type="hidden" name="description" value="Order description"> <input type="hidden" name="totalAmount" value="1000"> <input type="hidden" name="currencyCode" value="PLN"> <input type="hidden" name="products[0].name" value="Product 1"> <input type="hidden" name="products[0].unitPrice" value="1000"> <input type="hidden" name="products[0].quantity" value="1"> <input type="hidden" name="notifyUrl" value="
+							Element:a
+								http://shop.url/notify
+								"> <input type="hidden" name="continueUrl" value="
+							Element:a
+								http://shop.url/continue
+								"> <input type="hidden" name="OpenPayu-Signature" value="sender=145227;algorithm=SHA-256;signature=bc94a8026d6032b5e216be112a5fb7544e66e23e68d44b4283ff495bdb3983a8"> <button type="submit" formtarget="_blank" >Pay with PayU</button> </form >
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Customizing your form
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														You can include optional parameters, such as URLs for redirects and notifications or to set the payment page language. A full list of available parameters is available in the section
+													Element:a
+														.
+													Element:li
+														Optionally enter a signature element. For more information on how to design a signature, see the section
+													Element:a
+													Element:li
+														For styling the form button, you can find some useful graphic resources
+													Element:a
+														here
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								2.2 Creating a new order via the API
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								For information on the supported authentication methods, see
+							Element:a
+								Signing API calls parameters
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To create a new order, use the POST method to send
+							Element:code
+								OrderCreateRequest
+								to endpoint
+							Element:code
+								/api/v2_1/orders.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:b
+								Note: specify prices using the lowest currency unit
+								e.g. in lowest currency unit for PLN, so 1000 is equal to 10 PLN. HUF is the exception – multiply this by 100.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following is a basic sample order (you can also view a live example on apiary):
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								curl -X POST https://secure.payu.com/api/v2_1/orders \ -H "Content-Type: application/json" \ -H "Authorization: Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd" \ -d '{ "notifyUrl": "https://your.eshop.com/notify", "customerIp": "127.0.0.1", "merchantPosId": "145227", "description": "RTV market", "currencyCode": "PLN", "totalAmount": "21000", "buyer": { "email": "john.doe@example.com", "phone": "654111654", "firstName": "John", "lastName": "Doe", "language": "en" }, "settings":{ "invoiceDisabled":"true" }, "products": [ { "name": "Wireless Mouse for Laptop", "unitPrice": "15000", "quantity": "1" }, { "name": "HDMI cable", "unitPrice": "6000", "quantity": "1" } ] }'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following is a sample single-product order, with basic buyer data and an
+							Element:code
+								extOrderId
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								curl -X POST https://secure.payu.com/api/v2_1/orders \ -H "Content-Type: application/json" \ -H "Authorization: Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd" \ -d '{ "notifyUrl": "https://your.eshop.com/notify", "customerIp": "127.0.0.1", "merchantPosId": "145227", "description": "RTV market", "currencyCode": "PLN", "totalAmount": "15000", "extOrderId":"[generateExtOrderId]", "buyer": { "email": "john.doe@example.com", "phone": "654111654", "firstName": "John", "lastName": "Doe", "language": "en" }, "products": [ { "name": "Wireless Mouse for Laptop", "unitPrice": "15000", "quantity": "1" } ] }'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								Note: if included, the
+							Element:code
+								extOrderId
+								must be unique within each point of sale (POS).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After sending a request for a new order, a response will be returned by the API. The following is an example of an
+							Element:code
+								OrderCreateResponse
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "status":{ "statusCode":"SUCCESS", }, "redirectUri":"{payment_summary_redirection_url}", "orderId":"WZHF5FFDRJ140731GUEST000P01", "extOrderId":"{YOUR_EXT_ORDER_ID}", }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The HTTP status code of the response is 302 and location header is set to
+							Element:code
+								redirectUri
+								, which - depending on the software used - may sometimes trigger an automatic redirect.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Check
+							Element:a
+								Status codes
+								to learn more about possible response status codes.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The redirect process allows you to define the language of a PayU webpage by using the optional
+							Element:b
+								lang
+								parameter.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To set the language of the page displayed after redirection, either use the lang parameter (see the section
+							Element:a
+								<buyer>
+								for more information) or modify
+							Element:code
+								redirectUri
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{redirectUri from OrderCreateResponse}&lang=en
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The value of sessionId and merchantPosId parameters are set by the PayU system.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more information on the available lang values refer to the section
+							Element:a
+								Language versions.
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								2.3 Card-only payment form
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also invoke a card-only payment form.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This option is intended for buyers unable to make Czech or Polish online bank transfers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To invoke the form, add the following additional code to the order:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "payMethods": { "payMethod": { "type":"PBL", "value":"c" } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								After the order is created with the above, the
+							Element:code
+								redirectUri
+								will contain link to the card payment form.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can specify the language of the form using any of the following methods:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Method 1: based on the language setting of the buyer's browser. If the browser language is not supported, the default language (English) is displayed.
+							Element:li
+								Method 2: add the
+							Element:b
+								lang
+								parameter to
+							Element:code
+								redirectUri
+								, as described in the section
+							Element:a
+								Creating a new order via API
+								.
+							Element:li
+								Method 3: add the
+							Element:b
+								language
+								parameter to the Buyer section. For more information, see the
+							Element:a
+								Buyer Section Fields Description.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								A more advanced option is to use a widget hosted by PayU or build your own form.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Details of these integrations can be found here:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:a
+								Inline widget
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:a
+								Pop-up widget
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:a
+								Custom card form with JS
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Please note:
+								the above integrations require a configuration change (tokenization service must be enabled for your POS). Therefore, before starting the integration process, please contact PayU via your Account Manager.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								3 Notifications
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								Each payment in the PayU system has a lifecycle, which is comprised of stages related to key events such as acceptance, settlement, and cancellation. PayU provides you with a mechanism that notifies your system of all changes to the payment status.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Overview
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To enable notifications for a specific payment, specify the
+													Element:code
+														notifyUrl
+														parameter in the payment form. Each payment can receive a different URL to which notifications will be sent.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Every notification is sent asynchronously. After your system receives a notification with the status completed, instruct it to ignore any further notifications.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														After sending a notification, the PayU system requires a 200 HTTP status code in response. If it receives a different status code, it will resend the notification.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To ensure trusted communication between PayU and your shop, you must verify the signature value available in the OpenPayu-Signature header each time your system receives any notification from a PayU server. Refer to the
+													Element:a
+														Verification of notifications signature
+														for more information.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Payment lifecycle
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You can configure a separate auto-receive / automatic collection parameter for each payment method via the Management Panel.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														By default, auto-receive is enabled. The basic payment sequence is as follows:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Each successfully authorized payment for an order is captured.
+													Element:li
+														The buyer is charged with the order amount.
+													Element:li
+														The shop balance is increased by the order amount.
+													Element:li
+														PayU calculates its commission to the order.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If the auto-receive is turned off, you should capture each order using a PUT method (
+													Element:a
+														Order capture
+														) or cancele using DELETE method (
+													Element:a
+														Cancellation
+														).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If no such action is taken the order is auto-canceled. Automatic cancellation occurs after a number of days indicated for the
+													Element:a
+														payment method
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Status
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														PENDING
+													Element:td
+														Payment is currently being processed.
+													Element:tr
+													Element:td
+														WAITING_FOR_CONFIRMATION
+													Element:td
+														PayU is currently waiting for the merchant system to receive (capture) the payment. This status is set if auto-receive is disabled on the merchant system.
+													Element:tr
+													Element:td
+														COMPLETED
+													Element:td
+														Payment has been accepted. PayU will pay out the funds shortly.
+													Element:tr
+													Element:td
+														CANCELED
+													Element:td
+														Payment has been cancelled and the buyer has not been charged (no money was taken from buyer's account).
+													Element:tr
+													Element:td
+														REJECTED
+													Element:td
+														Payment has been rejected, but the buyer was charged (the money was transferred from the buyer to PayU). The merchant can either complete the order and receive the money or cancel it to return the money to the buyer.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								3.1 Order status
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample notifications for updated order status
+												Node:
+												(type) c
+												(layer)4
+													Element:blockquote
+													Element:ul
+													Element:li
+														Notifications are sent in JSON format using POST method.
+													Element:li
+														For more information about parameters, refer to the
+													Element:a
+														JSON requests description
+														section.
+													Element:li
+														The following sample notifications are all examples of notifications sent by PayU to a merchant.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Completed order
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Below is a sample notification of a completed order:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "order":{ "orderId":"LDLW5N7MF4140324GUEST000P01", "extOrderId":"Order id in your shop", "orderCreateDate":"2012-12-31T12:00:00", "notifyUrl":"http://tempuri.org/notify", "customerIp":"127.0.0.1", "merchantPosId":"{POS ID (pos_id)}", "description":"My order description", "currencyCode":"PLN", "totalAmount":"200", "buyer":{ "email":"john.doe@example.org", "phone":"111111111", "firstName":"John", "lastName":"Doe", "language":"en" }, "products":[ { "name":"Product 1", "unitPrice":"200", "quantity":"1" } ], "status":"COMPLETED" }, "localReceiptDateTime": "2016-03-02T12:58:14.828+01:00", "properties": [ { "name": "PAYMENT_ID", "value": "151471228" } ] }
+														Note:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														"localReceiptDateTime" is only present for the status completed.
+													Element:li
+														"PAYMENT_ID" is the payment identifier, displayed on transaction statements as "Trans ID" and within the transaction search option in the Management Panel.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Cancelled order:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The folllowing is a sample notification for cancelled order:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "order":{ "orderId":"LDLW5N7MF4140324GUEST000P01", "extOrderId":"Order id in your shop", "orderCreateDate":"2012-12-31T12:00:00", "notifyUrl":"http://tempuri.org/notify", "customerIp":"127.0.0.1", "merchantPosId":"{POS ID (pos_id)}", "description":"My order description", "currencyCode":"PLN", "totalAmount":"200", "products":[ { "name":"Product 1", "unitPrice":"200", "quantity":"1" } ], "status":"CANCELED" } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								3.2 Refund status
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														The following is a sample notification for when a payment status is updated to refund:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "orderId": "2DVZMPMFPN140219GUEST000P01", "extOrderId": "Order id in your shop", "refund":{ "refundId": "912128", "amount": "15516", "currencyCode": "PLN", "status": "FINALIZED", "statusDateTime": "1395677071799", "reason": "refund", "reasonDescription": "on customer’s request", "refundDate": "1395677071799" } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								4 Refunds
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								The PayU system fully supports refunds for processed payments, the balance of which is transferred directly to the buyer’s account.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can process refund requests as either full or partial. For partial refunds, always specify the amount in the lowest unit of a given currency, which must be the same currency as the initial order.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can send several partial refund requests for each single order. The total value of the requests must not exceed the order value. The PayU system allows you to send a partial refund request once every minute.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Refunding a buyer account
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To refund the buyer account, call the endpoint
+													Element:code
+														/api/v2_1/orders/{orderId}/refunds
+														using the
+													Element:code
+														POST
+														method. Example calls are shown below.
+												Node:
+												(type) c
+												(layer)4
+													Element:blockquote
+														For information on the supported authentication methods, see
+													Element:a
+														Signing API calls parameters
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														The following is an example of a full refund request:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST https://secure.payu.com/api/v2_1/orders/H9LL64F37H160126GUEST000P01/refunds \ -H "Content-Type: application/json" \ -H "Authorization: Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd" \ -d '{ "refund": { "description": "Refund" } }'
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														The following is an example of a partial refund request, for a value of 10 in the order currency:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST https://secure.payu.com/api/v2_1/orders/H9LL64F37H160126GUEST000P01/refunds \ -H "Content-Type: application/json" \ -H "Authorization: Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd" \ -d '{ "refund": { "description": "Refund", "amount": 1000 } }'
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As soon as the PayU system receives a request, it will confirm this fact with a message containing a relevant status (see the section
+													Element:a
+														Status Codes
+														).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A refund request that has been properly accepted by the PayU system may be cancelled in the Management Panel.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Refund error codes
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														status
+														field included in each response response contains an error code which provides information about the problem. A list of possible error codes is shown below.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														StatusCode
+													Element:th
+														Code
+													Element:th
+														CodeLiteral
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														OPENPAYU_BUSINESS_ERROR
+													Element:td
+														TRANS_NOT_ENDED
+													Element:td
+														9101
+													Element:td
+														Transaction has not been finalized
+													Element:tr
+													Element:td
+														OPENPAYU_BUSINESS_ERROR
+													Element:td
+														NO_BALANCE
+													Element:td
+														9102
+													Element:td
+														Lack of funds in account
+													Element:tr
+													Element:td
+														OPENPAYU_ERROR_VALUE_INVALID
+													Element:td
+														AMOUNT_TO_BIG
+													Element:td
+														9103
+													Element:td
+														Refund amount exceeds transaction amount
+													Element:tr
+													Element:td
+														OPENPAYU_ERROR_VALUE_INVALID
+													Element:td
+														AMOUNT_TO_SMALL
+													Element:td
+														9104
+													Element:td
+														Refund value is too small
+													Element:tr
+													Element:td
+														OPENPAYU_BUSINESS_ERROR
+													Element:td
+														REFUND_DISABLED
+													Element:td
+														9105
+													Element:td
+														Refunds have been disabled
+													Element:tr
+													Element:td
+														OPENPAYU_BUSINESS_ERROR
+													Element:td
+														REFUND_TO_OFTEN
+													Element:td
+														9106
+													Element:td
+														Too many refund attempts have been made
+													Element:tr
+													Element:td
+														OPENPAYU_ERROR_VALUE_INVALID
+													Element:td
+														PAID
+													Element:td
+														9108
+													Element:td
+														Refund was already created
+													Element:tr
+													Element:td
+														OPENPAYU_ERROR_INTERNAL
+													Element:td
+														UNKNOWN_ERROR
+													Element:td
+														9111
+													Element:td
+														Unknown error
+													Element:tr
+													Element:td
+														OPENPAYU_BUSINESS_​ERROR
+													Element:td
+														REFUND_IDEMPOTENCY_MISMATCH
+													Element:td
+														9112
+													Element:td
+														extRefundId was re-used and other params do not match the values sent during the first call.
+													Element:tr
+													Element:td
+														OPENPAYU_BUSINESS_​ERROR
+													Element:td
+														TRANS_BILLING_​ENTRIES_NOT_COMPLETED
+													Element:td
+														9113
+													Element:td
+														Shop billing has not yet been completed
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								5 Cancellation
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								You can cancel (reject) orders processed by the PayU system, for example if a product or service is not delivered.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A cancellation request always relates to the entire order. After cancellation, all funds are returned to the buyer account.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To cancel an order and proceed with a refund to the Payer’s account, call the endpoint T
+							Element:code
+								/api/v2_1/orders/{orderId}
+								using the
+							Element:code
+								DELETE
+								method. An example call is shown below.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								Note: only orders which are not
+							Element:code
+								COMPLETED
+								can be canceled.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To return money to buyer's bank account for an order in
+							Element:code
+								WAITING_FOR_CONFIRMATION
+								status, you need to send DELETE request twice.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following is an example response from the API after successful cancellation of an order:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "orderId":"71S3CTJJXV140325GUEST000P01", "extOrderId":"your_order_id" "status":{ "statusCode":"SUCCESS" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								6 Order capture
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								You can capture or cancel orders with the status
+							Element:code
+								WAITING_FOR_CONFIRMATION
+								or
+							Element:code
+								REJECTED
+								status (see
+							Element:a
+								Cancellation
+								). If no capture or cancel action is taken, the order is cancelled automatically, after the number of days indicated by the
+							Element:a
+								payment method
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Order capture request always concerns the whole order. Capturing an order updates its status to
+							Element:code
+								COMPLETED
+								(ended).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To update the order status, call the endpoint
+							Element:code
+								/api/v2_1/orders/{orderId}/status
+								using the
+							Element:code
+								PUT
+								method.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Below is an example of order capture via the API
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X PUT https://secure.payu.com/api/v2_1/orders/H9LL64F37H160126GUEST000P01/status \ -H "Content-Type: application/json" \ -H "Authorization: Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd" \ -d '{ "orderId": "H9LL64F37H160126GUEST000P01", "orderStatus": "COMPLETED" }'
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+												Node:
+												(type) c
+												(layer)4
+													Element:blockquote
+														For information on the supported authentication methods, see
+													Element:a
+														Signing API calls parameters
+														.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Below is a sample response after a successful order status update.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "status": { "statusCode": "SUCCESS", "statusDesc": "Status was updated" } }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								7 Order and transaction data retrieve
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								You may get the details of your Orders or Transactions (payments) via below requests.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								7.1 Order data retrieve
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								OrderRetrieveRequest
+								message enables you to retrieve the status and details of an order.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Simply make a HTTP GET call to
+							Element:code
+								https://secure.payu.com/api/v2_1/orders/{orderId}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Below is a sample response after retreving order data:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "orders": [ { "orderId": "{orderId}", "extOrderId": "358766", "orderCreateDate": "2014-10-27T14:58:17.443+01:00", "notifyUrl": "http://localhost/OrderNotify/", "customerIp": "127.0.0.1", "merchantPosId": "145227", "description": "New order", "currencyCode": "PLN", "totalAmount": "3200", "status": "NEW", "products": [ { "name": "Product1", "unitPrice": "1000", "quantity": "1" }, { "name": "Product2", "unitPrice": "2200", "quantity": "1" } ] } ], "status": { "statusCode": "SUCCESS", "statusDesc": "Request processing successful" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more information in regard to the fields specified in the above sample, please refer to
+							Element:a
+								JSON requests description
+								, sections
+							Element:code
+								OrderRetrieveRequest
+								and
+							Element:code
+								OrderRetrieveResponse
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								7.2 Transaction data retrieve
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								TransactionRetrieveRequest
+								message enables you to retrieve the details of transactions created for an order.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Simply make a HTTP GET call to
+							Element:code
+								https://secure.payu.com/api/v2_1/orders/{orderId}/transactions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using this endpoint is extremely useful if you would like to get bank account details or card details.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								Please note that although card details are available right after transaction has been processed, the bank details may be available either after few minutes or on the next business day, depending on the bank.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Below is a sample response after retreving card transaction data:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "transactions": [ { "payMethod": { "value": "c" }, "paymentFlow": "CARD", // also MASTERPASS, ONE_CLICK_CARD, ONE_CLICK_CARD_RECURRING etc. "card": { "cardData": { "cardNumberMasked": "543402******4014", "cardScheme": "MC", //MC (MasterCard/Maestro), VS (Visa) "cardProfile": "CONSUMER", // CONSUMER or BUSINESS "cardClassification": "DEBIT" //DEBIT or CREDIT } } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Below is a sample response after retreving pay-by-link or bank transfer transaction data:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "transactions":[ { "payMethod":{ "value":"m" }, "bankAccount":[ "number":"80607787095718703296721164", "name":"JAN KOWALSKI", //note: depending on the bank, the name //and address may be all included in "name" "city":"WARSZAWA", "postalCode":"02-638", "street":"UL.NOWOWIEJSKIEGO 8", "address":"Warszawa Nowowiejskiego 8" ] } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								8 Transparent integration
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								Transparent (or "white label") integration allows you to display payment methods on your website and create orders in PayU system with already defined payment method.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								In order to display the payment methods icons or buttons as you see fit, you need to retrieve them. Additionally, you would need to place some information about PayU on your website to satisfy the legal requirements. This is discussed in further sections.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Transparent order request and response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To create orders with an already defined payment method you need to add
+														For example:
+													Element:a
+														payMethod
+														section.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "payMethods": { "payMethod": { "type":"PBL", "value":"m" "authorizationCode":"123456" //optional for "value":"blik", see below } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														Note:
+														for payment method "blik" it is possible to either redirect the payer to an external page or to capture a 6-digit authorization code directly on your page. In the latter case, the
+													Element:code
+														authorizationCode
+														parameter must be present in payMethods section and the
+													Element:b
+														HTTP success response code is 201
+														instead of standard 302.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For more details see
+													Element:a
+														Creating a new order via the API
+														and
+													Element:a
+														Status codes
+														sections.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														Example of a successful response
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{"orderId":"VVLR1HXK2S160929GUEST000P01","status":{"statusCode":"SUCCESS"}, "redirectUri":"https://www.platnosci.pl/np/newpayment.resume.action?paymentId=12345678&hash={HashNumber}&js=1"}
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														Example of a successful response for banks: orx, bnx, gbx, nlx
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{"orderId":"1BSLZN2FFZ160929GUEST000P01","extOrderId":"number of extOrderId", "status":{"statusCode":"WARNING_CONTINUE_REDIRECT"}, redirectUri":"https://secure.getinbank.pl/pbl/#index/index/{index}"}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								8.1 Payment methods retrieve
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to retrieve the payment methods, you need first to obtain OAuth access token, see
+							Element:a
+								Signing API calls
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then you need to insert the access token into header and use the GET method to send request to endpoint
+							Element:code
+								api/v2_1/paymethods
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to retrieve description in a specific language, you may use optional parameter:
+								.
+							Element:code
+								?lang={2-letter ISO code}
+								, e.g. 'cs', 'de', 'pl'.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sample request:
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								curl -X GET -H "Authorization: Bearer 87ad751f-7ea5-4023-a16f-04b6647a07f5" -H "Cache-Control: no-cache" 'https://secure.payu.com/api/v2_1/paymethods'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sample postive response (HTTP 200). Description of fields are below the sample:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "payByLinks":[ { "value":"c", "name":"Płatność online kartą płatniczą", "brandImageUrl":"http://static.payu.com/images/mobile/logos/pbl_c.png", "status":"ENABLED" }, { "value":"o", "name":"Pekao24Przelew", "brandImageUrl":"http://static.payu.com/images/mobile/logos/pbl_o.png", "status":"DISABLED" }, { "value":"ab", "name":"Płacę z Alior Bankiem", "brandImageUrl":"http://static.payu.com/images/mobile/logos/pbl_ab.png", "status":"TEMPORARY_DISABLED" } ] }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														payByLinks
+														payByLinks are payment methods which always require redirection of the user. Therefore this section includes online bank transfers (pay-by-links), traditional bank transfer, installments and non-tokenized cards.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														value
+													Element:td
+														payType value. Available values are
+													Element:a
+														here
+														.
+													Element:tr
+													Element:td
+														name
+													Element:td
+														Name of payType set by PayU
+													Element:tr
+													Element:td
+														brandImageUrl
+													Element:td
+														Link to payType logo graphic on PayU server.
+													Element:tr
+													Element:td
+														status
+													Element:td
+														Possible values: 'ENABLED', 'DISABLED', 'TEMPORARY_DISABLED'.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								8.2 Information requirements
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are legal requirements to be met for the transparent integration model.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You need to put the following text and links on your website, so the payer is aware that PayU is the payment service provider.
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								The below information should be displayed only if the sales are targeted at consumers in Czech Rep. or Poland. If you target consumers on other EU markets (e.g. Germany, Hungary etc.), there is no obligation to provide the information below.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:sub
+								Payment order: Payment is processed by PayU SA;The recipient's data, the payment title and the amount are provided to PayU SA by the recipient;The order is sent for processing when PayU SA receives your payment. The payment is transferred to the recipient within 1 hour, not later than until the end of the next business day;PayU SA does not charge any service fees.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:sub
+								[insert a
+							Element:b
+								checkbox,
+								here] I accept
+							Element:a
+								Terms and Conditions of the single transaction in of PayU
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:sub
+								The administrator of your personal data within the meaning of the Personal Data Protection Act of 29 August 1997 (Journal of Laws of 2002, No. 101, item 926 as amended) is PayU SA with the registered office in Poznań (60-166) at ul. Grunwaldzka 182. Your personal data will be processed according to the applicable provisions of law for archiving and service provision purposes. Your data will not be made available to other entities, except of entities authorized by law. You are entitled to access and edit your data. Data provision is voluntary but required to achieve the above-mentioned purposes.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:b
+								checkbox
+								may be already checked. It should not be possible to pay with the checkbox unchecked - in such a case the user should be shown a message like:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:sub
+								You have to accept "Terms and Conditions of the single transaction in of PayU".
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Available language versions of the above information can be found
+							Element:a
+								here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								8.3 Card form
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								PayU supports full integration of card form. Card fields may be customized and placed in any manner.
+								Card form is described at:
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								PayU | Express
+								. In case of single time payments, the agreement for card storage must not be placed:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								<tr> <td>PayU terms of condition and acceptance to save credit card</td> <td><input type="checkbox" value="false" class="payu-agreement"></td> </tr>
+								Payment example is described at:
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								PayU | Express
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								9 References
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								9.1 Signing the form
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								If you use SDK, you do not need to implement your signature individually.
+								To ensure data integrity, order parameters are signed in the
+						Node:
+						(type) c
+						(layer)2
+							Element:code
+								OpenPayu-Signature
+								field. The field structure is as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								signature=...;algorithm=...;sender=...
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that the order of these elements is irrelevant.
+								The meaning of the elements is as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+								The following is an excerpt from a form containing a sample signature:
+							Element:li
+							Element:code
+								signature
+								- it contains a signature generated in compliance with the
+							Element:a
+								algorithm
+								,
+							Element:li
+							Element:code
+								algorithm
+								- it defines an
+							Element:a
+								hash function
+								used to generate a signature,
+							Element:li
+							Element:code
+								sender
+								- a POS identifier.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								<input name="OpenPayu-Signature" value="sender=45654;algorithm=MD5;signature=aeb032c66779a4de34ec7b7f597b5058">
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Available hash functions
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														algorithm
+														parameter may take the following values:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:code
+														MD5
+														,
+													Element:li
+													Element:code
+														SHA1
+														,
+													Element:li
+													Element:code
+														SHA256
+														.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Algorithm for signing parameters in the form
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Sort all the fields available in the form in alphabetic, ascending order according to the names of parameters and the (
+													Element:code
+														name
+														attribute of the
+													Element:code
+														input
+														element).
+													Element:li
+														Concatenate values of all the fields in the indicated order.
+													Element:li
+														Assign your private key to this sequence of characters.
+													Element:li
+														Use one of the available abbreviation functions.
+													Element:li
+														Complete the
+													Element:code
+														OpenPayU-Signature
+														field with values
+													Element:code
+														signature=
+														, where:
+													Element:b
+														A
+														;algorithm=
+													Element:b
+														B
+														;sender=
+													Element:b
+														C
+													Element:ul
+													Element:li
+													Element:code
+														is the result of the abbreviation function,
+													Element:b
+														A
+													Element:li
+													Element:code
+														is the name of an applied abbreviation function,
+													Element:b
+														B
+													Element:li
+													Element:code
+														is a POS identifier.
+													Element:b
+														C
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Below is the pseudo-code of an algorithm for signing parameters in the form
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														generate_signature(form, privateKey, algorithm, posId) { sortedValues = sortValuesByItsName(form) foreach value in sortedValues { content = content + value } content = content + privateKey result = "signature=" + algorithm.apply(content) + ";" result = result + "algorithm=" + algorithm.name + ";" result = result + "sender=" + posId return result }
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								9.2 Signing API calls
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								The REST API supports two authentication method: OAuth (recommended by PayU) and HTTP Basic.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														OAuth
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You authenticate with OAuth standard by obtaining a token, which is used for further communication with PayU servers. You can veiw authorization data from the management panel. There are two grant types: client_credentials for standard integration (for standard integration) and trusted_merchant (for use with token payments).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Request example for obtaining access token in
+													Element:code
+														client_credentials
+														mode:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST https://secure.payu.com/pl/standard/user/oauth/authorize \ -d 'grant_type=client_credentials&client_id=145227&client_secret=12f071174cb7eb79d4aac5bc2f07563f'
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Respone example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "access_token":"7524f96e-2d22-45da-bc64-778a61cbfc26", "token_type":"bearer", "expires_in":43199, "grant_type":"client_credentials" }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Order example with OAuth access_token:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -X POST https://secure.payu.com/api/v2_1/orders \ -H "Content-Type: application/json" \ -H "Authorization: Bearer 3e5cac39-7e38-4139-8fd6-30adc06a61bd" \ -d '{ "customerIp": "127.0.0.1", "merchantPosId": "145227", "description": "RTV market", "currencyCode": "PLN", "totalAmount": "21000", "products": [ { "name": "Wireless Mouse for Laptop", "unitPrice": "21000", "quantity": "1" } ] }'
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+													Element:img
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														HTTP Basic
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														HTTP Basic is not recommended.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In order to receive documentation for this method please refer to:
+													Element:a
+														tech@payu.pl
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								9.3 Verification of notifications signature
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following is a sample header:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								OpenPayu-Signature: sender=checkout;signature=c33a38d89fb60f873c039fcec3a14743;algorithm=MD5;content=DOCUMENT
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To verify the header:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Retrieve the OpenPayU-Signature header from a notification received from a PayU server.
+							Element:li
+								Extract the “signature” value from the header:
+							Element:pre
+								string incoming_signature = signature_header[signature]
+							Element:li
+								Check the type of a hashing function used to generate the signature (this is usually md5)
+							Element:li
+								Combine the body of the incoming notification with the value of second_key:
+							Element:pre
+								string concatenated = JSONnotification + second_key;
+							Element:li
+								Select an expected signature value by applying the hashing function (e.g. md5) in the received chain of characters:
+							Element:pre
+								string expected_signature = md5(concatenated)
+							Element:li
+								Compare the strings: expected_signature and incoming_signature:
+							Element:pre
+								if(expected_signature == incoming_signature){ return true; //signature is correct }else{ return 'Wrong signature' // signature is incorrect }
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								9.4 Form parameters
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								This section details all parameters (both required and optional) supported by the payment form.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														General parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Required
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														customerIp
+													Element:td
+														Yes
+													Element:td
+														Payer’s IP address, e.g. 123.123.123.123
+													Element:tr
+													Element:td
+														extOrderId
+													Element:td
+														No
+													Element:td
+														Order identifier assigned by the merchant. It enables merchants to find a specific order in their system
+													Element:tr
+													Element:td
+														merchantPosId
+													Element:td
+														Yes
+													Element:td
+														POS identifier
+													Element:tr
+													Element:td
+														description
+													Element:td
+														Yes
+													Element:td
+														Order description
+													Element:tr
+													Element:td
+														currencyCode
+													Element:td
+														Yes
+													Element:td
+														Order currency compliant with ISO 4217, e.g. PLN
+													Element:tr
+													Element:td
+														totalAmount
+													Element:td
+														Yes
+													Element:td
+														The entire order value specified in the lowest currency unit, e.g. for PLN “1000” is equal to 10 PLN. HUF is the exception, this must be multiplied by 100
+													Element:tr
+													Element:td
+														OpenPayu-Signature
+													Element:td
+														Yes
+													Element:td
+														Parameter signature. For more information, see section
+													Element:a
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														URL addresses
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Required
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														continueUrl
+													Element:td
+														No
+													Element:td
+														URL to which a user will be redirected if an error occurs while placing an order. The following parameters may be sent:
+													Element:ul
+													Element:li
+													Element:code
+														status
+														- error code,
+													Element:li
+													Element:code
+														desc
+														- error description,
+													Element:li
+													Element:code
+														field
+														- patch indicating a field to which the error refers
+													Element:tr
+													Element:td
+														notifyUrl
+													Element:td
+														No
+													Element:td
+														URL to which notifications of a changed order status will be sent
+													Element:tr
+													Element:td
+														orderUrl
+													Element:td
+														No
+													Element:td
+														URL presented in the PayU system which indicates an order on a shop webpage
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Buyer
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														buyer
+														section stores basic information about the buyer. This information is not required.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Required
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														buyer.email
+													Element:td
+														Yes
+													Element:td
+														Buyer’s e-mail address
+													Element:tr
+													Element:td
+														buyer.phone
+													Element:td
+														Yes
+													Element:td
+														Buyer’s phone number
+													Element:tr
+													Element:td
+														buyer.firstName
+													Element:td
+														Yes
+													Element:td
+														Buyer’s first name
+													Element:tr
+													Element:td
+														buyer.lastName
+													Element:td
+														Yes
+													Element:td
+														Buyer’s surname
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Shipping address
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														buyer.delivery
+														section stores the shipping address. The information is nor required.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Required
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														buyer.delivery.street
+													Element:td
+														Yes
+													Element:td
+														Street name
+													Element:tr
+													Element:td
+														buyer.delivery.postalBox
+													Element:td
+														No
+													Element:td
+														Postal box number
+													Element:tr
+													Element:td
+														buyer.delivery.postalCode
+													Element:td
+														Yes
+													Element:td
+														Postal code
+													Element:tr
+													Element:td
+														buyer.delivery.city
+													Element:td
+														Yes
+													Element:td
+														City
+													Element:tr
+													Element:td
+														buyer.delivery.state
+													Element:td
+														No
+													Element:td
+														Province
+													Element:tr
+													Element:td
+														buyer.delivery.countryCode
+													Element:td
+														Yes
+													Element:td
+														Two-letter country code compliant with ISO-3166
+													Element:tr
+													Element:td
+														buyer.delivery.name
+													Element:td
+														No
+													Element:td
+														Address description
+													Element:tr
+													Element:td
+														buyer.delivery.recipientName
+													Element:td
+														Yes
+													Element:td
+														Recipient’s name
+													Element:tr
+													Element:td
+														buyer.delivery.recipientEmail
+													Element:td
+														No
+													Element:td
+														Recipient’s e-mail address
+													Element:tr
+													Element:td
+														buyer.delivery.recipientPhone
+													Element:td
+														No
+													Element:td
+														Recipient’s phone number
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Invoice data
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														buyer.invoice
+														section stores data about the invoice. This information is not required.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Required
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														buyer.invoice.street
+													Element:td
+														Yes
+													Element:td
+														Street name
+													Element:tr
+													Element:td
+														buyer.invoice.postalBox
+													Element:td
+														No
+													Element:td
+														Postal box number
+													Element:tr
+													Element:td
+														buyer.invoice.postalCode
+													Element:td
+														Yes
+													Element:td
+														Postal code
+													Element:tr
+													Element:td
+														buyer.invoice.city
+													Element:td
+														Yes
+													Element:td
+														City
+													Element:tr
+													Element:td
+														buyer.invoice.state
+													Element:td
+														No
+													Element:td
+														Province
+													Element:tr
+													Element:td
+														buyer.invoice.countryCode
+													Element:td
+														Yes
+													Element:td
+														Two-letter country code compliant with ISO-3166
+													Element:tr
+													Element:td
+														buyer.invoice.name
+													Element:td
+														No
+													Element:td
+														Address description
+													Element:tr
+													Element:td
+														buyer.invoice.recipientName
+													Element:td
+														Yes
+													Element:td
+														Recipient’s name
+													Element:tr
+													Element:td
+														buyer.invoice.recipientEmail
+													Element:td
+														No
+													Element:td
+														Recipient’s email address
+													Element:tr
+													Element:td
+														buyer.invoice.recipientPhone
+													Element:td
+														No
+													Element:td
+														Recipient’s phone number
+													Element:tr
+													Element:td
+														buyer.invoice.tIN
+													Element:td
+														No
+													Element:td
+														Tax identification number
+													Element:tr
+													Element:td
+														buyer.invoice.ennvoiceRequested
+													Element:td
+														No
+													Element:td
+														The parameter specifies whether an electronic invoice hwas ordered (possible values -
+													Element:code
+														true
+														or
+													Element:code
+														false
+														)
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Products
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														products
+														section stores a list of products ordered. The list uses an iterator. Every product is numbered with a value in the range [0..n], for example
+													Element:code
+														Products.Product[0]
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Required
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														products.product[0].name
+													Element:td
+														Yes
+													Element:td
+														Product name
+													Element:tr
+													Element:td
+														products.product[0].unitPrice
+													Element:td
+														Yes
+													Element:td
+														Product unit price
+													Element:tr
+													Element:td
+														products.product[0].quantity
+													Element:td
+														Yes
+													Element:td
+														Quantity of products
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Shipping methods
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														shippingMethods
+														section stores a list of delivery options for an order. Each type is numbered with a value in the range [0..n], for example
+													Element:code
+														ShippingMethods.ShippingMethod[0]
+														. This information is not required.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Required
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														shippingMethods.shippingMethod[0].country
+													Element:td
+														Yes
+													Element:td
+														Two-letter country code compliant with ISO-3166 for which a shipping method is available, e.g. "PL"
+													Element:tr
+													Element:td
+														shippingMethods.shippingMethod[0].price
+													Element:td
+														Yes
+													Element:td
+														The value of a delivery cost specified in the lowest currency unit, e.g. for PLN “1000” means 10 PLN
+													Element:tr
+													Element:td
+														shippingMethods.shippingMethod[0].name
+													Element:td
+														Yes
+													Element:td
+														Identifying name of a shipping method
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								9.5 JSON requests description
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								This section details all parameters (both required and optional) supported by the payment form.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														OrderCreateRequest - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														extOrderId
+													Element:td
+														ID of an order used in merchant system
+													Element:td
+														No
+													Element:tr
+													Element:td
+														notifyUrl
+													Element:td
+														The address for sending notifications
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														orderUrl
+													Element:td
+														URL of an order in the shop system
+													Element:td
+														No
+													Element:tr
+													Element:td
+														customerIp
+													Element:td
+														Customer IP address
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														merchantPosId
+													Element:td
+														Point of sale ID
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														validityTime
+													Element:td
+														Duration for the validity of an order (in seconds), during which time payment must be made
+													Element:td
+														No
+													Element:tr
+													Element:td
+														description
+													Element:td
+														Description of the an order
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														additionalDescription
+													Element:td
+														Additional description of the order
+													Element:td
+														No
+													Element:tr
+													Element:td
+														currencyCode
+													Element:td
+														Currency code (e.g PLN, EUR)
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														totalAmount
+													Element:td
+														Total price of the order
+													Element:td
+														No
+													Element:tr
+													Element:td
+														continueUrl
+													Element:td
+														Address for redirecting the customer after successful payment. If there is no authentication, an error=501 parameter is automatically added to URL. The return to shop address is for information purposes only; no decision is made on its basis
+													Element:td
+														No
+													Element:tr
+													Element:td
+														settings
+													Element:td
+														A section containing 1 field: "invoiceDisabled". Field which supports values true/false, default is 'false'. Setting 'true' removes the option
+													Element:b
+														I want to receive an invoice
+														from the payment summary page. Setting 'false' or lack of this section enables the buyer to require an invoice from the merchant. Billing details collected by PayU form are sent via notification for the order.
+													Element:td
+														No
+													Element:tr
+													Element:td
+														buyer
+													Element:td
+														Section containing buyer data. For a list of parameters, see section
+													Element:a
+														<buyer>
+													Element:td
+														No
+													Element:tr
+													Element:td
+														shippingMethods
+													Element:td
+														Section containing data of shipping methods. Section shippingMethods is an array containing elements of type <shippingMethod> This section should not be used if payMethods section is present. For a list of parameters, see section
+													Element:a
+														<shippingMethod>
+													Element:td
+														No
+													Element:tr
+													Element:td
+														products
+													Element:td
+														Section containing data of the ordered products. Section products is an array of objects of type <product>. For a list of parameters, see section
+													Element:a
+														<product>
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														payMethods
+													Element:td
+														Section allows to directly invoke payment method. Section <payMethods> is one object of <payMethod> type. For a list of parameters, see section
+													Element:a
+														<payMethod>
+													Element:td
+														No
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														OrderCreateResponse - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														redirectUri
+													Element:td
+														Address to redirect the buyer
+													Element:tr
+													Element:td
+														orderId
+													Element:td
+														Order ID generated by the PayU system
+													Element:tr
+													Element:td
+														extOrderId
+													Element:td
+														External order ID (assigned by the shop)
+													Element:tr
+													Element:td
+														status
+													Element:td
+														Response status object. For a list of parameters, see section
+													Element:a
+														<status>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Notifications - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														order
+													Element:td
+														Section containing <order> object. For a list of parameters, see section
+													Element:a
+														<order>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														OrderStatusUpdateRequest - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														orderId
+													Element:td
+														Order id in PayU system
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														orderStatus
+													Element:td
+														New order status. Possible values are:
+													Element:ul
+													Element:li
+														NEW
+													Element:li
+														PENDING
+													Element:li
+														CANCELED
+													Element:li
+														REJECTED
+													Element:li
+														COMPLETED
+													Element:li
+														WAITING_FOR_CONFIRMATION
+													Element:td
+														Yes
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														OrderStatusUpdateResponse - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														status
+													Element:td
+														Response status object. For a list of parameters, see section
+													Element:a
+														<status>
+														.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														RefundCreateRequest - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														orderId
+													Element:td
+														ID of refunded order
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														refund
+													Element:td
+														Element of <RefundInfoType>. Contains detailed information about a refund
+													Element:td
+														Yes
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Description of <RefundInfoType>
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														description
+													Element:td
+														Refund description
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														amount
+													Element:td
+														Amount of the refund. If this is left blank, all funds will be returned to the buyer
+													Element:td
+														No
+													Element:tr
+													Element:td
+														extRefundId
+													Element:td
+														External refund ID
+													Element:td
+														No
+													Element:tr
+													Element:td
+														currencyCode
+													Element:td
+														Currency code (e.g. PLN, EUR)
+													Element:td
+														No
+													Element:tr
+													Element:td
+														bankDescription
+													Element:td
+														Bank operation description
+													Element:td
+														No
+													Element:tr
+													Element:td
+														type
+													Element:td
+														Operation type (possible value: REFUND_PAYMENT_STANDARD)
+													Element:td
+														No
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														RefundCreateResponse - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														orderId
+													Element:td
+														ID of refunded order
+													Element:tr
+													Element:td
+														refund
+													Element:td
+														Element of <RefundRecord_Type>.
+													Element:tr
+													Element:td
+														status
+													Element:td
+														Response status object. For a list of parameters, see section
+													Element:a
+														<status>
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Opis <RefundRecord_Type>
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														refundId
+													Element:td
+														Refund ID
+													Element:tr
+													Element:td
+														extRefundId
+													Element:td
+														External refund ID
+													Element:tr
+													Element:td
+														amount
+													Element:td
+														Amount of the refund. If this is left blank, all money will be returned
+													Element:tr
+													Element:td
+														currencyCode
+													Element:td
+														Currency code (e.g PLN, EUR)
+													Element:tr
+													Element:td
+														description
+													Element:td
+														Refund description
+													Element:tr
+													Element:td
+														creationDateTime
+													Element:td
+														Date of refund creation
+													Element:tr
+													Element:td
+														status
+													Element:td
+														Order status code (PENDING, CANCELED, FINALIZED)
+													Element:tr
+													Element:td
+														statusDateTime
+													Element:td
+														Timestamp of the status
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														OrderCancelRequest - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														orderId
+													Element:td
+														Order ID generated by the PayU system
+													Element:td
+														Yes
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														OrderCancelResponse - opis pól komunikatu
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														orderId
+													Element:td
+														Order ID generated by the PayU system
+													Element:tr
+													Element:td
+														extOrderId
+													Element:td
+														External order ID (assigned by the shop)
+													Element:tr
+													Element:td
+														status
+													Element:td
+														Response status object. For a list of parameters, see section
+													Element:a
+														<status>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														OrderRetrieveRequest - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameters
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														orderId
+													Element:td
+														Order ID generated by the PayU system
+													Element:td
+														Yes
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														OrderRetrieveResponse - fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameters
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														orders
+													Element:td
+														Array of <order> objects. For a list of parameters, see section
+													Element:a
+														<order>
+													Element:tr
+													Element:td
+														status
+													Element:td
+														Response status object. For a list of parameters, see section
+													Element:a
+														<status>
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Common sections
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														<product> fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameters
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														name
+													Element:td
+														Name of the product
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														unitPrice
+													Element:td
+														Unit price
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														quantity
+													Element:td
+														Quantity
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														virtual
+													Element:td
+														Product type, which can be virtual or material; (possible values
+													Element:code
+														true
+														or
+													Element:code
+														false
+														).
+													Element:td
+														No
+													Element:tr
+													Element:td
+														listingDate
+													Element:td
+														Marketplace date from which the product (or offer) is available, for example: "2016-01-26T17:35:37+01:00"
+													Element:td
+														No
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														<payMethod> fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameters
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														type
+													Element:td
+														Payment method type, possible values:
+													Element:ul
+													Element:li
+														PBL (payment always requiring redirection of the user)
+													Element:li
+														CARD_TOKEN
+													Element:li
+														BANK_TOKEN
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														value
+													Element:td
+													Element:a
+														Payment type
+														(for "PBL") or token.
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														authorizationCode
+													Element:td
+														Optional for BLIK payments integrated transparently. Enables to collect 6-digit BLIK code on your website instead of redirecting to BLIK. See more about
+													Element:a
+														transparent integration
+														.
+													Element:td
+														No
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														<shippingMethod> fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														country
+													Element:td
+														Country code
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														price
+													Element:td
+														Price
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														name
+													Element:td
+														Name of the shipping method
+													Element:td
+														Yes
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														<buyer> section fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														customerIp
+													Element:td
+														Customer's IP address
+													Element:td
+														No
+													Element:tr
+													Element:td
+														extCustomerId
+													Element:td
+														ID of the customer used in merchant system
+													Element:td
+														No
+													Element:tr
+													Element:td
+														email
+													Element:td
+														Buyer's email address
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														phone
+													Element:td
+														Buyer's telephone number
+													Element:td
+														No
+													Element:tr
+													Element:td
+														firstName
+													Element:td
+														Buyer's first name
+													Element:td
+														No
+													Element:tr
+													Element:td
+														lastName
+													Element:td
+														Buyer's last name
+													Element:td
+														No
+													Element:tr
+													Element:td
+														nin
+													Element:td
+														National Identification Number
+													Element:td
+														No
+													Element:tr
+													Element:td
+														language
+													Element:td
+														Buyer's language - determines language version of the payment page. For a list of accepted language values, see section
+													Element:a
+														Language values
+													Element:td
+														No
+													Element:tr
+													Element:td
+														buyer.delivery
+													Element:td
+														Section containing delivery address. For a list of parameters, see section
+													Element:a
+														<buyer.delivery>
+													Element:td
+														No
+													Element:tr
+													Element:td
+														buyer.billing
+													Element:td
+														Section containing billing data. For a list of parameters, see section
+													Element:a
+														<buyer.billing>
+													Element:td
+														No
+													Element:tr
+													Element:td
+														buyer.invoice
+													Element:td
+														Section containing data for invoice. For a list of parameters, see section.
+													Element:a
+														<buyer.invoice>
+													Element:td
+														No
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														<buyerInvoice> fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														street
+													Element:td
+														Street
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														postalBox
+													Element:td
+														Postal box
+													Element:td
+														No
+													Element:tr
+													Element:td
+														postalCode
+													Element:td
+														Postal code
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														city
+													Element:td
+														City
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														state
+													Element:td
+														State
+													Element:td
+														No
+													Element:tr
+													Element:td
+														countryCode
+													Element:td
+														Country code
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														name
+													Element:td
+														Address description
+													Element:td
+														No
+													Element:tr
+													Element:td
+														recipientName
+													Element:td
+														Recipient name
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														recipientEmail
+													Element:td
+														Recipient email
+													Element:td
+														No
+													Element:tr
+													Element:td
+														recipientPhone
+													Element:td
+														Recipient phone number
+													Element:td
+														No
+													Element:tr
+													Element:td
+														tin
+													Element:td
+														Taxpayer Identification Number
+													Element:td
+														No
+													Element:tr
+													Element:td
+														eInvoiceRequested
+													Element:td
+														Flag specifying if invoice was requested
+													Element:td
+														No
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														<buyerBilling> fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														street
+													Element:td
+														Street
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														postalBox
+													Element:td
+														Postal box
+													Element:td
+														No
+													Element:tr
+													Element:td
+														postalCode
+													Element:td
+														Postal code
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														city
+													Element:td
+														City
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														state
+													Element:td
+														State
+													Element:td
+														No
+													Element:tr
+													Element:td
+														countryCode
+													Element:td
+														Country code
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														name
+													Element:td
+														Address description
+													Element:td
+														No
+													Element:tr
+													Element:td
+														recipientName
+													Element:td
+														Recipient name
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														recipientPhone
+													Element:td
+														Recipient phone
+													Element:td
+														No
+													Element:tr
+													Element:td
+														recipientEmail
+													Element:td
+														Recipient email
+													Element:td
+														No
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														<buyerDelivery> fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:tbody
+													Element:tr
+													Element:td
+														street
+													Element:td
+														Street
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														postalBox
+													Element:td
+														Postal box
+													Element:td
+														No
+													Element:tr
+													Element:td
+														postalCode
+													Element:td
+														Postal code
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														city
+													Element:td
+														city
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														state
+													Element:td
+														State
+													Element:td
+														No
+													Element:tr
+													Element:td
+														countryCode
+													Element:td
+														Country code
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														name
+													Element:td
+														Address description
+													Element:td
+														No
+													Element:tr
+													Element:td
+														recipientName
+													Element:td
+														Recipient name
+													Element:td
+														Yes
+													Element:tr
+													Element:td
+														recipientEmail
+													Element:td
+														Recipient email
+													Element:td
+														No
+													Element:tr
+													Element:td
+														recipientPhone
+													Element:td
+														Recipient phone number
+													Element:td
+														No
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														<order> fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														orderId
+													Element:td
+														Order ID generated by the PayU system
+													Element:tr
+													Element:td
+														extOrderId
+													Element:td
+														External order ID (assigned by the shop)
+													Element:tr
+													Element:td
+														orderCreateDate
+													Element:td
+														Order creation timestamp
+													Element:tr
+													Element:td
+														notifyUrl
+													Element:td
+														Address for sending notifications
+													Element:tr
+													Element:td
+														orderUrl
+													Element:td
+														URL of order
+													Element:tr
+													Element:td
+														customerIp
+													Element:td
+														Customer's IP address
+													Element:tr
+													Element:td
+														merchantPosId
+													Element:td
+														Point of sale ID
+													Element:tr
+													Element:td
+														description
+													Element:td
+														Description for order
+													Element:tr
+													Element:td
+														validityTime
+													Element:td
+														Duration for the validity of an order (in seconds), during which time payment must be made
+													Element:tr
+													Element:td
+														currencyCode
+													Element:td
+														Currency code (e.g PLN, EUR)
+													Element:tr
+													Element:td
+														totalAmount
+													Element:td
+														Total price of the order
+													Element:tr
+													Element:td
+														buyer
+													Element:td
+														Section containing buyer data. For a list of parameters, see section
+													Element:a
+														<buyer>
+													Element:tr
+													Element:td
+														products
+													Element:td
+														Section containing data of the ordered products. Section products is an array of objects of type <product> . For a list of parameters, see section
+													Element:a
+														<product>
+													Element:tr
+													Element:td
+														shippingMethods
+													Element:td
+														Section containing data of shipping methods. Section <shippingMethods> is an array containing elements of type <shippingMethod>. For a list of parameters, see section
+													Element:a
+														<shippingMethod>
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														<status> section fields description
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+														statusCode
+													Element:td
+														Response code
+													Element:tr
+													Element:td
+														statusDesc
+													Element:td
+														Response status description
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								9.6 Status codes
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								Below is a list of status codes sent by the PayU system. Some status codes may be sent with a more detailed message.
+								In case you need to contact PayU technical support to investigate some unsuccessful API call, please use
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								tech@payu.pl
+								address and provide the value of
+						Node:
+						(type) c
+						(layer)2
+							Element:code
+								Correlation-Id
+								header returned in the response. Status codes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								HTTP Status Code
+							Element:th
+								Status code
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:b
+								200
+								OK
+							Element:td
+								SUCCESS
+							Element:td
+								Request has been processed correctly.
+							Element:tr
+							Element:td
+							Element:b
+								201
+								OK
+							Element:td
+								SUCCESS
+							Element:td
+								Order with
+							Element:code
+								payMethods
+								array with card token or BLIK auth code has been created.
+							Element:tr
+							Element:td
+							Element:b
+								302
+								Found
+							Element:td
+								SUCCESS
+							Element:td
+								Request has been processed correctly.
+							Element:code
+								redirectUri
+								is provided in the response Location header and in the response body (in JSON payload).
+							Element:tr
+							Element:td
+								WARNING_CONTINUE_REDIRECT
+							Element:td
+								Request has been processed correctly.
+							Element:code
+								redirectUri
+								is provided in the response Location header and in the response body (in JSON payload). Applies to transparent integration, if order request contains
+							Element:code
+								payMethods
+								with following payment type values: orx, bnx, gbx, nlx.
+							Element:tr
+							Element:td
+								WARNING_CONTINUE_3DS
+							Element:td
+								3DS authorization is required. Redirect the buyer to perform 3DS authentication process.
+							Element:tr
+							Element:td
+								WARNING_CONTINUE_CVV
+							Element:td
+								CVV/CVC authorization required. Call the OpenPayU.authorizeCVV() method described
+							Element:a
+								here
+								.
+							Element:tr
+							Element:td
+							Element:b
+								400
+								Bad request
+							Element:td
+								ERROR_SYNTAX
+							Element:td
+								Incorrect request syntax. Supported format is JSON.
+							Element:tr
+							Element:td
+								ERROR_VALUE_INVALID
+							Element:td
+								One or more required values are incorrect
+							Element:tr
+							Element:td
+								ERROR_VALUE_MISSING
+							Element:td
+								One or more required values are missing
+							Element:tr
+							Element:td
+								ERROR_ORDER_NOT_UNIQUE
+							Element:td
+								Order already exists. This error may be caused by a not unique
+							Element:code
+								extOrderId
+								parameter.
+							Element:tr
+							Element:td
+							Element:b
+								401
+								Unauthorized
+							Element:td
+								UNAUTHORIZED
+							Element:td
+								Incorrect authentication. Check signature parameters and implementation of the signature algorithm
+							Element:tr
+							Element:td
+							Element:b
+								403
+								Forbidden
+							Element:td
+								UNAUTHORIZED_REQUEST
+							Element:td
+								No privileges to perform the request
+							Element:tr
+							Element:td
+							Element:b
+								404
+								Not found
+							Element:td
+								DATA_NOT_FOUND
+							Element:td
+								Data indicated in the request is not available in the PayU system
+							Element:tr
+							Element:td
+							Element:b
+								408
+								Request timeout
+							Element:td
+								TIMEOUT
+							Element:td
+								Permitted time to process the request has expired
+							Element:tr
+							Element:td
+							Element:b
+								500
+								Internal server error
+							Element:td
+								BUSINESS_ERROR
+							Element:td
+								PayU system is unavailable. Try again later
+							Element:tr
+							Element:td
+								ERROR_INTERNAL
+							Element:td
+								PayU system is unavailable. Try again later
+							Element:tr
+							Element:td
+								GENERAL_ERROR
+							Element:td
+								Unexpected error. Try again later
+							Element:tr
+							Element:td
+								WARNING
+							Element:td
+								Minor unexpected error. Try again later
+							Element:tr
+							Element:td
+							Element:b
+								503
+								Service unavailable
+							Element:td
+								SERVICE_NOT_AVAILABLE
+							Element:td
+								PayU system is unavailable. Try again later
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								9.7 Available language versions
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+								This section details the language settings for the payment form.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														General language parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Use these parameters to define the language version of the standard payment page, in the event that no payment method was defined.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Value
+													Element:th
+														Language
+													Element:tbody
+													Element:tr
+													Element:td
+														pl
+													Element:td
+														Polish
+													Element:tr
+													Element:td
+														en
+													Element:td
+														English
+													Element:tr
+													Element:td
+														cs
+													Element:td
+														Czech
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Card payment form parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Below values maybe used only in case of
+													Element:a
+														cards-only form
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Value
+													Element:th
+														Card form language
+													Element:tbody
+													Element:tr
+													Element:td
+														bg
+													Element:td
+														Bulgarian
+													Element:tr
+													Element:td
+														de
+													Element:td
+														German
+													Element:tr
+													Element:td
+														ee
+													Element:td
+														Estonian
+													Element:tr
+													Element:td
+														el
+													Element:td
+														Greek
+													Element:tr
+													Element:td
+														es
+													Element:td
+														Spanish
+													Element:tr
+													Element:td
+														fi
+													Element:td
+														Finnish
+													Element:tr
+													Element:td
+														fr
+													Element:td
+														French
+													Element:tr
+													Element:td
+														hr
+													Element:td
+														Croatian
+													Element:tr
+													Element:td
+														hu
+													Element:td
+														Hungarian
+													Element:tr
+													Element:td
+														it
+													Element:td
+														Italian
+													Element:tr
+													Element:td
+														lt
+													Element:td
+														Lithuanian
+													Element:tr
+													Element:td
+														lv
+													Element:td
+														Latvian
+													Element:tr
+													Element:td
+														pt
+													Element:td
+														Portuguese
+													Element:tr
+													Element:td
+														ro
+													Element:td
+														Romanian
+													Element:tr
+													Element:td
+														ru
+													Element:td
+														Russian
+													Element:tr
+													Element:td
+														sk
+													Element:td
+														Slovak
+													Element:tr
+													Element:td
+														sl
+													Element:td
+														Slovenian
+													Element:tr
+													Element:td
+														uk
+													Element:td
+														Ukrainian
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Legal disclaimers
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Language
+													Element:th
+														Information
+													Element:th
+														Text
+													Element:tbody
+													Element:tr
+													Element:td
+														cs
+													Element:td
+														Payment Order info
+													Element:td
+														Platební přikaz PayU SA: Službu poskytuje PayU SA; data příjemce, titul platby a sumu poskytuje PayU SA příjemce; přikaz je odeslán ke zapracování, když PayU SA obdrží platbu; platba je k dispozici příjemci během 1 holdiny, nejpozději do konce dalšího pracovního dne; PayU SA si neúčtuje žádný související poplatek za služby.
+													Element:tr
+													Element:td
+														cs
+													Element:td
+														Single Transaction Terms&Conditions
+													Element:td
+														Přijímám
+													Element:a
+														"Podmínky pro provedení jednorázové platební transakce v PayU"
+														.
+													Element:tr
+													Element:td
+														cs
+													Element:td
+														Data protection info
+													Element:td
+														Správcem vašich osobních údajů ve smyslu Zákona o ochraně osobních údajů ze dne 29. srpna 1997 (Sbírka zákonů 2002, č. 101, položka 926, ve znění pozdějších úprav) je PayU SA se sídlem registrovaným na adrese Grunwaldzka 182, Poznaň (60-166), Polsko. Vaše osobní údaje budou zpracovány a archivovány v souladu s příslušnými ustanoveními uvedeného zákona. Vaše údaje nebudou zpřístupněny třetím osobám, s výjimkou osob k tomu autorizovaných zákonem. Máte právo k vašim údajům přistupovat a upravovat je. Poskytnutí údajů je dobrovolné, ale je požadováno k účelům uvedeným výše.
+													Element:tr
+													Element:td
+														pl
+													Element:td
+														Payment Order info
+													Element:td
+														Zlecenie realizacji płatności: Zlecenie wykonuje PayU SA;Dane odbiorcy, tytuł oraz kwota płatności dostarczane są PayU SA przez odbiorcę;Zlecenie jest przekazywane do realizacji po otrzymaniu przez PayU SA Państwa wpłaty. Płatność udostępniana jest odbiorcy w ciągu 1 godziny, nie później niż do końca następnego dnia roboczego;PayU SA nie pobiera opłaty od realizacji usługi.
+													Element:tr
+													Element:td
+														pl
+													Element:td
+														Single Transaction Terms&Conditions
+													Element:td
+														Akceptuję
+													Element:a
+														"Regulamin pojedynczej transakcji płatniczej PayU"
+														.
+													Element:tr
+													Element:td
+														pl
+													Element:td
+														Data protection info
+													Element:td
+														Administratorem Twoich danych osobowych w rozumieniu ustawy z dnia 29 sierpnia 1997 r. o ochronie danych osobowych (tj. Dz.U. z 2002 roku, nr 101, poz. 926 z późn. zm.) jest PayU SA z siedzibą w Poznaniu (60-166), przy ul. Grunwaldzkiej 182. Twoje dane osobowe będą przetwarzane zgodnie z obowiązującymi przepisami prawa, w celu świadczenia usług i archiwizacji. Twoje dane nie będą udostępniane innym podmiotom, z wyjątkiem podmiotów upoważnionych na podstawie przepisów prawa. Przysługuje Tobie prawo dostępu do treści swoich danych oraz ich poprawiania. Podanie danych jest dobrowolne, ale niezbędne do realizacji ww. celu.

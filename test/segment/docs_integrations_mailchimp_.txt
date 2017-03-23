@@ -1,0 +1,722 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					MailChimp Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					MailChimp
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to MailChimp in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					With Segment you can add people to your Mailchimp list with a single
+				Element:a
+					call.
+				Element:code
+					identify
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating your API Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is recommended that you create a brand new api key for the Segment integration. MailChimp restricts each api key to a maximum of 10 concurrent requests, so creating a dedicated one for Segment will ensure maximum throughput for outgoing calls.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can read more about API keys on
+										Element:a
+											MailChimp’s docs
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Finding your List ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Select the list you wish to add users to, then look in “Settings” under “List Name & defaults”. Your List Id will be at the top of the right column, here:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Every time you call
+							Element:a
+								with an email address included, we will:
+							Element:code
+								identify
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:p
+								1) First ask Mailchimp if that email exists and what their subscriber status is for the
+							Element:code
+								listId
+								you have provided in the integration settings.
+							Element:li
+							Element:p
+								2) If they do not exist, we will
+							Element:strong
+								subscribe
+								that user to the list immediately. If you have
+							Element:code
+								doubleOptIn
+								setting enabled, it will send a confirmation email to that user before subscribing them and that email will not be tagged with a subscriber status of
+							Element:code
+								pending
+								.
+							Element:li
+							Element:p
+								3) If they already have a subscriber status such as
+							Element:code
+								pending
+								,
+							Element:code
+								subscribed
+								,
+							Element:code
+								unsubscribed
+								or
+							Element:code
+								cleaned
+								, we will
+							Element:strong
+								NOT
+								resubscribe them but simply update their user
+							Element:code
+								traits
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								So you no longer have to worry about the
+							Element:code
+								identify
+								call resubscribing users unintentionally!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s an example:
+						Node:
+						(type) c
+						(layer)2
+							Element:figure
+							Element:pre
+							Element:code
+								analytics.identify("12345", new Traits() .putValue("firstName", "Peter") .putValue("lastName", "Gibbons") .putValue("email", "peter@initech.com"));
+							Element:pre
+							Element:code
+								client.Identify(&analytics.Identify{ UserId: "12345", Traits: map[string]interface{}{ "firstName": "Peter", "lastName": "Gibbons", "email": "peter@initech.com", }, })
+							Element:pre
+							Element:code
+								[[SEGAnalytics sharedAnalytics] identify:@"12345", traits: @{ @"firstName" : @"Peter", @"lastName" : @"Gibbons", @"email" : @"peter@initech.com" }];
+							Element:pre
+							Element:code
+								Analytics.identify("12345", new Traits() .put("firstName", "Peter") .put("lastName", "Gibbons") .put("email", "peter@initech.com"));
+							Element:pre
+							Element:code
+								analytics.identify({ userId: '12345', traits: { firstName: 'Peter', lastName: 'Gibbons', email: 'peter@initech.com' } });
+							Element:pre
+							Element:code
+								Analytics::identify(array( "userId" => "12345", "traits" => array( "firstName" => "Peter", "lastName" => "Gibbons", "email" => "peter@initech.com" ) ));
+							Element:pre
+							Element:code
+								analytics.identify('12345', { 'firstName': 'Peter', 'lastName': 'Gibbons', 'email': 'peter@initech.com' })
+							Element:pre
+							Element:code
+								Analytics.identify( user_id: '12345', traits: { firstName: 'Peter', lastName: 'Gibbons', email: 'peter@initech.com' } )
+							Element:pre
+							Element:code
+								analytics.identify('12345', { firstName: 'Peter', lastName: 'Gibbons', email: 'peter@initech.com' });
+							Element:pre
+							Element:code
+								Analytics.Client.Identify("12345", new Traits() { { "firstName", "Peter" }, { "lastName", "Gibbons" }, { "email", "peter@initech.com" } });
+							Element:pre
+							Element:code
+								Analytics.Client.Identify("12345", new Traits() { { "firstName", "Peter" }, { "lastName", "Gibbons" }, { "email", "peter@initech.com" } });
+							Element:pre
+							Element:code
+								curl
+							Element:a
+								https://api.segment.io/v1/identify
+								\ -d userId=12345 \ -d traits[firstName]=Peter \ -d traits[lastName]=Gibbons \ -d traits[email]=peter@initech.com
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment recognizes
+							Element:code
+								firstName
+								,
+							Element:code
+								lastName
+								and
+							Element:code
+								email
+								as
+							Element:a
+								special traits
+								, so we will translate those for you to match the Mailchimp accepted field names. Mailchimp includes these fields by default when you create a list.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Recording Custom User Traits
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to view any other custom user traits in the Mailchimp list dashboard, you
+										Element:strong
+											must
+										Element:a
+											create a Custom Merge Field inside Mailchimp’s UI
+											of the
+										Element:code
+											traits
+											in your
+										Element:code
+											identify
+											calls. Note that you do not need to map all
+										Element:code
+											user.traits
+											you are sending inside Mailchimp. You only need to create Custom Merge Fields of the traits you
+										Element:em
+											want
+											to see in your list view.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											IMPORTANT:
+											Mailchimp only supports merge tags that are 10 characters or shorter. So for every user
+										Element:code
+											trait
+											you send inside the
+										Element:code
+											.identify()
+											call, we will trim it to be the first 10 characters and will send it in
+										Element:strong
+											uppercase
+											form to Mailchimp. So it’s very important that when you set up your merge tags in Mailchimp, your
+										Element:code
+											Merge Tags
+											are the first 10 characters (excluding whitespace or special characters) of its
+										Element:code
+											Field Label
+											(if it’s over 10 characters).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, if your
+										Element:code
+											Field Label
+											was
+										Element:code
+											Way Too-Long123
+											, your
+										Element:code
+											Merge Tag
+											should be
+										Element:code
+											WAYTOOLONG
+											. And the
+										Element:code
+											user.trait
+											inside your
+										Element:code
+											.identify()
+											call would be
+										Element:code
+											Way Too-Long123
+											since we will convert that to
+										Element:code
+											WAYTOOLONG
+											before sending it to Mailchimp.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are going to be sending either a
+										Element:code
+											boolean
+											or
+										Element:code
+											null
+											object as a
+										Element:code
+											user.trait
+											value, when creating the custom merge field for that trait inside Mailchimp, make sure to set the data type as
+										Element:code
+											TEXT
+											since we will stringify all
+										Element:code
+											boolean
+											or
+										Element:code
+											null
+											objects to strings.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Also note that fields you specify in Mailchimp as date fields must receive dates. Passing non-date values will cause issues.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Recording
+										Element:code
+											userId
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you send a
+										Element:code
+											userId
+											in your
+										Element:code
+											.identify()
+											call, we will attach it as Mailchimp’s semantic
+										Element:code
+											unique_email_id
+											for that user. This is a read-only unique identifier for that email across all of Mailchimp.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Overriding List ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have multiple lists that your users can subscribe to, you can override the default list ID. Simply send a
+										Element:code
+											listId
+											parameter as an option for Mailchimp:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.identify('12345', { firstName: 'Peter' }, { "MailChimp": { "listId": "ea7918abb6" } });
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Manually updating user subscription status
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’d like to manually update a user’s subscription status, you can do so by passing in
+										Element:code
+											subscriptionStatus
+											property as an option for Mailchimp:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.identify('12345', { firstName: 'Peter' }, { "MailChimp": { "listId": "ea7918abb6", "subscriptionStatus": "unsubscribed" } });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Important:
+											You must use the semantic property exactly as is,
+										Element:code
+											subscriptionStatus
+											(case-sensitive) and the value of this property
+										Element:em
+											must
+											be one of the four valid statuses supported by Mailchimp:
+										Element:code
+											pending
+											,
+										Element:code
+											subscribed
+											,
+										Element:code
+											unsubscribed
+											, and
+										Element:code
+											cleaned
+											(all lowercase).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Again, this will
+										Element:strong
+											NOT
+											work for new users. New users will always have their subscription status set as either
+										Element:code
+											pending
+											or
+										Element:code
+											subscribed
+											depending on your double opt-in setting.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Features
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Custom Merge Fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To send custom merge fields/user traits to Mailchimp you need to create the merge field first in Mailchimp for each trait you want sent to Mailchimp. Then when you call
+										Element:a
+											with keys that match those
+										Element:code
+											identify
+										Element:code
+											traits
+											they will appear in your Mailchimp list.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, if you have a list in Mailchimp with these custom merge fields:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can populate those fields using this
+										Element:a
+											call:
+										Element:code
+											identify
+									Node:
+									(type) c
+									(layer)3
+										Element:figure
+										Element:pre
+										Element:code
+											analytics.identify("12345", new Traits() .putValue("firstName", "Peter") .putValue("lastName", "Gibbons") .putValue("email", "peter@initech.com") .putValue("company", "Initech") .putValue("employees", 234));
+										Element:pre
+										Element:code
+											client.Identify(&analytics.Identify{ UserId: "12345", Traits: map[string]interface{}{ "firstName": "Peter", "lastName": "Gibbons", "email": "peter@initech.com", "company": "Initech", "employees": 234, }, })
+										Element:pre
+										Element:code
+											[[SEGAnalytics sharedAnalytics] identify:@"12345", traits: @{ @"firstName" : @"Peter", @"lastName" : @"Gibbons", @"email" : @"peter@initech.com", @"company" : @"Initech", @"employees" : @234 }];
+										Element:pre
+										Element:code
+											Analytics.identify("12345", new Traits() .put("firstName", "Peter") .put("lastName", "Gibbons") .put("email", "peter@initech.com") .put("company", "Initech") .put("employees", 234));
+										Element:pre
+										Element:code
+											analytics.identify({ userId: '12345', traits: { firstName: 'Peter', lastName: 'Gibbons', email: 'peter@initech.com', company: 'Initech', employees: 234 } });
+										Element:pre
+										Element:code
+											Analytics::identify(array( "userId" => "12345", "traits" => array( "firstName" => "Peter", "lastName" => "Gibbons", "email" => "peter@initech.com", "company" => "Initech", "employees" => 234 ) ));
+										Element:pre
+										Element:code
+											analytics.identify('12345', { 'firstName': 'Peter', 'lastName': 'Gibbons', 'email': 'peter@initech.com', 'company': 'Initech', 'employees': 234 })
+										Element:pre
+										Element:code
+											Analytics.identify( user_id: '12345', traits: { firstName: 'Peter', lastName: 'Gibbons', email: 'peter@initech.com', company: 'Initech', employees: 234 } )
+										Element:pre
+										Element:code
+											analytics.identify('12345', { firstName: 'Peter', lastName: 'Gibbons', email: 'peter@initech.com', company: 'Initech', employees: 234 });
+										Element:pre
+										Element:code
+											Analytics.Client.Identify("12345", new Traits() { { "firstName", "Peter" }, { "lastName", "Gibbons" }, { "email", "peter@initech.com" }, { "company", "Initech" }, { "employees", 234 } });
+										Element:pre
+										Element:code
+											Analytics.Client.Identify("12345", new Traits() { { "firstName", "Peter" }, { "lastName", "Gibbons" }, { "email", "peter@initech.com" }, { "company", "Initech" }, { "employees", 234 } });
+										Element:pre
+										Element:code
+											curl
+										Element:a
+											https://api.segment.io/v1/identify
+											\ -d userId=12345 \ -d traits[firstName]=Peter \ -d traits[lastName]=Gibbons \ -d traits[email]=peter@initech.com \ -d traits[company]=Initech \ -d traits[employees]=234
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For any other custom
+										Element:code
+											traits
+											just add a Mailchimp Custom Merge Field inside of Mailchimp with a tag that matches the key you are using in your
+										Element:a
+											call. In the example these
+										Element:code
+											identify
+										Element:code
+											traits
+											are
+										Element:strong
+											company
+											and
+										Element:strong
+											employees
+											. They will be shown as
+										Element:strong
+											COMPANY
+											and
+										Element:strong
+											EMPLOYEES
+											in Mailchimp, but you can record them in lower-case to
+										Element:a
+											and they will still be populated.
+										Element:code
+											identify
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once Mailchimp has processed the new subscriber you’ll see it show up in your list, like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that you can’t pass arrays as values to Mailchimp. This can cause calls to not show up.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+								✅
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You create and copy-paste your MailChimp API Key from Account Settings > Extras > API Keys.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Datacenter ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your Datacenter ID in the MailChimp url in your browser when you’re logged in. It’s the ‘us1’ in ‘
+										Element:a
+											https://us1.admin.mailchimp.com/lists/
+											‘.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Double Opt-In
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An optional flag to control whether a double opt-in confirmation message is sent when subscribing new users.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											List ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your List ID in your Mailchimp list’s Settings pane under List Name & Defaults. Your list ID will be at the top of the right column.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

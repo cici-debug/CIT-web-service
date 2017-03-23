@@ -1,0 +1,1194 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you toggle on Omniture in Segment, our CDN is updated within 5-10 minutes. Then our javascript will start sending all mapped
+							Element:code
+								track
+								calls to your Omniture installation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you already host an Omniture instance on your page, we will hook into that. In the absence of an existing client-side instance we will create one that points to the
+							Element:strong
+								Tracking Server URL
+								you entered in your Omniture settings on Segment.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Overview
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Omniture integration on Segment works with
+										Element:a
+											all of our tracking sources
+											. When you send events via our mobile SDKs or server-side sources we translate that data into XML format and pass it to Omniture’s XML Insertion API. Events tracked in client-side javascript are sent directly from the browser.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Pageviews can be tracked via Segment with
+							Element:a
+								calls from the browser. You must call it at least once per page. The javascript snippet you copy-paste from the setup guide comes with a default,
+							Element:code
+								page
+							Element:code
+								analytics.page();
+								call.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:em
+								You can extend the basic call to include the page name:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.page('Home');
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This will set
+							Element:code
+								s.pageName
+								on Sitecatalyst to
+							Element:strong
+								Home
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Going a step further, you can extend the
+							Element:code
+								page
+								call with additional properties.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.page('Product', { channel: 'Electronics', campaign: 'Radio Spot XYZ', sku: 'X-1287XL888C' });
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This will set the
+							Element:code
+								channel
+								and
+							Element:code
+								campaign
+								automatically for the pageview sent to Sitecatalyst. This also works for track calls and for some other fields from our
+							Element:a
+								spec
+								including
+							Element:code
+								state
+								,
+							Element:code
+								zip
+								,
+							Element:code
+								purchaseId
+								, and
+							Element:code
+								transactionId
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default the
+							Element:code
+								sku
+								property will not be sent to Omniture. First you have to map
+							Element:code
+								sku
+								inside the Segment interface to a numbered
+							Element:code
+								eVar
+								or
+							Element:code
+								prop
+								:
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Check out the
+							Element:code
+								page
+								method docs for more information about our
+							Element:a
+								page tracking API
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Event tracking in Omniture requires one extra step as compared to other integrations.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll have to map each event and event property to a corresponding Omniture
+							Element:code
+								event
+								,
+							Element:code
+								prop
+								, or
+							Element:code
+								eVar
+								in our interface. Once you’ve created that mapping, we’ll automatically translate your
+							Element:code
+								analytics.track()
+								calls and send them to Omniture.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s an example mapping in our interface:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								And the corresponding
+							Element:code
+								track
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:figure
+							Element:pre
+							Element:code
+								analytics.track("Played Song", new Properties() .putValue("song", "YMCA") .putValue("genre", "Disco"));
+							Element:pre
+							Element:code
+								client.Track(&analytics.Track{ UserId: "12345", Event: "Played Song", Properties: map[string]interface{}{ "song": "YMCA", "genre": "Disco", }, })
+							Element:pre
+							Element:code
+								[[SEGAnalytics sharedAnalytics] track:@"Played Song", properties: @{ @"song" : @"YMCA", @"genre" : @"Disco" }];
+							Element:pre
+							Element:code
+								Analytics.track("12345", "Played Song", new Props() .put("song", "YMCA") .put("genre", "Disco"));
+							Element:pre
+							Element:code
+								analytics.track({ userId: '12345', event: 'Played Song', properties: { song: 'YMCA', genre: 'Disco' } });
+							Element:pre
+							Element:code
+								Analytics::track(array( "userId" => "12345", "event" => "Played Song", "properties" => array( "song" => "YMCA", "genre" => "Disco" ) ));
+							Element:pre
+							Element:code
+								analytics.track('12345', 'Played Song', { 'song': 'YMCA', 'genre': 'Disco' })
+							Element:pre
+							Element:code
+								Analytics.track( user_id: '12345', event: 'Played Song', properties: { song: 'YMCA', genre: 'Disco' } )
+							Element:pre
+							Element:code
+								analytics.track('Played Song', { song: 'YMCA', genre: 'Disco' });
+							Element:pre
+							Element:code
+								Analytics.Client.Track("12345", "Played Song", new Properties() { { "song", "YMCA" }, { "genre", "Disco" } });
+							Element:pre
+							Element:code
+								Analytics.Client.Track("12345", "Played Song", new Properties() { { "song", "YMCA" }, { "genre", "Disco" } });
+							Element:pre
+							Element:code
+								curl
+							Element:a
+								https://api.segment.io/v1/track
+								\ -d userId=12345 \ -d "event=Played Song" \ -d properties[song]=YMCA \ -d properties[genre]=Disco
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this example Segment will automatically send the following data to Omniture:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								s.events = 'event99';
+							Element:li
+							Element:code
+								s.prop4 = 'YMCA';
+							Element:li
+							Element:code
+								s.prop67 = 'Disco';
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We
+							Element:em
+								will not
+								send any
+							Element:code
+								event
+								,
+							Element:code
+								prop
+								or
+							Element:code
+								eVar
+								which isn’t found in your mapping. Except for
+							Element:a
+								Ecommerce events
+								, which are automatically aliased to Omniture events.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								With
+							Element:a
+								in place, you’ll no longer need to write Omniture-specific code to send data to Omniture. Once you create the mapping we’ll automatically set up all of the tracking code and send the data to the Omniture server.
+							Element:code
+								track
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											eVars
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With Segment you can map an event name or property to an
+										Element:code
+											eVar
+											in Omniture. This works the same way as the mapping example above.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								E-Commerce
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Our Omniture integration works with our standard
+							Element:a
+								Ecommerce API
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s how we map our standard ecommerce events to Omniture events:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+								Viewed Product
+							Element:td
+							Element:code
+								prodView
+							Element:tr
+							Element:td
+								Added Product
+							Element:td
+							Element:code
+								scAdd
+							Element:tr
+							Element:td
+								Removed Product
+							Element:td
+							Element:code
+								scRemove
+							Element:tr
+							Element:td
+								Completed Order
+							Element:td
+							Element:code
+								purchase
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								These events are specific to Omniture and thus, not mentioned in our ecommerce docs. However, we will still translate the following event names to Omniture’s naming conventions as mapped below:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+								Viewed Cart
+							Element:td
+							Element:code
+								scView
+							Element:tr
+							Element:td
+								Opened Cart
+							Element:td
+							Element:code
+								scOpen
+							Element:tr
+							Element:td
+								Viewed Checkout
+							Element:td
+							Element:code
+								scCheckout
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For
+							Element:a
+								ecommerce events
+								, we’ll automatically send standard properties to Omniture, like
+							Element:code
+								category
+								,
+							Element:code
+								product
+								,
+							Element:code
+								quantity
+								,
+							Element:code
+								orderId
+								, and
+							Element:code
+								price
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Mobile
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment supports Omniture mobile app analytics via the Omniture XML Insertion API. You’ll no longer need to deal with the Omniture SDKs at all.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For getting started with our mobile sources, check out the
+							Element:a
+								iOS
+								and
+							Element:a
+								Android
+								technical docs.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Add the Omniture Report Suite Id / Report Server Url
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The first thing you’ll want to do is to add the
+										Element:strong
+											Report Suite Id
+											and the
+										Element:strong
+											Report Server Url
+											settings to your Segment Omniture integrations settings.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											When Will I See Data?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you already have an app deployed with the Segment library, and you just turned on Omniture mobile, it will take up to an hour for all your mobile users to refresh their Segment settings cache, and learn about the new service that you want to send to.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											After the settings cache refreshes, our library will automatically start sending data to Omniture.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Android Permissions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+											You’ll need to make sure you added these permissions to your
+										Element:code
+											AndroidManifest.xml
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<uses-permission android:name="android.permission.INTERNET" /> <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Miscellaneous
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Custom Links
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to populate the Custom Links report when sending data server-side, you’ll need to pass
+										Element:code
+											context.page.url
+											manually.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					Aboardly
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					Adjust
+				Element:li
+				Element:a
+					AdLearn Open Platform
+				Element:li
+				Element:a
+					Adobe Analytics
+				Element:li
+				Element:a
+					AdRoll
+				Element:li
+				Element:a
+					AdWords
+				Element:li
+				Element:a
+					Alexa
+				Element:li
+				Element:a
+					Amazon Kinesis
+				Element:li
+				Element:a
+					Amazon S3
+				Element:li
+				Element:a
+					Amplitude
+				Element:li
+				Element:a
+					Appboy
+				Element:li
+				Element:a
+					Appcues
+				Element:li
+				Element:a
+					AppNexus
+				Element:li
+				Element:a
+					AppsFlyer
+				Element:li
+				Element:a
+					Apptimize
+				Element:li
+				Element:a
+					Atatus
+				Element:li
+				Element:a
+					Attribution
+				Element:li
+				Element:a
+					AutopilotHQ
+				Element:li
+				Element:a
+					Autosend
+				Element:li
+				Element:a
+					awe.sm
+				Element:li
+				Element:a
+					BIME
+				Element:li
+				Element:a
+					Bing Ads
+				Element:li
+				Element:a
+					Blueshift
+				Element:li
+				Element:a
+					Boomtrain
+				Element:li
+				Element:a
+					Branch Metrics
+				Element:li
+				Element:a
+					Bronto
+				Element:li
+				Element:a
+					BugHerd
+				Element:li
+				Element:a
+					Bugsnag
+				Element:li
+				Element:a
+					Calq
+				Element:li
+				Element:a
+					Castle
+				Element:li
+				Element:a
+					Chartbeat
+				Element:li
+				Element:a
+					Chartio
+				Element:li
+				Element:a
+					Clearbit
+				Element:li
+				Element:a
+					Clearbit Reveal
+				Element:li
+				Element:a
+					CleverTap
+				Element:li
+				Element:a
+					Clicky
+				Element:li
+				Element:a
+					ClientSuccess
+				Element:li
+				Element:a
+					comScore
+				Element:li
+				Element:a
+					Convertro
+				Element:li
+				Element:a
+					Countly
+				Element:li
+				Element:a
+					Crazy Egg
+				Element:li
+				Element:a
+					Criteo
+				Element:li
+				Element:a
+					Crittercism
+				Element:li
+				Element:a
+					Curebit
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					DataXu
+				Element:li
+				Element:a
+					DoubleClick Floodlight
+				Element:li
+				Element:a
+					Drift
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Elevio
+				Element:li
+				Element:a
+					Eloqua
+				Element:li
+				Element:a
+					Email Aptitude
+				Element:li
+				Element:a
+					Errorception
+				Element:li
+				Element:a
+					Evergage
+				Element:li
+				Element:a
+					Extole
+				Element:li
+				Element:a
+					Facebook App Events
+				Element:li
+				Element:a
+					Facebook Offline Conversions
+				Element:li
+				Element:a
+					Facebook Pixel
+				Element:li
+				Element:a
+					Flurry
+				Element:li
+				Element:a
+					FoxMetrics
+				Element:li
+				Element:a
+					Freshsales
+				Element:li
+				Element:a
+					FullStory
+				Element:li
+				Element:a
+					Gainsight
+				Element:li
+				Element:a
+					Gauges
+				Element:li
+				Element:a
+					Goedle
+				Element:li
+				Element:a
+					Google Analytics
+				Element:li
+				Element:a
+					Google Tag Manager
+				Element:li
+				Element:a
+					GoSquared
+				Element:li
+				Element:a
+					HasOffers
+				Element:li
+				Element:a
+					Heap
+				Element:li
+				Element:a
+					Hello Bar
+				Element:li
+				Element:a
+					Help Scout
+				Element:li
+				Element:a
+					HitTail
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Hull
+				Element:li
+				Element:a
+					Improvely
+				Element:li
+				Element:a
+					Indicative
+				Element:li
+				Element:a
+					Infinario
+				Element:li
+				Element:a
+					Inspectlet
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					Iron.io
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					JackDB
+				Element:li
+				Element:a
+					Kahuna
+				Element:li
+				Element:a
+					Keen IO
+				Element:li
+				Element:a
+					Kenshoo Infinity
+				Element:li
+				Element:a
+					KISSmetrics
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Knowtify
+				Element:li
+				Element:a
+					Kochava
+				Element:li
+				Element:a
+					Leanplum
+				Element:li
+				Element:a
+					Librato
+				Element:li
+				Element:a
+					Lifecycle
+				Element:li
+				Element:a
+					LiveChat
+				Element:li
+				Element:a
+					Localytics
+				Element:li
+				Element:a
+					Looker
+				Element:li
+				Element:a
+					Lucky Orange
+				Element:li
+				Element:a
+					Lytics
+				Element:li
+				Element:a
+					Madkudu
+				Element:li
+				Element:a
+					MailChimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					MediaMath
+				Element:li
+				Element:a
+					Millennial Media
+				Element:li
+				Element:a
+					Mixpanel
+				Element:li
+				Element:a
+					Mode
+				Element:li
+				Element:a
+					MoEngage
+				Element:li
+				Element:a
+					Mojn
+				Element:li
+				Element:a
+					Monetate
+				Element:li
+				Element:a
+					Mouseflow
+				Element:li
+				Element:a
+					MouseStats
+				Element:li
+				Element:a
+					Nanigans
+				Element:li
+				Element:a
+					Natero
+				Element:li
+				Element:a
+					Navilytics
+				Element:li
+				Element:a
+					New Relic
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					Olark
+				Element:li
+				Element:a
+					OneSignal
+				Element:li
+				Element:a
+					Optimizely
+				Element:li
+				Element:a
+					Outbound
+				Element:li
+				Element:a
+					Pardot
+				Element:li
+				Element:a
+					Parsely
+				Element:li
+				Element:a
+					Pendo
+				Element:li
+				Element:a
+					Perfect Audience
+				Element:li
+				Element:a
+					Periscope.io
+				Element:li
+				Element:a
+					Pingdom
+				Element:li
+				Element:a
+					Piwik
+				Element:li
+				Element:a
+					Planhat
+				Element:li
+				Element:a
+					Pointillist
+				Element:li
+				Element:a
+					Promoter.io
+				Element:li
+				Element:a
+					Qualaroo
+				Element:li
+				Element:a
+					Quantcast
+				Element:li
+				Element:a
+					QuanticMind
+				Element:li
+				Element:a
+					RadiumOne Connect
+				Element:li
+				Element:a
+					Ramen
+				Element:li
+				Element:a
+					Relay
+				Element:li
+				Element:a
+					Responsys
+				Element:li
+				Element:a
+					Rockerbox
+				Element:li
+				Element:a
+					Rollbar
+				Element:li
+				Element:a
+					Route
+				Element:li
+				Element:a
+					SaaSquatch
+				Element:li
+				Element:a
+					Sailthru
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Salesforce Marketing Cloud
+				Element:li
+				Element:a
+					Salesmachine
+				Element:li
+				Element:a
+					SatisMeter
+				Element:li
+				Element:a
+					Seg
+				Element:li
+				Element:a
+					sendinblue
+				Element:li
+				Element:a
+					Sendwithus
+				Element:li
+				Element:a
+					Sentry
+				Element:li
+				Element:a
+					ShareASale
+				Element:li
+				Element:a
+					SimpleReach
+				Element:li
+				Element:a
+					Slack
+				Element:li
+				Element:a
+					Smyte
+				Element:li
+				Element:a
+					SnapEngage
+				Element:li
+				Element:a
+					SparkPage
+				Element:li
+				Element:a
+					Spinnakr
+				Element:li
+				Element:a
+					Stitch Data
+				Element:li
+				Element:a
+					Stripe Radar
+				Element:li
+				Element:a
+					Tableau
+				Element:li
+				Element:a
+					Taplytics
+				Element:li
+				Element:a
+					Tapstream
+				Element:li
+				Element:a
+					Totango
+				Element:li
+				Element:a
+					Track JS
+				Element:li
+				Element:a
+					Tractionboard
+				Element:li
+				Element:a
+					Trak.io
+				Element:li
+				Element:a
+					tray.io
+				Element:li
+				Element:a
+					Treasure Data
+				Element:li
+				Element:a
+					TUNE
+				Element:li
+				Element:a
+					TV Squared
+				Element:li
+				Element:a
+					Twitter Ads
+				Element:li
+				Element:a
+					Urban Airship
+				Element:li
+				Element:a
+					Userlike
+				Element:li
+				Element:a
+					UserVoice
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Visual Website Optimizer
+				Element:li
+				Element:a
+					Watsi
+				Element:li
+				Element:a
+					WebEngage
+				Element:li
+				Element:a
+					Webhooks
+				Element:li
+				Element:a
+					Webtrends
+				Element:li
+				Element:a
+					Whale Alerts
+				Element:li
+				Element:a
+					Whale Watch
+				Element:li
+				Element:a
+					Woopra
+				Element:li
+				Element:a
+					Wootric
+				Element:li
+				Element:a
+					Xplenty
+				Element:li
+				Element:a
+					Yandex Metrica
+				Element:li
+				Element:a
+					Yellowhammer
+				Element:li
+				Element:a
+					Zaius
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					Zopim
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a
+				Element:li
+				Element:a

@@ -1,0 +1,601 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Quantcast Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					Quantcast
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to Quantcast in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					We have both web and mobile integrations with Quantcast. The two integrations are outlined below. Our Quantcast integration code is also open source on Github. Feel free to check it out:
+				Element:a
+					analytics-ios-integration-quantcast
+					,
+				Element:a
+					analytics.js-integration-quantcast
+					.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Web Integration
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you toggle on Quantcast for a website in Segment, this is what happens:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Our CDN is updated within 5-10 minutes. Then our snippet will start asynchronously loading quant.js onto your page. This means you should remove Quantcast’s snippet from your page.
+							Element:li
+								Quantcast will automatically start recording data. If this is the first time sending data to Quantcast it can take them up to
+							Element:strong
+								12 days
+								to process your new data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Quantcast supports the
+							Element:code
+								identify
+								and
+							Element:code
+								track
+								methods on our API.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note: For Quantcast to load you must call our page method. There is a call to page in your javascript snippet by default, so as long as you don’t remove it Quantcast will load whenever your snippet loads!
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Page
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:code
+											.page()
+											, we will automatically pass the labels.
+										Element:a
+											See below for details
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Identify
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:code
+											.identify()
+											with a
+										Element:code
+											userId
+											, we’ll stringify it and pass it to Quantcast. This allows you to accurately measure your audience size across multiple platforms and devices.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Track
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our
+										Element:code
+											.track()
+											method will append Quantcast labels automatically.
+										Element:a
+											See below for details
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Order ID
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When you call
+													Element:code
+														.track()
+														and include a property labeled
+													Element:code
+														orderId
+														and
+													Element:code
+														revenue
+														according to our spec, we will pass that along to Quantcast in the format they expect.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Order Completed
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For purchase events, you should send an event called
+										Element:code
+											Order Completed
+											per our spec
+										Element:a
+											seen here
+											that includes properties of
+										Element:code
+											order_id
+											and
+										Element:code
+											revenue
+											in dollars (eg
+										Element:code
+											16.50
+											). If available, you should also include properties of
+										Element:code
+											category
+											and
+										Element:code
+											repeat
+											with a value of
+										Element:code
+											true
+											or
+										Element:code
+											false
+											indicating whether or not the visitor is new or returning. This will cause the appropriate Quantcast custom lables to be populated properly.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Features
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Labels
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When you call
+													Element:code
+														page
+														,
+													Element:code
+														track
+														or
+													Element:code
+														screen
+														, we’ll pass the page name, event name or screen name and the category (if provided) to Quantcast as a label. The standard label will look like this “
+												Node:
+												(type) c
+												(layer)4
+													Element:title
+														“ for page or screen, and ““ for track events. If you enable Quantcast for advertisers then we’ll send “_fp.event.“ to match Quantcast’s internal data structures for advertisers. If you do not pass any
+													Element:code
+														category
+														or
+													Element:code
+														name
+														for a
+													Element:code
+														.page()
+														call, we will fallback on Quantcast’s default label.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here’s an example for Quantcast Advertisers:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														analytics.page('Blog'); // sends label _fp.event.Blog analytics.page(); /// sends default label _fp.event.Default
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For non-advertisers:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														analytics.page('Blog'); // sends label "Blog" analytics.page(); // does not send any label
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you opt to send multiple custom labels, you can do so in a few ways. You can attach a property called
+													Element:code
+														label
+														and define a custom label there or send them via the
+													Element:code
+														Quantcast.labels
+														in the
+													Element:code
+														options
+														object.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For advertisers:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														analytics.page('Home', { label: 'customLabel' }); // This will send label as _fp.event.Home,customLabel analytics.page('Home', {}, { Quantcast: { labels: ['customLabel1', 'customLabel2'] } }); // This will send label as _fp.event.Home,customLabel1,customLabel2
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														IMPORTANT
+														: Labels cannot contain any special characters so we will strip them out!
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Script unverified or undetected by third-party tool
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Many times this is a limitation on the tool’s detection process, where the detector is looking for a specific HTML element on your page. Our client side analytics.js library asynchronously loads the tool’s library or pixel onto the page. As such, the detection fails.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to confirm that the tool’s library or pixel is actually loaded onto the page, you can open up the
+										Element:a
+											javascript console
+											and go to the network tab when the page is loading.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the script isn’t loading, check that any form of ad blocker is disabled.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Mobile Integration
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you toggle on Quantcast for a mobile app in Segment, this is what happens:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Follow the instructions on the Quantcast sheet on the integrations page for adding the packaged Quantcast SDK (a simple one-liner to add to your Podfile).
+							Element:li
+								After you build and release to the app store, we’ll automatically start translating and sending your data to Quantcast. If this is the first time sending data to Quantcast it can take them up to
+							Element:strong
+								12 days
+								to process your new data.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Identify
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:code
+											identify
+											with a
+										Element:code
+											userId
+											, we’ll pass that to Quantcast. This allows you to accurately measure your audience size across multiple platforms and devices.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Track
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:code
+											track
+											we’ll automatically log the events to Quantcast.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Screen
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:code
+											screen
+											we’ll automatically log an event like
+										Element:code
+											Viewed ABC Screen
+											to Quantcast.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Other Features
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Labels
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The integration does not currently support labels. If this is important to you, please let us know in the
+													Element:a
+														Segment Community
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+								✅
+							Element:td
+								✅
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+							Element:td
+							Element:td
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This integration
+							Element:em
+								requires
+								a
+							Element:strong
+								Device-based
+								Connection Mode for
+							Element:strong
+								Mobile
+								data. Follow the steps above to ensure you have packaged the Quantcast SDK with Segment’s.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Advertise
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default data will be sent to Quantcast Measure, enable this option to send to Quantcast Advertise
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Only required for mobile apps. You can find your API Key in the right-hand column under
+										Element:strong
+											Your API Key
+											after you login to
+										Element:a
+											Quantcast
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											P-Code
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can find your P-Code in the right-hand column under
+										Element:strong
+											Your P-Code
+											after you login to
+										Element:a
+											Quantcast
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											android
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											browser
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											ios

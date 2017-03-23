@@ -1,0 +1,487 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					How to Manipulate Records (CRUD)
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A PHP example demonstrating how to use the CRUD (Create, Read, Update, Delete) endpoints in the REST v10 API.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								CRUD Operations
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authenticating
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, you will need to authenticate to the Sugar API. An example is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $instance_url = "http://{site_url}/rest/v10"; $username = "admin"; $password = "password"; //Login - POST /oauth2/token $auth_url = $instance_url . "/oauth2/token"; $oauth2_token_arguments = array( "grant_type" => "password", //client id - default is sugar. //It is recommended to create your own in Admin > OAuth Keys "client_id" => "sugar", "client_secret" => "", "username" => $username, "password" => $password, //platform type - default is base. //It is recommend to change the platform to a custom name such as "custom_api" to avoid authentication conflicts. "platform" => "custom_api" ); $auth_request = curl_init($auth_url); curl_setopt($auth_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); curl_setopt($auth_request, CURLOPT_HEADER, false); curl_setopt($auth_request, CURLOPT_SSL_VERIFYPEER, 0); curl_setopt($auth_request, CURLOPT_RETURNTRANSFER, 1); curl_setopt($auth_request, CURLOPT_FOLLOWLOCATION, 0); curl_setopt($auth_request, CURLOPT_HTTPHEADER, array( "Content-Type: application/json" )); //convert arguments to json $json_arguments = json_encode($oauth2_token_arguments); curl_setopt($auth_request, CURLOPT_POSTFIELDS, $json_arguments); //execute request $oauth2_token_response = curl_exec($auth_request); //decode oauth2 response to get token $oauth2_token_response_obj = json_decode($oauth2_token_response); $oauth_token = $oauth2_token_response_obj->access_token;
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on authenticating can be found in the
+										Element:a
+											How to Authenticate and Log Out
+											example and
+										Element:a
+											/oauth2/logout
+											endpoint documentation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating a Record
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we need to submit the recor to the Sugar instance using the
+										Element:code
+											/<module>
+											endpoint. In this example we are going to create an Account record with a Name of 'Test Record' and an email of 'test@sugar.com'.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//Create Records - POST /<module> $url = $instance_url . "/Accounts"; //Set up the Record details $record = array( 'name' => 'Test Record', 'email1' => 'test@sugar.com' ); $curl_request = curl_init($url); curl_setopt($curl_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); curl_setopt($curl_request, CURLOPT_HEADER, false); curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0); curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1); curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0); curl_setopt($curl_request, CURLOPT_HTTPHEADER, array( "Content-Type: application/json", "oauth-token: {$oauth_token}" )); //convert arguments to json $json_arguments = json_encode($record); curl_setopt($curl_request, CURLOPT_POSTFIELDS, $json_arguments); //execute request $curl_response = curl_exec($curl_request); //decode json $createdRecord = json_decode($curl_response); //display the created record print_r($createdRecord); curl_close($curl_request);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on this API endpoint can be found in the
+										Element:a
+											/<module> - POST
+											documentation.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The data sent to the server is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "name":"Test Record", "email1":"test@sugar.com" }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The data received from the server is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "id":"ab2222df-73da-0e92-6887-5705428f4d68", "name":"Test Record", "date_entered":"2016-04-06T13:07:41-04:00", "date_modified":"2016-04-06T13:07:41-04:00", "modified_user_id":"1", "modified_by_name":"Administrator", "modified_user_link":{ "full_name":"Administrator", "id":"1", "_acl":{ "fields":[ ], "delete":"no", "_hash":"8e11bf9be8f04daddee9d08d44ea891e" } }, "created_by":"1", "created_by_name":"Administrator", "created_by_link":{ "full_name":"Administrator", "id":"1", "_acl":{ "fields":[ ], "delete":"no", "_hash":"8e11bf9be8f04daddee9d08d44ea891e" } }, "description":"", "deleted":false, "facebook":"", "twitter":"", "googleplus":"", "account_type":"", "industry":"", "annual_revenue":"", "phone_fax":"", "billing_address_street":"", "billing_address_street_2":"", "billing_address_street_3":"", "billing_address_street_4":"", "billing_address_city":"", "billing_address_state":"", "billing_address_postalcode":"", "billing_address_country":"", "rating":"", "phone_office":"", "phone_alternate":"", "website":"", "ownership":"", "employees":"", "ticker_symbol":"", "shipping_address_street":"", "shipping_address_street_2":"", "shipping_address_street_3":"", "shipping_address_street_4":"", "shipping_address_city":"", "shipping_address_state":"", "shipping_address_postalcode":"", "shipping_address_country":"", "parent_id":"", "sic_code":"", "duns_num":"", "parent_name":"", "member_of":{ "name":"", "id":"", "_acl":{ "fields":[ ], "_hash":"654d337e0e912edaa00dbb0fb3dc3c17" } }, "campaign_id":"", "campaign_name":"", "campaign_accounts":{ "name":"", "id":"", "_acl":{ "fields":[ ], "_hash":"654d337e0e912edaa00dbb0fb3dc3c17" } }, "following":true, "my_favorite":false, "tag":[ ], "assigned_user_id":"", "assigned_user_name":"", "assigned_user_link":{ "full_name":"", "id":"", "_acl":{ "fields":[ ], "_hash":"654d337e0e912edaa00dbb0fb3dc3c17" } }, "team_count":"", "team_count_link":{ "team_count":"", "id":"1", "_acl":{ "fields":[ ], "_hash":"654d337e0e912edaa00dbb0fb3dc3c17" } }, "team_name":[ { "id":1, "name":"Global", "name_2":"", "primary":true } ], "email":[ { "email_address":"test@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":true, "reply_to_address":false } ], "email1":"test@sugar.com", "email2":"", "invalid_email":false, "email_opt_out":false, "email_addresses_non_primary":"", "_acl":{ "fields":{ } }, "_module":"Accounts" }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Getting a Record
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we can get the created record from the Sugar instance using the
+										Element:code
+											/<module>/:record
+											endpoint. In this example, we are going to get an Account record by it's ID, but only request the Name, Email, and Industry fields.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$id = $createdRecord->id; //Get Record - GET //:record $url = $instance_url . "/Accounts/$id"; //Setup request to only return some fields on module $data = array( 'fields' => 'name,email1,industry' ); //Add data to the URL $url = $url."?".http_build_query($data); $curl_request = curl_init($url); curl_setopt($curl_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); curl_setopt($curl_request, CURLOPT_HEADER, false); curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0); curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1); curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0); curl_setopt($curl_request, CURLOPT_HTTPHEADER, array( "Content-Type: application/json", "oauth-token: {$oauth_token}" )); //execute request $curl_response = curl_exec($curl_request); //decode json $record = json_decode($curl_response); //display the created record print_r($record); curl_close($curl_request);
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Updating a Record
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we can update the record in the Sugar instance using the
+										Element:code
+											/<module>/:record
+											endpoint, and the PUT Http method. In this example we are going to update the Account record and change it's name to "Updated Test Record".
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$id = $record->id; //Update Record - PUT /<module>/:record $url = $instance_url . "/Accounts/$id"; //Set up the Record details $record->name = 'Updated Test Record'; $curl_request = curl_init($url); curl_setopt($curl_request, CURLOPT_CUSTOMREQUEST, "PUT"); curl_setopt($curl_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); curl_setopt($curl_request, CURLOPT_HEADER, false); curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0); curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1); curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0); curl_setopt($curl_request, CURLOPT_HTTPHEADER, array( "Content-Type: application/json", "oauth-token: {$oauth_token}" )); //convert arguments to json $json_arguments = json_encode($record); curl_setopt($curl_request, CURLOPT_POSTFIELDS, $json_arguments); //execute request $curl_response = curl_exec($curl_request); //decode json $updatedRecord = json_decode($curl_response); //display the created record echo "Updated Record Name:".$updatedRecord->name; curl_close($curl_request);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on this API endpoint can be found in the
+										Element:a
+											/<module>/:record - PUT
+											documentation.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The URL sent to the server is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "id":"ab2222df-73da-0e92-6887-5705428f4d68", "name":"Updated Test Record", "date_modified":"2016-04-06T15:03:21-04:00", "industry":"", "email1":"test@sugar.com", "_acl":{ "fields":{ } }, "_module":"Accounts" }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The data received from the server is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "id":"ab2222df-73da-0e92-6887-5705428f4d68", "name":"Updated Test Record", "date_entered":"2016-04-06T15:03:21-04:00", "date_modified":"2016-04-06T15:03:22-04:00", "modified_user_id":"1", "modified_by_name":"Administrator", "modified_user_link":{ "full_name":"Administrator", "id":"1", "_acl":{ "fields":[ ], "delete":"no", "_hash":"8e11bf9be8f04daddee9d08d44ea891e" } }, "created_by":"1", "created_by_name":"Administrator", "created_by_link":{ "full_name":"Administrator", "id":"1", "_acl":{ "fields":[ ], "delete":"no", "_hash":"8e11bf9be8f04daddee9d08d44ea891e" } }, "description":"", "deleted":false, "facebook":"", "twitter":"", "googleplus":"", "account_type":"", "industry":"", "annual_revenue":"", "phone_fax":"", "billing_address_street":"", "billing_address_street_2":"", "billing_address_street_3":"", "billing_address_street_4":"", "billing_address_city":"", "billing_address_state":"", "billing_address_postalcode":"", "billing_address_country":"", "rating":"", "phone_office":"", "phone_alternate":"", "website":"", "ownership":"", "employees":"", "ticker_symbol":"", "shipping_address_street":"", "shipping_address_street_2":"", "shipping_address_street_3":"", "shipping_address_street_4":"", "shipping_address_city":"", "shipping_address_state":"", "shipping_address_postalcode":"", "shipping_address_country":"", "parent_id":"", "sic_code":"", "duns_num":"", "parent_name":"", "member_of":{ "name":"", "id":"", "_acl":{ "fields":[ ], "_hash":"654d337e0e912edaa00dbb0fb3dc3c17" } }, "campaign_id":"", "campaign_name":"", "campaign_accounts":{ "name":"", "id":"", "_acl":{ "fields":[ ], "_hash":"654d337e0e912edaa00dbb0fb3dc3c17" } }, "following":true, "my_favorite":false, "tag":[ ], "assigned_user_id":"", "assigned_user_name":"", "assigned_user_link":{ "full_name":"", "id":"", "_acl":{ "fields":[ ], "_hash":"654d337e0e912edaa00dbb0fb3dc3c17" } }, "team_count":"", "team_count_link":{ "team_count":"", "id":"1", "_acl":{ "fields":[ ], "_hash":"654d337e0e912edaa00dbb0fb3dc3c17" } }, "team_name":[ { "id":1, "name":"Global", "name_2":"", "primary":true } ], "email":[ { "email_address":"test@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":true, "reply_to_address":false } ], "email1":"test@sugar.com", "email2":"", "invalid_email":false, "email_opt_out":false, "email_addresses_non_primary":"", "_acl":{ "fields":{ } }, "_module":"Accounts" }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Deleting a Record
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we can delete the record from the Sugar instance using the
+										Element:code
+											/<module>/:record
+											endpoint, by using the DELETE Http Method.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$id = $updatedRecord->id; //Delete Record - DELETE /<module>/:record $url = $instance_url . "/Accounts/$id"; $curl_request = curl_init($url); curl_setopt($curl_request, CURLOPT_CUSTOMREQUEST, "DELETE"); curl_setopt($curl_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); curl_setopt($curl_request, CURLOPT_HEADER, false); curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0); curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1); curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0); curl_setopt($curl_request, CURLOPT_HTTPHEADER, array( "Content-Type: application/json", "oauth-token: {$oauth_token}" )); //execute request $curl_response = curl_exec($curl_request); //decode json $deletedRecord = json_decode($curl_response); //display the created record echo "Deleted Record:".$deletedRecord->id; curl_close($curl_request);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on this API endpoint can be found in the
+										Element:a
+											/<module>/:record - DELETE
+											documentation.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Payload
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The URL sent to the server is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														No payload is sent for this request.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The data received from the server is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "id":"ab2222df-73da-0e92-6887-5705428f4d68" }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Download
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can download the full API example
+							Element:a
+								here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 02/01/2017 11:40am
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

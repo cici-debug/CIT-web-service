@@ -1,0 +1,536 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Duplicate Check
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The duplicate-check framework provides the capability to alter how the system searches for duplicate records in the database when creating records. For information on duplicate checking during imports, please refer to the
+							Element:a
+								index
+								documentation. The
+							Element:a
+								duplicateCheck API endpoint
+								utilizes this framework, which is called by default when saving a record from the user interface.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Default Strategy
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The default duplicate-check strategy, located in
+							Element:code
+								./data/duplicatecheck/FilterDuplicateCheck.php
+								, is referred to as FilterDuplicateCheck. This strategy utilizes the
+							Element:a
+								Filter API
+								and a defined filter in the
+							Element:a
+								vardefs
+								of the module to search for duplicates and rank them based on matching data.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Custom Filter
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To alter a defined filter for a stock a module, you only need to update the
+										Element:a
+											Vardefs
+											using the
+										Element:a
+											Extensions framework
+											. If you are working with a custom module, you can modify the vardefs in
+										Element:code
+											./modules/<module>/vardefs.php
+											directly. The FilterDuplicateCheck Strategy accepts two properties in its metadata:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Name
+										Element:td
+										Element:strong
+											Type
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											filter_template
+										Element:td
+											array
+										Element:td
+											An array containing the Filter Definition for which fields to search for duplicates on. Please consult the Filter API for further information on the filter syntax
+										Element:tr
+										Element:td
+											ranking_fields
+										Element:td
+											array
+										Element:td
+										Element:p
+											A list of arrays with the following properties. The order in which you list the fields for ranking will determine the ranking score. The first ranks higher, than those after it.
+										Element:p
+										Element:strong
+											in_field_name
+											: Name of field in vardefs
+										Element:p
+										Element:strong
+											dupe_field_name
+											: Name of field returned by filter
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following example will demonstrate how to manipulate the stock Accounts duplicate check to not filter on the shipping address city. The default Account
+													Element:code
+														duplicate_check
+														defintion, located in
+													Element:code
+														./modules/Accounts/vardefs.php
+														, is shown below.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														... 'duplicate_check' => array( 'enabled' => true, 'FilterDuplicateCheck' => array( 'filter_template' => array( array( '$or' => array( array('name' => array('$equals' => '$name')), array('duns_num' => array('$equals' => '$duns_num')), array( '$and' => array( array('name' => array('$starts' => '$name')), array( '$or' => array( array('billing_address_city' => array('$starts' => '$billing_address_city')), array('shipping_address_city' => array('$starts' => '$shipping_address_city')), ) ), ) ), ) ), ), 'ranking_fields' => array( array('in_field_name' => 'name', 'dupe_field_name' => 'name'), array('in_field_name' => 'billing_address_city', 'dupe_field_name' => 'billing_address_city'), array('in_field_name' => 'shipping_address_city', 'dupe_field_name' => 'shipping_address_city'), ) ) ), ...
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To add or remove fields from the check, you will need to manipulate
+													Element:code
+														$dictionary['<module>']['duplicate_check']['FilterDuplicateCheck']['filter_template']
+														and
+													Element:code
+														$dictionary['<module>']['duplicate_check']['FilterDuplicateCheck']['ranking_fields']
+														. For our example, we will simply remove the references to
+													Element:code
+														shipping_address_city
+														. It is important to familiarize yourself with
+													Element:a
+														filter operators
+														before making any changes.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/Extension/modules/Accounts/Ext/Vardefs/newFilterDuplicateCheck.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $dictionary['Account']['duplicate_check']['FilterDuplicateCheck'] = array( 'filter_template' => array( array( '$or' => array( array('name' => array('$equals' => '$name')), array('duns_num' => array('$equals' => '$duns_num')), array( '$and' => array( array('name' => array('$starts' => '$name')), array( '$or' => array( array('billing_address_city' => array('$starts' => '$billing_address_city')), ) ), ) ), ) ), ), 'ranking_fields' => array( array('in_field_name' => 'name', 'dupe_field_name' => 'name'), array('in_field_name' => 'billing_address_city', 'dupe_field_name' => 'billing_address_city'), ) );
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Finally, navigate to Admin > Repair > Quick Repair and Rebuild. The system will then enable the custom duplicate-check class.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you want to disable the duplicate check entirely, you can set
+													Element:code
+														$dictionary['<module>']['duplicate_check']['enabled']
+														to false in your vardefs and run a Quick Repair and Rebuild.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														$dictionary['Account']['duplicate_check']['enabled'] = false;
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Custom Strategies
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Custom duplicate-check class files are stored under
+							Element:code
+								./custom/data/duplicatecheck/
+								. The files in this directory can be enabled on a module's duplicate_check property located in
+							Element:code
+								./custom/Extension/modules/<module>/Ext/Vardefs/
+								. Only one duplicate-check class can be enabled on a module at a given time.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Duplicate Check Class
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To create a custom duplicate-check strategy, you need to create a custom duplicate-check class that extends the base DuplicateCheckStrategy,
+										Element:code
+											./data/duplicatecheck/DuplicateCheckStrategy.php
+											. To work, this custom class requires the implementation of two methods:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Method Name
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											setMetadata
+										Element:td
+											Sets up properties for duplicate-check logic based on the passed-in metadata
+										Element:tr
+										Element:td
+											findDuplicates
+										Element:td
+											Finds possible duplicate records for a given set of field data
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Example
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following example will create a new duplicate-check class called "OneFieldDuplicateCheck" that will query the database based on the configured field for records that contain data similar to that one field:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/data/duplicatecheck/OneFieldDuplicateCheck.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); class OneFieldDuplicateCheck extends DuplicateCheckStrategy { protected $field; public function setMetadata($metadata) { if (isset($metadata['field'])) { $this->field = $metadata['field']; } } public function findDuplicates() { if (empty($this->field)){ return null; } $Query = new SugarQuery(); $Query->from($this->bean); $Query->where()->ends($this->field,$this->bean->{$this->field}); $Query->limit(10); //Filter out the same Bean during Edits if (!empty($this->bean->id)) { $Query->where()->notEquals('id',$this->bean->id); } $results = $Query->execute(); return array( 'records' => $results ); } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Vardef Settings
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The duplicate-check vardef settings are configured on each module and can be altered using the
+										Element:a
+											Extension framework
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Name
+										Element:td
+										Element:strong
+											Type
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											enabled
+										Element:td
+											boolean
+										Element:td
+											Whether or not duplicate-check framework is enabled on the module
+										Element:tr
+										Element:td
+											<class_name>
+										Element:td
+											array
+										Element:td
+											The class name that will provide duplicate checking, set to an array of metadata that gets passed to the duplicate-check class
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to enable the OneFieldDuplicateCheck strategy (shown above) for the Accounts module, you must create the following file:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Accounts/Ext/Vardefs/newDuplicateCheck.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $dictionary['Account']['duplicate_check'] = array( 'enabled' => true, 'OneFieldDuplicateCheck' => array( 'field' => 'name' ) );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, navigate to Admin > Repair > Quick Repair and Rebuild. The system will then enable the custom duplicate-check class.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Programmatic Usage
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also use the duplicate-check framework in code such as in a logic hook or a scheduler. The following example shows how to use the module's defined duplicate-check strategy when utilizing a bean object by simply calling the
+							Element:code
+								findDuplicates
+								method on the bean object:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								$account = BeanFactory::newBean('Accounts'); $account->name = 'Test'; $duplicates = $account->findDuplicates(); if (count($duplicates['records'])>0){ $GLOBALS['log']->fatal("Duplicate records found for Account"); }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 08/15/2016 04:04pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

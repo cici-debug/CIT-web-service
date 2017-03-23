@@ -1,0 +1,553 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Quickstart: iOS
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This tutorial will help you start sending analytics data from your iOS app to Segment. Once you’re done you’ll be able to turn on
+				Element:a
+					any of our integrations
+					with the flip of a switch! No more waiting for App Store approval.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If you want to dive deeper at any point, check out the
+				Element:a
+					iOS Library Reference
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:em
+					Note: At the moment we can’t support tracking of watchkit extensions for tha Apple watch.
+				Element:a
+					Email us
+					if you’re interested in a watchkit SDK. For now we recommend tracking watch interactions via the native iPhone app code.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 1: Install the SDK
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The recommended way to install Analytics for iOS is via
+							Element:a
+								Cocoapods
+								, since it means you can create a build with specific integrations, and because it makes it dead simple to install and upgrade.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, add the
+							Element:code
+								Analytics
+								dependency to your
+							Element:code
+								Podfile
+								, like so:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								pod 'Analytics', '~> 3.0'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then in your application delegate’s
+							Element:code
+								- application:didFinishLaunchingWithOptions:
+								method, setup the SDK like so:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"YOUR_WRITE_KEY"]; configuration.trackApplicationLifecycleEvents = YES; // Enable this to record certain application events automatically! configuration.recordScreenViews = YES; // Enable this to record screen views automatically! [SEGAnalytics setupWithConfiguration:configuration];
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note
+								: Automatically tracking lifecycle events (
+							Element:code
+								Application Opened
+								,
+							Element:code
+								Application Installed
+								,
+							Element:code
+								Application Updated
+								) and screen views is optional via initialization config parameters, but highly recommended to hit the ground running with core events! See
+							Element:a
+								below
+								for more info!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								And of course, import the SDK in the files that you use it with:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								#import <Analytics/SEGAnalytics.h>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Including Additional Client Side SDKs
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the interest of keeping our SDK lightweight, the
+										Element:code
+											Analytics
+											pod only installs the Segment integration. This means that all your data will be sent via Segment’s servers to any tools you’ve enabled with server-side-compatible integrations.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You’ll likely want to bundle some additional integrations client side. Many advanced marketing automation and analytics tools will offer the option of including their SDK or electing to send data server to server depending on the features you need. Most optimization, deep linking, error tracking, and survey tools must be included on the device to leverage their core feature set.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In those cases, you’ll need to take some additional steps as
+										Element:a
+											shown in the source documentation here
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now that the SDK is installed and setup, you’re ready to…
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 2: Identify Users
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								method is how you tell Segment who the current user is. It takes a unique User ID and any optional traits you know about them. You can read more about it in the
+							Element:a
+								identify reference
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s what a basic call to
+							Element:code
+								identify
+								might look like:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								[[SEGAnalytics sharedAnalytics] identify:@"f4ca124298" traits:@{ @"name": @"Michael Bolton", @"email": @"mbolton@initech.com" }];
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That’s identifying Michael by his unique User ID (the one you know him by in your database) and labeling him with
+							Element:code
+								name
+								and
+							Element:code
+								email
+								traits.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Hold up though!
+								When you actually put that code in your iOS app, you’ll need to replace all those hard-coded strings with details about the currently logged-in user.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you’ve added an
+							Element:code
+								identify
+								call, you’re ready to move on to…
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 3: Track Actions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								track
+								method is how you tell Segment about which actions your users are performing inside your app. Every action triggers what we call an “event”, which can also have associated properties. You can read more about
+							Element:code
+								track
+								in the
+							Element:a
+								track reference
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, our SDK can automatically track a few key common events, such as the
+							Element:strong
+								Application Installed
+								,
+							Element:strong
+								Application Updated
+								and
+							Element:strong
+								Application Opened
+								. Simply enable this option during initialization.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"YOUR_WRITE_KEY"]; configuration.trackApplicationLifecycleEvents = YES; [SEGAnalytics setupWithConfiguration:configuration];
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll also want to track events that are indicators of success for your mobile app, like
+							Element:strong
+								Signed Up
+								,
+							Element:strong
+								Item Purchased
+								or
+							Element:strong
+								Article Bookmarked
+								. We recommend tracking just a few important events. You can always add more later!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s what a call to
+							Element:code
+								track
+								might look like when a user signs up:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								[[SEGAnalytics sharedAnalytics] track:@"Signed Up" properties:@{ @"plan": @"Enterprise" }];
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That’s just telling us that your user just triggered the
+							Element:strong
+								Signed Up
+								event and chose your hypothetical
+							Element:code
+								'Enterprise'
+								plan. Properties can be anything you want to record, for example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								[[SEGAnalytics sharedAnalytics] track:@"Article Bookmarked" properties:@{ @"title": @"Snow Fall", @"subtitle": @"The Avalanche at Tunnel Creek", @"author": @"John Branch" }];
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you’ve added a few
+							Element:code
+								track
+								calls,
+							Element:strong
+								you’re done!
+								You successfully instrumented your app! Now you’re ready to turn on any integration you fancy from our interface, margarita in hand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 4: Flushing
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can set the number of events should queue before flushing. Setting this to
+							Element:code
+								1
+								will send events as they come in (i.e. not send batched events) and will use more battery.
+							Element:code
+								20
+								by default.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"YOUR_WRITE_KEY"]; configuration.flushAt = 1; [SEGAnalytics setupWithConfiguration:configuration];
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also manually
+							Element:code
+								flush
+								the queue:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								[[SEGAnalytics sharedAnalytics] alias:@"glenncoco"]; [[SEGAnalytics sharedAnalytics] flush]
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Step 5: Submitting to the App Store
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you submit to the app store, be aware that Segment collects the IDFA for use in doing mobile install attribution with integrations like Mobile App Tracking. Even if you’re not currently doing mobile install attribution, if you get asked, “Does this app use the Advertising Identifier (IDFA)?” on
+							Element:a
+								this
+								page, you’ll want to
+							Element:strong
+								check
+								the following three boxes:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								“Attribute this app installation to a previously served advertisement”
+							Element:li
+								“Attribute an action taken within this app to a previously served advertisement”
+							Element:li
+								“I, YOUR_NAME, confirm that this app, and any third party…”
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note, you should
+							Element:em
+								not
+								check the box labeled “Serve advertisements within the app” unless you are actually going to display ads.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What’s Next?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We just walked through the quickest way to get started with Segment using Analytics for iOS. You might also want to check out our full
+							Element:a
+								Analytics for iOS reference
+								to see what else is possible, or read about the
+							Element:a
+								Tracking API methods
+								to get a sense for the bigger picture.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have any questions or see anywhere we can improve our documentation, please
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:span
+							Element:span
+								Was this document helpful?
+							Element:span
+							Element:label
+							Element:span
+								Yes
+							Element:label
+							Element:span
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

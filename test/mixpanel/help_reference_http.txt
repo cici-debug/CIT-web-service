@@ -1,0 +1,1581 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Mixpanel HTTP Tracking API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Mixpanel directly supports tracking client libraries for the following platforms:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					JavaScript
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					ActionScript 3
+				Element:li
+				Element:a
+					Server-Side Java
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Ruby
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The client libraries typically support a wide range of convenience features, and should be the starting point for using Mixpanel in your application. This document should be most useful to you if you need to send data from an unsupported platform, or if you need low-level details for another reason.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Tracking via HTTP
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel can receive two types of data from your application: events, and profile updates. Both types of data are represented in your requests by Base64-encoded JSON objects, provided to the API as a
+							Element:code
+								data
+								query parameter to an endpoint URL.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Events describe things that happen in your application, usually as the result of user interaction; for example, when a customer reads an article, uploads content, or signs up for your service, you can send an event to record the incident.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Events are tracked at endpoint
+										Element:code
+											http://api.mixpanel.com/track/
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											This URL tracks an event with Mixpanel
+										Element:code
+											http://api.mixpanel.com/track/?data=eyJldmVudCI6ICJnYW1lIiwgInByb3BlcnRpZXMiOiB7ImlwIjogIjEyMy4xMjMuMTIzLjEyMyIsICJkaXN0aW5jdF9pZCI6ICIxMzc5MyIsICJ0b2tlbiI6ICJlM2JiNDEwMDMzMGMzNTcyMjc0MGZiOGM2ZjVhYmRkYyIsICJ0aW1lIjogMTI0NTYxMzg4NSwgImFjdGlvbiI6ICJwbGF5In19
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the event you are trying to send to Mixpanel is more than 5 days old, the track endpoint above will not accept your request. Instead, you will need to hit the import endpoint at
+										Element:code
+											http://api.mixpanel.com/import/
+											to process your request. Full details on using the import endpoint can be found
+										Element:a
+											here
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Profile updates
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											People analytics updates describe a fact you've learned about one of your customers. For example, when a customer enters their first name or their birthday into your sign-in form, or signs up for a new level of service, you may send a profile update to record what you've learned.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Profile updates are recorded at endpoint
+										Element:code
+											http://api.mixpanel.com/engage/
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											This URL sends a profile update to Mixpanel
+										Element:code
+											http://api.mixpanel.com/engage/?data=ew0KICAgICIkdG9rZW4iOiAiMzZhZGE1YjEwZGEzOWExMzQ3NTU5MzIxYmFmMTMwNjMiLA0KICAgICIkZGlzdGluY3RfaWQiOiAiMTM3OTMiLA0KICAgICIkc2V0Ijogew0KICAgICAgICAiJGZpcnN0X25hbWUiOiAiRGF2aWQiLA0KICAgICAgICAiJGxhc3RfbmFtZSI6ICJKb25lcyIsDQogICAgICAgICIkZW1haWwiOiAiYWxhZGRpbi5zYW5lQGV4YW1wbGUuY29tIiwNCiAgICAgICAgIiRjcmVhdGVkIjogIjIwMTMtMDQtMDFUMTM6MjA6MDAiDQogICAgfQ0KfQ==
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Base64 for Mixpanel
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To Base64 encode data for the Mixpanel API, you should use the following characters:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789+/=
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel will only accept padded Base64 requests.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Tracking events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Each event you record is represented as a JSON object in a request to
+								eventstring A name for the event. For example, "Signed Up", or "Uploaded Photo". propertiesobject A collection of properties associated with this event. You can use these properties to filter or segment events in Mixpanel. In addition, some properties are treated specially by Mixpanel.
+							Element:code
+								http://api.mixpanel.com/track/
+								. The request will return an HTTP response with body "1" if the track call is successful, and a "0" otherwise. Event tracking objects should have the following attributes:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								// Sends an event "Signed Up", associated with user 13793,
+							Element:span
+								// with a property "Referred By"
+							Element:span
+								{
+							Element:span
+								"event"
+							Element:span
+								:
+							Element:span
+								"Signed Up"
+							Element:span
+								,
+							Element:span
+								"properties"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								// "distinct_id" and "token" are
+							Element:span
+								// special properties, described below.
+							Element:span
+								"distinct_id"
+							Element:span
+								:
+							Element:span
+								"13793"
+							Element:span
+								,
+							Element:span
+								"token"
+							Element:span
+								:
+							Element:span
+								"e3bc4100330c35722740fb8c6f5abddc"
+							Element:span
+								,
+							Element:span
+								"Referred By"
+							Element:span
+								:
+							Element:span
+								"Friend"
+							Element:span
+								}
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The JSON string above can be base64 encoded as:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								ew0KICAgICJldmVudCI6ICJTaWduZWQgVXAiLA0KICAgICJwcm9wZXJ0aWVzIjogew0KICAgICAgICAiZGlzdGluY3RfaWQiOiAiMTM3OTMiLA0KICAgICAgICAidG9rZW4iOiAiZTNiYzQxMDAzMzBjMzU3MjI3NDBmYjhjNmY1YWJkZGMiLA0KICAgICAgICAiUmVmZXJyZWQgQnkiOiAiRnJpZW5kIg0KICAgIH0NCn0=
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using the base64 encoded value as the
+							Element:code
+								data
+								parameter for the Mixpanel event endpoint will result in the following url:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								http://api.mixpanel.com/track/?data=ew0KICAgICJldmVudCI6ICJTaWduZWQgVXAiLA0KICAgICJwcm9wZXJ0aWVzIjogew0KICAgICAgICAiZGlzdGluY3RfaWQiOiAiMTM3OTMiLA0KICAgICAgICAidG9rZW4iOiAiZTNiYzQxMDAzMzBjMzU3MjI3NDBmYjhjNmY1YWJkZGMiLA0KICAgICAgICAiUmVmZXJyZWQgQnkiOiAiRnJpZW5kIg0KICAgIH0NCn0=
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Special properties in events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can use any UTF-8 string that doesn't begin with "mp_" to name your properties, but some property names have special significance to Mixpanel. All of the special properties except for "token" are optional, but most events should include a "distinct_id" property. These special properties include:
+											tokenstring The Mixpanel token associated with your project. You can find your Mixpanel token in the project settings dialog in the Mixpanel app. Events without a valid token will be ignored.distinct_idstring The value of distinct_id will be treated as a string, and used to uniquely identify a user associated with your event. If you provide a distinct_id property with your events, you can track a given user through funnels and distinguish unique users for retention analyses. You should always send the same distinct_id when an event is triggered by the same user. timenumber The time an event occurred. If present, the value should be a unix timestamp (seconds since midnight, January 1st, 1970 - UTC). If this property is not included in your request, Mixpanel will use the time the event arrives at the server. ipstring An IP address string (e.g. "127.0.0.1") associated with the event. This is used for adding geolocation data to events, and should only be required if you are making requests from your backend. If "ip" is absent (and ip=1 is not provided as a URL parameter), Mixpanel will ignore the IP address of the request.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// Tracks an event, recording the fact that
+										Element:span
+											// user "13793", completed level 9
+										Element:span
+											// on January 15th, 2013 on a machine with ip
+										Element:span
+											// 203.0.113.9
+										Element:span
+											{
+										Element:span
+											"event"
+										Element:span
+											:
+										Element:span
+											"Level Complete"
+										Element:span
+											,
+										Element:span
+											"properties"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"Level Number"
+										Element:span
+											:
+										Element:span
+											9
+										Element:span
+											,
+										Element:span
+											"distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"token"
+										Element:span
+											:
+										Element:span
+											"e3bc4100330c35722740fb8c6f5abddc"
+										Element:span
+											,
+										Element:span
+											"time"
+										Element:span
+											:
+										Element:span
+											1358208000
+										Element:span
+											,
+										Element:span
+											"ip"
+										Element:span
+											:
+										Element:span
+											"203.0.113.9"
+										Element:span
+											}
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Event request parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to the
+											data A Base 64 encoded JSON event object, with a name and propertiesip1 or 0 If present and equal to 1, Mixpanel will use the ip address of the incoming request as a distinct_id if none is provided in the event.redirecturl If present, Mixpanel will serve a redirect to the given url as a response to the request. This is useful when tracking clicks in an email or text message.img1 or 0 If present and equal to 1, Mixpanel will serve a 1x1 transparent pixel image as a response to the request. This is useful for tracking page loads and email opens.callbackfunction name If present, Mixpanel will serve a response of type text/javascript, containing a call to a function with the given name. This is useful for reacting to Mixpanel track events in JavaScript.verbose1 or 0 If present and equal to 1, Mixpanel will respond with a JSON Object describing the success or failure of the tracking call. The returned object will have two keys: "status", with the value 1 on success and 0 on failure, and "error", with a string-valued error message if the request wasn't successful.
+										Element:code
+											data
+											parameter,
+										Element:code
+											https://api.mixpanel.com/track
+											supports a number of optional parameters. For the most part, these optional parameters are useful only in special situations.
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											verbose=1
+											is useful for debugging your Mixpanel implementation.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This tracking call will be redirected to http://www.example.com when it responds:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.mixpanel.com/track/?data=eyJldmVudCI6ICJnYW1lIiwgInByb3BlcnRpZXMiOiB7ImlwIjogIjEyMy4xMjMuMTIzLjEyMyIsICJkaXN0aW5jdF9pZCI6ICIxMzc5MyIsICJ0b2tlbiI6ICJlM2JiNDEwMDMzMGMzNTcyMjc0MGZiOGM2ZjVhYmRkYyIsICJ0aW1lIjogMTI0NTYxMzg4NSwgImFjdGlvbiI6ICJwbGF5In19==&redirect=http%3A%2F%2Fwww.example.com
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This tracking call will respond with a 1x1 transparent image:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.mixpanel.com/track/?data=eyJldmVudCI6ICJnYW1lIiwgInByb3BlcnRpZXMiOiB7ImlwIjogIjEyMy4xMjMuMTIzLjEyMyIsICJkaXN0aW5jdF9pZCI6IDEzNzkzLCAidG9rZW4iOiAiZTNiYjQxMDAzMzBjMzU3MjI3NDBmYjhjNmY1YWJkZGMiLCAidGltZSI6IDEyNDU2MTM4ODUsICJhY3Rpb24iOiAicGxheSJ9fQ==&img=1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This tracking call will return a text/javascript response, calling the function "wasTracked"
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.mixpanel.com/track/?data=eyJldmVudCI6ICJnYW1lIiwgInByb3BlcnRpZXMiOiB7ImlwIjogIjEyMy4xMjMuMTIzLjEyMyIsICJkaXN0aW5jdF9pZCI6IDEzNzkzLCAidG9rZW4iOiAiZTNiYjQxMDAzMzBjMzU3MjI3NDBmYjhjNmY1YWJkZGMiLCAidGltZSI6IDEyNDU2MTM4ODUsICJhY3Rpb24iOiAicGxheSJ9fQ==&callback=wasTracked
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Storing user profiles
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Each profile update you send is represented as a JSON object in a request to
+								$tokenstring The Mixpanel token associated with your project. You can find your Mixpanel token in the project settings dialog in the Mixpanel app.$distinct_idstring This is a string that identifies the profile you would like to update. Updates with the same $distinct_id refer to the same profile. If this $distinct_id matches a distinct_id you use in your events, those events will show up in the activity feed associated with the profile you've updated.$ipstring The IP address associated with a given profile. If $ip isn't provided (and ip=0 isn't provided as a URL parameter), Mixpanel will use the IP address of the request. Mixpanel uses an IP address to guess at the geographic location of users. If $ip is set to "0", Mixpanel will ignore IP information.$timeintegerSeconds since midnight, January 1st 1970, UTC. Updates are applied in $time order, so setting this value can lead to unexpected results unless care is taken. If $time is not included in a request, Mixpanel will use the time the update arrives at the Mixpanel server. $ignore_timetrue or false If the $ignore_time property is present and true in your update request, Mixpanel will not automatically update the "Last Seen" property of the profile. Otherwise, Mixpanel will add a "Last Seen" property associated with the current time for all $set, $append, and $add operations
+							Element:code
+								http://api.mixpanel.com/engage/
+								. The request will return an HTTP response with body "1" if the track call is successful, and a "0" otherwise. All profile update objects should have the following attributes:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In addition to the attributes common to all updates, every update should also have a key and value associated with a particular
+							Element:a
+								update operation
+								. Every call to the profile update API should have a single associated operation - you can't do two operations at once. Each operation has its own key name and format for appropriate values. Typical profile update objects look like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								{
+							Element:span
+								"$token"
+							Element:span
+								:
+							Element:span
+								"36ada5b10da39a1347559321baf13063"
+							Element:span
+								,
+							Element:span
+								"$distinct_id"
+							Element:span
+								:
+							Element:span
+								"13793"
+							Element:span
+								,
+							Element:span
+								"$ip"
+							Element:span
+								:
+							Element:span
+								"123.123.123.123"
+							Element:span
+								,
+							Element:span
+								OPERATION_NAME
+							Element:span
+								:
+							Element:span
+								OPERATION_VALUE
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Where
+							Element:em
+								OPERATION_NAME
+								and
+							Element:em
+								OPERATION_VALUE
+								are specific to the operation you are performing. For example, a "$set" operation request might look like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								{
+							Element:span
+								"$token"
+							Element:span
+								:
+							Element:span
+								"36ada5b10da39a1347559321baf13063"
+							Element:span
+								,
+							Element:span
+								"$distinct_id"
+							Element:span
+								:
+							Element:span
+								"13793"
+							Element:span
+								,
+							Element:span
+								"$ip"
+							Element:span
+								:
+							Element:span
+								"123.123.123.123"
+							Element:span
+								,
+							Element:span
+								"$set"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								"Address"
+							Element:span
+								:
+							Element:span
+								"1313 Mockingbird Lane"
+							Element:span
+								}
+							Element:span
+								}
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Update Operations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel People analytics supports the following operations on profiles:
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											$set
+											object Takes a JSON object containing names and values of profile properties. If the profile does not exist, it creates it with these properties. If it does exist, it sets the properties to these values, overwriting existing values.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// sets the "Address" and "Birthday"
+										Element:span
+											// properties of user 13793
+										Element:span
+											{
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"$ip"
+										Element:span
+											:
+										Element:span
+											"123.123.123.123"
+										Element:span
+											,
+										Element:span
+											"$set"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"Address"
+										Element:span
+											:
+										Element:span
+											"1313 Mockingbird Lane"
+										Element:span
+											,
+										Element:span
+											"Birthday"
+										Element:span
+											:
+										Element:span
+											"1948-01-01"
+										Element:span
+											}
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											$set_once
+											object Works just like "$set", except it will not overwrite existing property values. This is useful for properties like "First login date".
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// This sets the "First login date" property of user 13793
+										Element:span
+											// if and only if it has never been set before
+										Element:span
+											{
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"$set_once"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"First login date"
+										Element:span
+											:
+										Element:span
+											"2013-04-01T13:20:00"
+										Element:span
+											}
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											$add
+											object Takes a JSON object containing keys and numerical values. When processed, the property values are added to the existing values of the properties on the profile.
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+											If the property is not present on the profile, the value will be added to 0. It is possible to decrement by calling "$add" with negative values. This is useful for maintaining the values of properties like "Number of Logins" or "Files Uploaded".
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// This adds 12 to a running total of
+										Element:span
+											// Coins Gathered for user 13793
+										Element:span
+											{
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"$add"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"Coins Gathered"
+										Element:span
+											:
+										Element:span
+											12
+										Element:span
+											}
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											$append
+											object Takes a JSON object containing keys and values, and appends each to a list associated with the corresponding property name. $appending to a property that doesn't exist will result in assigning a list with one element to that property.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// This adds "Bubble Lead" to
+										Element:span
+											// the list "Power Ups" for user 13793
+										Element:span
+											{
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"$append"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"Power Ups"
+										Element:span
+											:
+										Element:span
+											"Bubble Lead"
+										Element:span
+											}
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											$union
+											object Takes a JSON object containing keys and list values. The list values in the request are merged with the existing list on the user profile, ignoring duplicate list values.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// This combines ["socks", "shirts"] with the existing values for the "Items purchased"
+										Element:span
+											// list for user 13793, also ensuring that the list values will only appear once in
+										Element:span
+											// the merged list.
+										Element:span
+											{
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"$union"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"Items purchased"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											"socks"
+										Element:span
+											,
+										Element:span
+											"shirts"
+										Element:span
+											]
+										Element:span
+											}
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											$remove
+											object Takes a JSON object containing keys and values. The value in the request is removed from the existing list on the user profile. If it does not exist, no updates are made.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// This removes "socks" from the "Items purchased" list for user 13793.
+										Element:span
+											{
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"$remove"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"Items purchased"
+										Element:span
+											:
+										Element:span
+											"socks"
+										Element:span
+											}
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											$unset
+											list Takes a JSON list of string property names, and permanently removes the properties and their values from a profile.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// This removes the property "Days Overdue" from user 13793
+										Element:span
+											{
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"$unset"
+										Element:span
+											:
+										Element:span
+											[
+										Element:span
+											"Days Overdue"
+										Element:span
+											]
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											$delete
+											string Permanently delete the profile from Mixpanel, along with all of its properties. The value is ignored - the profile is determined by the $distinct_id from the request itself.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// This removes the user 13793 from Mixpanel
+										Element:span
+											{
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"$delete"
+										Element:span
+											:
+										Element:span
+											""
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Dates in Mixpanel updates
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Properties in updates can be any of the data types valid in JSON: strings, numbers, boolean, null, arrays or objects. In addition, Mixpanel will interpret strings of a particular format as dates. This format is:
+												Node:
+												(type) c
+												(layer)4
+													Element:code
+														YYYY-MM-DDThh:mm:ss
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Where:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:code
+														YYYY
+														= four-digit year
+													Element:li
+													Element:code
+														MM
+														= two-digit month (01=January, etc.)
+													Element:li
+													Element:code
+														DD
+														= two-digit day of month (01 through 31)
+													Element:li
+													Element:code
+														T
+														= a literal 'T' character
+													Element:li
+													Element:code
+														hh
+														= two digits of hour (00 through 23)
+													Element:li
+													Element:code
+														mm
+														= two digits of minute (00 through 59)
+													Element:li
+													Element:code
+														ss
+														= two digits of second (00 through 59)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														January 15th, 1976, at 9:45 PM can be represented as
+												Node:
+												(type) c
+												(layer)4
+													Element:code
+														1976-01-15T21:45:00
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														So, to set a "Time Joined" property on user "13793", you can create the following $set object:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:span
+														{
+													Element:span
+														"$token"
+													Element:span
+														:
+													Element:span
+														"36ada5b10da39a1347559321baf13063"
+													Element:span
+														,
+													Element:span
+														"$distinct_id"
+													Element:span
+														:
+													Element:span
+														"13793"
+													Element:span
+														,
+													Element:span
+														"$set"
+													Element:span
+														:
+													Element:span
+														{
+													Element:span
+														"Time Joined"
+													Element:span
+														:
+													Element:span
+														"2013-04-01T09:02:00"
+													Element:span
+														}
+													Element:span
+														}
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All date properties should use the UTC timezone. This will be converted to your project's timezone when viewing your reports.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Special properties in profile updates
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Mixpanel interprets some properties in special ways. If you provide values for these properties, you can enable certain features in Mixpanel reports and notifications.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Mixpanel special properties all have names that begin with a dollar sign ("$") - you shouldn't create custom properties that begin with a dollar sign in your profiles, because Mixpanel may add new special properties in the future. A list of selected special properties is below.
+											$first_name and $last_nameShould be set to the first and last name of the user represented by the profile. If these are set, the full name of the user will be displayed in Mixpanel reports.$nameCan be set to the user's full name as an alternative to having two separate first and last name properties.$createdThe time when the user created their account. This should be expressed as a Mixpanel date string.$emailThe user's email address as a string, e.g. "joe.doe@example.com". Mixpanel will use the "$email" property when sending email notifications to your users, and for displaying the user's gravatar image in reports.$phoneThe user's phone number as a string, e.g. "4805551212". Mixpanel will use the "$phone" property when sending SMS messages to your users.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											// You can set $first_name, $last_name, $created, and $email
+										Element:span
+											// special properties just like any other.
+										Element:span
+											{
+										Element:span
+											"$token"
+										Element:span
+											:
+										Element:span
+											"36ada5b10da39a1347559321baf13063"
+										Element:span
+											,
+										Element:span
+											"$distinct_id"
+										Element:span
+											:
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											"$set"
+										Element:span
+											:
+										Element:span
+											{
+										Element:span
+											"$first_name"
+										Element:span
+											:
+										Element:span
+											"Joe"
+										Element:span
+											,
+										Element:span
+											"$last_name"
+										Element:span
+											:
+										Element:span
+											"Doe"
+										Element:span
+											,
+										Element:span
+											"$email"
+										Element:span
+											:
+										Element:span
+											"joe.doe@example.com"
+										Element:span
+											,
+										Element:span
+											"$created"
+										Element:span
+											:
+										Element:span
+											"2013-04-01T13:20:00"
+										Element:span
+											,
+										Element:span
+											"$phone"
+										Element:span
+											:
+										Element:span
+											"4805551212"
+										Element:span
+											}
+										Element:span
+											}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Update request parameters
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to the
+											data A Base 64 encoded JSON update object, with a $token, $distinct_id, and an operation. redirecturl If present, Mixpanel will serve a redirect to the given url as a response to the request. This is useful when tracking clicks in an email or text message.callbackfunction name If present, Mixpanel will serve a response of type text/javascript, containing a call to a function with the given name. This is useful for reacting to Mixpanel track events in JavaScriptverbose1 or 0 If present and equal to 1, Mixpanel will respond with a JSON object describing the success or failure of the tracking call. The returned object will have two keys: "status", with the value 1 on success and 0 on failure, and "error", with a string-valued error message if the request wasn't successful.
+										Element:code
+											data
+											parameter,
+										Element:code
+											https://api.mixpanel.com/engage/
+											supports a number of optional parameters. For the most part, these optional parameters are useful only in special situations.
+									Node:
+									(type) c
+									(layer)3
+										Element:code
+											verbose=1
+											is useful for debugging your Mixpanel implementation.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A url for a standard update tracking call.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.mixpanel.com/engage/?data=ew0KICAgICIkdG9rZW4iOiAiMzZhZGE1YjEwZGEzOWExMzQ3NTU5MzIxYmFmMTMwNjMiLA0KICAgICIkZGlzdGluY3RfaWQiOiAiMTM3OTMiLA0KICAgICIkc2V0Ijogew0KICAgICAgICAiJGZpcnN0X25hbWUiOiAiRGF2aWQiLA0KICAgICAgICAiJGxhc3RfbmFtZSI6ICJKb25lcyIsDQogICAgICAgICIkZW1haWwiOiAiYWxhZGRpbi5zYW5lQGV4YW1wbGUuY29tIiwNCiAgICAgICAgIiRjcmVhdGVkIjogIjIwMTMtMDQtMDFUMTM6MjA6MDAiDQogICAgfQ0KfQ==
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Mixpanel will respond to this tracking call by redirecting to http://www.example.com.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.mixpanel.com/engage/?data=ew0KICAgICIkdG9rZW4iOiAiMzZhZGE1YjEwZGEzOWExMzQ3NTU5MzIxYmFmMTMwNjMiLA0KICAgICIkZGlzdGluY3RfaWQiOiAiMTM3OTMiLA0KICAgICIkc2V0Ijogew0KICAgICAgICAiJGZpcnN0X25hbWUiOiAiRGF2aWQiLA0KICAgICAgICAiJGxhc3RfbmFtZSI6ICJKb25lcyIsDQogICAgICAgICIkZW1haWwiOiAiYWxhZGRpbi5zYW5lQGV4YW1wbGUuY29tIiwNCiAgICAgICAgIiRjcmVhdGVkIjogIjIwMTMtMDQtMDFUMTM6MjA6MDAiDQogICAgfQ0KfQ==&redirect=http%3A%2F%2Fwww.example.com
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Mixpanel will respond to this tracking call by serving a text/javascript response, calling function 'wasTracked'
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											http://api.mixpanel.com/engage/?data=ew0KICAgICIkdG9rZW4iOiAiMzZhZGE1YjEwZGEzOWExMzQ3NTU5MzIxYmFmMTMwNjMiLA0KICAgICIkZGlzdGluY3RfaWQiOiAiMTM3OTMiLA0KICAgICIkc2V0Ijogew0KICAgICAgICAiJGZpcnN0X25hbWUiOiAiRGF2aWQiLA0KICAgICAgICAiJGxhc3RfbmFtZSI6ICJKb25lcyIsDQogICAgICAgICIkZW1haWwiOiAiYWxhZGRpbi5zYW5lQGV4YW1wbGUuY29tIiwNCiAgICAgICAgIiRjcmVhdGVkIjogIjIwMTMtMDQtMDFUMTM6MjA6MDAiDQogICAgfQ0KfQ==&callback=wasTracked
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Creating a distinct_id alias
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel supports adding an alias to a distinct id. An alias is a new value that will be interpreted by Mixpanel as an existing value. That means that you can send messages to Mixpanel using the new value, and Mixpanel will continue to use the old value for calculating funnels and retention reports, or applying updates to people profiles.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Aliases are created by sending a special event, "$create_alias", with a property "distinct_id" containing the original id, and a property "alias" containing the new id you would like to map to the old one.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								// Creates an alias for "ORIGINAL_ID" with value "NEW_ID".
+							Element:span
+								// New events and updates sent with distinct_id "NEW_ID"
+							Element:span
+								// will be mapped to "ORIGINAL_ID" when they are stored
+							Element:span
+								// in Mixpanel
+							Element:span
+								{
+							Element:span
+								"event"
+							Element:span
+								:
+							Element:span
+								"$create_alias"
+							Element:span
+								,
+							Element:span
+								"properties"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								"distinct_id"
+							Element:span
+								:
+							Element:span
+								"ORIGINAL_ID"
+							Element:span
+								,
+							Element:span
+								"alias"
+							Element:span
+								:
+							Element:span
+								"NEW_ID"
+							Element:span
+								,
+							Element:span
+								"token"
+							Element:span
+								:
+							Element:span
+								"e3bc4100330c35722740fb8c6f5abddc"
+							Element:span
+								}
+							Element:span
+								}
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Tracking revenue
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel tracks revenue in a profile property named "$transactions". "$transactions" is a list, containing specially formatted JSON objects, one for each purchase or transaction associated with the particular profile.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The easiest way to track revenue is with an
+								$timedate A string representing the time of transaction, formatted in
+							Element:code
+								$append
+								profile update, sent to
+							Element:code
+								http://api.mixpanel.com/engage/
+								. When you record revenue from a user,
+							Element:code
+								$append
+								an object with the following attributes:
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								the profile update date format
+								$amountnumber A number that represents the amount of the transaction.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In addition to the required attributes, you can also include other attributes, like a SKU, product name, or any information that might be useful to associate with an individual transaction. However, properties other than the date and amount are not visible in reports at this time.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To record that the user with distinct id "13793" made a purchase for $25.34 at 9AM on January 3rd, 2013, you might send the following update:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								{
+							Element:span
+								"$append"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								"$transactions"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								"$time"
+							Element:span
+								:
+							Element:span
+								"2013-01-03T09:00:00"
+							Element:span
+								,
+							Element:span
+								"$amount"
+							Element:span
+								:
+							Element:span
+								25.34
+							Element:span
+								}
+							Element:span
+								},
+							Element:span
+								"$token"
+							Element:span
+								:
+							Element:span
+								"36ada5b10da39a1347559321baf13063"
+							Element:span
+								,
+							Element:span
+								"$distinct_id"
+							Element:span
+								:
+							Element:span
+								"13793"
+							Element:span
+								}
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Batch requests
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Both the events endpoint at
+							Element:code
+								http://api.mixpanel.com/track/
+								and the profile update endpoint at
+							Element:code
+								http://api.mixpanel.com/engage/
+								accept batched updates. To send a batch of messages to an endpoint, you should use a POST instead of a GET request. Instead of sending a single JSON object as the
+							Element:code
+								data
+								query parameter, send a JSON list of objects, base64 encoded, as the
+							Element:code
+								data
+								parameter of an application/x-www-form-urlencoded POST request body.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								// Here's a list of events
+							Element:span
+								[
+							Element:span
+								{
+							Element:span
+								"event"
+							Element:span
+								:
+							Element:span
+								"Signed Up"
+							Element:span
+								,
+							Element:span
+								"properties"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								"distinct_id"
+							Element:span
+								:
+							Element:span
+								"13793"
+							Element:span
+								,
+							Element:span
+								"token"
+							Element:span
+								:
+							Element:span
+								"e3bc4100330c35722740fb8c6f5abddc"
+							Element:span
+								,
+							Element:span
+								"Referred By"
+							Element:span
+								:
+							Element:span
+								"Friend"
+							Element:span
+								,
+							Element:span
+								"time"
+							Element:span
+								:
+							Element:span
+								1371002000
+							Element:span
+								}
+							Element:span
+								},
+							Element:span
+								{
+							Element:span
+								"event"
+							Element:span
+								:
+							Element:span
+								"Uploaded Photo"
+							Element:span
+								,
+							Element:span
+								"properties"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								"distinct_id"
+							Element:span
+								:
+							Element:span
+								"13793"
+							Element:span
+								,
+							Element:span
+								"token"
+							Element:span
+								:
+							Element:span
+								"e3bc4100330c35722740fb8c6f5abddc"
+							Element:span
+								,
+							Element:span
+								"Topic"
+							Element:span
+								:
+							Element:span
+								"Vacation"
+							Element:span
+								,
+							Element:span
+								"time"
+							Element:span
+								:
+							Element:span
+								1371002104
+							Element:span
+								}
+							Element:span
+								}
+							Element:span
+								]
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Base64 encoded, the list becomes:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Ww0KICAgIHsNCiAgICAgICAgImV2ZW50IjogIlNpZ25lZCBVcCIsDQogICAgICAgICJwcm9wZXJ0aWVzIjogew0KICAgICAgICAgICAgImRpc3RpbmN0X2lkIjogIjEzNzkzIiwNCiAgICAgICAgICAgICJ0b2tlbiI6ICJlM2JjNDEwMDMzMGMzNTcyMjc0MGZiOGM2ZjVhYmRkYyIsDQogICAgICAgICAgICAiUmVmZXJyZWQgQnkiOiAiRnJpZW5kIiwNCiAgICAgICAgICAgICJ0aW1lIjogMTM3MTAwMjAwMA0KICAgICAgICB9DQogICAgfSwNCiAgICB7DQogICAgICAgICAiZXZlbnQiOiAiVXBsb2FkZWQgUGhvdG8iLA0KICAgICAgICAgICJwcm9wZXJ0aWVzIjogew0KICAgICAgICAgICAgICAiZGlzdGluY3RfaWQiOiAiMTM3OTMiLA0KICAgICAgICAgICAgICAidG9rZW4iOiAiZTNiYzQxMDAzMzBjMzU3MjI3NDBmYjhjNmY1YWJkZGMiLA0KICAgICAgICAgICAgICAiVG9waWMiOiAiVmFjYXRpb24iLA0KICAgICAgICAgICAgICAidGltZSI6IDEzNzEwMDIxMDQNCiAgICAgICAgICB9DQogICAgfQ0KXQ==
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								So the body of a POST request to send the events as a batch is:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								data=Ww0KICAgIHsNCiAgICAgICAgImV2ZW50IjogIlNpZ25lZCBVcCIsDQogICAgICAgICJwcm9wZXJ0aWVzIjogew0KICAgICAgICAgICAgImRpc3RpbmN0X2lkIjogIjEzNzkzIiwNCiAgICAgICAgICAgICJ0b2tlbiI6ICJlM2JjNDEwMDMzMGMzNTcyMjc0MGZiOGM2ZjVhYmRkYyIsDQogICAgICAgICAgICAiUmVmZXJyZWQgQnkiOiAiRnJpZW5kIiwNCiAgICAgICAgICAgICJ0aW1lIjogMTM3MTAwMjAwMA0KICAgICAgICB9DQogICAgfSwNCiAgICB7DQogICAgICAgICAiZXZlbnQiOiAiVXBsb2FkZWQgUGhvdG8iLA0KICAgICAgICAgICJwcm9wZXJ0aWVzIjogew0KICAgICAgICAgICAgICAiZGlzdGluY3RfaWQiOiAiMTM3OTMiLA0KICAgICAgICAgICAgICAidG9rZW4iOiAiZTNiYzQxMDAzMzBjMzU3MjI3NDBmYjhjNmY1YWJkZGMiLA0KICAgICAgICAgICAgICAiVG9waWMiOiAiVmFjYXRpb24iLA0KICAgICAgICAgICAgICAidGltZSI6IDEzNzEwMDIxMDQNCiAgICAgICAgICB9DQogICAgfQ0KXQ==
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Both endpoints will accept up to 50 messages in a single batch. Usually, batch requests will have a "time" property associated with events, or a "$time" attribute associated with profile updates.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When sending a batch request to Mixpanel, we will invalidate the entire request if one of the objects within the batch is invalid. If you receive an error when attempting to send a batch, please attempt the requests one at a time to isolate the cause of the error.
+								Document Sections
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Introduction
+							Element:li
+							Element:a
+								Tracking via HTTP
+							Element:li
+							Element:a
+								Base64 for Mixpanel
+							Element:li
+							Element:a
+								Tracking events
+							Element:li
+							Element:a
+								Storing user profiles
+							Element:li
+							Element:a
+								Update Operations
+							Element:li
+							Element:a
+								Creating a distinct_id alias
+							Element:li
+							Element:a
+								Tracking revenue
+							Element:li
+							Element:a
+								Batch requests

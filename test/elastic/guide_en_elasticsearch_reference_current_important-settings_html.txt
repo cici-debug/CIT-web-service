@@ -1,0 +1,665 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Important Elasticsearch configuration
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								While Elasticsearch requires very little configuration, there are a number of settings which need to be configured manually and should definitely be configured before going into production.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+							Element:code
+								path.data
+								and
+							Element:code
+								path.logs
+							Element:li
+							Element:a
+							Element:code
+								cluster.name
+							Element:li
+							Element:a
+							Element:code
+								node.name
+							Element:li
+							Element:a
+							Element:code
+								bootstrap.memory_lock
+							Element:li
+							Element:a
+							Element:code
+								network.host
+							Element:li
+							Element:a
+							Element:code
+								discovery.zen.ping.unicast.hosts
+							Element:li
+							Element:a
+							Element:code
+								discovery.zen.minimum_master_nodes
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											path.data
+											and
+										Element:code
+											path.logs
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are using the
+										Element:code
+											.zip
+											or
+										Element:code
+											.tar.gz
+											archives, the
+										Element:code
+											data
+											and
+										Element:code
+											logs
+											directories are sub-folders of
+										Element:code
+											$ES_HOME
+											. If these important folders are left in their default locations, there is a high risk of them being deleted while upgrading Elasticsearch to a new version.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In production use, you will almost certainly want to change the locations of the data and log folder:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											path: logs: /var/log/elasticsearch data: /var/data/elasticsearch
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The RPM and Debian distributions already use custom paths for
+										Element:code
+											data
+											and
+										Element:code
+											logs
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											path.data
+											settings can be set to multiple paths, in which case all paths will be used to store data (although the files belonging to a single shard will all be stored on the same data path):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											path: data: - /mnt/elasticsearch_1 - /mnt/elasticsearch_2 - /mnt/elasticsearch_3
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											cluster.name
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A node can only join a cluster when it shares its
+										Element:code
+											cluster.name
+											with all the other nodes in the cluster. The default name is
+										Element:code
+											elasticsearch
+											, but you should change it to an appropriate name which describes the purpose of the cluster.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											cluster.name: logging-prod
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Make sure that you don’t reuse the same cluster names in different environments, otherwise you might end up with nodes joining the wrong cluster.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											node.name
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, Elasticsearch will take the 7 first character of the randomly generated uuid used as the node id. Note that the node id is persisted and does not change when a node restarts and therefore the default node name will also not change.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is worth configuring a more meaningful name which will also have the advantage of persisting after restarting the node:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											node.name: prod-data-2
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											node.name
+											can also be set to the server’s HOSTNAME as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											node.name: ${HOSTNAME}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											bootstrap.memory_lock
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is vitally important to the health of your node that none of the JVM is ever swapped out to disk. One way of achieving that is set the
+										Element:code
+											bootstrap.memory_lock
+											setting to
+										Element:code
+											true
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For this setting to have effect, other system settings need to be configured first. See
+										Element:a
+											Enable
+											for more details about how to set up memory locking correctly.
+										Element:code
+											bootstrap.memory_lock
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											network.host
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, Elasticsearch binds to loopback addresses only — e.g.
+										Element:code
+											127.0.0.1
+											and
+										Element:code
+											[::1]
+											. This is sufficient to run a single development node on a server.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In fact, more than one node can be started from the same
+										Element:code
+											$ES_HOME
+											location on a single node. This can be useful for testing Elasticsearch’s ability to form clusters, but it is not a configuration recommended for production.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to communicate and to form a cluster with nodes on other servers, your node will need to bind to a non-loopback address. While there are many
+										Element:a
+											network settings
+											, usually all you need to configure is
+										Element:code
+											network.host
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											network.host: 192.168.1.10
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											network.host
+											setting also understands some special values such as
+										Element:code
+											_local_
+											,
+										Element:code
+											_site_
+											,
+										Element:code
+											_global_
+											and modifiers like
+										Element:code
+											:ip4
+											and
+										Element:code
+											:ip6
+											, details of which can be found in
+										Element:a
+											the section called “Special values for
+										Element:code
+											network.host
+										Element:a
+											edit
+											”.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As soon you provide a custom setting for
+										Element:code
+											network.host
+											, Elasticsearch assumes that you are moving from development mode to production mode, and upgrades a number of system startup checks from warnings to exceptions. See
+										Element:a
+											the section called “Development mode vs production mode
+										Element:a
+											edit
+											” for more information.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											discovery.zen.ping.unicast.hosts
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Out of the box, without any network configuration, Elasticsearch will bind to the available loopback addresses and will scan ports 9300 to 9305 to try to connect to other nodes running on the same server. This provides an auto- clustering experience without having to do any configuration.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When the moment comes to form a cluster with nodes on other servers, you have to provide a seed list of other nodes in the cluster that are likely to be live and contactable. This can be specified as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											discovery.zen.ping.unicast.hosts: - 192.168.1.10:9300 - 192.168.1.11
+										Element:a
+										Element:span
+											- seeds.mydomain.com
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The port will default to
+										Element:code
+											transport.profiles.default.port
+											and fallback to
+										Element:code
+											transport.tcp.port
+											if not specified.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											A hostname that resolves to multiple IP addresses will try all resolved addresses.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											discovery.zen.minimum_master_nodes
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To prevent data loss, it is vital to configure the
+										Element:code
+											discovery.zen.minimum_master_nodes
+											setting so that each master-eligible node knows the
+										Element:span
+											that must be visible in order to form a cluster.
+										Element:em
+											minimum number of master-eligible nodes
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Without this setting, a cluster that suffers a network failure is at risk of having the cluster split into two independent clusters — a split brain — which will lead to data loss. A more detailed explanation is provided in
+										Element:a
+											the section called “Avoiding split brain with
+										Element:code
+											minimum_master_nodes
+										Element:a
+											edit
+											”.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To avoid a split brain, this setting should be set to a
+										Element:span
+											of master- eligible nodes:
+										Element:em
+											quorum
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											(master_eligible_nodes / 2) + 1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In other words, if there are three master-eligible nodes, then minimum master nodes should be set to
+										Element:code
+											(3 / 2) + 1
+											or
+										Element:code
+											2
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											discovery.zen.minimum_master_nodes: 2
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Configuring Elasticsearch
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Bootstrap Checks »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

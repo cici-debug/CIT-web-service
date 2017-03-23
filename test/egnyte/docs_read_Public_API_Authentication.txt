@@ -1,0 +1,1257 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Authentication
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Before you begin making API calls, you must first authenticate to obtain a valid access token to use in subsequent requests. Our APIs use the
+				Element:a
+					OAuth 2.0
+					standard for authentication. We support the Resource Owner, Authorization Code, and Implicit Grant flows. We also support an
+				Element:a
+					Enhanced Authentication Service
+					for the Authorization Code flow. Regardless of which flow you use, your application must cache the tokens received rather than making repeated requests for a token.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					If you registered for an
+				Element:em
+					internal application key
+					, please refer to the
+				Element:a
+					Internal Applications
+					section below.
+				Element:li
+					If you registered for a
+				Element:em
+					publicly available application key
+					, please refer to the
+				Element:a
+					Authorization Code
+					or
+				Element:a
+					Implicit Grant
+					flows.
+				Element:li
+					If you registered for the wrong type of key or need to change your domain association, please contact
+				Element:a
+					api-support@egnyte.com
+					and we will be happy to help you fix it.
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Subsequent Requests
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once you have an OAuth token, all subsequent API calls that you make on a given user's behalf must have the token specified in the header of the request. Set the
+													Element:span
+														“Authorization”
+														field to
+													Element:span
+														“Bearer <Token>”
+														. For example:
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														Authorization: Bearer 2v8q2bc6uvxtgghwmwvnvcp4
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You should persist the OAuth token in your application, rather than making repeated calls to obtain a token for the same user. Treat the token with the same degree of care that you would a saved password.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Bearer tokens issued by Egnyte's APIs do not expire. However, if a user changes their password or explicitly revokes access, then a new token will be required. Therefore, your app must be able to deal with 401 authentication failure scenarios.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Public Applications
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are an Egnyte partner developing an application for use by our customers, you can use either the
+										Element:a
+											Authorization Code
+											flow or
+										Element:a
+											Implicit Grant
+											flow to generate an OAuth access token. The Authorization flow is a general-purpose and secure way of getting tokens that are stored in the backend. The Implicit Grant flow is only useful when working in the browser and displays the token to the user. Please note, until you application has been
+										Element:a
+											approved for production
+											use, it will only work on the domain registered in your application key's profile.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authorization Code Flow
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The authorization code flow is most commonly used by applications that make server side requests. The token is stored securely in the backend and never shown in the browser.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is a three stage flow:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:a
+											Initiate the authentication flow.
+										Element:li
+										Element:a
+											Handle the Response.
+										Element:li
+										Element:a
+											Exchange the code for a token.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	1. Initiate the Authentication Flow
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Direct the user to the Egnyte OAuth 2.0 login screen using a request like this:
+															Node:
+															(type) c
+															(layer)5
+																Element:span
+																	https://<Egnyte Domain>.egnyte.com/puboauth/token?client_id=<API Key>&redirect_uri=<Callback URL>&scope=<SELECTED SCOPES>&state=<STRING>&response_type=code
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tbody
+																Element:tr
+																Element:th
+																	Variable
+																Element:th
+																	Description
+																Element:th
+																	Required
+																Element:tr
+																Element:td
+																Element:span
+																	Egnyte Domain
+																Element:td
+																	This is the user's Egnyte domain. You will need to prompt the user for the domain name. An example domain name is "acme". Note that initially your API key will only work with the single Egnyte domain you told us you would use for testing. When we approve your completed app, we will issue you a new key that works with any Egnyte domain.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	client_id
+																Element:td
+																	This is the API key that was provided to you when you registered your application.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	redirect_uri
+																Element:td
+																	This is the URL that we will redirect to after the user has allowed or denied your request to access their account. This must be an HTTPS URL and must match the callback URL configured for your key. E.g. "https://yourapp.com/oauth"
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	response_type
+																Element:td
+																	This must be set to "code" for this flow.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	scope
+																Element:td
+																	Although this parameter is optional from a technical standpoint, all third party applications must scope token requests to only the endpoints they need. We will not approve applications for production use unless they properly scope their token requests or demonstrate a valid need for global scope. More details on
+																Element:a
+																	OAuth Scopes
+																	are provided below.
+																Element:td
+																	No
+																Element:tr
+																Element:td
+																Element:span
+																	state
+																Element:td
+																	As described in the
+																Element:a
+																	OAuth 2.0 spec
+																	, this optional parameter is an opaque value used by the client to maintain state between the request and callback. The authorization server includes this value when redirecting the user-agent back to the client. The parameter can be used for preventing cross-site request forgery and passing the Egnyte domain as part of the response from the authorization server.
+																Element:td
+																	No
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	For example:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	https://apidemo.egnyte.com/puboauth/token?client_id=x2g35g8gynb5cedas649m4h4&client_secret=SECRET_KEY&redirect_uri=https://yourapp.com/oauth&scope=Egnyte.filesystem&state=apidemo123&response_type=code
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The user will be taken to an authorization page that asks them to explicitly permit your app to access their Egnyte account. This page displays information about your application taken from your profile. The user must provide their login credentials on this page to authorize your application.
+															Node:
+															(type) c
+															(layer)5
+																Element:a
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	2. Handle the Response from Egnyte
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If the user allows your app to access their account, we redirect to:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	https://yourapp.com/oauth?code=OAUTH_CODE&state=apidemo123
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If the user denies your app, we redirect to:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	https://yourapp.com/oauth?error=access_denied&state=apidemo123
+															Node:
+															(type) c
+															(layer)5
+																Element:a
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	3. Exchange the code for a token
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Make a request to exchange the code for a token by sending an HTTP POST to:
+															Node:
+															(type) c
+															(layer)5
+																Element:span
+																	https://<Egnyte Domain>.egnyte.com/puboauth/token
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	with the following form encoded ("application/x-www-form-urlencoded" format) request body:
+															Node:
+															(type) c
+															(layer)5
+																Element:span
+																Element:pre
+																	client_id=<API Key>&client_secret=<Shared Secret>&redirect_uri=<Callback URL>&code=<CODE_FROM_STEP_2>&grant_type=authorization_code
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tbody
+																Element:tr
+																Element:th
+																	Variable
+																Element:th
+																	Description
+																Element:th
+																	Required
+																Element:tr
+																Element:td
+																Element:span
+																	Egnyte Domain
+																Element:td
+																	This is the user's Egnyte domain. You will need to prompt the user for the domain name. An example domain name is "acme". Note that initially your API key will only work with the single Egnyte domain you told us you would use for testing. When we approve your completed app, we will issue you a new key that works with any Egnyte domain.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	client_id
+																Element:td
+																	This is the API key that was provided to you when you registered your application.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	client_secret
+																Element:td
+																	This is the secret key that was provided with your key to you when you registered your application. If your application key was requested prior to January 2015, please register for a new key to get one with a client secret.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	redirect_uri
+																Element:td
+																	This is the callback URL configured for your key.
+																Element:strong
+																	It must be the same as you used in the initial call to the authorization server.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	code
+																Element:td
+																	The authorization code received from the authorization server in step 2.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	grant_type
+																Element:td
+																	This must be set to "authorization_code" for this request.
+																Element:td
+																Element:span
+																	Yes
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	For example, you send a POST to:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	https://apidemo.egnyte.com/puboauth/token
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	With body:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	client_id=x2g35g8gynb5cedas649m4h4&redirect_uri=https://yourapp.com/oauth&code=5u3m26mzgfn8nv6antmessr5&grant_type=authorization_code
+															Node:
+															(type) c
+															(layer)5
+																Element:h4
+																	Sample Response Body
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "access_token": "68zc95e3xv954u6k3hbnma3q", "token_type": "bearer", "expires_in": -1 }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Please save this access token and use it when making API requests for this user. Store it encrypted and don't leave it in browser's localStorage.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+										Element:a
+											Enhanced Authentication Service
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											URLs
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Services are available in two regions, Europe and the United States.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Europe
+										Element:li
+										Element:a
+											United States
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											https://partner-integrations.egnyte.com/services/
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											https://us-partner-integrations.egnyte.com/services/
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											OAuth Flow Proxy
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This OAuth flow enhances the
+										Element:a
+											Authorization Code Flow
+											. The OAuth Flow Proxy does not require knowing the user's Egnyte domain before initiating the flow. The user will be prompted to provide a domain name in the first step of the flow.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Start the Code Auth Flow Proxy using a request in this format:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<baseUrl>/services/oauth/code?redirect_uri=<clientUri>&client_id=<apiKey>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The end of this flow redirects to the
+										Element:span
+											clientUri
+											with an authorization code that should be exchanged for the access token by the client. The domain chosen is available in the Referrer header.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Skipping Domain Choice
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you already know the domain but need to go through the OAuth flow for the user again, you can skip asking for the domain name again.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To skip the first step, add the
+										Element:span
+											domain
+											query parameter to the initial Url. The Url can be either the full Url with
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<baseUrl>/services/oauth/code?redirect_uri=<clientUri>&client_id=<apiKey>&domain=apidemo.egnyte.com
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Example Initialization of Enhanced OAuth Flow
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Initial Call:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											https://partner-integrations.egnyte.com/services/oauth/code?redirect_uri=https://example.com/&client_id=<apiKey>&state=STATE
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above call will redirect to:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											https://example.com/?state=STATE&code=st6b9tzzz5ck48x5yyauswv3
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Egnyte domain name can be retrieved from the
+										Element:span
+											Referer
+											header in the final redirect.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Implicit Grant Flow
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The implicit grant flow is most commonly used by browser applications. If you want to store access tokens in your back-end, we recommend Authorization Code flow.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is a two stage flow:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:a
+											Initiate the Authentication Flow
+										Element:li
+										Element:a
+											Handle the Response from Egnyte
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Initiate the Authentication Flow
+															Node:
+															(type) c
+															(layer)5
+																Element:span
+																	https://<Egnyte Domain>.egnyte.com/puboauth/token?client_id=<API Key>&redirect_uri=<Callback URL>&scope=<SELECTED SCOPES>&state=<STRING>&response_type=token
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tbody
+																Element:tr
+																Element:th
+																	Variable
+																Element:th
+																	Description
+																Element:th
+																	Required
+																Element:tr
+																Element:td
+																Element:span
+																	Egnyte Domain
+																Element:td
+																	This is the user's Egnyte domain. You will need to prompt the user for the domain name. An example domain name is "acme". Note that initially your API key will only work with the single Egnyte domain you told us you would use for testing. When we approve your completed app, we will issue you a new key that works with any Egnyte domain.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	API Key
+																Element:td
+																	This is the key string that was provided to you when you registered your application.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	redirect_uri
+																Element:td
+																	This is the URL that we will redirect to after the user has allowed or denied your request to access their account. This must be an HTTPS URL and must match the callback URL configured for your key. E.g. "https://yourapp.com/oauth"
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	response_type
+																Element:td
+																	This must be set to "token" for this flow.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	state
+																Element:td
+																	As described in the
+																Element:a
+																	OAuth 2.0 spec
+																	, this optional parameter is an opaque value used by the client to maintain state between the request and callback. The authorization server includes this value when redirecting the user-agent back to the client. The parameter can be used for preventing cross-site request forgery and passing the Egnyte domain as part of the response from the authorization server.
+																Element:td
+																	No
+																Element:tr
+																Element:td
+																Element:span
+																	scope
+																Element:td
+																	Although this parameter is optional from a technical standpoint, all third party applications must scope token requests to only the endpoints they need. We will not approve applications for production use unless they properly scope their token requests or demonstrate a valid need for global scope. More details on
+																Element:a
+																	OAuth Scopes
+																	are provided below.
+																Element:td
+																	No
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	For example:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	https://apidemo.egnyte.com/puboauth/token?client_id=x2g35g8gynb5cedas649m4h4&redirect_uri=https://yourapp.com/oauth&scope=Egnyte.filesystem&state=apidemo123&response_type=token
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The user will be taken to an authorization page that asks them to explicitly permit your app to access their Egnyte account. This page displays information about your application taken from your profile. The user must provide their login credentials on this page to authorize your application.
+															Node:
+															(type) c
+															(layer)5
+																Element:a
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	2. Handle the Response from Egnyte
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If the user allows your app to access their account, we redirect to:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	https://yourapp.com/oauth#access_token=OAUTH_CODE&token_type=bearer&state=apidemo123
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If the user denies your app, we redirect to:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	https://yourapp.com/oauth#error=access_denied&state=apidemo123
+															Node:
+															(type) c
+															(layer)5
+																Element:h4
+																	Sample Response Body
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Please save this access token and use it when making API requests for this user. Store it encrypted and don't leave it in browser's localStorage.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:a
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Internal Applications
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Resource Owner Password Credentials Flow
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are an Egnyte customer developing an application for internal use, you should use the following steps to generate an OAuth token that you will use for all subsequent API calls. These steps correspond to the OAuth 2.0
+										Element:em
+											Resource Owner
+											flow.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Sending the Authentication Request
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											POST
+											/puboauth/token
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With the following form-encoded parameters ("application/x-www-form-urlencoded" format) in the request body:
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											client_id=<Your API Key>&username=<Username>&password=<Password>&grant_type=password
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Variable
+										Element:th
+											Description
+										Element:tr
+										Element:td
+										Element:span
+											client_id
+										Element:td
+											This is the key string that was provided to you when you registered your application. E.g. "cba97f3apst9eqzdr5hskggx".
+										Element:tr
+										Element:td
+										Element:span
+											username
+										Element:td
+											This is the Egnyte username of the user on whose behalf you are acting.
+										Element:tr
+										Element:td
+										Element:span
+											password
+										Element:td
+											This is the Egnyte password of the user.
+										Element:tr
+										Element:td
+										Element:span
+											grant_type
+										Element:td
+											This must always be set to "password"
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Request Examples
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											HTTP
+										Element:li
+										Element:a
+											cURL
+										Element:li
+										Element:a
+											Ruby
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /puboauth/token HTTP/1.1 Host: acme.egnyte.com Content-Type: application/x-www-form-urlencoded Content-Length: 91 Connection: close client_id=cba97f3apst9eqzdr5hskggx&username=test&password=password&grant_type=password
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -v --request POST -H "Content-Type: application/x-www-form-urlencoded" \ -d grant_type=password -d username=test -d password='password' \ -d client_id=cba97f3apst9eqzdr5hskggx https://apidemo.egnyte.com/puboauth/token
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											require 'egnyte' session = Egnyte::Session.new({ username:'test', password:'password', domain:'apidemo', key:'cba97f3apst9eqzdr5hskggx' }, :password) client = Egnyte::Client.new(session)
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Sample Response Body
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "access_token": "68zc95e3xv954u6k3hbnma3q", "token_type": "bearer", "expires_in": -1 }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please save this access token and use it when making API requests for this user. Please note, this token does not expire until the user's password is changed.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Error Codes
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Error Code
+										Element:th
+											Error Message
+										Element:th
+											HTTP Code
+										Element:th
+											Troubleshooting
+										Element:tr
+										Element:td
+											APIKEY_FOR_IMPLICIT
+										Element:span
+										Element:td
+											This API key is configured only for Implicit Grant flow. Please check the documentation and try again.
+										Element:td
+											400
+										Element:td
+											Your key is configured to work with the
+										Element:a
+											Implicit Grant
+											flow. If you are an Egnyte customer developing an application for internal use, please contact
+										Element:a
+											api-support@egnyte.com
+											and we will be happy to convert your key. Otherwise, please follow the instructions for using the
+										Element:a
+											Implicit Grant
+											flow.
+										Element:tr
+										Element:td
+										Element:span
+											INTERNAL_ERROR
+										Element:td
+											Oauth request from this source has gone over its rate limit quota.
+										Element:td
+											400
+										Element:td
+											For some reason, your application is repeatedly making requests to the authorization endpoint for the same user. Please check your application logic to ensure tokens are being properly cached.
+										Element:tr
+										Element:td
+										Element:span
+											INTERNAL_ERROR
+										Element:td
+											No active developer profile found for api key
+										Element:td
+											400
+										Element:td
+											Your API key is invalid. Please confirm your API key is correct and is being sent properly in the request.
+										Element:tr
+										Element:td
+										Element:span
+											INTERNAL_ERROR
+										Element:td
+											null
+										Element:td
+											400
+										Element:td
+											Check the parameters you are sending. There is a good chance you have an invalid parameter name or a syntax error.
+										Element:tr
+										Element:td
+										Element:span
+											INVALID_USERNAME_OR_PASSWORD
+										Element:td
+											Invalid username and/or password.
+										Element:td
+											403
+										Element:td
+											Please make sure the username and password are correct. Also, some HTTP libraries have trouble with special characters. If your credentials are correct but you are still having trouble, you might test your library with a simpler password to see if your library is causing the issue.
+										Element:tr
+										Element:td
+										Element:span
+											GRANT_PASSWORD
+										Element:td
+											For resource owner flow, grant_type must be password. Check documentation and try again.
+										Element:td
+											403
+										Element:td
+											Make sure you have set the grant_type parameter to "password" and try again.
+										Element:tr
+										Element:td
+										Element:span
+											RESOURCE_FLOW_ISNULL
+										Element:td
+											Resource owner flow based access request but username and/or password is null. Please check documentation and try again.
+										Element:td
+											400
+										Element:td
+											If you are receiving a secondary message about an invalid username or password, you probably did not add a username or password in the reqeust body. If you are just seeing the message above in the response body, you are probably missing the Content-Type header or have an invalid header.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+										Element:a
+											OAuth Scopes
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, any OAuth token you create will be permitted to access all available Egnyte APIs. You should restrict a given token to a subset of APIs by passing the
+										Element:span
+											scope
+											parameter in the token request call. For example, in order to restrict a token to only be able to call the File System API, pass the parameter
+										Element:span
+											”scope=Egnyte.filesystem”
+											. For the Authorization Code and Implicit Grant flows, you pass the scope parameter in the query string. For the Resource Owner Password Credentials flow you pass it along with the other form-encoded parameters in the request body.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The list of currently supported scopes:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Scope Identifier
+										Element:th
+											API
+										Element:tr
+										Element:td
+											Egnyte.filesystem
+										Element:td
+											File System
+										Element:tr
+										Element:td
+											Egnyte.user
+										Element:td
+											User Management
+										Element:tr
+										Element:td
+											Egnyte.group
+										Element:td
+											Group Management
+										Element:tr
+										Element:td
+											Egnyte.audit
+										Element:td
+											Audit Reporting
+										Element:tr
+										Element:td
+											Egnyte.link
+										Element:td
+											Links
+										Element:tr
+										Element:td
+											Egnyte.permission
+										Element:td
+											Permissions
+										Element:tr
+										Element:td
+											Egnyte.bookmark
+										Element:td
+											Bookmarks
+										Element:tr
+										Element:td
+											Egnyte.launchwebsession
+										Element:td
+											Embedded UI
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you specify more than one scope, they must be space-delimited. E.g.
+										Element:span
+											“scope=Egnyte.filesystem Egnyte.link”
+											. OAuth tokens created through the Publicly Available Applications flow will present all requested scopes to the end user. For instance if you do not request a specific scope, then the user will be shown the following text in the authorization dialog:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This application will be able to:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Read, write and delete files/folders
+										Element:li
+											Create, update and delete users
+										Element:li
+											Generate audit reports
+										Element:li
+											Create and delete file/folder links
+										Element:li
+											Add, update, delete and report on folder permissions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Requesting access to only the APIs your application strictly needs will increase the chance that an end user will grant permission. Avoid requesting scopes that your application does not actually need.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Getting User Info for an OAuth Token
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To obtain user info for a given OAuth token, you make a GET request to the following URL (using OAuth authorization):
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											GET
+											/pubapi/v1/userinfo
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Request Examples
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											HTTP
+										Element:li
+										Element:a
+											cURL
+										Element:li
+										Element:a
+											Ruby
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /pubapi/v1/userinfo HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -H "Authorization: Bearer 68zc95e3xv954u6k3hbnma3q" \ https://apidemo.egnyte.com/pubapi/v1/userinfo
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											require 'egnyte' session = Egnyte::Session.new({domain:'apidemo', access_token:'68zc95e3xv954u6k3hbnma3q'}) puts session.info
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Sample Response Body
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "id": 123, "first_name": "Test", "last_name": "User", "username": "test" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											version 32
+										Element:span
+											as of
+										Element:abbr
+											4 months ago
+										Element:span
+											by
+										Element:span
+										Element:a
+											Greg Neustaetter
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Previous:
+										Element:a
+											Getting Started
+										Element:li
+										Element:span
+											Up:
+										Element:a
+											Overview
+										Element:li
+										Element:span
+											Next:
+										Element:a
+											File System API
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Docs Navigation
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Overview
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Authentication
+							Element:li
+							Element:a
+								File System API
+							Element:li
+							Element:a
+								Permissions API
+							Element:li
+							Element:a
+								Events API
+							Element:li
+							Element:a
+								Search API
+							Element:li
+							Element:a
+								Links API
+							Element:li
+							Element:a
+								User Management API
+							Element:li
+							Element:a
+								Group Management API
+							Element:li
+							Element:a
+								Audit Reporting API
+							Element:li
+							Element:a
+								UI Integration Framework
+							Element:li
+							Element:a
+								Trash API
+							Element:li
+							Element:a
+								Comments API
+							Element:li
+							Element:a
+								Metadata API
+							Element:li
+							Element:a
+								Embedded UI API
+							Element:li
+							Element:a
+								Bookmarks API
+							Element:li
+							Element:a
+								Folder Options API
+							Element:li
+							Element:a
+								Best Practices
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Get API Key
+							Element:li
+							Element:a
+								API Docs
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Explore APIs
+							Element:li
+							Element:a
+								Explore SDKs
+						Node:
+						(type) c
+						(layer)2
+							Element:noscript
+							Element:img

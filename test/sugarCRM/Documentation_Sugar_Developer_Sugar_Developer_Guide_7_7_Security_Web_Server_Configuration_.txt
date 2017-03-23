@@ -1,0 +1,828 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Web Server Configuration
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This document serves as a guideline to harden the web server configuration with regard to running SugarCRM. Note that this is a guideline and certain settings will depend on your specific environment and setup. This guideline focuses on Apache web server as this is SugarCRM's primary supported web server. However the recommendations in this document apply to all web servers in general.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Advisory ID: sugarcrm-sr-2015-003
+							Element:br
+								Revision: 1.1
+							Element:br
+								Last updated: 2015-10-01
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								SugarCRM .htaccess file
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								During installation, SugarCRM deploys an .htaccess file in SugarCRM's root folder. The content of this file may change during upgrades as well. The primary configuration directives managed by SugarCRM are focused around disabling direct access to certain directories and files. Secondly the configuration contains specific URL rewrite rules which are required for SugarCRM.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Although this file can be used to ship most of the settings which are explained in this document to harden the web server, SugarCRM has chosen not to do so as most of them depend on the customer's setup which cannot be fully controlled by the SugarCRM application itself.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All directives which are managed by SugarCRM are placed between the following markers inside the .htaccess file:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								# BEGIN SUGARCRM RESTRICTIONS RedirectMatch 403 .*\.log$ ... # END SUGARCRM RESTRICTIONS
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Customers can add additional directives if need. Make sure to put those directives outside of the above mentioned markers. SugarCRM can rebuild during upgrades all directives enclosed in the above markers.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Securing .htaccess
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Apache allows admins to drop in .htaccess files in any given directory. When a request comes in, Apache will scan the directory recursively for any .htaccess file and apply its configuration directives. This ability is orchestrated by the AllowOverride directive which is enabled by default on most Apache configurations.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To disable this dynamic Apache configuration behavior, disable AllowOverride and make sure to copy paste the .htaccess file content as well.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<Directory "/var/www/html"> AllowOverride None # BEGIN SUGARCRM RESTRICTIONS RedirectMatch 403 .*\.log$ ... # END SUGARCRM RESTRICTIONS </Directory>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When choosing for this security measure, make sure to verify if any changes have happened in the .htaccess after an upgrade. Those changes need to be applied manually back in the Apache configuration to ensure SugarCRM functions properly. Disabling the .htaccess file support also has a positive impact on the performance as Apache will no longer need to scan for the presence of .htaccess files.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Although Apache does not allow to download .htaccess files, to tighten the security around .htaccess even more the following directives can be added:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<Files ".ht*"> Order deny,allow Deny from all </Files>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Prevent version exposure
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default Apache web server exposes its version and OS details in most *nix distributions in both the HTTP response headers as well as on the default error pages. To prevent this behavior use the following configuration directives:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								ServerSignature Off ServerTokens Prod
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The exposure of the PHP version can be disabled in your php.ini file. When exposed an X-Powered-By response header will be added containing the PHP version information.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								expose_php = Off
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Another option is to unset the header explicitly in the Apache configuration:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<IfModule mod_headers.c> Header unset X-Powered-By </IfModule>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that unsetting the Server header is not possible using this way. The web server will always respond with a Server header containing the string "Apache". If it is desired to remove this header as well, additional modules need to be used for this (i.e. mod_security can do this).
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Directory listing and index page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Make sure to configure a default index page which should only be index.php for SugarCRM. This is mostly configured but worth checking. Additional SugarCRM does not require the directory browsing support and this is recommended to be disabled. This can be accomplished by removing Options Indexes and/or completely disable the mod_autoindex module.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Optionally additional Allow/Deny directives can be used to apply access lists to certain directories. It is not recommended to add additional authentication through Apache as SugarCRM already fully manages user authentication. The Allow/Deny directives can still be used to apply any IP access list if required by the customer.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following example secures the root directory (default configuration), disable directory browsing and an additional IP access list is applied.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								DocumentRoot "/var/www/html" <Directory /> AllowOverride none Order allow,deny Deny from all </Directory> <Directory "/var/www/html"> DirectoryIndex index.php Options -Indexes Order deny,allow Allow from 10.0.0.0/8 Deny from all </Directory>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Additional Options directives
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								SugarCRM does not rely on both CGI and SSI and it is recommended to disable this functionality explicitly. Optionally the FollowSymLinks options can also be disabled depending on your directory setup.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<Directory "/var/www/html"> Options -ExecCGI -Includes -FollowSymLinks </Directory>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Web server permissions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Ensure your web server is configured to run as a dedicated non-privileged user. Certain *nix distributions use out of the box the user/group nobody. It is recommended to use a dedicated user/group instead.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								User wwwrun Group www
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Ensure the configured user/group have the proper file and directory permissions for SugarCRM. See the installation/upgrade guide for more detailed instructions regarding the required permissions.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Disable unnecessary loadable modules
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Apache is pluggable by means of loadable modules. To minimize the chances becoming a victim of an attack it is recommended to disable all loadable modules which are not needed. SugarCRM recommends the following base Apache modules:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								mod_authz_host
+							Element:li
+								mod_dir
+							Element:li
+								mod_expires
+							Element:li
+								mod_rewrite
+							Element:li
+								mod_headers
+							Element:li
+								mod_mime
+							Element:li
+								mod_alias
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								From an Apache perspective to disable a loadable module, it is sufficient to comment out the LoadModule directives. However certain *nix distribution have additional configuration scripts to manage the loaded Apache modules. Please refer to your *nix distribution for this.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Based on your setup additional Apache modules can be used. When using MPM prefork you will also need mod_php5 and when terminating secure HTTP connection on the web server directly also mod_ssl (see below).
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								HTTP methods
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								HTTP uses different methods (verbs) in requests. As per RFC-7231 for HTTP/1.1 different request methods are defined which serve the primary source of the request semantics. The following methods are used by SugarCRM:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For new REST API:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								GET
+							Element:li
+								POST
+							Element:li
+								PUT
+							Element:li
+								DELETE
+							Element:li
+								HEAD (*)
+							Element:li
+								OPTIONS (*)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Bootstrap, BWC access, old SOAP/REST API:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								GET
+							Element:li
+								POST
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								(*) Currently not in use, but may be implemented in the future.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The new REST API is accessed using the URL "/rest/vxx/…" where xxx represents the API version number. To harden the usage of the additional HTTP methods the following directives can be used for the new REST API endpoint while only allowing GET and POST on the legacy access.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<Directory "/var/www/html"> <LimitExcept GET POST> Order deny,allow Deny from all </LimitExcept> </Directory> <Location "/rest"> <LimitExcept GET POST PUT DELETE> Order deny,allow Deny from all </LimitExcept> </Location> <Location "/api/rest.php"> <LimitExcept GET POST PUT DELETE> Order deny,allow Deny from all </LimitExcept> </Location>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Instead of using the Limit directive, an alternative is using mod_allowmethods which is available since Apache 2.4. However this module is flagged as experimental.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Secure HTTP traffic
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								SugarCRM requires the usage of HTTPS transport without any exception. Depending on your setup you can terminate the secure connection on a separate end point (load balancer, dedicated HTTPS termination point) or directly on the web server(s). You will also need a valid private key and X.509 certificate. In most cases the customer needs to acquire an X.509 certificate through a public certification authority of their choice. For internal deployments this may not be necessary when a local PKI environment is available.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When terminating the secure connection directly on the Apache web server, mod_ssl is required. A dedicated VirtualHost needs to be configured on port 443 (standard HTTPS port). The following is a basic SSL/TLS configuration as a reference. More details are covered in the next paragraphs.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<VirtualHost 1.2.3.4:443> SSLEngine on SSLCertificateFile /etc/pki/tls/certs/example.com.crt SSLCertificateKeyFile /etc/pki/tls/certs/example.com.key SSLCertificateChainFile /etc/pki/tls/certs/example_bundle.crt ServerName crm.example.com </VirtualHost>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Make sure to have your server name properly configured as it should match the X.509 certificate's CommonName (or one of the SNA's, subject alternative names). More information regarding the certificate requests including the certificate chain can be obtained from your certification authority.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Ensure to redirect all non-secure HTTP (port 80) traffic to the secure virtual host.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<VirtualHost *:80> Redirect "/" "https://crm.example.com/" </VirtualHost >
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Cipher suite hardening
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								One of the crucial points of HTTPS is to force only secure cryptographic algorithms. Based on new future weaknesses which may be discovered in the future the recommended cipher suite settings can change. As per publish date of this document the usage of SSLv2 and SSLv3 is recommended to be disabled. The current safe secure transport protocols are TLSv1.0, TLSv1.1 and TLSv1.2 with properly configured cipher suites.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For proper deployment of Diffie-Hellman (DH) key exchange algorithms the following guidelines apply:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								No longer use out-dated export cipher suites
+							Element:li
+								Ensure the usage of Elliptic Curve Diffie-Hellman (ECDHE) based algorithms
+							Element:li
+								Use of non-common Diffie-Hellman groups
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								More detail around the DH configuration and a detailed list of recommended cipher suites including web server configuration examples, can be found at https://weakdh.org/sysadmin.html. Additionally, an online SSL/TLS checker can be used to generate a full report of your current configuration in case your web server is publically reachable. A recommended tool is https://www.ssllabs.com/ssltest/analyze.html. The output of this SSL/TLS test suite will guide you into further (optional) details which can be tweaked regarding your configuration (i.e. OCSP stapling, certificate pinning, …).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Please note that using the above instruction "perfect forward secrecy" will be enabled. This basically means that captured TLS traffic can only be decoded using the session key between a specific client and server. Non perfect forwarding secrecy connections can always be decrypted by having access to only the server's private key. If the customer's setup has intermediate IDS/WAF systems to inspect traffic looking inside the secure traffic, having perfect forwarding secrecy configured may not be desirable.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Public trusted root CA's
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It is recommended that the *nix system where Apache is running always has the latest public root CA (certification authority) files available to authenticate server certificates during the SSL/TLS handshake. Most *nix distributions take care of this through their online update process. If this is not the case, the system administrator is responsible to ensure the latest trusted root CA's are up-to-date. Out of the box the SugarCRM application contacts the SugarCRM heartbeat and licensing server using a secure connection.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								HSTS header
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As all traffic requires HTTPS for SugarCRM, it is recommended to configure a global HSTS (HTTP Strict Transport Security) header. This is an additional opt-in security enhancement supported by most modern browsers. The HSTS will instruct the browser to always use HTTPS in the future for the given FQDN. More details regarding HSTS can be found here: https://www.owasp.org/index.php/HTTP_Strict_Transport_Security.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Before enabling the HSTS header, ensure that no other non-HTTPS website is running for the given FQDN and any subdomains.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Header always set Strict-Transport-Security \ "max-age=10886400; includeSubdomains; preload"
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Optionally when your SugarCRM application is publically reachable, you can submit your FQDN on the preload which is maintained by Chrome and included by Firefox, Safari, Internet Explorer 11 and Edge browser. Understand the consequences and requirements to end up on the preload list. Once registered, this cannot be undone easily. Submissions for the HSTS preload list can be found at https://hstspreload.appspot.com.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								CSP header
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A Content Security Policy header can be added to offer additional protection against XSS (cross site scripting). Most modern browser support CSP and will apply the limitation as directed by the CSP header. The CSP header defines the allowed sources through different directives which are allowed regarding JScript, CSS, images, fonts, form actions, plugins, … More information can be found at https://www.owasp.org/index.php/Content_Security_Policy.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The management of CSP headers can become complex and may depend on different types of customizations which can be deployed on the SugarCRM platform. Therefor SugarCRM will ship in the future with the ability of controlling CSP headers directly from within SugarCRM itself.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For now CSP headers can be configured directly on the web server. A basic configuration looks like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Header always set Content-Security-Policy \ "default-src: 'self'; script-src: 'self'"
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that older browsers used the header X-Content-Security-Policy or X-WebKit-CSP instead of the standardized one. The CSP header can also safely be added first in "report only" mode before deploying it in production using Content-Security-Policy-Report-Only.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Additional security headers
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To prevent clickjacking an X-Frame-Options header can be added. This header can also be used to be able specifically iframe the SugarCRM application inside another web site if required. This can be better controlled with the above mentioned CSP header. Both can coexist together but it is encouraged to used the CSP approach.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Header always set X-Frame-Options "SAMEORIGIN" Header always set X-Frame-Options "ALLOW-FROM
+							Element:a
+								https://someothersite.com"
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To protect against so called drive-by download attacks, it is encouraged to disable Content-Type sniffing. This is particularly targeted at Chrome and IE.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Header always set X-Content-Type-Options "nosniff"
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Ensure XSS browser protection is enabled by adding the following header. By default this feature should be enabled in every browser. In case it has been disabled, sending this header will re-enabled it.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Header always set X-XSS-Protection "1; mode=block"
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Secure cookie settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Ensure the following settings are applied in php.ini to ensure legacy cookies are properly protected against XSS attacks and are only transmitted over a secure HTTPS connection.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								session.cookie_httponly = 1 session.cookie_secure = 1
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Additionally, the session.cookie_path can be tweaked if other applications are running on the same webserver.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Security modules
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Additional Apache loadable security modules exists which can optionally be installed to better protect your system from malicious requests and/or DDOS attacks. The following modules are available for Apache 2.4:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								mod_security - This module adds WAF (web application firewall) capabilities to your Apache setup. In combination with the OWASP CRS (core rule set) gives you a solid starting point for a WAF implementation.
+							Element:li
+								mod_evasive - This module helps preventing (D)DOS attacks
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Covering both modules in details is out of scope of this Security Response. Refer to the module documentation for additional details. In the future SugarCRM may publish specific settings and fine tuning for both modules.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Additional resources
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Generic Apache security tips
+							Element:br
+							Element:a
+								http://httpd.apache.org/docs/2.4/misc/security_tips.html
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Online SSL/TLS tester
+							Element:br
+							Element:a
+								https://www.ssllabs.com/ssltest/analyze.html
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Useful HTTP headers
+							Element:br
+							Element:a
+								https://www.owasp.org/index.php/List_of_useful_HTTP_headers
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Publication History
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:p
+								2015-10-01
+							Element:td
+							Element:p
+								Adding HTTP method restrictions
+							Element:tr
+							Element:td
+							Element:p
+								2015-09-08
+							Element:td
+							Element:p
+								Initial publication
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A stand-alone copy of this document that omits the distribution URL is an uncontrolled copy, and may lack important information or contain factual errors. SugarCRM reserves the right to change or update this document at any time.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 04/08/2016 09:25am
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

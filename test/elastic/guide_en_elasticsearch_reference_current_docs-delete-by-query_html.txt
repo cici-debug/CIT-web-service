@@ -1,0 +1,940 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Delete By Query API
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The simplest usage of
+							Element:code
+								_delete_by_query
+								just performs a deletion on every document that match a query. Here is the API:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST twitter/_delete_by_query { "query": {
+							Element:a
+							Element:span
+								"match": { "message": "some message" } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The query must be passed as a value to the
+							Element:code
+								query
+								key, in the same way as the
+							Element:a
+								Search API
+								. You can also use the
+							Element:code
+								q
+								parameter in the same way as the search api.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That will return something like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "took" : 147, "timed_out": false, "deleted": 119, "batches": 1, "version_conflicts": 0, "noops": 0, "retries": { "bulk": 0, "search": 0 }, "throttled_millis": 0, "requests_per_second": -1.0, "throttled_until_millis": 0, "total": 119, "failures" : [ ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								_delete_by_query
+								gets a snapshot of the index when it starts and deletes what it finds using
+							Element:code
+								internal
+								versioning. That means that you’ll get a version conflict if the document changes between the time when the snapshot was taken and when the delete request is processed. When the versions match the document is deleted.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Since
+							Element:code
+								internal
+								versioning does not support the value 0 as a valid version number, documents with version equal to zero cannot be deleted using
+							Element:code
+								_delete_by_query
+								and will fail the request.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								During the
+							Element:code
+								_delete_by_query
+								execution, multiple search requests are sequentially executed in order to find all the matching documents to delete. Every time a batch of documents is found, a corresponding bulk request is executed to delete all these documents. In case a search or bulk request got rejected,
+							Element:code
+								_delete_by_query
+								relies on a default policy to retry rejected requests (up to 10 times, with exponential back off). Reaching the maximum retries limit causes the
+							Element:code
+								_delete_by_query
+								to abort and all failures are returned in the
+							Element:code
+								failures
+								of the response. The deletions that have been performed still stick. In other words, the process is not rolled back, only aborted. While the first failure causes the abort, all failures that are returned by the failing bulk request are returned in the
+							Element:code
+								failures
+								element; therefore it’s possible for there to be quite a few failed entities.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’d like to count version conflicts rather than cause them to abort then set
+							Element:code
+								conflicts=proceed
+								on the url or
+							Element:code
+								"conflicts": "proceed"
+								in the request body.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Back to the API format, you can limit
+							Element:code
+								_delete_by_query
+								to a single type. This will only delete
+							Element:code
+								tweet
+								documents from the
+							Element:code
+								twitter
+								index:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST twitter/tweet/_delete_by_query?conflicts=proceed { "query": { "match_all": {} } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It’s also possible to delete documents of multiple indexes and multiple types at once, just like the search API:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST twitter,blog/tweet,post/_delete_by_query { "query": { "match_all": {} } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you provide
+							Element:code
+								routing
+								then the routing is copied to the scroll query, limiting the process to the shards that match that routing value:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST twitter/_delete_by_query?routing=1 { "query": { "range" : { "age" : { "gte" : 10 } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default
+							Element:code
+								_delete_by_query
+								uses scroll batches of 1000. You can change the batch size with the
+							Element:code
+								scroll_size
+								URL parameter:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST twitter/_delete_by_query?scroll_size=5000 { "query": { "term": { "user": "kimchy" } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											URL Parameters
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to the standard parameters like
+										Element:code
+											pretty
+											, the Delete By Query API also supports
+										Element:code
+											refresh
+											,
+										Element:code
+											wait_for_completion
+											,
+										Element:code
+											wait_for_active_shards
+											, and
+										Element:code
+											timeout
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sending the
+										Element:code
+											refresh
+											will refresh all shards involved in the delete by query once the request completes. This is different than the Delete API’s
+										Element:code
+											refresh
+											parameter which causes just the shard that received the delete request to be refreshed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the request contains
+										Element:code
+											wait_for_completion=false
+											then Elasticsearch will perform some preflight checks, launch the request, and then return a
+										Element:code
+											task
+											which can be used with
+										Element:a
+											Tasks APIs
+											to cancel or get the status of the task. Elasticsearch will also create a record of this task as a document at
+										Element:code
+											.tasks/task/${taskId}
+											. This is yours to keep or remove as you see fit. When you are done with it, delete it so Elasticsearch can reclaim the space it uses.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											wait_for_active_shards
+											controls how many copies of a shard must be active before proceeding with the request. See
+										Element:a
+											here
+											for details.
+										Element:code
+											timeout
+											controls how long each write request waits for unavailable shards to become available. Both work exactly how they work in the
+										Element:a
+											Bulk API
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											requests_per_second
+											can be set to any positive decimal number (
+										Element:code
+											1.4
+											,
+										Element:code
+											6
+											,
+										Element:code
+											1000
+											, etc) and throttles the number of requests per second that the delete-by-query issues or it can be set to
+										Element:code
+											-1
+											to disabled throttling. The throttling is done waiting between bulk batches so that it can manipulate the scroll timeout. The wait time is the difference between the time it took the batch to complete and the time
+										Element:code
+											requests_per_second * requests_in_the_batch
+											. Since the batch isn’t broken into multiple bulk requests large batch sizes will cause Elasticsearch to create many requests and then wait for a while before starting the next set. This is "bursty" instead of "smooth". The default is
+										Element:code
+											-1
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Response body
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The JSON response looks like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "took" : 639, "deleted": 0, "batches": 1, "version_conflicts": 2, "retries": 0, "throttled_millis": 0, "failures" : [ ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											took
+										Element:dd
+											The number of milliseconds from start to end of the whole operation.
+										Element:dt
+										Element:span
+										Element:code
+											deleted
+										Element:dd
+											The number of documents that were successfully deleted.
+										Element:dt
+										Element:span
+										Element:code
+											batches
+										Element:dd
+											The number of scroll responses pulled back by the the delete by query.
+										Element:dt
+										Element:span
+										Element:code
+											version_conflicts
+										Element:dd
+											The number of version conflicts that the delete by query hit.
+										Element:dt
+										Element:span
+										Element:code
+											retries
+										Element:dd
+											The number of retries that the delete by query did in response to a full queue.
+										Element:dt
+										Element:span
+										Element:code
+											throttled_millis
+										Element:dd
+											Number of milliseconds the request slept to conform to
+										Element:code
+											requests_per_second
+											.
+										Element:dt
+										Element:span
+										Element:code
+											failures
+										Element:dd
+											Array of all indexing failures. If this is non-empty then the request aborted because of those failures. See
+										Element:code
+											conflicts
+											for how to prevent version conflicts from aborting the operation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Works with the Task API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can fetch the status of any running delete-by-query requests with the
+										Element:a
+											Task API
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET _tasks?detailed=true&actions=*/delete/byquery
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The responses looks like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "nodes" : { "r1A2WoRbTwKZ516z6NEs5A" : { "name" : "r1A2WoR", "transport_address" : "127.0.0.1:9300", "host" : "127.0.0.1", "ip" : "127.0.0.1:9300", "attributes" : { "testattr" : "test", "portsfile" : "true" }, "tasks" : { "r1A2WoRbTwKZ516z6NEs5A:36619" : { "node" : "r1A2WoRbTwKZ516z6NEs5A", "id" : 36619, "type" : "transport", "action" : "indices:data/write/delete/byquery", "status" : {
+										Element:a
+										Element:span
+											"total" : 6154, "updated" : 0, "created" : 0, "deleted" : 3500, "batches" : 36, "version_conflicts" : 0, "noops" : 0, "retries": 0, "throttled_millis": 0 }, "description" : "" } } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											this object contains the actual status. It is just like the response json with the important addition of the
+										Element:code
+											total
+											field.
+										Element:code
+											total
+											is the total number of operations that the reindex expects to perform. You can estimate the progress by adding the
+										Element:code
+											updated
+											,
+										Element:code
+											created
+											, and
+										Element:code
+											deleted
+											fields. The request will finish when their sum is equal to the
+										Element:code
+											total
+											field.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With the task id you can look up the task directly:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_tasks/taskId:1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The advantage of this API is that it integrates with
+										Element:code
+											wait_for_completion=false
+											to transparently return the status of completed tasks. If the task is completed and
+										Element:code
+											wait_for_completion=false
+											was set on it then it’ll come back with
+										Element:code
+											results
+											or an
+										Element:code
+											error
+											field. The cost of this feature is the document that
+										Element:code
+											wait_for_completion=false
+											creates at
+										Element:code
+											.tasks/task/${taskId}
+											. It is up to you to delete that document.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Works with the Cancel Task API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Any Delete By Query can be canceled using the
+										Element:a
+											Task Cancel API
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _tasks/task_id:1/_cancel
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											task_id
+											can be found using the tasks API above.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Cancellation should happen quickly but might take a few seconds. The task status API above will continue to list the task until it is wakes to cancel itself.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Rethrottling
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The value of
+										Element:code
+											requests_per_second
+											can be changed on a running delete by query using the
+										Element:code
+											_rethrottle
+											API:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _delete_by_query/task_id:1/_rethrottle?requests_per_second=-1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											task_id
+											can be found using the tasks API above.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Just like when setting it on the
+										Element:code
+											_delete_by_query
+											API
+										Element:code
+											requests_per_second
+											can be either
+										Element:code
+											-1
+											to disable throttling or any decimal number like
+										Element:code
+											1.7
+											or
+										Element:code
+											12
+											to throttle to that level. Rethrottling that speeds up the query takes effect immediately but rethrotting that slows down the query will take effect on after completing the current batch. This prevents scroll timeouts.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Manually slicing
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Delete-by-query supports
+										Element:a
+											Sliced Scroll
+											allowing you to manually parallelize the process relatively easily:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST twitter/_delete_by_query { "slice": { "id": 0, "max": 2 }, "query": { "range": { "likes": { "lt": 10 } } } } POST twitter/_delete_by_query { "slice": { "id": 1, "max": 2 }, "query": { "range": { "likes": { "lt": 10 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which you can verify works with:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET _refresh POST twitter/_search?size=0&filter_path=hits.total { "query": { "range": { "likes": { "lt": 10 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which results in a sensible
+										Element:code
+											total
+											like this one:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "hits": { "total": 0 } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Automatic slicing
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also let delete-by-query automatically parallelize using
+										Element:a
+											Sliced Scroll
+											to slice on
+										Element:code
+											_uid
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST twitter/_delete_by_query?refresh&slices=5 { "query": { "range": { "likes": { "lt": 10 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which you also can verify works with:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST twitter/_search?size=0&filter_path=hits.total { "query": { "range": { "likes": { "lt": 10 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which results in a sensible
+										Element:code
+											total
+											like this one:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "hits": { "total": 0 } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Adding
+										Element:code
+											slices
+											to
+										Element:code
+											_delete_by_query
+											just automates the manual process used in the section above, creating sub-requests which means it has some quirks: * You can see these requests in the
+										Element:a
+											Tasks APIs
+											. These sub-requests are "child" tasks of the task for the request with
+										Element:code
+											slices
+											. * Fetching the status of the task for the request with
+										Element:code
+											slices
+											only contains the status of completed slices. * These sub-requests are individually addressable for things like cancellation and rethrottling. * Rethrottling the request with
+										Element:code
+											slices
+											will rethrottle the unfinished sub-request proportionally. * Canceling the request with
+										Element:code
+											slices
+											will cancel each sub-request. * Due to the nature of
+										Element:code
+											slices
+											each sub-request won’t get a perfectly even portion of the documents. All documents will be addressed, but some slices may be larger than others. Expect larger slices to have a more even distribution. * Parameters like
+										Element:code
+											requests_per_second
+											and
+										Element:code
+											size
+											on a request with
+										Element:code
+											slices
+											are distributed proportionally to each sub-request. Combine that with the point above about distribution being uneven and you should conclude that the using
+										Element:code
+											size
+											with
+										Element:code
+											slices
+											might not result in exactly
+										Element:code
+											size
+											documents being `_delete_by_query`ed. * Each sub-requests gets a slightly different snapshot of the source index though these are all taken at approximately the same time.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Picking the number of slices
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At this point we have a few recommendations around the number of
+										Element:code
+											slices
+											to use (the
+										Element:code
+											max
+											parameter in the slice API if manually parallelizing):
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Don’t use large numbers.
+										Element:code
+											500
+											creates fairly massive CPU thrash.
+										Element:li
+											It is more efficient from a query performance standpoint to use some multiple of the number of shards in the source index.
+										Element:li
+											Using exactly as many shards as are in the source index is the most efficient from a query performance standpoint.
+										Element:li
+											Indexing performance should scale linearly across available resources with the number of
+										Element:code
+											slices
+											.
+										Element:li
+											Whether indexing or query performance dominates that process depends on lots of factors like the documents being reindexed and the cluster doing the reindexing.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Delete API
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Update API »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,714 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Painless Scripting Language
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+								The Painless scripting language is new and is still marked as experimental. The syntax or API may be changed in the future in non-backwards compatible ways if required.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:span
+								is a simple, secure scripting language available in Elasticsearch by default. It is designed specifically for use with Elasticsearch and can safely be used with
+							Element:em
+								Painless
+							Element:code
+								inline
+								and
+							Element:code
+								stored
+								scripting, which is enabled by default.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Painless syntax is similar to
+							Element:a
+								Groovy
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can use Painless anywhere a script can be used in Elasticsearch—simply set the
+							Element:code
+								lang
+								parameter to
+							Element:code
+								painless
+								.
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Painless Features
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Fast performance:
+							Element:a
+								several times faster
+								than the alternatives.
+							Element:li
+								Safety: Fine-grained
+							Element:a
+								whitelist
+								with method call/field granularity.
+							Element:li
+								Optional typing: Variables and parameters can use explicit types or the dynamic
+							Element:code
+								def
+								type.
+							Element:li
+								Syntax: Extends Java’s syntax with a subset of Groovy for ease of use. See the
+							Element:a
+								Syntax Overview
+								.
+							Element:li
+								Optimizations: Designed specifically for Elasticsearch scripting.
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Painless Examples
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To illustrate how Painless works, let’s load some hockey stats into an Elasticsearch index:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT hockey/player/_bulk?refresh {"index":{"_id":1}} {"first":"johnny","last":"gaudreau","goals":[9,27,1],"assists":[17,46,0],"gp":[26,82,1]} {"index":{"_id":2}} {"first":"sean","last":"monohan","goals":[7,54,26],"assists":[11,26,13],"gp":[26,82,82]} {"index":{"_id":3}} {"first":"jiri","last":"hudler","goals":[5,34,36],"assists":[11,62,42],"gp":[24,80,79]} {"index":{"_id":4}} {"first":"micheal","last":"frolik","goals":[4,6,15],"assists":[8,23,15],"gp":[26,82,82]} {"index":{"_id":5}} {"first":"sam","last":"bennett","goals":[5,0,0],"assists":[8,1,0],"gp":[26,1,0]} {"index":{"_id":6}} {"first":"dennis","last":"wideman","goals":[0,26,15],"assists":[11,30,24],"gp":[26,81,82]} {"index":{"_id":7}} {"first":"david","last":"jones","goals":[7,19,5],"assists":[3,17,4],"gp":[26,45,34]} {"index":{"_id":8}} {"first":"tj","last":"brodie","goals":[2,14,7],"assists":[8,42,30],"gp":[26,82,82]} {"index":{"_id":39}} {"first":"mark","last":"giordano","goals":[6,30,15],"assists":[3,30,24],"gp":[26,60,63]} {"index":{"_id":10}} {"first":"mikael","last":"backlund","goals":[3,15,13],"assists":[6,24,18],"gp":[26,82,82]} {"index":{"_id":11}} {"first":"joe","last":"colborne","goals":[3,18,13],"assists":[6,20,24],"gp":[26,67,82]}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Accessing Doc Values from Painless
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Document values can be accessed from a
+										Element:code
+											Map
+											named
+										Element:code
+											doc
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, the following script calculates a player’s total goals. This example uses a strongly typed
+										Element:code
+											int
+											and a
+										Element:code
+											for
+											loop.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET hockey/_search { "query": { "function_score": { "script_score": { "script": { "lang": "painless", "inline": "int total = 0; for (int i = 0; i < doc['goals'].length; ++i) { total += doc['goals'][i]; } return total;" } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Alternatively, you could do the same thing using a script field instead of a function score:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET hockey/_search { "query": { "match_all": {} }, "script_fields": { "total_goals": { "script": { "lang": "painless", "inline": "int total = 0; for (int i = 0; i < doc['goals'].length; ++i) { total += doc['goals'][i]; } return total;" } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following example uses a Painless script to sort the players by their combined first and last names. The names are accessed using
+										Element:code
+											doc['first'].value
+											and
+										Element:code
+											doc['last'].value
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET hockey/_search { "query": { "match_all": {} }, "sort": { "_script": { "type": "string", "order": "asc", "script": { "lang": "painless", "inline": "doc['first.keyword'].value + ' ' + doc['last.keyword'].value" } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Updating Fields with Painless
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also easily update fields. You access the original source for a field as
+										Element:code
+											ctx._source.<field-name>
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, let’s look at the source data for a player by submitting the following request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET hockey/_search { "stored_fields": [ "_id", "_source" ], "query": { "term": { "_id": 1 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To change player 1’s last name to
+										Element:code
+											hockey
+											, simply set
+										Element:code
+											ctx._source.last
+											to the new value:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST hockey/player/1/_update { "script": { "lang": "painless", "inline": "ctx._source.last = params.last", "params": { "last": "hockey" } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also add fields to a document. For example, this script adds a new field that contains the player’s nickname,
+										Element:span
+											.
+										Element:em
+											hockey
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST hockey/player/1/_update { "script": { "lang": "painless", "inline": "ctx._source.last = params.last; ctx._source.nick = params.nick", "params": { "last": "gaudreau", "nick": "hockey" } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Regular expressions
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Regexes are disabled by default because they circumvent Painless’s protection against long running and memory hungry scripts. To make matters worse even innocuous looking regexes can have staggering performance and stack depth behavior. They remain an amazing powerful tool but are too scary to enable by default. To enable them yourself set
+										Element:code
+											script.painless.regex.enabled: true
+											in
+										Element:code
+											elasticsearch.yml
+											. We’d like very much to have a safe alternative implementation that can be enabled by default so check this space for later developments!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Painless’s native support for regular expressions has syntax constructs:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											/pattern/
+											: Pattern literals create patterns. This is the only way to create a pattern in painless. The pattern inside the `/`s are just
+										Element:a
+											Java regular expressions
+											. See
+										Element:a
+											the section called “Pattern flags
+										Element:a
+											edit
+											” for more.
+										Element:li
+										Element:code
+											=~
+											: The find operator return a
+										Element:code
+											boolean
+											,
+										Element:code
+											true
+											if a subsequence of the text matches,
+										Element:code
+											false
+											otherwise.
+										Element:li
+										Element:code
+											==~
+											: The match operator returns a
+										Element:code
+											boolean
+											,
+										Element:code
+											true
+											if the text matches,
+										Element:code
+											false
+											if it doesn’t.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using the find operator (
+										Element:code
+											=~
+											) you can update all hockey players with "b" in their last name:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST hockey/player/_update_by_query { "script": { "lang": "painless", "inline": "if (ctx._source.last =~ /b/) {ctx._source.last += \"matched\"} else {ctx.op = 'noop'}" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using the match operator (
+										Element:code
+											==~
+											) you can update all the hockey players who’s names start with a consonant and end with a vowel:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST hockey/player/_update_by_query { "script": { "lang": "painless", "inline": "if (ctx._source.last ==~ /[^aeiou].*[aeiou]/) {ctx._source.last += \"matched\"} else {ctx.op = 'noop'}" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can use the
+										Element:code
+											Pattern.matcher
+											directly to get a
+										Element:code
+											Matcher
+											instance and remove all of the vowels in all of their last names:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST hockey/player/_update_by_query { "script": { "lang": "painless", "inline": "ctx._source.last = /[aeiou]/.matcher(ctx._source.last).replaceAll('')" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											Matcher.replaceAll
+											is just a call to Java’s
+										Element:code
+											Matcher
+											's
+										Element:a
+											replaceAll
+											method so it supports
+										Element:code
+											$1
+											and
+										Element:code
+											\1
+											for replacements:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST hockey/player/_update_by_query { "script": { "lang": "painless", "inline": "ctx._source.last = /n([aeiou])/.matcher(ctx._source.last).replaceAll('$1')" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you need more control over replacements you can call
+										Element:code
+											replaceAll
+											on a
+										Element:code
+											CharSequence
+											with a
+										Element:code
+											Function<Matcher, String>
+											that builds the replacement. This does not support
+										Element:code
+											$1
+											or
+										Element:code
+											\1
+											to access replacements because you already have a reference to the matcher and can get them with
+										Element:code
+											m.group(1)
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Calling
+										Element:code
+											Matcher.find
+											inside of the function that builds the replacement is rude and will likely break the replacement process.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This will make all of the vowels in the hockey player’s last names upper case:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST hockey/player/_update_by_query { "script": { "lang": "painless", "inline": "ctx._source.last = ctx._source.last.replaceAll(/[aeiou]/, m -> m.group().toUpperCase(Locale.ROOT))" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Or you can use the
+										Element:code
+											CharSequence.replaceFirst
+											to make the first vowel in their last names upper case:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST hockey/player/_update_by_query { "script": { "lang": "painless", "inline": "ctx._source.last = ctx._source.last.replaceFirst(/[aeiou]/, m -> m.group().toUpperCase(Locale.ROOT))" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note: all of the
+										Element:code
+											_update_by_query
+											examples above could really do with a
+										Element:code
+											query
+											to limit the data that they pull back. While you
+										Element:span
+											use a
+										Element:strong
+											could
+										Element:a
+											Script Query
+											it wouldn’t be as efficient as using any other query because script queries aren’t able to use the inverted index to limit the documents that they have to check.
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Painless API
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following Java packages are available for use in the Painless language:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								java.lang
+							Element:li
+							Element:a
+								java.math
+							Element:li
+							Element:a
+								java.text
+							Element:li
+							Element:a
+								java.time
+							Element:li
+							Element:a
+								java.time.chrono
+							Element:li
+							Element:a
+								java.time.format
+							Element:li
+							Element:a
+								java.time.temporal
+							Element:li
+							Element:a
+								java.time.zone
+							Element:li
+							Element:a
+								java.util
+							Element:li
+							Element:a
+								java.util.function
+							Element:li
+							Element:a
+								java.util.regex
+							Element:li
+							Element:a
+								java.util.stream
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that unsafe classes and methods are not included, there is no support for:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Manipulation of processes and threads
+							Element:li
+								Input/Output
+							Element:li
+								Reflection
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								« Groovy Scripting Language
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								How painless dispatches functions »
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+								Top Videos
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Elasticsearch Demo
+							Element:li
+							Element:a
+								Kibana 101
+							Element:li
+							Element:a
+								Logstash Primer
+						Node:
+						(type) c
+						(layer)2
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+															Node:
+															(type) c
+															(layer)5
+																Element:footer
+																Element:h3
+																Element:a
+																	Products >
+																Element:ul
+																Element:li
+																Element:a
+																	Elasticsearch
+																Element:li
+																Element:a
+																	Kibana
+																Element:li
+																Element:a
+																	Beats
+																Element:li
+																Element:a
+																	Logstash
+																Element:li
+																Element:a
+																	X-Pack
+																Element:li
+																Element:a
+																	Elastic Cloud
+																Element:li
+																Element:a
+																	Security (formerly Shield)
+																Element:li
+																Element:a
+																	Alerting (via Watcher)
+																Element:li
+																Element:a
+																	Monitoring (formerly Marvel)
+																Element:li
+																Element:a
+																	Graph
+																Element:li
+																Element:a
+																	Reporting
+																Element:li
+																Element:a
+																	Machine Learning
+																Element:li
+																Element:a
+																	ES-Hadoop
+																Element:h3
+																	Resources
+																Element:ul
+																Element:li
+																Element:a
+																	Blog
+																Element:li
+																Element:a
+																	Cloud Status
+																Element:li
+																Element:a
+																	Community
+																Element:li
+																Element:a
+																	Customers & Use Cases
+																Element:li
+																Element:a
+																	Documentation
+																Element:li
+																Element:a
+																	Elastic{ON} Events
+																Element:li
+																Element:a
+																	Forums
+																Element:li
+																Element:a
+																	Meetups
+																Element:li
+																Element:a
+																	Subscriptions
+																Element:li
+																Element:a
+																	Support Portal
+																Element:li
+																Element:a
+																	Videos & Webinars
+																Element:li
+																Element:a
+																	Training
+																Element:h3
+																Element:a
+																	About >
+																Element:ul
+																Element:li
+																Element:a
+																	Careers/Jobs
+																Element:li
+																Element:a
+																	Contact
+																Element:li
+																Element:a
+																	Leadership
+																Element:li
+																Element:a
+																	Partners
+																Element:li
+																Element:a
+																	Press
+																Element:h3
+																	Language
+																Element:ul
+																Element:li
+																Element:a
+																	English
+																Element:li
+																Element:a
+																	Français
+																Element:li
+																Element:a
+																	Deutsch
+																Element:li
+																Element:a
+																	日本語
+																Element:li
+																Element:a
+																	한국어
+																Element:p
+																	FOLLOW US
+																Element:ul
+																Element:li
+																Element:a
+																Element:li
+																Element:a
+																Element:li
+																Element:a
+																Element:li
+																Element:a
+																Element:li
+																Element:a
+																Element:ul
+																Element:li
+																Element:a
+																	Trademarks
+																Element:li
+																Element:a
+																	Terms of Use
+																Element:li
+																Element:a
+																	Privacy
+																Element:li
+																Element:a
+																	Cookie Policy
+																Element:li
+																Element:a
+																	Brand
+																Element:a
+																Element:img
+																Element:p
+																	© 2017. All Rights Reserved - Elasticsearch
+																Element:p
+																	Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+																Element:p
+																	Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+																Element:a
+																	Apache Software Foundation
+																	in the United States and/or other countries.

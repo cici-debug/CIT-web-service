@@ -1,0 +1,324 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Database
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All Sugar editions support the MySQL and Microsoft SQL Server databases. Sugar Enterprise and Sugar Ultimate also support the DB2 and Oracle databases. In general, Sugar uses only common database functionality, and the application logic is embedded in the PHP code. Sugar does not use or recommend database triggers or stored procedures. This design simplifies coding and testing across different database vendors. The only implementation difference across the various supported databases is column types.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Primary Keys, Foreign Keys, and GUIDs
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, Sugar uses globally unique identification values (GUIDs) for primary keys for all database records. Sugar provides a
+							Element:code
+								Sugarcrm\Sugarcrm\Util\Uuid::uuid1()
+								utility function for creating these GUIDs in the following format:
+							Element:code
+								aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+								. The primary key's column length is 36 characters.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The GUID format and value has no special meaning (relevance) in Sugar other than the ability to match records in the database. Sugar links two records (such as an Accounts record with a Contacts record) with a specified ID in the record type relationship table (e.g. accounts_contacts).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Primary keys in Sugar may contain any unique string such as a GUID algorithm, a key that has some meaning (e.g. bean type first, followed by info), an external key, or auto-incrementing numbers converted to strings. Sugar chose GUIDs over auto-incrementing keys to enable easier data synchronization across databases and avoid primary-key collisions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also import data from a previous system with one primary key format and make all new records in Sugar use the GUID primary key format. All keys must be stored as globally unique strings with no more than 36 characters.
+						Node:
+						(type) c
+						(layer)2
+							Element:strong
+								Notice
+								If multiple records between modules contain matching ids, you may experience undesired behaviors within the system.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To implement a new primary key method or to import data with a different primary key format (based on the existing GUID mechanism for new records), keep in mind the following rules of primary key behavior:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Quote characters
+								: Sugar expects primary keys to be string types and will format the SQL with quotes. If you change the primary key types to an integer type, SQL errors may occur since Sugar stores all ID values in quotes in the generated SQL. The database may be able to ignore this issue. MySQL running in Safe mode experiences issues, for instance.
+							Element:li
+							Element:strong
+								Case sensitivity
+								: The ID values
+							Element:code
+								abc
+								and
+							Element:code
+								ABC
+								are treated the same in MySQL but represent different values in Oracle. When migrating data to Sugar, some CRM systems may use case-sensitive strings as their IDs on export. If this is the case, and you are running MySQL, you must run an algorithm on the data to make sure all of the IDs are unique. One simple algorithm is to MD5 the ID values that they provide. A quick check will let you know if there is a problem. If you imported 80,000 leads and there are only 60,000 in the system, some may have been lost due to non-unique primary keys caused by case insensitivity.
+							Element:li
+							Element:strong
+								Key size
+								: Sugar only tracks the first 36 characters in the primary key. Any replacement primary key will either require changing all of the ID columns with one of an appropriate size or to make sure you do not run into any truncation or padding issues. MySQL in some versions has had issues with Sugar where the IDs were not matching because it was adding spaces to pad the row out to the full size. MySQL's handling of char and varchar padding has changed in later versions. To protect against this, make sure the GUIDs are not padded with blanks in the database by removing any leading or trailing space characters.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Indexes
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Indexes can be defined in the main or custom vardefs.php for a module in an array under the key indices. See below for an example of defining several indices:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								'indices' => array( array( 'name' => 'idx_modulename_name', 'type' => 'index', 'fields' => array('name'), ), array( 'name' => 'idx_modulename_assigned_deleted', 'type' => 'index', 'fields' => array('assigned_user_id', 'deleted'), ), ),
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The name of the index must start with idx_ and must be unique across the database. Possible values for type include primary for a primary key or index for a normal index. The fields list matches the column names used in the database.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Topics
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								DBManagerFactory
+							Element:p
+								Learn more about the DBManagerFactory class, which allows you to generate the appropriate manager for the database you are using.
+							Element:li
+							Element:a
+								SugarQuery
+							Element:p
+								SugarQuery provides an object-oriented approach to working with the database. This allows developers to generate the applicable SQL for a Sugar system without having to know which database backend the instance is using. SugarQuery supports all databases supported by Sugar.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 01/23/2017 02:10pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

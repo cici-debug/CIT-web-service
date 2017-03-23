@@ -1,0 +1,383 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Mailchimp Source
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Please Note:
+					The Mailchimp Source is still in alpha. Data may sometimes be inaccurate, and the service may occasionally be unavailable or buggy. That said, we’re totally committed to fixing things as quickly as we can, and we’re working to improve it quickly. Our hope is that by opening this up to more users, we can more rapidly improve! In return for early access, we ask for your feedback and bug reports. Thanks!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								From your workspace’s
+							Element:code
+								/sources
+								page, click
+							Element:code
+								add source
+								.
+							Element:li
+							Element:p
+								Choose Mailchimp.
+							Element:li
+							Element:p
+								Give the source a nickname and a schema name. The nickname will be used to designate the source in the Segment interface, and the schema name is the namespace you’ll be querying against in your warehouse. Both can be whatever you like, but we recommend sticking to something that reflects the source itself, like
+							Element:code
+								Mailchimp
+								for nickname and
+							Element:code
+								mailchimp
+								or
+							Element:code
+								email
+								or
+							Element:code
+								chimp_prod
+								for the schema name.
+							Element:p
+							Element:strong
+								Note
+								that you can add multiple instances if you have multiple Mailchimp accounts. That’s why we allow you to customize the source’s nickname and schema name!
+							Element:p
+							Element:img
+							Element:li
+							Element:p
+								Next, provide credentials to an account with API permissions to access your Mailchimp data. It is recommended that you create a brand new api key for the Segment source. MailChimp restricts each api key to a maximum of 10 concurrent requests, so creating a dedicated one for Segment will ensure maximum throughput. You can find your API key in
+							Element:strong
+								Account > Extras > API Keys
+								. You can read more about API keys on
+							Element:a
+								MailChimp’s docs
+								.
+							Element:p
+							Element:img
+							Element:p
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								Paste the newly created key into the Segment setup flow:
+							Element:p
+							Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Components
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sync
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Mailchimp has a sync component, which means we’ll make requests to their API on your behalf on a 3 hour interval to pull the latest data into Segment. In the initial sync, we’ll grab all the Mailchimp objects (and their corresponding properties) according to the Collections table below. The objects will be written into a separate schema, corresponding to the source instance’s schema name you designated upon creation. For example, if you went with
+										Element:code
+											mailchimp
+											, the
+										Element:code
+											lists
+											collection will be accessible at
+										Element:code
+											mailchimp.lists
+											in SQL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our sync component uses an upsert API, so the data in your warehouse loaded via sync will reflect the latest state of the corresponding resource in Mailchimp. For example, if
+										Element:code
+											status
+											goes from
+										Element:code
+											subscribed
+											to
+										Element:code
+											unsubscribed
+											between syncs, on its next sync that tickets status will be
+										Element:code
+											unsubscribed
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The source syncs and warehouse syncs are independent processes. Source runs pull your data into the Segment Hub, and warehouse runs flush that data to your warehouse. Sources will sync with Segment every 3 hours. Depending on your Warehouses plan, we will push the Source data to your warehouse on the interval associated with your billing plan.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At the moment, we don’t support filtering which objects or properties get synced. If you’re interested in this feature, please let us know!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Collections
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Collections are the groupings of resources we pull from your source. In your warehouse, each collection gets its own table.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								For a complete visual breakdown of the Mailchimp collections, all their properties, and ID linkages between objects,
+							Element:a
+								view the visual schema here
+							Element:strong
+								or
+							Element:a
+								download it in PDF form here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Collection
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								conversations
+							Element:td
+								object
+							Element:td
+								Conversation tracking is a
+							Element:a
+								paid feature
+								that lets you view subscribers’ replies to your campaigns from inside your MailChimp account. Fetched via Mailchimp’s
+							Element:a
+								.
+							Element:code
+								/conversations
+								endpoint
+							Element:tr
+							Element:td
+							Element:code
+								lists
+							Element:td
+								object
+							Element:td
+								The state of your various lists in Mailchimp. Fetched via Mailchimp’s
+							Element:a
+								.
+							Element:code
+								/lists
+								endpoint
+							Element:tr
+							Element:td
+							Element:code
+								campaigns
+							Element:td
+								object
+							Element:td
+								Your Mailchimp campaigns. Fetched via Mailchimp’s
+							Element:a
+								.
+							Element:code
+								/lists
+								endpoint
+							Element:tr
+							Element:td
+							Element:code
+								subscriber activity
+							Element:td
+								object
+							Element:td
+							Element:strong
+								Currently unavailable
+								Mailchimp’s subscriber activity endpoint cannot support our Sources product. If you are interested in this collection, please reach out to your MailChimp Client Success Manager and request that they update their export API functionality.*
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have any questions or see anywhere we can improve our documentation, please
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:span
+							Element:span
+								Was this document helpful?
+							Element:span
+							Element:label
+							Element:span
+								Yes
+							Element:label
+							Element:span
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

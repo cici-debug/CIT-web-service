@@ -1,0 +1,247 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Retrieving a List of Records With Related Info
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A PHP example demonstrating how to retrieve a list of records with info from a related entity with the get_entry_list method using
+							Element:a
+								NuSOAP
+								and the v4_1 SOAP API.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example will retrieve a list of contacts and their related email addresses.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Example
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php $url = "http://{site_url}/service/v4_1/soap.php?wsdl"; $username = "admin"; $password = "password"; //require NuSOAP require_once("./nusoap/lib/nusoap.php"); //retrieve WSDL $client = new nusoap_client($url, 'wsdl'); //display errors $err = $client->getError(); if ($err) { echo '<h2>Constructor error</h2><pre>' . $err . '</pre>'; echo '<h2>Debug</h2><pre>' . htmlspecialchars($client->getDebug(), ENT_QUOTES) . '</pre>'; exit(); } //login ---------------------------------------------------- $login_parameters = array( 'user_auth' => array( 'user_name' => $username, 'password' => md5($password), 'version' => '1' ), 'application_name' => 'SoapTest', 'name_value_list' => array( ), ); $login_result = $client->call('login', $login_parameters); /* echo '<pre>'; print_r($login_result); echo '</pre>'; */ //get session id $session_id = $login_result['id']; //retrieve records ------------------------------------- $get_entry_list_parameters = array( //session id 'session' => $session_id, //The name of the module from which to retrieve records 'module_name' => "Contacts", //The SQL WHERE clause without the word "where". 'query' => "", //The SQL ORDER BY clause without the phrase "order by". 'order_by' => "", //The record offset from which to start. 'offset' => "0", //Optional. The list of fields to be returned in the results 'select_fields' => array( 'id', 'first_name', 'last_name', ), //A list of link names and the fields to be returned for each link name 'link_name_to_fields_array' => array( array( 'name' => 'email_addresses', 'value' => array( 'id', 'email_address', 'opt_out', 'primary_address' ), ), ), //The maximum number of results to return. 'max_results' => '2', //To exclude deleted records 'deleted' => 0, //If only records marked as favorites should be returned. 'Favorites' => false, ); $get_entry_list_result = $client->call("get_entry_list", $get_entry_list_parameters); echo "<pre>"; print_r($get_entry_list_result); echo "</pre>"; ?>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Result
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Array ( [result_count] => 2 [total_count] => -1 [next_offset] => 2 [entry_list] => Array ( [0] => Array ( [id] => 10613769-54e0-820d-de9b-5282a31b88cd [module_name] => Contacts [name_value_list] => Array ( [0] => Array ( [name] => id [value] => 10613769-54e0-820d-de9b-5282a31b88cd ) [1] => Array ( [name] => first_name [value] => Son ) [2] => Array ( [name] => last_name [value] => Roan ) ) ) [1] => Array ( [id] => 129b5f1d-5f1f-c679-beab-5282a325a501 [module_name] => Contacts [name_value_list] => Array ( [0] => Array ( [name] => id [value] => 129b5f1d-5f1f-c679-beab-5282a325a501 ) [1] => Array ( [name] => first_name [value] => Pasquale ) [2] => Array ( [name] => last_name [value] => Gottlieb ) ) ) ) [relationship_list] => Array ( [0] => Array ( [link_list] => Array ( [0] => Array ( [name] => email_addresses [records] => Array ( [0] => Array ( [link_value] => Array ( [0] => Array ( [name] => id [value] => 11980e8f-9cb6-0019-ad4a-5282a3e705cf ) [1] => Array ( [name] => email_address [value] => kid76@example.us ) [2] => Array ( [name] => opt_out [value] => 0 ) [3] => Array ( [name] => primary_address [value] => ) ) ) [1] => Array ( [link_value] => Array ( [0] => Array ( [name] => id [value] => 11c82450-4664-b210-4b79-5282a339d730 ) [1] => Array ( [name] => email_address [value] => info.dev@example.name ) [2] => Array ( [name] => opt_out [value] => 1 ) [3] => Array ( [name] => primary_address [value] => ) ) ) ) ) ) ) [1] => Array ( [link_list] => Array ( [0] => Array ( [name] => email_addresses [records] => Array ( [0] => Array ( [link_value] => Array ( [0] => Array ( [name] => id [value] => 13bf6b4b-4feb-823f-7c54-5282a36a2f57 ) [1] => Array ( [name] => email_address [value] => phone.vegan@example.tv ) [2] => Array ( [name] => opt_out [value] => 0 ) [3] => Array ( [name] => primary_address [value] => ) ) ) [1] => Array ( [link_value] => Array ( [0] => Array ( [name] => id [value] => 13ee5142-17c1-76fd-3cc4-5282a32cf864 ) [1] => Array ( [name] => email_address [value] => kid.hr.sugar@example.biz ) [2] => Array ( [name] => opt_out [value] => 1 ) [3] => Array ( [name] => primary_address [value] => ) ) ) ) ) ) ) ) )
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 06/30/2016 03:48pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

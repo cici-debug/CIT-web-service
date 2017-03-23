@@ -1,0 +1,909 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Phrase Suggester
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to understand the format of suggestions, please read the
+							Element:a
+								page first.
+							Element:em
+								Suggesters
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								term
+								suggester provides a very convenient API to access word alternatives on a per token basis within a certain string distance. The API allows accessing each token in the stream individually while suggest-selection is left to the API consumer. Yet, often pre-selected suggestions are required in order to present to the end-user. The
+							Element:code
+								phrase
+								suggester adds additional logic on top of the
+							Element:code
+								term
+								suggester to select entire corrected phrases instead of individual tokens weighted based on
+							Element:code
+								ngram-language
+								models. In practice this suggester will be able to make better decisions about which tokens to pick based on co-occurrence and frequencies.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											API Example
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In general the
+										Element:code
+											phrase
+											suggester requires special mapping up front to work. The
+										Element:code
+											phrase
+											suggester examples on this page need the following mapping to work. The
+										Element:code
+											reverse
+											analyzer is used only in the last example.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT test { "settings": { "index": { "number_of_shards": 1, "analysis": { "analyzer": { "trigram": { "type": "custom", "tokenizer": "standard", "filter": ["standard", "shingle"] }, "reverse": { "type": "custom", "tokenizer": "standard", "filter": ["standard", "reverse"] } }, "filter": { "shingle": { "type": "shingle", "min_shingle_size": 2, "max_shingle_size": 3 } } } } }, "mappings": { "test": { "properties": { "title": { "type": "text", "fields": { "trigram": { "type": "text", "analyzer": "trigram" }, "reverse": { "type": "text", "analyzer": "reverse" } } } } } } } POST test/test?refresh=true {"title": "noble warriors"} POST test/test?refresh=true {"title": "nobel prize"}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have the analyzers and mappings set up you can use the
+										Element:code
+											phrase
+											suggester in the same spot you’d use the
+										Element:code
+											term
+											suggester:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/_search { "suggest": { "text": "noble prize", "simple_phrase": { "phrase": { "field": "title.trigram", "size": 1, "gram_size": 3, "direct_generator": [ { "field": "title.trigram", "suggest_mode": "always" } ], "highlight": { "pre_tag": "<em>", "post_tag": "</em>" } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response contains suggestions scored by the most likely spell correction first. In this case we received the expected correction "nobel prize".
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_shards": ... "hits": ... "timed_out": false, "took": 3, "suggest": { "simple_phrase" : [ { "text" : "noble prize", "offset" : 0, "length" : 11, "options" : [ { "text" : "nobel prize", "highlighted": "<em>nobel</em> prize", "score" : 0.5962314 }] } ] } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Basic Phrase suggest API parameters
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											field
+										Element:td
+										Element:p
+											the name of the field used to do n-gram lookups for the language model, the suggester will use this field to gain statistics to score corrections. This field is mandatory.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											gram_size
+										Element:td
+										Element:p
+											sets max size of the n-grams (shingles) in the
+										Element:code
+											field
+											. If the field doesn’t contain n-grams (shingles) this should be omitted or set to
+										Element:code
+											1
+											. Note that Elasticsearch tries to detect the gram size based on the specified
+										Element:code
+											field
+											. If the field uses a
+										Element:code
+											shingle
+											filter the
+										Element:code
+											gram_size
+											is set to the
+										Element:code
+											max_shingle_size
+											if not explicitly set.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											real_word_error_likelihood
+										Element:td
+										Element:p
+											the likelihood of a term being a misspelled even if the term exists in the dictionary. The default is
+										Element:code
+											0.95
+											corresponding to 5% of the real words are misspelled.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											confidence
+										Element:td
+										Element:p
+											The confidence level defines a factor applied to the input phrases score which is used as a threshold for other suggest candidates. Only candidates that score higher than the threshold will be included in the result. For instance a confidence level of
+										Element:code
+											1.0
+											will only return suggestions that score higher than the input phrase. If set to
+										Element:code
+											0.0
+											the top N candidates are returned. The default is
+										Element:code
+											1.0
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											max_errors
+										Element:td
+										Element:p
+											the maximum percentage of the terms that at most considered to be misspellings in order to form a correction. This method accepts a float value in the range
+										Element:code
+											[0..1)
+											as a fraction of the actual query terms or a number
+										Element:code
+											>=1
+											as an absolute number of query terms. The default is set to
+										Element:code
+											1.0
+											which corresponds to that only corrections with at most 1 misspelled term are returned. Note that setting this too high can negatively impact performance. Low values like
+										Element:code
+											1
+											or
+										Element:code
+											2
+											are recommended otherwise the time spend in suggest calls might exceed the time spend in query execution.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											separator
+										Element:td
+										Element:p
+											the separator that is used to separate terms in the bigram field. If not set the whitespace character is used as a separator.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											size
+										Element:td
+										Element:p
+											the number of candidates that are generated for each individual query term Low numbers like
+										Element:code
+											3
+											or
+										Element:code
+											5
+											typically produce good results. Raising this can bring up terms with higher edit distances. The default is
+										Element:code
+											5
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											analyzer
+										Element:td
+										Element:p
+											Sets the analyzer to analyse to suggest text with. Defaults to the search analyzer of the suggest field passed via
+										Element:code
+											field
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											shard_size
+										Element:td
+										Element:p
+											Sets the maximum number of suggested term to be retrieved from each individual shard. During the reduce phase, only the top N suggestions are returned based on the
+										Element:code
+											size
+											option. Defaults to
+										Element:code
+											5
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											text
+										Element:td
+										Element:p
+											Sets the text / query to provide suggestions for.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											highlight
+										Element:td
+										Element:p
+											Sets up suggestion highlighting. If not provided then no
+										Element:code
+											highlighted
+											field is returned. If provided must contain exactly
+										Element:code
+											pre_tag
+											and
+										Element:code
+											post_tag
+											which are wrapped around the changed tokens. If multiple tokens in a row are changed the entire phrase of changed tokens is wrapped rather than each token.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											collate
+										Element:td
+										Element:p
+											Checks each suggestion against the specified
+										Element:code
+											query
+											to prune suggestions for which no matching docs exist in the index. The collate query for a suggestion is run only on the local shard from which the suggestion has been generated from. The
+										Element:code
+											query
+											must be specified, and it is run as a
+										Element:a
+											. The current suggestion is automatically made available as the
+										Element:code
+											template
+											query
+										Element:code
+											{{suggestion}}
+											variable, which should be used in your query. You can still specify your own template
+										Element:code
+											params
+											— the
+										Element:code
+											suggestion
+											value will be added to the variables you specify. Additionally, you can specify a
+										Element:code
+											prune
+											to control if all phrase suggestions will be returned, when set to
+										Element:code
+											true
+											the suggestions will have an additional option
+										Element:code
+											collate_match
+											, which will be
+										Element:code
+											true
+											if matching documents for the phrase was found,
+										Element:code
+											false
+											otherwise. The default value for
+										Element:code
+											prune
+											is
+										Element:code
+											false
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _search { "suggest": { "text" : "noble prize", "simple_phrase" : { "phrase" : { "field" : "title.trigram", "size" : 1, "direct_generator" : [ { "field" : "title.trigram", "suggest_mode" : "always", "min_word_length" : 1 } ], "collate": { "query": {
+										Element:a
+										Element:span
+											"inline" : { "match": { "{{field_name}}" : "{{suggestion}}"
+										Element:img
+										Element:a
+										Element:span
+											} } }, "params": {"field_name" : "title"},
+										Element:img
+										Element:a
+										Element:span
+											"prune": true
+										Element:img
+										Element:a
+										Element:span
+											} } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											This query will be run once for every suggestion.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											{{suggestion}}
+											variable will be replaced by the text of each suggestion.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											An additional
+										Element:code
+											field_name
+											variable has been specified in
+										Element:code
+											params
+											and is used by the
+										Element:code
+											match
+											query.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											All suggestions will be returned with an extra
+										Element:code
+											collate_match
+											option indicating whether the generated phrase matched any document.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Smoothing Models
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											phrase
+											suggester supports multiple smoothing models to balance weight between infrequent grams (grams (shingles) are not existing in the index) and frequent grams (appear at least once in the index).
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											stupid_backoff
+										Element:td
+										Element:p
+											a simple backoff model that backs off to lower order n-gram models if the higher order count is
+										Element:code
+											0
+											and discounts the lower order n-gram model by a constant factor. The default
+										Element:code
+											discount
+											is
+										Element:code
+											0.4
+											. Stupid Backoff is the default model.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											laplace
+										Element:td
+										Element:p
+											a smoothing model that uses an additive smoothing where a constant (typically
+										Element:code
+											1.0
+											or smaller) is added to all counts to balance weights, The default
+										Element:code
+											alpha
+											is
+										Element:code
+											0.5
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											linear_interpolation
+										Element:td
+										Element:p
+											a smoothing model that takes the weighted mean of the unigrams, bigrams and trigrams based on user supplied weights (lambdas). Linear Interpolation doesn’t have any default values. All parameters (
+										Element:code
+											trigram_lambda
+											,
+										Element:code
+											bigram_lambda
+											,
+										Element:code
+											unigram_lambda
+											) must be supplied.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Candidate Generators
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											phrase
+											suggester uses candidate generators to produce a list of possible terms per term in the given text. A single candidate generator is similar to a
+										Element:code
+											term
+											suggester called for each individual term in the text. The output of the generators is subsequently scored in combination with the candidates from the other terms to for suggestion candidates.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Currently only one type of candidate generator is supported, the
+										Element:code
+											direct_generator
+											. The Phrase suggest API accepts a list of generators under the key
+										Element:code
+											direct_generator
+											each of the generators in the list are called per term in the original text.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Direct Generators
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The direct generators support the following parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											field
+										Element:td
+										Element:p
+											The field to fetch the candidate suggestions from. This is a required option that either needs to be set globally or per suggestion.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											size
+										Element:td
+										Element:p
+											The maximum corrections to be returned per suggest text token.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											suggest_mode
+										Element:td
+										Element:p
+											The suggest mode controls what suggestions are included on the suggestions generated on each shard. All values other than
+										Element:code
+											always
+											can be thought of as an optimization to generate fewer suggestions to test on each shard and are not rechecked when combining the suggestions generated on each shard. Thus
+										Element:code
+											missing
+											will generate suggestions for terms on shards that do not contain them even other shards do contain them. Those should be filtered out using
+										Element:code
+											confidence
+											. Three possible values can be specified:
+										Element:ul
+										Element:li
+										Element:code
+											missing
+											: Only generate suggestions for terms that are not in the shard. This is the default.
+										Element:li
+										Element:code
+											popular
+											: Only suggest terms that occur in more docs on the shard than the original term.
+										Element:li
+										Element:code
+											always
+											: Suggest any matching suggestions based on terms in the suggest text.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											max_edits
+										Element:td
+										Element:p
+											The maximum edit distance candidate suggestions can have in order to be considered as a suggestion. Can only be a value between 1 and 2. Any other value result in an bad request error being thrown. Defaults to 2.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											prefix_length
+										Element:td
+										Element:p
+											The number of minimal prefix characters that must match in order be a candidate suggestions. Defaults to 1. Increasing this number improves spellcheck performance. Usually misspellings don’t occur in the beginning of terms. (Old name "prefix_len" is deprecated)
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											min_word_length
+										Element:td
+										Element:p
+											The minimum length a suggest text term must have in order to be included. Defaults to 4. (Old name "min_word_len" is deprecated)
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											max_inspections
+										Element:td
+										Element:p
+											A factor that is used to multiply with the
+										Element:code
+											shards_size
+											in order to inspect more candidate spell corrections on the shard level. Can improve accuracy at the cost of performance. Defaults to 5.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											min_doc_freq
+										Element:td
+										Element:p
+											The minimal threshold in number of documents a suggestion should appear in. This can be specified as an absolute number or as a relative percentage of number of documents. This can improve quality by only suggesting high frequency terms. Defaults to 0f and is not enabled. If a value higher than 1 is specified then the number cannot be fractional. The shard level document frequencies are used for this option.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											max_term_freq
+										Element:td
+										Element:p
+											The maximum threshold in number of documents a suggest text token can exist in order to be included. Can be a relative percentage number (e.g 0.4) or an absolute number to represent document frequencies. If an value higher than 1 is specified then fractional can not be specified. Defaults to 0.01f. This can be used to exclude high frequency terms from being spellchecked. High frequency terms are usually spelled correctly on top of this also improves the spellcheck performance. The shard level document frequencies are used for this option.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											pre_filter
+										Element:td
+										Element:p
+											a filter (analyzer) that is applied to each of the tokens passed to this candidate generator. This filter is applied to the original token before candidates are generated.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											post_filter
+										Element:td
+										Element:p
+											a filter (analyzer) that is applied to each of the generated tokens before they are passed to the actual phrase scorer.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following example shows a
+										Element:code
+											phrase
+											suggest call with two generators, the first one is using a field containing ordinary indexed terms and the second one uses a field that uses terms indexed with a
+										Element:code
+											reverse
+											filter (tokens are index in reverse order). This is used to overcome the limitation of the direct generators to require a constant prefix to provide high-performance suggestions. The
+										Element:code
+											pre_filter
+											and
+										Element:code
+											post_filter
+											options accept ordinary analyzer names.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST _search { "suggest": { "text" : "obel prize", "simple_phrase" : { "phrase" : { "field" : "title.trigram", "size" : 1, "direct_generator" : [ { "field" : "title.trigram", "suggest_mode" : "always" }, { "field" : "title.reverse", "suggest_mode" : "always", "pre_filter" : "reverse", "post_filter" : "reverse" } ] } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											pre_filter
+											and
+										Element:code
+											post_filter
+											can also be used to inject synonyms after candidates are generated. For instance for the query
+										Element:code
+											captain usq
+											we might generate a candidate
+										Element:code
+											usa
+											for term
+										Element:code
+											usq
+											which is a synonym for
+										Element:code
+											america
+											which allows to present
+										Element:code
+											captain america
+											to the user if this phrase scores high enough.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Term suggester
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Completion Suggester »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

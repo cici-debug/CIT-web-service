@@ -1,0 +1,710 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Scroll
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								While a
+							Element:code
+								search
+								request returns a single “page” of results, the
+							Element:code
+								scroll
+								API can be used to retrieve large numbers of results (or even all results) from a single search request, in much the same way as you would use a cursor on a traditional database.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Scrolling is not intended for real time user requests, but rather for processing large amounts of data, e.g. in order to reindex the contents of one index into a new index with a different configuration.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Client support for scrolling and reindexing
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Some of the officially supported clients provide helpers to assist with scrolled searches and reindexing of documents from one index to another:
+						Node:
+						(type) c
+						(layer)2
+							Element:dl
+							Element:dt
+							Element:span
+								Perl
+							Element:dd
+								See
+							Element:a
+								Search::Elasticsearch::Bulk
+								and
+							Element:a
+								Search::Elasticsearch::Scroll
+							Element:dt
+							Element:span
+								Python
+							Element:dd
+								See
+							Element:a
+								elasticsearch.helpers.*
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The results that are returned from a scroll request reflect the state of the index at the time that the initial
+							Element:code
+								search
+								request was made, like a snapshot in time. Subsequent changes to documents (index, update or delete) will only affect later search requests.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to use scrolling, the initial search request should specify the
+							Element:code
+								scroll
+								parameter in the query string, which tells Elasticsearch how long it should keep the “search context” alive (see
+							Element:a
+								Keeping the search context alive
+								), eg
+							Element:code
+								?scroll=1m
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /twitter/tweet/_search?scroll=1m { "size": 100, "query": { "match" : { "title" : "elasticsearch" } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The result from the above request includes a
+							Element:code
+								_scroll_id
+								, which should be passed to the
+							Element:code
+								scroll
+								API in order to retrieve the next batch of results.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST
+							Element:a
+							Element:span
+								/_search/scroll
+							Element:img
+							Element:a
+							Element:span
+								{ "scroll" : "1m",
+							Element:img
+							Element:a
+							Element:span
+								"scroll_id" : "DXF1ZXJ5QW5kRmV0Y2gBAAAAAAAAAD4WYm9laVYtZndUQlNsdDcwakFMNjU1QQ=="
+							Element:img
+							Element:a
+							Element:span
+								}
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+							Element:code
+								GET
+								or
+							Element:code
+								POST
+								can be used.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The URL should not include the
+							Element:code
+								index
+								or
+							Element:code
+								type
+								name — these are specified in the original
+							Element:code
+								search
+								request instead.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								scroll
+								parameter tells Elasticsearch to keep the search context open for another
+							Element:code
+								1m
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								scroll_id
+								parameter
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								size
+								parameter allows you to configure the maximum number of hits to be returned with each batch of results. Each call to the
+							Element:code
+								scroll
+								API returns the next batch of results until there are no more results left to return, ie the
+							Element:code
+								hits
+								array is empty.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The initial search request and each subsequent scroll request returns a new
+							Element:code
+								_scroll_id
+								— only the most recent
+							Element:code
+								_scroll_id
+								should be used.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If the request specifies aggregations, only the initial search response will contain the aggregations results.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Scroll requests have optimizations that make them faster when the sort order is
+							Element:code
+								_doc
+								. If you want to iterate over all documents regardless of the order, this is the most efficient option:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /_search?scroll=1m { "sort": [ "_doc" ] }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Keeping the search context alive
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											scroll
+											parameter (passed to the
+										Element:code
+											search
+											request and to every
+										Element:code
+											scroll
+											request) tells Elasticsearch how long it should keep the search context alive. Its value (e.g.
+										Element:code
+											1m
+											, see
+										Element:a
+											the section called “Time units
+										Element:a
+											edit
+											”) does not need to be long enough to process all data — it just needs to be long enough to process the previous batch of results. Each
+										Element:code
+											scroll
+											request (with the
+										Element:code
+											scroll
+											parameter) sets a new expiry time.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Normally, the background merge process optimizes the index by merging together smaller segments to create new bigger segments, at which time the smaller segments are deleted. This process continues during scrolling, but an open search context prevents the old segments from being deleted while they are still in use. This is how Elasticsearch is able to return the results of the initial search request, regardless of subsequent changes to documents.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Keeping older segments alive means that more file handles are needed. Ensure that you have configured your nodes to have ample free file handles. See
+										Element:a
+											File Descriptors
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can check how many search contexts are open with the
+										Element:a
+											nodes stats API
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_nodes/stats/indices/search
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Clear scroll API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Search context are automatically removed when the
+										Element:code
+											scroll
+											timeout has been exceeded. However keeping scrolls open has a cost, as discussed in the
+										Element:a
+											previous section
+											so scrolls should be explicitly cleared as soon as the scroll is not being used anymore using the
+										Element:code
+											clear-scroll
+											API:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE /_search/scroll { "scroll_id" : ["DXF1ZXJ5QW5kRmV0Y2gBAAAAAAAAAD4WYm9laVYtZndUQlNsdDcwakFMNjU1QQ=="] }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Multiple scroll IDs can be passed as array:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE /_search/scroll { "scroll_id" : [ "DXF1ZXJ5QW5kRmV0Y2gBAAAAAAAAAD4WYm9laVYtZndUQlNsdDcwakFMNjU1QQ==", "DnF1ZXJ5VGhlbkZldGNoBQAAAAAAAAABFmtSWWRRWUJrU2o2ZExpSGJCVmQxYUEAAAAAAAAAAxZrUllkUVlCa1NqNmRMaUhiQlZkMWFBAAAAAAAAAAIWa1JZZFFZQmtTajZkTGlIYkJWZDFhQQAAAAAAAAAFFmtSWWRRWUJrU2o2ZExpSGJCVmQxYUEAAAAAAAAABBZrUllkUVlCa1NqNmRMaUhiQlZkMWFB" ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All search contexts can be cleared with the
+										Element:code
+											_all
+											parameter:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE /_search/scroll/_all
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											scroll_id
+											can also be passed as a query string parameter or in the request body. Multiple scroll IDs can be passed as comma separated values:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE /_search/scroll/DXF1ZXJ5QW5kRmV0Y2gBAAAAAAAAAD4WYm9laVYtZndUQlNsdDcwakFMNjU1QQ==,DnF1ZXJ5VGhlbkZldGNoBQAAAAAAAAABFmtSWWRRWUJrU2o2ZExpSGJCVmQxYUEAAAAAAAAAAxZrUllkUVlCa1NqNmRMaUhiQlZkMWFBAAAAAAAAAAIWa1JZZFFZQmtTajZkTGlIYkJWZDFhQQAAAAAAAAAFFmtSWWRRWUJrU2o2ZExpSGJCVmQxYUEAAAAAAAAABBZrUllkUVlCa1NqNmRMaUhiQlZkMWFB
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Sliced Scroll
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For scroll queries that return a lot of documents it is possible to split the scroll in multiple slices which can be consumed independently:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /twitter/tweet/_search?scroll=1m { "slice": { "id": 0,
+										Element:a
+										Element:span
+											"max": 2
+										Element:img
+										Element:a
+										Element:span
+											}, "query": { "match" : { "title" : "elasticsearch" } } } GET /twitter/tweet/_search?scroll=1m { "slice": { "id": 1, "max": 2 }, "query": { "match" : { "title" : "elasticsearch" } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The id of the slice
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The maximum number of slices
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The result from the first request returned documents that belong to the first slice (id: 0) and the result from the second request returned documents that belong to the second slice. Since the maximum number of slices is set to 2 the union of the results of the two requests is equivalent to the results of a scroll query without slicing. By default the splitting is done on the shards first and then locally on each shard using the _uid field with the following formula:
+										Element:code
+											slice(doc) = floorMod(hashCode(doc._uid), max)
+											For instance if the number of shards is equal to 2 and the user requested 4 slices then the slices 0 and 2 are assigned to the first shard and the slices 1 and 3 are assigned to the second shard.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each scroll is independent and can be processed in parallel like any scroll request.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the number of slices is bigger than the number of shards the slice filter is very slow on the first calls, it has a complexity of O(N) and a memory cost equals to N bits per slice where N is the total number of documents in the shard. After few calls the filter should be cached and subsequent calls should be faster but you should limit the number of sliced query you perform in parallel to avoid the memory explosion.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To avoid this cost entirely it is possible to use the
+										Element:code
+											doc_values
+											of another field to do the slicing but the user must ensure that the field has the following properties:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											The field is numeric.
+										Element:li
+										Element:code
+											doc_values
+											are enabled on that field
+										Element:li
+											Every document should contain a single value. If a document has multiple values for the specified field, the first value is used.
+										Element:li
+											The value for each document should be set once when the document is created and never updated. This ensures that each slice gets deterministic results.
+										Element:li
+											The cardinality of the field should be high. This ensures that each slice gets approximately the same amount of documents.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /twitter/tweet/_search?scroll=1m { "slice": { "field": "date", "id": 0, "max": 10 }, "query": { "match" : { "title" : "elasticsearch" } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For append only time-based indices, the
+										Element:code
+											timestamp
+											field can be used safely.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default the maximum number of slices allowed per scroll is limited to 1024. You can update the
+										Element:code
+											index.max_slices_per_scroll
+											index setting to bypass this limit.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Search Type
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Preference »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

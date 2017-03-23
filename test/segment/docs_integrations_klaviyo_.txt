@@ -1,0 +1,601 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Klaviyo Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					Klaviyo
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to Klaviyo in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you toggle on Klaviyo in Segment, this is what happens:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Our CDN is updated within 5-10 minutes. Then our snippet will start asynchronously loading Klaviyo’s track.js onto your page. This means you should remove Klaviyo’s snippet from your page.
+							Element:li
+								Since Klaviyo only records custom events and custom user data, no events or users will appear in Klaviyo until you start using the API outlined below.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Klaviyo is supported on the client-side, server-side and mobile.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Client-side
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:code
+											identify
+											on analytics.js, we call Klaviyo’s
+										Element:code
+											identify
+											with the
+										Element:code
+											traits
+											object. We augment the
+										Element:code
+											traits
+											object to have
+										Element:code
+											traits.$id
+											be the
+										Element:code
+											userId
+											since Klaviyo takes the user ID on the
+										Element:code
+											traits
+											object itself.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											When sending data to Klaviyo via
+										Element:code
+											analytics.js
+											, an initial
+										Element:code
+											page
+											call is required. By default, this is already added in your
+										Element:a
+											Segment snippet
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Server-side
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:code
+											identify
+											from one of our server-side languages, we’ll create/update a Klaviyo person, with the
+										Element:code
+											traits
+											you provide in the identify.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your
+										Element:code
+											userId
+											is an email, or you provide an email in
+										Element:code
+											traits.email
+											, we’ll send it as the
+										Element:code
+											$email
+											property to Klaviyo. Also, you can send us
+										Element:code
+											traits.phoneNumber
+											and we’ll transform it to
+										Element:code
+											traits.$phone_number
+											per Klaviyo’s fancy (we’ll do the same for all of Klaviyo’s
+										Element:a
+											special people properties
+											.)
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Adding users to a list
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When you call
+													Element:code
+														identify
+														using a
+													Element:strong
+														server side
+														library, you can optionally send list data in order to add that person to a specific List in Klaviyo. We will use their
+													Element:a
+														List API
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In order for this to work, you must add the
+													Element:strong
+														Private Key
+														inside the Klaviyo settings in Segment. You can generate a private key by clicking
+													Element:code
+														Account > Settings > API Keys > Create API Key
+														inside Klaviyo.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You can choose to provide a default
+													Element:code
+														listId
+														that we can fallback on when adding users to a list. If you’d like to override this default listId, you can also do so by sending it manually via code in
+													Element:code
+														integrations.Klaviyo.listId
+														. You can also choose whether you want to force users to confirm the optin to your list. The default settings will be
+													Element:code
+														true
+														. However, you can uncheck this option in the Klaviyo settings inside Segment or override it per
+													Element:code
+														identify
+														call via code.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Important
+														: You must provide an
+													Element:code
+														email
+														in your
+													Element:code
+														traits
+														or send
+													Element:code
+														email
+														as the
+													Element:code
+														userId
+														. Be sure to provide the
+													Element:code
+														Private Key
+														in the Klaviyo settings for this to work.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														node
+														example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														analytics.identify({ userId: '019mr8mf4r', traits: { name: 'Michael Bolton', email: 'mbolton@initech.com', plan: 'Enterprise', friends: 42 }, integrations: { Klaviyo: { listId: 'baV129', // will override whatever it is in the UI setting confirmOptin: false // optional } } });
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Note:
+														Inappropriately setting
+													Element:code
+														Klaviyo.confirmOptin
+														to
+													Element:code
+														false
+														without explicit permission of the people added can result in your Klaviyo account being suspended and/or terminated by Klaviyo.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you call
+							Element:code
+								track
+								on
+							Element:code
+								analytics.js
+								, we call Klaviyo’s
+							Element:code
+								track
+								with the exact same parameters.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We’ll key the user using the
+							Element:code
+								userId
+								, but we’ll also provide the Klaviyo
+							Element:code
+								$email
+							Element:code
+								customer_property
+								if your
+							Element:code
+								userId
+								is an email, or you provide
+							Element:code
+								email
+								as one of your event
+							Element:code
+								properties
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Ecommerce
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Completed Order
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Klaviyo supports the
+										Element:code
+											Order Completed
+											event that is outlined in our
+										Element:a
+											specs
+											. If you send us a
+										Element:code
+											Order Completed
+											event, we will send Klaviyo a
+										Element:code
+											Placed Order
+											event and a
+										Element:code
+											Ordered Product
+											event for each item listed in the
+										Element:code
+											properties.products
+											array. We will also attach
+										Element:code
+											customer_properties
+											with the
+										Element:code
+											userId
+											set as
+										Element:code
+											$id
+											for each of those Klaviyo events.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While it is not included in our spec for a
+										Element:code
+											Order Completed
+											event, you can optionally include a
+										Element:code
+											productUrl
+											and or
+										Element:code
+											imageUrl
+											as a property of an item inside the
+										Element:code
+											products
+											array. We will pass those along to Klaviyo as
+										Element:code
+											Product URL
+											and
+										Element:code
+											Image URL
+											respectively.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Each auto-generated
+										Element:code
+											Ordered Product
+											event requires a unique
+										Element:code
+											$event_id
+											, which Segment automatically generates based on a combination of the
+										Element:code
+											orderId
+											of the parent
+										Element:code
+											Completed Order
+											event, and the
+										Element:code
+											productId
+											,
+										Element:code
+											id
+											or
+										Element:code
+											sku
+											of the product itself (in this order). In other words, you must pass either a
+										Element:code
+											productId
+											,
+										Element:code
+											id
+											or
+										Element:code
+											sku
+											to Segment, or Klaviyo will reject your
+										Element:code
+											Ordered Product
+											events.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An example
+										Element:code
+											Order Completed
+											event may look like this using the
+										Element:a
+											node.js library
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.track({ userId: '019mr8mf4r', event: 'Completed Order', properties: { orderId: '50314b8e9bcf000000000000', total: 30, revenue: 25, shipping: 3, tax: 2, discount: 2.5, coupon: 'hasbros', currency: 'USD', repeat: true, products: [ { id: '507f1f77bcf86cd799439011', sku: '45790-32', name: 'Monopoly: 3rd Edition', price: 19, quantity: 1, category: 'Games', productUrl: 'http://www.example.com/path/to/product', imageUrl: 'http://www.example.com/path/to/product/image.png', }, { id: '505bd76785ebb509fc183733', sku: '46493-32', name: 'Uno Card Game', price: 3, quantity: 2, category: 'Games' } ] } });
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+								✅
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your API key
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Confirm Optin
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This flag determines whether someone is sent an email with a confirmation link before they are added to the list. Defaults to true (checked). This should only be set to false or unchecked if you have already received explicit permission from that person to add them to this list.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											List ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Insert the ID of the default list that you’d like to subscribe users to when you call
+										Element:code
+											.identify()
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Enter your Private Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note: this is
+										Element:strong
+											required
+											to use the List API. You can find this by going to Klaviyo’s UI and clicking Account > Settings > API Keys > Create API Key
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Fallback on Anonymous ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Enable this option to fallback on
+										Element:code
+											anonymousId
+											if
+										Element:code
+											userId
+											is not available when sending server side events. Note that this option may result in superfluous user profiles in Klaviyo and is generally not recommend. If this option is unchecked, we will only accept server side events that includes the
+										Element:code
+											userId
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											browser
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

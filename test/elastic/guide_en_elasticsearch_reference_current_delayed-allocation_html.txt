@@ -1,0 +1,428 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Delaying allocation when a node leaves
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When a node leaves the cluster for whatever reason, intentional or otherwise, the master reacts by:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Promoting a replica shard to primary to replace any primaries that were on the node.
+							Element:li
+								Allocating replica shards to replace the missing replicas (assuming there are enough nodes).
+							Element:li
+								Rebalancing shards evenly across the remaining nodes.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								These actions are intended to protect the cluster against data loss by ensuring that every shard is fully replicated as soon as possible.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Even though we throttle concurrent recoveries both at the
+							Element:a
+								node level
+								and at the
+							Element:a
+								cluster level
+								, this “shard-shuffle” can still put a lot of extra load on the cluster which may not be necessary if the missing node is likely to return soon. Imagine this scenario:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Node 5 loses network connectivity.
+							Element:li
+								The master promotes a replica shard to primary for each primary that was on Node 5.
+							Element:li
+								The master allocates new replicas to other nodes in the cluster.
+							Element:li
+								Each new replica makes an entire copy of the primary shard across the network.
+							Element:li
+								More shards are moved to different nodes to rebalance the cluster.
+							Element:li
+								Node 5 returns after a few minutes.
+							Element:li
+								The master rebalances the cluster by allocating shards to Node 5.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If the master had just waited for a few minutes, then the missing shards could have been re-allocated to Node 5 with the minimum of network traffic. This process would be even quicker for idle shards (shards not receiving indexing requests) which have been automatically
+							Element:a
+								sync-flushed
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The allocation of replica shards which become unassigned because a node has left can be delayed with the
+							Element:code
+								index.unassigned.node_left.delayed_timeout
+								dynamic setting, which defaults to
+							Element:code
+								1m
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This setting can be updated on a live index (or on all indices):
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT _all/_settings { "settings": { "index.unassigned.node_left.delayed_timeout": "5m" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								With delayed allocation enabled, the above scenario changes to look like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Node 5 loses network connectivity.
+							Element:li
+								The master promotes a replica shard to primary for each primary that was on Node 5.
+							Element:li
+								The master logs a message that allocation of unassigned shards has been delayed, and for how long.
+							Element:li
+								The cluster remains yellow because there are unassigned replica shards.
+							Element:li
+								Node 5 returns after a few minutes, before the
+							Element:code
+								timeout
+								expires.
+							Element:li
+								The missing replicas are re-allocated to Node 5 (and sync-flushed shards recover almost immediately).
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This setting will not affect the promotion of replicas to primaries, nor will it affect the assignment of replicas that have not been assigned previously. In particular, delayed allocation does not come into effect after a full cluster restart. Also, in case of a master failover situation, elapsed delay time is forgotten (i.e. reset to the full initial delay).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Cancellation of shard relocation
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If delayed allocation times out, the master assigns the missing shards to another node which will start recovery. If the missing node rejoins the cluster, and its shards still have the same sync-id as the primary, shard relocation will be cancelled and the synced shard will be used for recovery instead.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For this reason, the default
+										Element:code
+											timeout
+											is set to just one minute: even if shard relocation begins, cancelling recovery in favour of the synced shard is cheap.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Monitoring delayed unassigned shards
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The number of shards whose allocation has been delayed by this timeout setting can be viewed with the
+										Element:a
+											cluster health API
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET _cluster/health
+										Element:a
+										Element:span
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											This request will return a
+										Element:code
+											delayed_unassigned_shards
+											value.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Removing a node permanently
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If a node is not going to return and you would like Elasticsearch to allocate the missing shards immediately, just update the timeout to zero:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT _all/_settings { "settings": { "index.unassigned.node_left.delayed_timeout": "0" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can reset the timeout as soon as the missing shards have started to recover.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Shard Allocation Filtering
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Index recovery prioritization »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

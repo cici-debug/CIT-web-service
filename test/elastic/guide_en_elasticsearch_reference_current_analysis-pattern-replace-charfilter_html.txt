@@ -1,0 +1,449 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Pattern Replace Char Filter
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								pattern_replace
+								character filter uses a regular expression to match characters which should be replaced with the specified replacement string. The replacement string can refer to capture groups in the regular expression.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Beware of Pathological Regular Expressions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The pattern replace character filter uses
+										Element:a
+											Java Regular Expressions
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A badly written regular expression could run very slowly or even throw a StackOverflowError and cause the node it is running on to exit suddenly.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Read more about
+										Element:a
+											pathological regular expressions and how to avoid them
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Configuration
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											pattern_replace
+											character filter accepts the following parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											pattern
+										Element:td
+										Element:p
+											A
+										Element:a
+											Java regular expression
+											. Required.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											replacement
+										Element:td
+										Element:p
+											The replacement string, which can reference capture groups using the
+										Element:code
+											$1
+											..
+										Element:code
+											$9
+											syntax, as explained
+										Element:a
+											here
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											flags
+										Element:td
+										Element:p
+											Java regular expression
+										Element:a
+											flags
+											. Flags should be pipe-separated, eg
+										Element:code
+											"CASE_INSENSITIVE|COMMENTS"
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Example configuration
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In this example, we configure the
+										Element:code
+											pattern_replace
+											character filter to replace any embedded dashes in numbers with underscores, i.e
+										Element:code
+											123-456-789
+											→
+										Element:code
+											123_456_789
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "settings": { "analysis": { "analyzer": { "my_analyzer": { "tokenizer": "standard", "char_filter": [ "my_char_filter" ] } }, "char_filter": { "my_char_filter": { "type": "pattern_replace", "pattern": "(\\d+)-(?=\\d)", "replacement": "$1_" } } } } } POST my_index/_analyze { "analyzer": "my_analyzer", "text": "My credit card is 123-456-789" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above example produces the following term:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											[ My, credit, card, is 123_456_789 ]
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using a replacement string that changes the length of the original text will work for search purposes, but will result in incorrect highlighting, as can be seen in the following example.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This example inserts a space whenever it encounters a lower-case letter followed by an upper-case letter (i.e.
+										Element:code
+											fooBarBaz
+											→
+										Element:code
+											foo Bar Baz
+											), allowing camelCase words to be queried individually:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "settings": { "analysis": { "analyzer": { "my_analyzer": { "tokenizer": "standard", "char_filter": [ "my_char_filter" ], "filter": [ "lowercase" ] } }, "char_filter": { "my_char_filter": { "type": "pattern_replace", "pattern": "(?<=\\p{Lower})(?=\\p{Upper})", "replacement": " " } } } }, "mappings": { "my_type": { "properties": { "text": { "type": "text", "analyzer": "my_analyzer" } } } } } POST my_index/_analyze { "analyzer": "my_analyzer", "text": "The fooBarBaz method" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above returns the following terms:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											[ the, foo, bar, baz, method ]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Querying for
+										Element:code
+											bar
+											will find the document correctly, but highlighting on the result will produce incorrect highlights, because our character filter changed the length of the original text:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index/my_doc/1?refresh { "text": "The fooBarBaz method" } GET my_index/_search { "query": { "match": { "text": "bar" } }, "highlight": { "fields": { "text": {} } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The output from the above is:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "timed_out": false, "took": $body.took, "_shards": { "total": 5, "successful": 5, "failed": 0 }, "hits": { "total": 1, "max_score": 0.2824934, "hits": [ { "_index": "my_index", "_type": "my_doc", "_id": "1", "_score": 0.2824934, "_source": { "text": "The fooBarBaz method" }, "highlight": { "text": [ "The foo<em>Ba</em>rBaz method"
+										Element:a
+										Element:span
+											] } } ] } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Note the incorrect highlight.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Mapping Char Filter
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Modules »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

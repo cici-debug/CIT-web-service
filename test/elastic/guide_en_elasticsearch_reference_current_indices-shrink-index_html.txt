@@ -1,0 +1,562 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Shrink Index
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The shrink index API allows you to shrink an existing index into a new index with fewer primary shards. The requested number of primary shards in the target index must be a factor of the number of shards in the source index. For example an index with
+							Element:code
+								8
+								primary shards can be shrunk into
+							Element:code
+								4
+								,
+							Element:code
+								2
+								or
+							Element:code
+								1
+								primary shards or an index with
+							Element:code
+								15
+								primary shards can be shrunk into
+							Element:code
+								5
+								,
+							Element:code
+								3
+								or
+							Element:code
+								1
+								. If the number of shards in the index is a prime number it can only be shrunk into a single primary shard. Before shrinking, a (primary or replica) copy of every shard in the index must be present on the same node.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Shrinking works as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								First, it creates a new target index with the same definition as the source index, but with a smaller number of primary shards.
+							Element:li
+								Then it hard-links segments from the source index into the target index. (If the file system doesn’t support hard-linking, then all segments are copied into the new index, which is a much more time consuming process.)
+							Element:li
+								Finally, it recovers the target index as though it were a closed index which had just been re-opened.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Preparing an index for shrinking
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to shrink an index, the index must be marked as read-only, and a (primary or replica) copy of every shard in the index must be relocated to the same node and have
+										Element:a
+											health
+										Element:code
+											green
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These two conditions can be achieved with the following request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT /my_source_index/_settings { "settings": { "index.routing.allocation.require._name": "shrink_node_name",
+										Element:a
+										Element:span
+											"index.blocks.write": true
+										Element:img
+										Element:a
+										Element:span
+											} }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Forces the relocation of a copy of each shard to the node with name
+										Element:code
+											shrink_node_name
+											. See
+										Element:a
+											Shard Allocation Filtering
+											for more options.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Prevents write operations to this index while still allowing metadata changes like deleting the index.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It can take a while to relocate the source index. Progress can be tracked with the
+										Element:a
+											, or the
+										Element:code
+											_cat recovery
+											API
+										Element:a
+											can be used to wait until all shards have relocated with the
+										Element:code
+											cluster health
+											API
+										Element:code
+											wait_for_no_relocating_shards
+											parameter.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Shrinking an index
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To shrink
+										Element:code
+											my_source_index
+											into a new index called
+										Element:code
+											my_target_index
+											, issue the following request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST my_source_index/_shrink/my_target_index
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above request returns immediately once the target index has been added to the cluster state — it doesn’t wait for the shrink operation to start.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Indices can only be shrunk if they satisfy the following requirements:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											the target index must not exist
+										Element:li
+											The index must have more primary shards than the target index.
+										Element:li
+											The number of primary shards in the target index must be a factor of the number of primary shards in the source index. The source index must have more primary shards than the target index.
+										Element:li
+											The index must not contain more than
+										Element:code
+											2,147,483,519
+											documents in total across all shards that will be shrunk into a single shard on the target index as this is the maximum number of docs that can fit into a single shard.
+										Element:li
+											The node handling the shrink process must have sufficient free disk space to accommodate a second copy of the existing index.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_shrink
+											API is similar to the
+										Element:a
+											and accepts
+										Element:code
+											create index
+											API
+										Element:code
+											settings
+											and
+										Element:code
+											aliases
+											parameters for the target index:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST my_source_index/_shrink/my_target_index { "settings": { "index.number_of_replicas": 1, "index.number_of_shards": 1,
+										Element:a
+										Element:span
+											"index.codec": "best_compression"
+										Element:img
+										Element:a
+										Element:span
+											}, "aliases": { "my_search_indices": {} } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The number of shards in the target index. This must be a factor of the number of shards in the source index.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Best compression will only take affect when new writes are made to the index, such as when
+										Element:a
+											force-merging
+											the shard to a single segment.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Mappings may not be specified in the
+										Element:code
+											_shrink
+											request, and all
+										Element:code
+											index.analysis.*
+											and
+										Element:code
+											index.similarity.*
+											settings will be overwritten with the settings from the source index.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Monitoring the shrink process
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The shrink process can be monitored with the
+										Element:a
+											, or the
+										Element:code
+											_cat recovery
+											API
+										Element:a
+											can be used to wait until all primary shards have been allocated by setting the
+										Element:code
+											cluster health
+											API
+										Element:code
+											wait_for_status
+											parameter to
+										Element:code
+											yellow
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_shrink
+											API returns as soon as the target index has been added to the cluster state, before any shards have been allocated. At this point, all shards are in the state
+										Element:code
+											unassigned
+											. If, for any reason, the target index can’t be allocated on the shrink node, its primary shard will remain
+										Element:code
+											unassigned
+											until it can be allocated on that node.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the primary shard is allocated, it moves to state
+										Element:code
+											initializing
+											, and the shrink process begins. When the shrink operation completes, the shard will become
+										Element:code
+											active
+											. At that point, Elasticsearch will try to allocate any replicas and may decide to relocate the primary shard to another node.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Wait For Active Shards
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Because the shrink operation creates a new index to shrink the shards to, the
+										Element:a
+											wait for active shards
+											setting on index creation applies to the shrink index action as well.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Open / Close Index API
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Rollover Index »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

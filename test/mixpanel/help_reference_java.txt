@@ -1,0 +1,1056 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Java Server API Integration
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Android and JavaScript libraries
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Mixpanel pure Java library is designed for generality, and is mostly useful in deep back-end and embedded applications.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel also provides
+							Element:a
+								a full-featured Android library
+								for developers deploying Android applications, and a powerful and easy to use
+							Element:a
+								client-side JavaScript library for web applications
+								. Both of these libraries offer platform-specific features and conveniences that can make Mixpanel implementations much simpler, and can scale naturally to an unlimited number of clients.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								see the Android library
+							Element:li
+							Element:a
+								see the client side JavaScript library
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Installing the library
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can get the library by including the following in your project's pom.xml:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								<dependency>
+							Element:span
+								<groupId>
+								com.mixpanel
+							Element:span
+								</groupId>
+							Element:span
+								<artifactId>
+								mixpanel-java
+							Element:span
+								</artifactId>
+							Element:span
+								<version>
+								1.4.4
+							Element:span
+								</version>
+							Element:span
+								</dependency>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you're not using Maven to build your project, you can browse and download the library jar directly from Maven central at
+							Element:a
+								http://search.maven.org/#search|ga|1|mixpanel-java
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sending events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Track events in the mixpanel-java library by creating messages using an instance of
+							Element:a
+								MessageBuilder
+								using your project token, bundling messages together using an instance of
+							Element:a
+								ClientDelivery
+								, and then pushing the bundle to Mixpanel using an instance of
+							Element:a
+								MixpanelAPI
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The JSONObjects produced by
+							Element:code
+								MessageBuilder
+								are completely self-contained, and can be sent over a network or enqueued for later processing.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								import
+							Element:span
+								com.mixpanel.mixpanelapi.ClientDelivery
+							Element:span
+								;
+							Element:span
+								import
+							Element:span
+								com.mixpanel.mixpanelapi.MessageBuilder
+							Element:span
+								;
+							Element:span
+								import
+							Element:span
+								com.mixpanel.mixpanelapi.MixpanelAPI
+							Element:span
+								;
+							Element:span
+								// You can find your project token in the
+							Element:span
+								// project settings dialog
+							Element:span
+								// of the Mixpanel web application
+							Element:span
+								MessageBuilder
+							Element:span
+								messageBuilder
+							Element:span
+								=
+							Element:span
+								new
+							Element:span
+								MessageBuilder
+							Element:span
+								(
+							Element:span
+								PROJECT_TOKEN
+							Element:span
+								);
+							Element:span
+								// Create an event
+							Element:span
+								JSONObject
+							Element:span
+								sentEvent
+							Element:span
+								=
+							Element:span
+								messageBuilder
+							Element:span
+								.
+							Element:span
+								event
+							Element:span
+								(
+							Element:span
+								distinctId
+							Element:span
+								,
+							Element:span
+								"Sent Message"
+							Element:span
+								,
+							Element:span
+								null
+							Element:span
+								);
+							Element:span
+								// You can send properties along with events
+							Element:span
+								JSONObject
+							Element:span
+								props
+							Element:span
+								=
+							Element:span
+								new
+							Element:span
+								JSONObject
+							Element:span
+								();
+							Element:span
+								props
+							Element:span
+								.
+							Element:span
+								put
+							Element:span
+								(
+							Element:span
+								"Gender"
+							Element:span
+								,
+							Element:span
+								"Female"
+							Element:span
+								);
+							Element:span
+								props
+							Element:span
+								.
+							Element:span
+								put
+							Element:span
+								(
+							Element:span
+								"Plan"
+							Element:span
+								,
+							Element:span
+								"Premium"
+							Element:span
+								);
+							Element:span
+								JSONObject
+							Element:span
+								planEvent
+							Element:span
+								=
+							Element:span
+								messageBuilder
+							Element:span
+								.
+							Element:span
+								event
+							Element:span
+								(
+							Element:span
+								distinctId
+							Element:span
+								,
+							Element:span
+								"Plan Selected"
+							Element:span
+								,
+							Element:span
+								props
+							Element:span
+								);
+							Element:span
+								// Gather together a bunch of messages into a single
+							Element:span
+								// ClientDelivery. This can happen in a separate thread
+							Element:span
+								// or process from the call to MessageBuilder.event()
+							Element:span
+								ClientDelivery
+							Element:span
+								delivery
+							Element:span
+								=
+							Element:span
+								new
+							Element:span
+								ClientDelivery
+							Element:span
+								();
+							Element:span
+								delivery
+							Element:span
+								.
+							Element:span
+								addMessage
+							Element:span
+								(
+							Element:span
+								sentEvent
+							Element:span
+								);
+							Element:span
+								delivery
+							Element:span
+								.
+							Element:span
+								addMessage
+							Element:span
+								(
+							Element:span
+								planEvent
+							Element:span
+								);
+							Element:span
+								// Use an instance of MixpanelAPI to send the messages
+							Element:span
+								// to Mixpanel's servers.
+							Element:span
+								MixpanelAPI
+							Element:span
+								mixpanel
+							Element:span
+								=
+							Element:span
+								new
+							Element:span
+								MixpanelAPI
+							Element:span
+								();
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								deliver
+							Element:span
+								(
+							Element:span
+								delivery
+							Element:span
+								);
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Storing user profiles
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In addition to events, you can send People Analytics profile updates to Mixpanel. Mixpanel can maintain a profile of each of your users, storing information you know about them. An update is a message that changes the properties of a People Analytics profile.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can use profiles to explore and segment users by who they are, rather than what they did. You can also use profiles to send notifications, such as emails, SMS, or push notifications.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Setting profile properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can prepare a profile update message with
+										Element:a
+											MessageBuilder.set
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											import
+										Element:span
+											com.mixpanel.mixpanelapi.MessageBuilder
+										Element:span
+											;
+										Element:span
+											import
+										Element:span
+											com.mixpanel.mixpanelapi.MixpanelAPI
+										Element:span
+											;
+										Element:span
+											MessageBuilder
+										Element:span
+											messageBuilder
+										Element:span
+											=
+										Element:span
+											new
+										Element:span
+											MessageBuilder
+										Element:span
+											(
+										Element:span
+											PROJECT_TOKEN
+										Element:span
+											);
+										Element:span
+											// Sets user 13793's "Plan" attribute to "Premium"
+										Element:span
+											// This creates a profile for 13793 if one does not
+										Element:span
+											// already exist.
+										Element:span
+											JSONObject
+										Element:span
+											props
+										Element:span
+											=
+										Element:span
+											new
+										Element:span
+											JSONObject
+										Element:span
+											();
+										Element:span
+											props
+										Element:span
+											.
+										Element:span
+											put
+										Element:span
+											(
+										Element:span
+											"Plan"
+										Element:span
+											,
+										Element:span
+											"Premium"
+										Element:span
+											);
+										Element:span
+											JSONObject
+										Element:span
+											update
+										Element:span
+											=
+										Element:span
+											messageBuilder
+										Element:span
+											.
+										Element:span
+											set
+										Element:span
+											(
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											props
+										Element:span
+											);
+										Element:span
+											// Send the update to mixpanel
+										Element:span
+											MixpanelAPI
+										Element:span
+											mixpanel
+										Element:span
+											=
+										Element:span
+											new
+										Element:span
+											MixpanelAPI
+										Element:span
+											();
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											sendMessage
+										Element:span
+											(
+										Element:span
+											update
+										Element:span
+											);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This will set a "Plan" property, with a value "Premium", on user 13793's profile. If there isn't a profile with distinct_id 13793 in Mixpanel already, a new profile will be created. If user 13793 already has a property named "Plan" in their profile, the old value will be overwritten with "Premium".
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Incrementing numeric properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can use
+										Element:a
+											MessageBuilder.increment
+											to create a message that will change the current value of numeric properties. This is useful when you want to keep a running tally of things, such as games played, emails sent, or points earned.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											import
+										Element:span
+											com.mixpanel.mixpanelapi.MessageBuilder
+										Element:span
+											;
+										Element:span
+											import
+										Element:span
+											com.mixpanel.mixpanelapi.MixpanelAPI
+										Element:span
+											;
+										Element:span
+											MessageBuilder
+										Element:span
+											messageBuilder
+										Element:span
+											=
+										Element:span
+											new
+										Element:span
+											MessageBuilder
+										Element:span
+											(
+										Element:span
+											PROJECT_TOKEN
+										Element:span
+											);
+										Element:span
+											// Pass a Map to increment multiple properties
+										Element:span
+											Map
+										Element:span
+											<
+										Element:span
+											String
+										Element:span
+											,
+										Element:span
+											Long
+										Element:span
+											>
+										Element:span
+											properties
+										Element:span
+											=
+										Element:span
+											new
+										Element:span
+											HashMap
+										Element:span
+											<
+										Element:span
+											String
+										Element:span
+											,
+										Element:span
+											Long
+										Element:span
+											>();
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											put
+										Element:span
+											(
+										Element:span
+											"dollars spent"
+										Element:span
+											,
+										Element:span
+											17
+										Element:span
+											);
+										Element:span
+											// Subtract by passing a negative value
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											put
+										Element:span
+											(
+										Element:span
+											"credits remaining"
+										Element:span
+											,
+										Element:span
+											-
+										Element:span
+											34
+										Element:span
+											);
+										Element:span
+											JSONObject
+										Element:span
+											update
+										Element:span
+											=
+										Element:span
+											messageBuilder
+										Element:span
+											.
+										Element:span
+											increment
+										Element:span
+											(
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											properties
+										Element:span
+											);
+										Element:span
+											// Send the update to mixpanel
+										Element:span
+											MixpanelAPI
+										Element:span
+											mixpanel
+										Element:span
+											=
+										Element:span
+											new
+										Element:span
+											MixpanelAPI
+										Element:span
+											();
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											sendMessage
+										Element:span
+											(
+										Element:span
+											update
+										Element:span
+											);
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Appending to list properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											MessageBuilder.append
+											creates an update that adds an item to a list-valued property. The value you send with the append is added to the end of the list. If the property doesn't exist, it will be created with a one element list as its value.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											import
+										Element:span
+											com.mixpanel.mixpanelapi.MessageBuilder
+										Element:span
+											;
+										Element:span
+											import
+										Element:span
+											com.mixpanel.mixpanelapi.MixpanelAPI
+										Element:span
+											;
+										Element:span
+											MessageBuilder
+										Element:span
+											messageBuilder
+										Element:span
+											=
+										Element:span
+											new
+										Element:span
+											MessageBuilder
+										Element:span
+											(
+										Element:span
+											PROJECT_TOKEN
+										Element:span
+											);
+										Element:span
+											// Adds "Asheville" to a list-value property
+										Element:span
+											// "Cities Visited" on user "13793"
+										Element:span
+											JSONObject
+										Element:span
+											properties
+										Element:span
+											=
+										Element:span
+											new
+										Element:span
+											JSONObject
+										Element:span
+											();
+										Element:span
+											properties
+										Element:span
+											.
+										Element:span
+											put
+										Element:span
+											(
+										Element:span
+											"Cities Visited"
+										Element:span
+											,
+										Element:span
+											"Asheville"
+										Element:span
+											);
+										Element:span
+											JSONObject
+										Element:span
+											update
+										Element:span
+											=
+										Element:span
+											messageBuilder
+										Element:span
+											.
+										Element:span
+											append
+										Element:span
+											(
+										Element:span
+											"13793"
+										Element:span
+											,
+										Element:span
+											properties
+										Element:span
+											);
+										Element:span
+											// Send the update to mixpanel
+										Element:span
+											MixpanelAPI
+										Element:span
+											mixpanel
+										Element:span
+											=
+										Element:span
+											new
+										Element:span
+											MixpanelAPI
+										Element:span
+											();
+										Element:span
+											mixpanel
+										Element:span
+											.
+										Element:span
+											sendMessage
+										Element:span
+											(
+										Element:span
+											update
+										Element:span
+											);
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Tracking revenue
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel makes it easy to analyze the revenue you make from individual customers. By associating charges with user profiles, you can compare revenue across different customer segments and calculate things like lifetime value.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can track a single transaction with
+							Element:a
+								MessageBuilder.trackCharge
+								. Sending a message created with
+							Element:code
+								trackCharge
+								will add transactions to the individual user profile, which will also be reflected in the
+							Element:a
+								Mixpanel Revenue report
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								Document Sections
+							Element:span
+								import
+							Element:span
+								com
+							Element:span
+								.
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								mixpanelapi
+							Element:span
+								.
+							Element:span
+								MessageBuilder
+							Element:span
+								;
+							Element:span
+								import
+							Element:span
+								com
+							Element:span
+								.
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								mixpanelapi
+							Element:span
+								.
+							Element:span
+								MixpanelAPI
+							Element:span
+								;
+							Element:span
+								MessageBuilder
+							Element:span
+								messageBuilder
+							Element:span
+								=
+							Element:span
+								new
+							Element:span
+								MessageBuilder
+							Element:span
+								(
+							Element:span
+								PROJECT_TOKEN
+							Element:span
+								);
+							Element:span
+								// Track a charge of $29.99 for the user identified by 13793
+							Element:span
+								JSONObject
+							Element:span
+								update
+							Element:span
+								=
+							Element:span
+								messageBuilder
+							Element:span
+								.
+							Element:span
+								trackCharge
+							Element:span
+								(
+							Element:span
+								"13793"
+							Element:span
+								,
+							Element:span
+								29.99
+							Element:span
+								,
+							Element:span
+								null
+							Element:span
+								);
+							Element:span
+								// Send the update to mixpanel
+							Element:span
+								MixpanelAPI
+							Element:span
+								mixpanel
+							Element:span
+								=
+							Element:span
+								new
+							Element:span
+								MixpanelAPI
+							Element:span
+								();
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								sendMessage
+							Element:span
+								(
+							Element:span
+								update
+							Element:span
+								);
+							Element:span
+								// Track a refund of $50 for the user identified by 13793
+							Element:span
+								JSONObject
+							Element:span
+								update
+							Element:span
+								=
+							Element:span
+								messageBuilder
+							Element:span
+								.
+							Element:span
+								trackCharge
+							Element:span
+								(
+							Element:span
+								"13793"
+							Element:span
+								,
+							Element:span
+								-
+							Element:span
+								50
+							Element:span
+								,
+							Element:span
+								null
+							Element:span
+								);
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								sendMessage
+							Element:span
+								(
+							Element:span
+								update
+							Element:span
+								);
+							Element:span
+								// Track a charge of 25 dollars on January 2, 2012
+							Element:span
+								JSONObject
+							Element:span
+								properties
+							Element:span
+								=
+							Element:span
+								new
+							Element:span
+								JSONObject
+							Element:span
+								()
+							Element:span
+								properties
+							Element:span
+								.
+							Element:span
+								put
+							Element:span
+								(
+							Element:span
+								"$time"
+							Element:span
+								,
+							Element:span
+								"2012-01-02T00:00:00"
+							Element:span
+								);
+							Element:span
+								JSONObject
+							Element:span
+								update
+							Element:span
+								=
+							Element:span
+								messageBuilder
+							Element:span
+								.
+							Element:span
+								trackCharge
+							Element:span
+								(
+							Element:span
+								"13793"
+							Element:span
+								,
+							Element:span
+								-
+							Element:span
+								50
+							Element:span
+								,
+							Element:span
+								properties
+							Element:span
+								);
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								sendMessage
+							Element:span
+								(
+							Element:span
+								update
+							Element:span
+								);
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+								Learn more
+							Element:li
+							Element:a
+								Android and JavaScript libraries
+							Element:li
+							Element:a
+								Installing the library
+							Element:li
+							Element:a
+								Sending events
+							Element:li
+							Element:a
+								Storing user profiles
+							Element:li
+							Element:a
+								Tracking revenue
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Full API reference
+							Element:li
+							Element:a
+								Example application
+							Element:li
+							Element:a
+								Library source code

@@ -1,0 +1,542 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Top hits Aggregation
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A
+							Element:code
+								top_hits
+								metric aggregator keeps track of the most relevant document being aggregated. This aggregator is intended to be used as a sub aggregator, so that the top matching documents can be aggregated per bucket.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								top_hits
+								aggregator can effectively be used to group result sets by certain fields via a bucket aggregator. One or more bucket aggregators determines by which properties a result set get sliced into.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Options
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											from
+											- The offset from the first result you want to fetch.
+										Element:li
+										Element:code
+											size
+											- The maximum number of top matching hits to return per bucket. By default the top three matching hits are returned.
+										Element:li
+										Element:code
+											sort
+											- How the top matching hits should be sorted. By default the hits are sorted by the score of the main query.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Supported per hit features
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The top_hits aggregation returns regular search hits, because of this many per hit features can be supported:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Highlighting
+										Element:li
+										Element:a
+											Explain
+										Element:li
+										Element:a
+											Named filters and queries
+										Element:li
+										Element:a
+											Source filtering
+										Element:li
+										Element:a
+											Stored fields
+										Element:li
+										Element:a
+											Script fields
+										Element:li
+										Element:a
+											Doc value fields
+										Element:li
+										Element:a
+											Include versions
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Example
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the following example we group the questions by tag and per tag we show the last active question. For each question only the title field is being included in the source.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs": { "top-tags": { "terms": { "field": "tags", "size": 3 }, "aggs": { "top_tag_hits": { "top_hits": { "sort": [ { "last_activity_date": { "order": "desc" } } ], "_source": { "includes": [ "title" ] }, "size" : 1 } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Possible response snippet:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"aggregations": { "top-tags": { "buckets": [ { "key": "windows-7", "doc_count": 25365, "top_tags_hits": { "hits": { "total": 25365, "max_score": 1, "hits": [ { "_index": "stack", "_type": "question", "_id": "602679", "_score": 1, "_source": { "title": "Windows port opening" }, "sort": [ 1370143231177 ] } ] } } }, { "key": "linux", "doc_count": 18342, "top_tags_hits": { "hits": { "total": 18342, "max_score": 1, "hits": [ { "_index": "stack", "_type": "question", "_id": "602672", "_score": 1, "_source": { "title": "Ubuntu RFID Screensaver lock-unlock" }, "sort": [ 1370143379747 ] } ] } } }, { "key": "windows", "doc_count": 18119, "top_tags_hits": { "hits": { "total": 18119, "max_score": 1, "hits": [ { "_index": "stack", "_type": "question", "_id": "602678", "_score": 1, "_source": { "title": "If I change my computers date / time, what could be affected?" }, "sort": [ 1370142868283 ] } ] } } } ] } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Field collapse example
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Field collapsing or result grouping is a feature that logically groups a result set into groups and per group returns top documents. The ordering of the groups is determined by the relevancy of the first document in a group. In Elasticsearch this can be implemented via a bucket aggregator that wraps a
+										Element:code
+											top_hits
+											aggregator as sub-aggregator.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the example below we search across crawled webpages. For each webpage we store the body and the domain the webpage belong to. By defining a
+										Element:code
+											terms
+											aggregator on the
+										Element:code
+											domain
+											field we group the result set of webpages by domain. The
+										Element:code
+											top_hits
+											aggregator is then defined as sub-aggregator, so that the top matching hits are collected per bucket.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Also a
+										Element:code
+											max
+											aggregator is defined which is used by the
+										Element:code
+											terms
+											aggregator’s order feature the return the buckets by relevancy order of the most relevant document in a bucket.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "query": { "match": { "body": "elections" } }, "aggs": { "top-sites": { "terms": { "field": "domain", "order": { "top_hit": "desc" } }, "aggs": { "top_tags_hits": { "top_hits": {} }, "top_hit" : { "max": { "script": { "lang": "painless", "inline": "_score" } } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At the moment the
+										Element:code
+											max
+											(or
+										Element:code
+											min
+											) aggregator is needed to make sure the buckets from the
+										Element:code
+											terms
+											aggregator are ordered according to the score of the most relevant webpage per domain. Unfortunately the
+										Element:code
+											top_hits
+											aggregator can’t be used in the
+										Element:code
+											order
+											option of the
+										Element:code
+											terms
+											aggregator yet.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											top_hits support in a nested or reverse_nested aggregator
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the
+										Element:code
+											top_hits
+											aggregator is wrapped in a
+										Element:code
+											nested
+											or
+										Element:code
+											reverse_nested
+											aggregator then nested hits are being returned. Nested hits are in a sense hidden mini documents that are part of regular document where in the mapping a nested field type has been configured. The
+										Element:code
+											top_hits
+											aggregator has the ability to un-hide these documents if it is wrapped in a
+										Element:code
+											nested
+											or
+										Element:code
+											reverse_nested
+											aggregator. Read more about nested in the
+										Element:a
+											nested type mapping
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If nested type has been configured a single document is actually indexed as multiple Lucene documents and they share the same id. In order to determine the identity of a nested hit there is more needed than just the id, so that is why nested hits also include their nested identity. The nested identity is kept under the
+										Element:code
+											_nested
+											field in the search hit and includes the array field and the offset in the array field the nested hit belongs to. The offset is zero based.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Top hits response snippet with a nested hit, which resides in the third slot of array field
+										Element:code
+											nested_field1
+											in document with id
+										Element:code
+											1
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											... "hits": { "total": 25365, "max_score": 1, "hits": [ { "_index": "a", "_type": "b", "_id": "1", "_score": 1, "_nested" : { "field" : "nested_field1", "offset" : 2 } "_source": ... }, ... ] } ...
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If
+										Element:code
+											_source
+											is requested then just the part of the source of the nested object is returned, not the entire source of the document. Also stored fields on the
+										Element:span
+											inner object level are accessible via
+										Element:strong
+											nested
+										Element:code
+											top_hits
+											aggregator residing in a
+										Element:code
+											nested
+											or
+										Element:code
+											reverse_nested
+											aggregator.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Only nested hits will have a
+										Element:code
+											_nested
+											field in the hit, non nested (regular) hits will not have a
+										Element:code
+											_nested
+											field.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The information in
+										Element:code
+											_nested
+											can also be used to parse the original source somewhere else if
+										Element:code
+											_source
+											isn’t enabled.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If there are multiple levels of nested object types defined in mappings then the
+										Element:code
+											_nested
+											information can also be hierarchical in order to express the identity of nested hits that are two layers deep or more.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the example below a nested hit resides in the first slot of the field
+										Element:code
+											nested_grand_child_field
+											which then resides in the second slow of the
+										Element:code
+											nested_child_field
+											field:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											... "hits": { "total": 2565, "max_score": 1, "hits": [ { "_index": "a", "_type": "b", "_id": "1", "_score": 1, "_nested" : { "field" : "nested_child_field", "offset" : 1, "_nested" : { "field" : "nested_grand_child_field", "offset" : 0 } } "_source": ... }, ... ] } ...
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Sum Aggregation
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Value Count Aggregation »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

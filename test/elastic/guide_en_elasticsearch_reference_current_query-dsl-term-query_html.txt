@@ -1,0 +1,607 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Term Query
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								term
+								query finds documents that contain the
+							Element:span
+								term specified in the inverted index. For instance:
+							Element:strong
+								exact
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _search { "query": { "term" : { "user" : "Kimchy" }
+							Element:a
+							Element:span
+								} }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								Finds documents which contain the exact term
+							Element:code
+								Kimchy
+								in the inverted index of the
+							Element:code
+								user
+								field.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A
+							Element:code
+								boost
+								parameter can be specified to give this
+							Element:code
+								term
+								query a higher relevance score than another query, for instance:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET _search { "query": { "bool": { "should": [ { "term": { "status": { "value": "urgent", "boost": 2.0
+							Element:a
+							Element:span
+								} } }, { "term": { "status": "normal"
+							Element:img
+							Element:a
+							Element:span
+								} } ] } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								urgent
+								query clause has a boost of
+							Element:code
+								2.0
+								, meaning it is twice as important as the query clause for
+							Element:code
+								normal
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								normal
+								clause has the default neutral boost of
+							Element:code
+								1.0
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Why doesn’t the
+							Element:code
+								term
+								query match my document?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								String fields can be of type
+							Element:code
+								text
+								(treated as full text, like the body of an email), or
+							Element:code
+								keyword
+								(treated as exact values, like an email address or a zip code). Exact values (like numbers, dates, and keywords) have the exact value specified in the field added to the inverted index in order to make them searchable.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								However,
+							Element:code
+								text
+								fields are
+							Element:code
+								analyzed
+								. This means that their values are first passed through an
+							Element:a
+								analyzer
+								to produce a list of terms, which are then added to the inverted index.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are many ways to analyze text: the default
+							Element:a
+								drops most punctuation, breaks up text into individual words, and lower cases them. For instance, the
+							Element:code
+								standard
+								analyzer
+							Element:code
+								standard
+								analyzer would turn the string “Quick Brown Fox!” into the terms [
+							Element:code
+								quick
+								,
+							Element:code
+								brown
+								,
+							Element:code
+								fox
+								].
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This analysis process makes it possible to search for individual words within a big block of full text.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								term
+								query looks for the
+							Element:span
+								term in the field’s inverted index — it doesn’t know anything about the field’s analyzer. This makes it useful for looking up values in keyword fields, or in numeric or date fields. When querying full text fields, use the
+							Element:strong
+								exact
+							Element:a
+								instead, which understands how the field has been analyzed.
+							Element:code
+								match
+								query
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To demonstrate, try out the example below. First, create an index, specifying the field mappings, and index a document:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT my_index { "mappings": { "my_type": { "properties": { "full_text": { "type": "text"
+							Element:a
+							Element:span
+								}, "exact_value": { "type": "keyword"
+							Element:img
+							Element:a
+							Element:span
+								} } } } } PUT my_index/my_type/1 { "full_text": "Quick Foxes!",
+							Element:img
+							Element:a
+							Element:span
+								"exact_value": "Quick Foxes!"
+							Element:img
+							Element:a
+							Element:span
+								}
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								full_text
+								field is of type
+							Element:code
+								text
+								and will be analyzed.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								exact_value
+								field is of type
+							Element:code
+								keyword
+								and will NOT be analyzed.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								full_text
+								inverted index will contain the terms: [
+							Element:code
+								quick
+								,
+							Element:code
+								foxes
+								].
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								exact_value
+								inverted index will contain the exact term: [
+							Element:code
+								Quick Foxes!
+								].
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now, compare the results for the
+							Element:code
+								term
+								query and the
+							Element:code
+								match
+								query:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET my_index/my_type/_search { "query": { "term": { "exact_value": "Quick Foxes!"
+							Element:a
+							Element:span
+								} } } GET my_index/my_type/_search { "query": { "term": { "full_text": "Quick Foxes!"
+							Element:img
+							Element:a
+							Element:span
+								} } } GET my_index/my_type/_search { "query": { "term": { "full_text": "foxes"
+							Element:img
+							Element:a
+							Element:span
+								} } } GET my_index/my_type/_search { "query": { "match": { "full_text": "Quick Foxes!"
+							Element:img
+							Element:a
+							Element:span
+								} } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								This query matches because the
+							Element:code
+								exact_value
+								field contains the exact term
+							Element:code
+								Quick Foxes!
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								This query does not match, because the
+							Element:code
+								full_text
+								field only contains the terms
+							Element:code
+								quick
+								and
+							Element:code
+								foxes
+								. It does not contain the exact term
+							Element:code
+								Quick Foxes!
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								A
+							Element:code
+								term
+								query for the term
+							Element:code
+								foxes
+								matches the
+							Element:code
+								full_text
+								field.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								This
+							Element:code
+								match
+								query on the
+							Element:code
+								full_text
+								field first analyzes the query string, then looks for documents containing
+							Element:code
+								quick
+								or
+							Element:code
+								foxes
+								or both.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								« Term level queries
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								Terms Query »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

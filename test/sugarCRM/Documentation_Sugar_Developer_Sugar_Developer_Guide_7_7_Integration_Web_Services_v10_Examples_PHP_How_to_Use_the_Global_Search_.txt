@@ -1,0 +1,335 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					How to Use the Global Search
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A PHP example demonstrating how to globally search for records using the REST v10
+							Element:code
+								/search GET
+								endpoint.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Authenticating
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, you will need to authenticate to the Sugar API. An example is shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php $instance_url = "http://{site_url}/rest/v10"; $username = "admin"; $password = "password"; //Login - POST /oauth2/token $auth_url = $instance_url . "/oauth2/token"; $oauth2_token_arguments = array( "grant_type" => "password", //client id - default is sugar. //It is recommended to create your own in Admin > OAuth Keys "client_id" => "sugar", "client_secret" => "", "username" => $username, "password" => $password, //platform type - default is base. //It is recommend to change the platform to a custom name such as "custom_api" to avoid authentication conflicts. "platform" => "custom_api" ); $auth_request = curl_init($auth_url); curl_setopt($auth_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); curl_setopt($auth_request, CURLOPT_HEADER, false); curl_setopt($auth_request, CURLOPT_SSL_VERIFYPEER, 0); curl_setopt($auth_request, CURLOPT_RETURNTRANSFER, 1); curl_setopt($auth_request, CURLOPT_FOLLOWLOCATION, 0); curl_setopt($auth_request, CURLOPT_HTTPHEADER, array( "Content-Type: application/json" )); //convert arguments to json $json_arguments = json_encode($oauth2_token_arguments); curl_setopt($auth_request, CURLOPT_POSTFIELDS, $json_arguments); //execute request $oauth2_token_response = curl_exec($auth_request); //decode oauth2 response to get token $oauth2_token_response_obj = json_decode($oauth2_token_response); $oauth_token = $oauth2_token_response_obj->access_token;
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								More information on authenticating can be found in the
+							Element:a
+								How to Authenticate and Log Out
+								example and
+							Element:a
+								/oauth2/logout
+								endpoint documentation.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Searching Records
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								So, we will need to identify the records we want to see using the
+							Element:code
+								/search
+								endpoint. In this case, we are going to search for all records that have the email address of 'jsmith@sugar.com'. In this example, there are 3 records, an Account, a Contact and a Lead.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								//Set up the search parameters - GET /search $search_url = $instance_url . "/search"; $search_arguments = array( "q" => 'jsmith@sugar.com', "max_num" => 3, "offset" => 0, "fields" => "", "order_by" => "", "favorites" => false, "my_items" => false, ); //As this request is a GET we will add the arguments to the URL $search_url .= "?" . http_build_query($search_arguments); $search_request = curl_init($search_url); curl_setopt($search_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); curl_setopt($search_request, CURLOPT_HEADER, false); curl_setopt($search_request, CURLOPT_SSL_VERIFYPEER, 0); curl_setopt($search_request, CURLOPT_RETURNTRANSFER, 1); curl_setopt($search_request, CURLOPT_FOLLOWLOCATION, 0); curl_setopt($search_request, CURLOPT_HTTPHEADER, array( "Content-Type: application/json", "oauth-token: {$oauth_token}" )); //execute request $search_response = curl_exec($search_request); //decode json $search_response_obj = json_decode($search_response);
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								More information on the search API can be found in the
+							Element:a
+								/search
+								documentation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											http://{site_url}/rest/v10/search?q=jsmith%40sugar.com&max_num=3&offset=0&fields=&order_by=&favorites=0&my_items=0
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Response
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The data received from the server is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "next_offset":-1, "records":[ { "my_favorite":false, "following":false, "id":"f31b2f00-468c-3d35-1e88-56fedbd3921d", "name":"Kaycee Gibney", "date_entered":"2016-04-01T20:34:00+00:00", "date_modified":"2016-04-06T15:16:24+00:00", "modified_user_id":"1", "modified_by_name":"Administrator", "created_by":"1", "created_by_name":"Administrator", "doc_owner":"", "user_favorites":"", "description":"", "deleted":false, "assigned_user_id":"seed_jim_id", "assigned_user_name":"Jim Brennan", "team_count":"", "team_name":[ { "id":"East", "name":"East", "name_2":"", "primary":true } ], "email":[ { "email_address":"jsmith@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":true, "reply_to_address":false }, { "email_address":"sales.kid.dev@example.info", "invalid_email":false, "opt_out":true, "primary_address":false, "reply_to_address":false } ], "email1":"jsmith@sugar.com", "email2":"sales.kid.dev@example.info", "invalid_email":false, "email_opt_out":false, "email_addresses_non_primary":"", "salutation":"", "first_name":"Kaycee", "last_name":"Gibney", "full_name":"Kaycee Gibney", "title":"Mgr Operations", "facebook":"", "twitter":"", "googleplus":"", "department":"", "do_not_call":false, "phone_home":"(599) 165-2396", "phone_mobile":"(215) 591-9574", "phone_work":"(771) 945-3648", "phone_other":"", "phone_fax":"", "primary_address_street":"321 University Ave.", "primary_address_street_2":"", "primary_address_street_3":"", "primary_address_city":"Santa Monica", "primary_address_state":"NY", "primary_address_postalcode":"96154", "primary_address_country":"USA", "alt_address_street":"", "alt_address_street_2":"", "alt_address_street_3":"", "alt_address_city":"", "alt_address_state":"", "alt_address_postalcode":"", "alt_address_country":"", "assistant":"", "assistant_phone":"", "picture":"", "email_and_name1":"", "lead_source":"Existing Customer", "account_name":"Tracker Com LP", "account_id":"72ad6f00-e345-1cab-b370-56fedbd23deb", "dnb_principal_id":"", "opportunity_role_fields":"", "opportunity_role_id":"", "opportunity_role":"", "reports_to_id":"", "report_to_name":"", "birthdate":"", "portal_name":"KayceeGibney33", "portal_active":true, "portal_password":true, "portal_password1":null, "portal_app":"", "preferred_language":"en_us", "campaign_id":"", "campaign_name":"", "c_accept_status_fields":"", "m_accept_status_fields":"", "accept_status_id":"", "accept_status_name":"", "accept_status_calls":"", "accept_status_meetings":"", "sync_contact":false, "mkto_sync":false, "mkto_id":null, "mkto_lead_score":null, "_acl":{ "fields":{ } }, "_module":"Contacts", "_search":{ "score":0.70710677, "highlighted":{ "email1":{ "text":"\u003Cstrong\u003Ejsmith@sugar.com\u003C\/strong\u003E", "module":"Contacts", "label":"LBL_EMAIL_ADDRESS" } } } }, { "my_favorite":false, "following":false, "id":"e8c641ca-1b8c-74c1-d08d-56fedbdd3187", "name":"MTM Investment Bank F S B", "date_entered":"2016-04-01T20:34:00+00:00", "date_modified":"2016-04-06T15:16:52+00:00", "modified_user_id":"1", "modified_by_name":"Administrator", "created_by":"1", "created_by_name":"Administrator", "doc_owner":"", "user_favorites":"", "description":"", "deleted":false, "assigned_user_id":"seed_will_id", "assigned_user_name":"Will Westin", "team_count":"", "team_name":[ { "id":"East", "name":"East", "name_2":"", "primary":true }, { "id":"West", "name":"West", "name_2":"", "primary":false } ], "email":[ { "email_address":"jsmith@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":true, "reply_to_address":false }, { "email_address":"the60@example.us", "invalid_email":false, "opt_out":false, "primary_address":false, "reply_to_address":false } ], "email1":"jsmith@sugar.com", "email2":"the60@example.us", "invalid_email":false, "email_opt_out":false, "email_addresses_non_primary":"", "facebook":"", "twitter":"", "googleplus":"", "account_type":"Customer", "industry":"a", "annual_revenue":"", "phone_fax":"", "billing_address_street":"67321 West Siam St.", "billing_address_street_2":"", "billing_address_street_3":"", "billing_address_street_4":"", "billing_address_city":"Alabama", "billing_address_state":"NY", "billing_address_postalcode":"52272", "billing_address_country":"USA", "rating":"", "phone_office":"(012) 704-8075", "phone_alternate":"", "website":"www.salesqa.it", "ownership":"", "employees":"", "ticker_symbol":"", "shipping_address_street":"67321 West Siam St.", "shipping_address_street_2":"", "shipping_address_street_3":"", "shipping_address_street_4":"", "shipping_address_city":"Alabama", "shipping_address_state":"NY", "shipping_address_postalcode":"52272", "shipping_address_country":"USA", "parent_id":"", "sic_code":"", "duns_num":"", "parent_name":"", "campaign_id":"", "campaign_name":"", "_acl":{ "fields":{ } }, "_module":"Accounts", "_search":{ "score":0.70710677, "highlighted":{ "email1":{ "text":"\u003Cstrong\u003Ejsmith@sugar.com\u003C\/strong\u003E", "module":"Accounts", "label":"LBL_EMAIL_ADDRESS" } } } }, { "my_favorite":false, "following":false, "id":"f3951f4d-2d17-7939-c5ec-56fedbb9e92f", "name":"Talia Knupp", "date_entered":"2016-04-01T20:34:00+00:00", "date_modified":"2016-04-06T15:33:24+00:00", "modified_user_id":"1", "modified_by_name":"Administrator", "created_by":"1", "created_by_name":"Administrator", "doc_owner":"", "user_favorites":"", "description":"", "deleted":false, "assigned_user_id":"seed_will_id", "assigned_user_name":"Will Westin", "team_count":"", "team_name":[ { "id":"East", "name":"East", "name_2":"", "primary":true }, { "id":"West", "name":"West", "name_2":"", "primary":false } ], "email":[ { "email_address":"jsmith@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":true, "reply_to_address":false }, { "email_address":"cjsmith@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":false, "reply_to_address":false } ], "email1":"jsmith@sugar.com", "email2":"cjsmith@sugar.com", "invalid_email":false, "email_opt_out":false, "email_addresses_non_primary":"", "salutation":"", "first_name":"Talia", "last_name":"Knupp", "full_name":"Talia Knupp", "title":"Senior Product Manager", "facebook":"", "twitter":"", "googleplus":"", "department":"", "do_not_call":false, "phone_home":"(963) 741-3689", "phone_mobile":"(600) 831-9872", "phone_work":"(680) 991-2837", "phone_other":"", "phone_fax":"", "primary_address_street":"111 Silicon Valley Road", "primary_address_street_2":"", "primary_address_street_3":"", "primary_address_city":"Sunnyvale", "primary_address_state":"NY", "primary_address_postalcode":"99452", "primary_address_country":"USA", "alt_address_street":"", "alt_address_street_2":"", "alt_address_street_3":"", "alt_address_city":"", "alt_address_state":"", "alt_address_postalcode":"", "alt_address_country":"", "assistant":"", "assistant_phone":"", "picture":"", "converted":false, "refered_by":"", "lead_source":"Word of mouth", "lead_source_description":"", "status":"In Process", "status_description":"", "reports_to_id":"", "report_to_name":"", "dnb_principal_id":"", "account_name":"First National S\/B", "account_description":"", "contact_id":"", "contact_name":"", "account_id":"", "opportunity_id":"", "opportunity_name":"", "opportunity_amount":"", "campaign_id":"", "campaign_name":"", "c_accept_status_fields":"", "m_accept_status_fields":"", "accept_status_id":"", "accept_status_name":"", "accept_status_calls":"", "accept_status_meetings":"", "webtolead_email1":[ { "email_address":"jsmith@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":true, "reply_to_address":false }, { "email_address":"cjsmith@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":false, "reply_to_address":false } ], "webtolead_email2":[ { "email_address":"jsmith@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":true, "reply_to_address":false }, { "email_address":"cjsmith@sugar.com", "invalid_email":false, "opt_out":false, "primary_address":false, "reply_to_address":false } ], "webtolead_email_opt_out":"", "webtolead_invalid_email":"", "birthdate":"", "portal_name":"", "portal_app":"", "website":"", "preferred_language":"", "mkto_sync":false, "mkto_id":null, "mkto_lead_score":null, "fruits_c":"Apples", "_acl":{ "fields":{ } }, "_module":"Leads", "_search":{ "score":0.70710677, "highlighted":{ "email1":{ "text":"\u003Cstrong\u003Ejsmith@sugar.com\u003C\/strong\u003E", "module":"Leads", "label":"LBL_EMAIL_ADDRESS" } } } } ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are 3 records shown above, the
+										Element:code
+											_module
+											field tells you if the record is from Accounts, Contacts or Leads. The
+										Element:code
+											_search
+											field is an array that tells you where in the record it found the search string. It gives you back a highlighted string that you can use for display.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Downloads
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can download the full API example
+							Element:a
+								here
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 04/15/2016 11:31am
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

@@ -1,0 +1,833 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Analytics for Clojure
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The clojure library lets you record analytics data from your clojure code. The requests hit our servers, and then we route your data to any analytics service you enable on your integrations page.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The library is open-source and was contributed by the very awesome
+				Element:a
+					CircleCI
+					, thanks! You can
+				Element:a
+					check it out on Github
+					. The clojure library is a wrapper around our
+				Element:a
+					Java library
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The clojure library (like our other server side libraries) is built for high-performance, so you can use them in your web server controller code. This library uses an internal queue to make calls non-blocking and fast. It also batches messages and flushes asynchronously to our servers.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re using Maven add this repository definition to your
+							Element:code
+								pom.xml
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<repository> <id>clojars.org</id> <url>http://clojars.org/repo</url> </repository>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Then, if you’re using Leiningen
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								[circleci/analytics-clj "0.4.0"]
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								or with Maven
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<dependency> <groupId>circleci</groupId> <artifactId>analytics-clj</artifactId> <version>0.4.0</version> </dependency>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You only need to initialize once at the start of your program. You can then keep using the
+							Element:code
+								Analytics
+								singleton anywhere in your code.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								(use '[circleci.analytics-clj.core]) (def analytics (initialize "<writeKey>"))
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The default initialization settings are production-ready.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								identify
+								lets you tie a user to their actions and record traits about them. It includes a unique User ID and any optional traits you know about them.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We recommend calling
+							Element:code
+								identify
+								a single time when the user’s account is first created, and only identifying again later when their traits are change.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								identify
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								(identify analytics "user-id" {:email "bob@acme.com"})
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This call is identifying the user by his unique User ID (the one you know him by in your database) and labeling him with an
+							Element:code
+								email
+								trait.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user-id
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								Map, optional
+							Element:td
+								A map of traits you know about the user. Things like:
+							Element:code
+								email
+								,
+							Element:code
+								name
+								or
+							Element:code
+								friends
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								identify method payload
+								in our
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								lets you record the actions your users perform. Every action triggers what we call an “event”, which can also have associated properties.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to track events that are indicators of success for your site, like
+							Element:strong
+								Signed Up
+								,
+							Element:strong
+								Item Purchased
+								or
+							Element:strong
+								Article Bookmarked
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, we recommend tracking just a few important events. You can always add more later!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								track
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								(track analytics "user-id" "Signed Up" {:plan "trial"})
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								(track analytics (:id user) "signup" {:company "Acme Inc."} {:context {:language "en-us"} :integrations {"AdRoll" false} :integration-options {"Amplitude" {:session-id (:id session)}}})
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example
+							Element:code
+								track
+								call tells us that your user just triggered the
+							Element:strong
+								Signed Up
+								event on a “trial” plan.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								event properties can be anything you want to record. In this case, plan type.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								track
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user-id
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								event
+							Element:em
+								String
+							Element:td
+								The name of the event you’re tracking. We recommend human-readable names like
+							Element:strong
+								Song Played
+								or
+							Element:strong
+								Status Updated
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								Map, optional
+							Element:td
+								A map of properties for the event. If the event was
+							Element:strong
+								Added to Cart
+								, it might have properties like
+							Element:code
+								price
+								or
+							Element:code
+								product
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on
+							Element:strong
+								best practices in event naming
+								as well as the
+							Element:strong
+								in our
+							Element:code
+								track
+								method payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Group
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								group
+								lets you associate an
+							Element:a
+								identified user
+								user with a group. A group could be a company, organization, account, project or team! It also lets you record custom traits about the group, like industry or number of employees.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This is useful for tools like
+							Element:a
+								Intercom
+								,
+							Element:a
+								Preact
+								and
+							Element:a
+								Totango
+								, as it ties the user to a
+							Element:strong
+								group
+								of other users.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								(group analytics "1234" "group-5678" {:name "Segment"})
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								group
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								groupId
+							Element:em
+								String
+							Element:td
+								The ID for this group in your database.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								Traits, optional
+							Element:td
+								A dictionary of traits you know about the group. Things like:
+							Element:code
+								name
+								or
+							Element:code
+								website
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find more details about
+							Element:code
+								group
+								, including the
+							Element:strong
+								, in our
+							Element:code
+								group
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Screen
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								method lets you record whenever a user sees a screen of your mobile app, along with optional extra information about the page being viewed.
+							Element:code
+								screen
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to record a screen event an event whenever the user opens a screen in your app.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Not all services support screen, so when it’s not supported explicitly, the screen method tracks as an event with the same parameters.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								(screen analytics "1234" "Login" {:path "/users/login"})
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								screen
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								name
+							Element:em
+								String
+							Element:td
+								The webpage name you’re tracking. We recommend human-readable names like
+							Element:strong
+								Login
+								or
+							Element:strong
+								Register
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								Properties, optional
+							Element:td
+								A dictionary of properties for the webpage visit. If the event was
+							Element:strong
+								Login
+								, it might have properties like
+							Element:code
+								path
+								or
+							Element:code
+								title
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Alias
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								alias
+								is how you associate one identity with another. This is an advanced method, but it is required to manage user identities successfully in
+							Element:em
+								some
+								of our integrations.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In
+							Element:a
+								Mixpanel
+								it’s used to associate an anonymous user with an identified user once they sign up. For
+							Element:a
+								KISSmetrics
+								, if your user switches IDs, you can use ‘alias’ to rename the ‘userId’.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								alias
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								(alias analytics "user-id" "real-id")
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more details about
+							Element:code
+								alias
+								, including the
+							Element:strong
+								, check out our
+							Element:code
+								alias
+								call payload
+							Element:a
+								Spec
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Builder
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If the above methods don’t meet your needs, you can use the builder types directly.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								(enqueue analytics (doto (YourMessageType/builder) (.userId "user-id") (.properties {"company" "Acme Inc."})))
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Logging
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can set a custom logger on the client using:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								(defn logger [] (reify com.segment.analytics.Log (print [this level format args] (println (str (java.util.Date.) "\t" level "\t" args))) (print [this level error format args] (println error)))) (def analytics (initialize "<writeKey>" {:log (logger)}))
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re having trouble we have a few tips that help common problems.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my debugger
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check that you’ve followed all the steps in the
+										Element:a
+											Quickstart
+											.
+										Element:li
+										Element:p
+											Make sure that you’re calling one of our API methods once the library is successfully installed—
+										Element:a
+											,
+										Element:code
+											identify
+										Element:a
+											, etc.
+										Element:code
+											track
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my end tools
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check your credentials for that integration.
+										Element:li
+										Element:p
+											Make sure that the integration you are troubleshooting can accept server-side API calls. Compatibility is shown on the
+										Element:a
+											integration docs
+											pages and on the sheets on your Segment source Integrations page.
+										Element:li
+										Element:p
+											Check out the
+										Element:a
+											integration’s documentation
+											to see if there are other requirements for using the method and integration you’re trying to get working.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

@@ -1,0 +1,242 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Relating Quotes and Products
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A PHP example demonstrating how to create and relate Products to Quotes using
+							Element:a
+								NuSOAP
+								and the v4_1 SOAP API.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Example
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php $url = "http://{site_url}/service/v4_1/soap.php?wsdl"; $username = "admin"; $password = "password"; //require NuSOAP require_once("./nusoap/lib/nusoap.php"); //retrieve WSDL $client = new nusoap_client($url, 'wsdl'); //display errors $err = $client->getError(); if ($err) { echo '<h2>Constructor error</h2><pre>' . $err . '</pre>'; echo '<h2>Debug</h2><pre>' . htmlspecialchars($client->getDebug(), ENT_QUOTES) . '</pre>'; exit(); } //login ---------------------------------------------------- $login_parameters = array( 'user_auth' => array( 'user_name' => $username, 'password' => md5($password), 'version' => '1' ), 'application_name' => 'SoapTest', 'name_value_list' => array( ), ); $login_result = $client->call("login", $login_parameters); /* echo "<pre>"; print_r($login_result); echo "</pre>"; */ //get session id $session_id = $login_result['id']; //create quote ------------------------------------------------- $createQuoteParams = array( 'session' => $session_id, 'module_name' => 'Quotes', 'name_value_list' => array( array( 'name' => 'name', 'value' => 'Widget Quote' ), array( 'name' => 'team_count', 'value' => '' ), array( 'name' => 'team_name', 'value' => '' ), array( 'name' => 'date_quote_expected_closed', 'value' => date('Y-m-d', mktime(0, 0, 0, date('m') , date('d')+7, date('Y'))) ), array( 'name' => 'quote_stage', 'value' => 'Negotiation' ), array( 'name' => 'quote_num', 'value' => '' ), array( 'name' => 'quote_type', 'value' => 'Quotes' ), array( 'name' => 'subtotal', 'value' => '1230.23' ), array( 'name' => 'subtotal_usdollar', 'value' => '1230.23' ), ), ); $createQuoteResult = $client->call('set_entry', $createQuoteParams); echo "Create Quote Result<br />"; echo "<pre>"; print_r($createQuoteResult); echo "</pre>"; //create product ------------------------------------------------- $createProductParams = array( 'session' => $session_id, 'module_name' => 'Products', 'name_value_list' => array( array( 'name' => 'name', 'value' => 'Widget' ), array( 'name' => 'quote_id', 'value' => $createQuoteResult['id'] ), array( 'name' => 'status', 'value' => 'Quotes' ) ) ); $createProductResult = $client->call('set_entry', $createProductParams); echo "Create Product Result<br />"; echo "<pre>"; print_r($createProductResult); echo "</pre>"; //create product-bundle ------------------------------------------------- $createProductBundleParams = array( "session" => $session_id, "module_name" => "ProductBundles", "name_value_list" => array( array( 'name' => 'name', 'value' => 'Order'), array( 'name' => 'bundle_stage', 'value' => 'Draft' ), array( 'name' => 'tax', 'value' => '0.00' ), array( 'name' => 'total', 'value' => '0.00' ), array( 'name' => 'subtotal', 'value' => '0.00' ), array( 'name' => 'shippint', 'value' => '0.00' ), array( 'name' => 'currency_id', 'value' => '-99' ), ) ); $createProductBundleResult = $client->call('set_entry', $createProductBundleParams); echo "Create ProductBundles Result<br />"; echo "<pre>"; print_r($createProductBundleResult); echo "</pre>"; //relate product to product-bundle --------------------------------------- $relationshipProductBundleProductsParams = array( 'session' => $session_id, 'module_name' => 'ProductBundles', 'module_id' => $createProductBundleResult['id'], 'link_field_name' => 'products', 'related_ids' => array( $createProductResult['id'] ), 'name_value_list' => array(), 'delete' => 0 ); // set the product bundles products relationship $relationshipProductBundleProductResult = $client->call('set_relationship', $relationshipProductBundleProductsParams); echo "Create ProductBundleProduct Relationship Result<br />"; echo "<pre>"; print_r($relationshipProductBundleProductResult); echo "</pre>"; //relate product-bundle to quote ---------------------------------------- $relationshipProductBundleQuoteParams = array( 'session' => $session_id, 'module_name' => 'Quotes', 'module_id' => $createQuoteResult['id'], 'link_field_name' => 'product_bundles', 'related_ids' => array( $createProductBundleResult['id'] ), 'name_value_list' => array(), 'delete' => 0 ); // set the product bundles quotes relationship $relationshipProductBundleQuoteResult = $client->call('set_relationship', $relationshipProductBundleQuoteParams); echo "Create ProductBundleQuote Relationship Result<br />"; echo "<pre>"; print_r($relationshipProductBundleQuoteResult); echo "</pre>";
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Result
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								//Create Quote Result Array ( [id] => ad88195a-9d36-20b6-beb1-517ea2b9278d ) //Create Product Result Array ( [id] => 6f920cba-0fed-7172-9dc0-517ea2adb1d1 ) //Create ProductBundles Result Array ( [id] => 4f397baa-5522-fa0e-2bcf-517ea24a9546 ) //Create ProductBundleProduct Relationship Result Array ( [created] => 1 [failed] => 0 [deleted] => 0 ) //Create ProductBundleQuote Relationship Result Array ( [created] => 1 [failed] => 0 [deleted] => 0 )
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 06/30/2016 03:47pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

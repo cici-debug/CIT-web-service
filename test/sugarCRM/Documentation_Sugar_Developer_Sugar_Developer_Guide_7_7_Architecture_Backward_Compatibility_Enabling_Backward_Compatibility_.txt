@@ -1,0 +1,418 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Enabling Backward Compatibility
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								How to enable backward compatibility for a module.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Enabling Backward Compatibility
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Backward Compatibility Mode is not a permanent solution for modules with legacy customizations. If you should need to temporarily get a module working due to legacy customizations, you can follow the steps below to enable the legacy MVC framework. Please note that switching stock Sugar modules from the Sidecar framework to backward compatibility mode is not supported and may result in unexpected behaviors in the application.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Enabling BWC
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To enable backward compatibility, you must first create a file in
+										Element:code
+											./custom/Extension/application/Ext/Include/
+											for the module. If the module is custom, there will already be an existing file in this folder pertaining to the module that you can edit.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/application/Ext/Include/<file>.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $bwcModules[] = '<module key>';
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the file is in place, you will need to navigate to Admin > Repair > Quick Repair and Rebuild. The Quick Repair can wait until you have completed the following sections for this customization.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Updating the MegaMenu Module Link
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once you have enabled backward compatibility for a module, you will then need to manually update the module's link in the
+													Element:a
+														MegaMenu
+														. This will control the navigation when a user clicks the actual module name on the MegaMenu.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/modules/<module>/clients/base/layouts/records/records.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $viewdefs['<module key>']['base']['layout']['records'] = array( 'name' => 'bwc', 'type' => 'bwc', 'components' => array( array( 'view' => 'bwc', ), ), );
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once the file is in place, you will need to navigate to Admin > Repair > Quick Repair and Rebuild. The Quick Repair can wait until you have completed the following section for this customization.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Updating the MegaMenu Sub-Navigation Links
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once you have updated the MegaMenu module link, you will then need to manually update the module's MegaMenu
+													Element:a
+														action links
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The module's deployed sub-navigation links for a module will be similar to the file shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./modules/<module>/clients/base/menus/header/header.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $moduleName = '<module key>'; $viewdefs[$moduleName]['base']['menu']['header'] = array( array( 'route' => "#$moduleName/create", 'label' => 'LNK_NEW_RECORD', 'acl_action' => 'create', 'acl_module' => $moduleName, 'icon' => 'icon-plus', ), array( 'route' => "#$moduleName", 'label' => 'LNK_LIST', 'acl_action' => 'list', 'acl_module' => $moduleName, 'icon' => 'icon-reorder', ), array( 'route' => "#bwc/index.php?module=Import&action=Step1&import_module=$moduleName&return_module=$moduleName&return_action=index", 'label' => 'LBL_IMPORT', 'acl_action' => 'import', 'acl_module' => $moduleName, 'icon' => '', ), );
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This file should be duplicated to the custom directory and edited to adjust the URLs to the BWC format. The example below demonstrates the changes needed to the duplicated file.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/modules/<module>/clients/base/menus/header/header.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $moduleName = '<module key>'; $viewdefs[$moduleName]['base']['menu']['header'] = array( array( 'route' => "#bwc/index.php?module=$moduleName&action=EditView", 'label' => 'LNK_NEW_RECORD', 'acl_action' => 'create', 'acl_module' => $moduleName, 'icon' => 'icon-plus', ), array( 'route' => "#bwc/index.php?module=$moduleName&action=ListView", 'label' => 'LNK_LIST', 'acl_action' => 'list', 'acl_module' => $moduleName, 'icon' => 'icon-reorder', ), array( 'route' => "#bwc/index.php?module=Import&action=Step1&import_module=$moduleName&return_module=$moduleName&return_action=index", 'label' => 'LBL_IMPORT', 'acl_action' => 'import', 'acl_module' => $moduleName, 'icon' => '', ), );
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once the file is in place, you will need to navigate to Admin > Repair > Quick Repair and Rebuild.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Verifying BWC Is Enabled
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To verify that backward compatibility is enabled, you can inspect
+							Element:code
+								App.metadata.get().modules
+								after running a Quick Repair and Rebuild in your browser's console window:
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Using Developer Tools in Google Chrome
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Open Developer Tools
+													Element:ul
+													Element:li
+														This can be done in the following ways:
+													Element:ol
+													Element:li
+													Element:p
+														Command + Option + i
+													Element:li
+													Element:p
+														View > Developer > Developer Tools
+													Element:li
+													Element:p
+														Right-click on the web page and selecting "Inspect Element"
+													Element:li
+													Element:p
+														Select the "Console" tab
+													Element:li
+													Element:p
+														Run the following command, replacing <module key> and verify that it returns true:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														App.metadata.get().modules.<module key>.isBwcEnabled
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Using Firebug in Google Chrome or Mozilla Firefox
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Open Firebug
+													Element:li
+													Element:p
+														Select the "Console" tab
+													Element:li
+													Element:p
+														Run the following command, replacing <module key>, and verify that it returns true:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														App.metadata.get().modules.<module key>.isBwcEnabled
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Last modified: 12/07/2016 09:39am
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

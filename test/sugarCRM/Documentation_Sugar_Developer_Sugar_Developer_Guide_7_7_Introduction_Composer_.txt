@@ -1,0 +1,1107 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Composer
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As of Sugar® 7.5, the Composer dependency management integration has been made publicly available for Sugar developers. Because Composer is the de facto standard for managing PHP dependencies, this enhancement to the Sugar platform will make customizations based on external libraries more intuitive.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Prerequisites
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								The Composer package must be available on your system if you wish to make any changes to the dependencies. Please refer to the
+							Element:a
+								Getting Started
+								guide on Composer's website for more details on installation and usage.
+							Element:li
+								Composer is a command-line tool, so you must have access to the command-line interface on the system.
+							Element:li
+								You must have the proper file-system permissions to alter files in the Sugar instance directory.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Note:
+								Before customizing the Composer configuration, be sure to read the documentation on this page in its entirety and feel confident in your knowledge of Composer. We strongly recommend reviewing the
+							Element:a
+								Composer website's documentation
+								for more information.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Restrictions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Customizations to the
+										Element:code
+											composer.json
+											file are restricted by a certain set of rules to ensure continuity in our product.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: The list of restrictions may change at any time, opening up certain configuration keys or making them more restrictive. These changes will be communicated through release notes, and this page will be updated to reflect the latest state.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Root Element
+										Element:td
+										Element:strong
+											Restriction Level
+										Element:td
+										Element:strong
+											Explanation
+										Element:tr
+										Element:td
+											name
+										Element:td
+											Prohibited
+										Element:td
+											These elements are owned by SugarCRM and should never be modified.
+										Element:tr
+										Element:td
+											description
+										Element:td
+											Prohibited
+										Element:tr
+										Element:td
+											type
+										Element:td
+											Prohibited
+										Element:tr
+										Element:td
+											license
+										Element:td
+											Prohibited
+										Element:tr
+										Element:td
+											homepage
+										Element:td
+											Prohibited
+										Element:tr
+										Element:td
+											support
+										Element:td
+											Prohibited
+										Element:tr
+										Element:td
+											autoload
+										Element:td
+											Prohibited
+										Element:td
+											These elements are owned by SugarCRM and should not be modified. They are under consideration for relaxed restriction levels in the future.
+										Element:tr
+										Element:td
+											minimum-stability
+										Element:td
+											Prohibited
+										Element:tr
+										Element:td
+											config
+										Element:td
+											Prohibited
+										Element:tr
+										Element:td
+											require
+										Element:td
+											Restricted
+										Element:td
+										Element:ul
+										Element:li
+											You may add new packages without restriction.
+										Element:li
+											You may add new repositories as long as they do not conflict with SugarCRM-owned packages.
+										Element:li
+											You may remove packages if they are not owned by SugarCRM.
+										Element:li
+											You may remove repositories if they are not owned by SugarCRM.
+										Element:tr
+										Element:td
+											repositories
+										Element:td
+											Restricted
+										Element:tr
+										Element:td
+											elements not listed here
+										Element:td
+											No Restrictions
+										Element:td
+											All other root elements may be added/changed at the developer's discretion.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please contact Sugar Support if the current restrictions block you from using the Composer integration in Sugar. Also, review the
+										Element:a
+											Frequently Asked Questions
+											section of this page for additional information.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Finding Packages
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Packages that are available to Composer are published through
+										Element:a
+											Packagist
+											. This is the primary place to look for third-party libraries. Composer is not restricted to packages published on Packagist, so you may refer to public or private repositories that are not found on Packagist. For more information, please refer to the
+										Element:a
+											Repositories
+											section of Composer's documentation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Adding a New Package
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To add a new package, you must modify the "require" element and then update the dependencies. To learn more about Composer's "require" element, please refer to the
+										Element:a
+											Composer documentation
+											. For information on version constraints, please refer to Composer's
+										Element:a
+											package versions
+											documentation.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Follow these steps to add a new package:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Back up the files
+										Element:code
+											./composer.json
+											and
+										Element:code
+											./composer.lock
+											.
+										Element:li
+											Modify the "require" section for
+										Element:code
+											./composer.json
+											. For example, to add the
+										Element:code
+											monolog/monolog
+											package to
+										Element:code
+											./composer.json
+											, add the package name and the required version constraint in the "require" section, as shown here:
+										Element:br
+										Element:pre
+										Element:code
+											{ "name": "sugarcrm/sugarcrm", ... "require": { "monolog/monolog": "~1.11", "ruflin/elastica": "v1.2.1.0", "php": ">=5.3.0" }, "require-dev": { "phpunit/phpunit": "4.1.4" }, ... }
+										Element:li
+											Next, update the dependencies. The easiest way to do this is by running
+										Element:code
+											composer update --no-dev
+											from the directory where
+										Element:code
+											composer.json
+											lives. This is the recommended method for production systems.
+										Element:ul
+										Element:li
+											Composer will automatically determine which packages need to be fetched and updated.
+										Element:li
+											All dependencies are stored in the
+										Element:code
+											./vendor/
+											folder.
+										Element:li
+											The
+										Element:code
+											./composer.lock
+											file is updated with the installed versions and repository information.
+										Element:li
+											The
+										Element:code
+											--no-dev
+											switch skips the packages in the
+										Element:code
+											require-dev
+											section because those packages are only needed for development.
+										Element:li
+											Using the example in step 2, you will see the Monolog package has a dependency of its own: the
+										Element:code
+											psr/log
+											package. Composer automatically installed this dependency.
+										Element:li
+											Clear the cache used by Sugar's autoloader to be sure the newly installed dependencies are available. Manually remove these two files:
+										Element:ul
+										Element:li
+										Element:code
+											./cache/file_map.php
+										Element:li
+										Element:code
+											./cache/class_map.php
+										Element:p
+											Alternatively, when developing new code in Sugar, you could enable Developer Mode in Sugar. When enabled, the autoloader will automatically refresh itself.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Removing Packages
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To remove a package, follow the steps in
+										Element:a
+											Adding a New Package
+											, but this time, remove the package name and the required version constraint from the "require" section in step 2.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: Keep in mind the
+										Element:a
+											restrictions
+											on the "require" section. Only remove packages that you control. Never remove packages that are owned by SugarCRM.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Adding and Removing Repositories
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To configure additional repositories in
+										Element:code
+											./composer.json
+											,follow the same procedure to add or remove entries in the "repositories" section. Here is an example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "name" : "sugarcrm/sugarcrm", ... "repositories" : [ { "type" : "git", "url" : "https://github.com/yours/Monolog" } { "type" : "git", "url" : "https://github.com/sugarcrm/Elastica" } ] }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Autoloader
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sugar has a custom autoloader that is
+							Element:a
+								PSR-0
+								and
+							Element:a
+								PSR-4
+								compliant and integrates with Composer's mapping definitions.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Integrations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When updating the Composer configuration, Composer will generate different mappings based on the settings of every dependency:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Class map
+										Element:li
+											PSR-0 map
+										Element:li
+											PSR-4 map
+										Element:li
+											Include paths (deprecated)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											SugarCRM's autoloader uses those generated maps directly to initialize itself and to figure out how to load different classes.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Internals
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To prevent endless file stats, Sugar's autoloader maintains a full list of all files at its disposal. This list is only generated once and is maintained in
+										Element:code
+											./cache/file_map.php
+											. Most of the Sugar codebase uses the autoloader to determine whether a file is available rather than performing expensive
+										Element:code
+											file_exists
+											calls.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A second file, stored in
+										Element:code
+											./cache/class_map.php
+											, maintains a flat list of class-name-to-file mappings. When you make any changes to the file system, clear both files before testing new code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Optimization
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When updating dependencies through Composer, it is advised that the production system uses the optimize flag:
+										Element:code
+											composer update --optimize-autoloader --no-dev
+											". By doing so, Composer will scan all files in the packages it manages and create a full list of PSR-0 and PSR-4 class name to file mappings, instead of performing this lookup on the fly by the autoloader itself on runtime.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Developer Mode
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When Developer Mode is enabled, the autoloader will bypass any persistent setting from both
+										Element:code
+											file_map
+											or
+										Element:code
+											class_map
+											. Adding new files or updating dependencies will be directly picked up by the autoloader without performing a Quick Repair and Rebuild.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Handling Upgrades
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you take control of the Composer configuration, there may be complications during upgrades. The upgrade logic will determine whether or not the Composer configuration has any customizations and whether a custom config is compatible for the upgrade.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When a custom configuration is not compatible (missing or conflicting dependencies), the upgrade process will generate a proposal. The administrator who is responsible for reviewing the proposal will need to make the necessary changes to the Composer configuration before running the upgrade again.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Upgrade Failure Notification
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When an incompatible Composer configuration is detected, a notification will appear depending on which type of upgrader you are using.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Web Upgrader
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+													Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														CLI Upgrader
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														*************** Step "healthcheck" OK - 0 seconds
+													Element:br
+														*************** Step "unpack" OK - 8 seconds
+													Element:br
+														ERROR: A custom composer configuration has been detected which is incompatible with the upgrade process. Consult the SugarCRM Administration Guide for more details on how to resolve this issue. Detailed logs are available in UpgradeWizard.log.
+													Element:br
+														*************** Step "pre" FAILED! - 5 seconds
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The detailed logging is available in the upgrade wizard log file as reported in the above notifications. We will use the content to determine the course of action to solve the upgrade issues. When using the Web Upgrader, the
+													Element:code
+														UpgradeWizard.log
+														file is located in the root directory of your SugarCRM instance. For the CLI Upgrader, the full path will be reported where you can find it.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example Failure
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Search for
+										Element:code
+											CheckComposerConfig
+											" in the upgrade log. Sections that are highlighted in red indicate detected problems.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											Starting script CheckComposerConfig
+										Element:br
+											Using sugarcrm/composer.json as composer.json source
+										Element:br
+											Using sugarcrm/composer.lock as composer.lock source
+										Element:br
+											Using cache/upgrades/temp/SugarPro-Upgrade-7.5.0.x-to-7.6.0.0/composer.json as composer.json target
+										Element:br
+											Hash 3a5b0634383693d27c7c6054a69839fc does not match release hash for 7.5.0.0
+										Element:br
+											Custom composer configuration detected
+										Element:br
+											Found valid package ruflin/elastica with version constraint v1.2.1.0
+										Element:br
+											Package onelogin/php-saml with version constraint 2.1.0.1 is missing
+										Element:br
+											Skipping platform package php
+										Element:br
+											Found valid repository https://github.com/sugarcrm/Elastica with type git
+										Element:br
+											Repository https://github.com/sugarcrm/php-saml of type git is missing
+										Element:br
+											Missing configuration key 'minimum-stability'
+										Element:br
+											Generating proposal file cache/upgrades/temp/SugarPro-Upgrade-7.5.0.x-to-7.6.0.0/composer.json.proposal
+										Element:br
+											Saving file cache/upgrades/temp/SugarPro-Upgrade-7.5.0.x-to-7.6.0.0/composer.json.proposal to disk
+										Element:br
+											ERROR: A custom composer configuration has been detected which is incompatible with the upgrade process.
+										Element:br
+											Finished script CheckComposerConfig
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Process
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following actions are required:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Backup the current composer,json and composer.lock file.
+													Element:li
+														Alter
+													Element:code
+														composer.json
+														to match the requirements.
+													Element:li
+														Run "composer update -o --no-dev" to deploy the new dependencies.
+													Element:li
+														Clear cache (
+													Element:code
+														./cache/file_map.php
+														and
+													Element:code
+														./cache/class_map.php
+														).
+													Element:li
+														Log in and test the instance.
+													Element:li
+														Perform upgrade again.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														What's Wrong?
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														From the above log output we can learn that:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														A package
+													Element:code
+														onelogin/php-saml
+														is missing
+													Element:li
+														A repository definition for php-saml is missing
+													Element:li
+														The configuration key
+													Element:code
+														minimum-stability
+														is missing
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In this case, for Sugar 7.7.x, these definitions are owned by SugarCRM. In case one of these settings were already present before they were required by SugarCRM, a similar notice will be thrown stating any incompatible issues.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														The Proposal
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The upgrade logic provides us with a proposal on how to update the
+													Element:code
+														./composer.json
+														file to fix the missing dependencies in our custom configuration. The location of this proposal file can be seen above in the highlighted blue section.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														Note
+														: Do not blindly copy the proposal file over your existing
+													Element:code
+														./composer.json
+														file without verifying and understanding what the issue is. There can be an incompatibility between a dependency of one of your own explicitly defined packages and requirements from the upgrade process.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Resolving the Issues
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As described in the chapter above we can make the change in our
+													Element:code
+														./composer.json
+														to satisfy all requirements. Based on the above example we make the following changes:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "name": "sugarcrm/sugarcrm", ... }, "require": { "psr/log": "1.0", "ruflin/elastica": "v1.2.1.0", "php": ">=5.3.0", "onelogin/php-saml": "2.1.0.1" }, "require-dev": { "phpunit/phpunit": "4.1.4" }, "repositories": [ { "type": "git", "url": "https://github.com/sugarcrm/Elastica" }, { "url": "https://github.com/sugarcrm/php-saml", "type": "git" } ], "minimum-stability": "stable" }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														From here, follow the procedure to run
+													Element:code
+														composer update
+														, clear the autoloader cache, and test drive the Sugar instance. When approved, you can try to upgrade again.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Retry Upgrade
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														After resolving all conflicts, the upgrade process will successfully resolve. The log output will look like this on success:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														Starting script CheckComposerConfig
+													Element:br
+														Using sugarcrm/composer.json as composer.json source
+													Element:br
+														Using sugarcrm/composer.lock as composer.lock source
+													Element:br
+														Using cache/upgrades/temp/SugarPro-Upgrade-7.5.0.x-to-7.6.0.0/composer.json as composer.json target
+													Element:br
+														Hash 79626e71bad09bf1c09585c89a28875e does not match release hash for 7.5.0.0
+													Element:br
+														Custom composer configuration detected
+													Element:br
+														Found valid package ruflin/elastica with version constraint v1.2.1.0
+													Element:br
+														Found valid package onelogin/php-saml with version constraint 2.1.0.1
+													Element:br
+														Skipping platform package php
+													Element:br
+														Found valid repository https://github.com/sugarcrm/Elastica with type git
+													Element:br
+														Found valid repository https://github.com/sugarcrm/php-saml with type git
+													Element:br
+														Custom composer configuration is valid for upgrade
+													Element:br
+														Finished script CheckComposerConfig
+													Element:br
+														…
+													Element:br
+														Starting script 8_ComposerConfig
+													Element:br
+														Restoring custom composer file 'composer.json.valid' to 'composer.json'
+													Element:br
+														Restoring custom composer file 'composer.lock.valid' to 'composer.lock'
+													Element:br
+														Finished script 8_ComposerConfig
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Stock Composer Configuration
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As a reference, the output in the log file when no custom Composer configuration is detected. The upgrader will automatically continue in this case without throwing any notices as the upgrade archive contains the necessary code base and an updated
+										Element:code
+											composer.json
+											and
+										Element:code
+											composer.lock
+											file.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											Starting script CheckComposerConfig
+										Element:br
+											Using sugarcrm/composer.json as composer.json source
+										Element:br
+											Using sugarcrm/composer.lock as composer.lock source
+										Element:br
+											Using cache/upgrades/temp/SugarPro-Upgrade-7.5.0.x-to-7.6.0.0/composer.json as composer.json target
+										Element:br
+											Skipping merge, stock composer settings detected
+										Element:br
+											Finished script CheckComposerConfig
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Frequently Asked Questions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Is the composer package required to install a Sugar instance?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								No. The Sugar installer ships with all required code bundled together. The installer process does not execute any Composer commands. The installer will deploy both
+							Element:code
+								composer.json
+								and
+							Element:code
+								composer.lock
+								in the web root directory as a reference of all dependencies which are controlled by Composer.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Why does Sugar ship
+							Element:code
+								./composer.json
+								and
+							Element:code
+								./composer.lock
+								if the installer doesn't rely on them?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Composer is used internally during development to manage Sugar's dependencies on third-party libraries and packages. The Composer files are shipped during development to manage Sugar's dependencies on third-party libraries and packages. The composer files are shipped with the product to give our customers the ability to expand from them.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Is the Composer package required to upgrade a Sugar instance?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								No. The Sugar upgrader ships, just like the installer, with all required code bundled together. The upgrade process will validate the present Composer configuration and verify if it is compatible with the upgrade. In the case of a custom configuration, the upgrade process will report any issues which need to be resolved by the system administrator before the upgrade can proceed.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Why are there no wildcards in the version constraints? Doesn't composer.lock keep track of exact version numbers?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The lock file is designed to lock the dependencies to a specific version, but to protect our customers from unintentionally pulling in newer versions of dependencies owned by SugarCRM, we have chosen to use explicit version numbers in the composer.json file too.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								May I change the version number of a package?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You cannot change version numbers for packages added by Sugar. Sugar will always configure exact version numbers for all of its dependencies. Changing these version numbers will result in an unsupported platform. The version constraints of packages not owned by Sugar may be modified at the developer's discretion.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Can I use Composer's autoloader?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We strongly recommend against using Composer's autoloader. The Sugar autoloader is fully compatible with the
+							Element:a
+								PSR-0
+								and
+							Element:a
+								PSR-4
+								autoloading recommendations from PHP-FIG, which makes the registration of an additional autoloader like the one from Composer redundant. Sugar's autoloader consumes the different mappings which are generated by Composer directly.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								How can I optimize the autoloader?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sugar ships with an optimized class map out of the box, which is pre-generated through Composer. This class map contains all different class to file mappings known to the dependencies managed by Composer. When customizing the Composer configuration, it is sufficient to run composer update --optimize-autoloader which will refresh the class map. SugarCRM's autoloader takes full advantage of this optimization.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Can I load customizations in Sugar through Composer?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Although not yet available out of the box, we are investigating this as a future capability.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								Can I move the vendor directory out of the web root?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You cannot currently move the vendor directory, but we are investigating this as a future capability.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:b
+								The Composer integration in Sugar is not flexible enough for me. What can I do?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We continuously strive to make our platform better and to facilitate both end users and developers. Our goal is to deliver a state-of-the-art environment. Do not hesitate to reach out to Sugar Support if we have overlooked your use case or if there too many constraints in the current implementation to make this a useful feature.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 04/04/2016 11:01am
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

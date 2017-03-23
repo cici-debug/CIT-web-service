@@ -1,0 +1,518 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Date math support in index names
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Date math index name resolution enables you to search a range of time-series indices, rather than searching all of your time-series indices and filtering the results or maintaining aliases. Limiting the number of indices that are searched reduces the load on the cluster and improves execution performance. For example, if you are searching for errors in your daily logs, you can use a date math name template to restrict the search to the past two days.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Almost all APIs that have an
+							Element:code
+								index
+								parameter, support date math in the
+							Element:code
+								index
+								parameter value.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A date math index name takes the following form:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								<static_name{date_math_expr{date_format|time_zone}}>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Where:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:colgroup
+							Element:col
+							Element:col
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								static_name
+							Element:td
+							Element:p
+								is the static text part of the name
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								date_math_expr
+							Element:td
+							Element:p
+								is a dynamic date math expression that computes the date dynamically
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								date_format
+							Element:td
+							Element:p
+								is the optional format in which the computed date should be rendered. Defaults to
+							Element:code
+								YYYY.MM.dd
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								time_zone
+							Element:td
+							Element:p
+								is the optional time zone . Defaults to
+							Element:code
+								utc
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You must enclose date math index name expressions within angle brackets, and all special characters should be URI encoded. For example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								# GET /<logstash-{now/d}>/_search GET /%3Clogstash-%7Bnow%2Fd%7D%3E/_search { "query" : { "match": { "test": "data" } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Percent encoding of date math characters
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The special characters used for date rounding must be URI encoded as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											<
+										Element:td
+										Element:p
+										Element:code
+											%3C
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											>
+										Element:td
+										Element:p
+										Element:code
+											%3E
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											/
+										Element:td
+										Element:p
+										Element:code
+											%2F
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											{
+										Element:td
+										Element:p
+										Element:code
+											%7B
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											}
+										Element:td
+										Element:p
+										Element:code
+											%7D
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											|
+										Element:td
+										Element:p
+										Element:code
+											%7C
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											+
+										Element:td
+										Element:p
+										Element:code
+											%2B
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											:
+										Element:td
+										Element:p
+										Element:code
+											%3A
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											,
+										Element:td
+										Element:p
+										Element:code
+											%2C
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following example shows different forms of date math index names and the final index names they resolve to given the current time is 22rd March 2024 noon utc.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:thead
+										Element:tr
+										Element:th
+											Expression
+										Element:th
+											Resolves to
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											<logstash-{now/d}>
+										Element:td
+										Element:p
+										Element:code
+											logstash-2024.03.22
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											<logstash-{now/M}>
+										Element:td
+										Element:p
+										Element:code
+											logstash-2024.03.01
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											<logstash-{now/M{YYYY.MM}}>
+										Element:td
+										Element:p
+										Element:code
+											logstash-2024.03
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											<logstash-{now/M-1M{YYYY.MM}}>
+										Element:td
+										Element:p
+										Element:code
+											logstash-2024.02
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											<logstash-{now/d{YYYY.MM.dd|+12:00}}>
+										Element:td
+										Element:p
+										Element:code
+											logstash-2024.03.23
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To use the characters
+										Element:code
+											{
+											and
+										Element:code
+											}
+											in the static part of an index name template, escape them with a backslash
+										Element:code
+											\
+											, for example:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											<elastic\\{ON\\}-{now/M}>
+											resolves to
+										Element:code
+											elastic{ON}-2024.03.01
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following example shows a search request that searches the Logstash indices for the past three days, assuming the indices use the default Logstash index name format,
+										Element:code
+											logstash-YYYY.MM.dd
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											# GET /<logstash-{now/d-2d}>,<logstash-{now/d-1d}>,<logstash-{now/d}>/_search GET /%3Clogstash-%7Bnow%2Fd-2d%7D%3E%2C%3Clogstash-%7Bnow%2Fd-1d%7D%3E%2C%3Clogstash-%7Bnow%2Fd%7D%3E/_search { "query" : { "match": { "test": "data" } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Multiple Indices
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Common options »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

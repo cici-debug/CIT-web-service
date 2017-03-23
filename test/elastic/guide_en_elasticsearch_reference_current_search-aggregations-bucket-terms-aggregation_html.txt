@@ -1,0 +1,1693 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Terms Aggregation
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A multi-bucket value source based aggregation where buckets are dynamically built - one per unique value.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "aggs" : { "genres" : { "terms" : { "field" : "genre" } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Response:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ ... "aggregations" : { "genres" : { "doc_count_error_upper_bound": 0,
+							Element:a
+							Element:span
+								"sum_other_doc_count": 0,
+							Element:img
+							Element:a
+							Element:span
+								"buckets" : [
+							Element:img
+							Element:a
+							Element:span
+								{ "key" : "jazz", "doc_count" : 10 }, { "key" : "rock", "doc_count" : 10 }, { "key" : "electronic", "doc_count" : 10 }, ] } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								an upper bound of the error on the document counts for each term, see
+							Element:a
+								below
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								when there are lots of unique terms, elasticsearch only returns the top terms; this number is the sum of the document counts for all buckets that are not part of the response
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								the list of the top buckets, the meaning of
+							Element:code
+								top
+								being defined by the
+							Element:a
+								order
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, the
+							Element:code
+								terms
+								aggregation will return the buckets for the top ten terms ordered by the
+							Element:code
+								doc_count
+								. One can change this default behaviour by setting the
+							Element:code
+								size
+								parameter.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Size
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											size
+											parameter can be set to define how many term buckets should be returned out of the overall terms list. By default, the node coordinating the search process will request each shard to provide its own top
+										Element:code
+											size
+											term buckets and once all shards respond, it will reduce the results to the final list that will then be returned to the client. This means that if the number of unique terms is greater than
+										Element:code
+											size
+											, the returned list is slightly off and not accurate (it could be that the term counts are slightly off and it could even be that a term that should have been in the top size buckets was not returned).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Document counts are approximate
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As described above, the document counts (and the results of any sub aggregations) in the terms aggregation are not always accurate. This is because each shard provides its own view of what the ordered list of terms should be and these are combined to give a final view. Consider the following scenario:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A request is made to obtain the top 5 terms in the field product, ordered by descending document count from an index with 3 shards. In this case each shard is asked to give its top 5 terms.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "products" : { "terms" : { "field" : "product", "size" : 5 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The terms for each of the three shards are shown below with their respective document counts in brackets:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:col
+										Element:col
+										Element:thead
+										Element:tr
+										Element:th
+										Element:th
+											Shard A
+										Element:th
+											Shard B
+										Element:th
+											Shard C
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+											1
+										Element:td
+										Element:p
+											Product A (25)
+										Element:td
+										Element:p
+											Product A (30)
+										Element:td
+										Element:p
+											Product A (45)
+										Element:tr
+										Element:td
+										Element:p
+											2
+										Element:td
+										Element:p
+											Product B (18)
+										Element:td
+										Element:p
+											Product B (25)
+										Element:td
+										Element:p
+											Product C (44)
+										Element:tr
+										Element:td
+										Element:p
+											3
+										Element:td
+										Element:p
+											Product C (6)
+										Element:td
+										Element:p
+											Product F (17)
+										Element:td
+										Element:p
+											Product Z (36)
+										Element:tr
+										Element:td
+										Element:p
+											4
+										Element:td
+										Element:p
+											Product D (3)
+										Element:td
+										Element:p
+											Product Z (16)
+										Element:td
+										Element:p
+											Product G (30)
+										Element:tr
+										Element:td
+										Element:p
+											5
+										Element:td
+										Element:p
+											Product E (2)
+										Element:td
+										Element:p
+											Product G (15)
+										Element:td
+										Element:p
+											Product E (29)
+										Element:tr
+										Element:td
+										Element:p
+											6
+										Element:td
+										Element:p
+											Product F (2)
+										Element:td
+										Element:p
+											Product H (14)
+										Element:td
+										Element:p
+											Product H (28)
+										Element:tr
+										Element:td
+										Element:p
+											7
+										Element:td
+										Element:p
+											Product G (2)
+										Element:td
+										Element:p
+											Product I (10)
+										Element:td
+										Element:p
+											Product Q (2)
+										Element:tr
+										Element:td
+										Element:p
+											8
+										Element:td
+										Element:p
+											Product H (2)
+										Element:td
+										Element:p
+											Product Q (6)
+										Element:td
+										Element:p
+											Product D (1)
+										Element:tr
+										Element:td
+										Element:p
+											9
+										Element:td
+										Element:p
+											Product I (1)
+										Element:td
+										Element:p
+											Product J (8)
+										Element:td
+										Element:p
+										Element:tr
+										Element:td
+										Element:p
+											10
+										Element:td
+										Element:p
+											Product J (1)
+										Element:td
+										Element:p
+											Product C (4)
+										Element:td
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The shards will return their top 5 terms so the results from the shards will be:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:col
+										Element:col
+										Element:thead
+										Element:tr
+										Element:th
+										Element:th
+											Shard A
+										Element:th
+											Shard B
+										Element:th
+											Shard C
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+											1
+										Element:td
+										Element:p
+											Product A (25)
+										Element:td
+										Element:p
+											Product A (30)
+										Element:td
+										Element:p
+											Product A (45)
+										Element:tr
+										Element:td
+										Element:p
+											2
+										Element:td
+										Element:p
+											Product B (18)
+										Element:td
+										Element:p
+											Product B (25)
+										Element:td
+										Element:p
+											Product C (44)
+										Element:tr
+										Element:td
+										Element:p
+											3
+										Element:td
+										Element:p
+											Product C (6)
+										Element:td
+										Element:p
+											Product F (17)
+										Element:td
+										Element:p
+											Product Z (36)
+										Element:tr
+										Element:td
+										Element:p
+											4
+										Element:td
+										Element:p
+											Product D (3)
+										Element:td
+										Element:p
+											Product Z (16)
+										Element:td
+										Element:p
+											Product G (30)
+										Element:tr
+										Element:td
+										Element:p
+											5
+										Element:td
+										Element:p
+											Product E (2)
+										Element:td
+										Element:p
+											Product G (15)
+										Element:td
+										Element:p
+											Product E (29)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Taking the top 5 results from each of the shards (as requested) and combining them to make a final top 5 list produces the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+											1
+										Element:td
+										Element:p
+											Product A (100)
+										Element:tr
+										Element:td
+										Element:p
+											2
+										Element:td
+										Element:p
+											Product Z (52)
+										Element:tr
+										Element:td
+										Element:p
+											3
+										Element:td
+										Element:p
+											Product C (50)
+										Element:tr
+										Element:td
+										Element:p
+											4
+										Element:td
+										Element:p
+											Product G (45)
+										Element:tr
+										Element:td
+										Element:p
+											5
+										Element:td
+										Element:p
+											Product B (43)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Because Product A was returned from all shards we know that its document count value is accurate. Product C was only returned by shards A and C so its document count is shown as 50 but this is not an accurate count. Product C exists on shard B, but its count of 4 was not high enough to put Product C into the top 5 list for that shard. Product Z was also returned only by 2 shards but the third shard does not contain the term. There is no way of knowing, at the point of combining the results to produce the final list of terms, that there is an error in the document count for Product C and not for Product Z. Product H has a document count of 44 across all 3 shards but was not included in the final list of terms because it did not make it into the top five terms on any of the shards.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Shard Size
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The higher the requested
+										Element:code
+											size
+											is, the more accurate the results will be, but also, the more expensive it will be to compute the final results (both due to bigger priority queues that are managed on a shard level and due to bigger data transfers between the nodes and the client).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											shard_size
+											parameter can be used to minimize the extra work that comes with bigger requested
+										Element:code
+											size
+											. When defined, it will determine how many terms the coordinating node will request from each shard. Once all the shards responded, the coordinating node will then reduce them to a final result which will be based on the
+										Element:code
+											size
+											parameter - this way, one can increase the accuracy of the returned terms and avoid the overhead of streaming a big list of buckets back to the client.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											shard_size
+											cannot be smaller than
+										Element:code
+											size
+											(as it doesn’t make much sense). When it is, elasticsearch will override it and reset it to be equal to
+										Element:code
+											size
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default
+										Element:code
+											shard_size
+											will be
+										Element:code
+											size
+											if the search request needs to go to a single shard, and
+										Element:code
+											(size * 1.5 + 10)
+											otherwise.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Calculating Document Count Error
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two error values which can be shown on the terms aggregation. The first gives a value for the aggregation as a whole which represents the maximum potential document count for a term which did not make it into the final list of terms. This is calculated as the sum of the document count from the last term returned from each shard .For the example given above the value would be 46 (2 + 15 + 29). This means that in the worst case scenario a term which was not returned could have the 4th highest document count.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ ... "aggregations" : { "products" : { "doc_count_error_upper_bound" : 46, "buckets" : [ { "key" : "Product A", "doc_count" : 100 }, { "key" : "Product Z", "doc_count" : 52 }, ... ] } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Per bucket document count error
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This functionality is experimental and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but experimental features are not subject to the support SLA of official GA features.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The second error value can be enabled by setting the
+										Element:code
+											show_term_doc_count_error
+											parameter to true. This shows an error value for each term returned by the aggregation which represents the
+										Element:span
+											error in the document count and can be useful when deciding on a value for the
+										Element:em
+											worst case
+										Element:code
+											shard_size
+											parameter. This is calculated by summing the document counts for the last term returned by all shards which did not return the term. In the example above the error in the document count for Product C would be 15 as Shard B was the only shard not to return the term and the document count of the last term it did return was 15. The actual document count of Product C was 54 so the document count was only actually off by 4 even though the worst case was that it would be off by 15. Product A, however has an error of 0 for its document count, since every shard returned it we can be confident that the count returned is accurate.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ ... "aggregations" : { "products" : { "doc_count_error_upper_bound" : 46, "buckets" : [ { "key" : "Product A", "doc_count" : 100, "doc_count_error_upper_bound" : 0 }, { "key" : "Product Z", "doc_count" : 52, "doc_count_error_upper_bound" : 2 }, ... ] } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These errors can only be calculated in this way when the terms are ordered by descending document count. When the aggregation is ordered by the terms values themselves (either ascending or descending) there is no error in the document count since if a shard does not return a particular term which appears in the results from another shard, it must not have that term in its index. When the aggregation is either sorted by a sub aggregation or in order of ascending document count, the error in the document counts cannot be determined and is given a value of -1 to indicate this.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Order
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The order of the buckets can be customized by setting the
+										Element:code
+											order
+											parameter. By default, the buckets are ordered by their
+										Element:code
+											doc_count
+											descending. It is possible to change this behaviour as documented below:
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sorting by ascending
+										Element:code
+											_count
+											or by sub aggregation is discouraged as it increases the
+										Element:a
+											error
+											on document counts. It is fine when a single shard is queried, or when the field that is being aggregated was used as a routing key at index time: in these cases results will be accurate since shards have disjoint values. However otherwise, errors are unbounded. One particular case that could still be useful is sorting by
+										Element:a
+											or
+										Element:code
+											min
+										Element:a
+											aggregation: counts will not be accurate but at least the top buckets will be correctly picked.
+										Element:code
+											max
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Ordering the buckets by their doc
+										Element:code
+											_count
+											in an ascending manner:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "genres" : { "terms" : { "field" : "genre", "order" : { "_count" : "asc" } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Ordering the buckets alphabetically by their terms in an ascending manner:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "genres" : { "terms" : { "field" : "genre", "order" : { "_term" : "asc" } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Ordering the buckets by single value metrics sub-aggregation (identified by the aggregation name):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "genres" : { "terms" : { "field" : "genre", "order" : { "max_play_count" : "desc" } }, "aggs" : { "max_play_count" : { "max" : { "field" : "play_count" } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Ordering the buckets by multi value metrics sub-aggregation (identified by the aggregation name):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "genres" : { "terms" : { "field" : "genre", "order" : { "playback_stats.max" : "desc" } }, "aggs" : { "playback_stats" : { "stats" : { "field" : "play_count" } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Pipeline aggs cannot be used for sorting
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Pipeline aggregations
+											are run during the reduce phase after all other aggregations have already completed. For this reason, they cannot be used for ordering.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is also possible to order the buckets based on a "deeper" aggregation in the hierarchy. This is supported as long as the aggregations path are of a single-bucket type, where the last aggregation in the path may either be a single-bucket one or a metrics one. If it’s a single-bucket type, the order will be defined by the number of docs in the bucket (i.e.
+										Element:code
+											doc_count
+											), in case it’s a metrics one, the same rules as above apply (where the path must indicate the metric name to sort by in case of a multi-value metrics aggregation, and in case of a single-value metrics aggregation the sort will be applied on that value).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The path must be defined in the following form:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											AGG_SEPARATOR = '>' ; METRIC_SEPARATOR = '.' ; AGG_NAME = <the name of the aggregation> ; METRIC = <the name of the metric (in case of multi-value metrics aggregation)> ; PATH = <AGG_NAME> [ <AGG_SEPARATOR>, <AGG_NAME> ]* [ <METRIC_SEPARATOR>, <METRIC> ] ;
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "countries" : { "terms" : { "field" : "artist.country", "order" : { "rock>playback_stats.avg" : "desc" } }, "aggs" : { "rock" : { "filter" : { "term" : { "genre" : "rock" }}, "aggs" : { "playback_stats" : { "stats" : { "field" : "play_count" }} } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above will sort the artist’s countries buckets based on the average play count among the rock songs.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Multiple criteria can be used to order the buckets by providing an array of order criteria such as the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "countries" : { "terms" : { "field" : "artist.country", "order" : [ { "rock>playback_stats.avg" : "desc" }, { "_count" : "desc" } ] }, "aggs" : { "rock" : { "filter" : { "term" : { "genre" : { "rock" }}}, "aggs" : { "playback_stats" : { "stats" : { "field" : "play_count" }} } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above will sort the artist’s countries buckets based on the average play count among the rock songs and then by their
+										Element:code
+											doc_count
+											in descending order.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the event that two buckets share the same values for all order criteria the bucket’s term value is used as a tie-breaker in ascending alphabetical order to prevent non-deterministic ordering of buckets.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Minimum document count
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is possible to only return terms that match more than a configured number of hits using the
+										Element:code
+											min_doc_count
+											option:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "tags" : { "terms" : { "field" : "tags", "min_doc_count": 10 } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above aggregation would only return tags which have been found in 10 hits or more. Default value is
+										Element:code
+											1
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Terms are collected and ordered on a shard level and merged with the terms collected from other shards in a second step. However, the shard does not have the information about the global document count available. The decision if a term is added to a candidate list depends only on the order computed on the shard using local shard frequencies. The
+										Element:code
+											min_doc_count
+											criterion is only applied after merging local terms statistics of all shards. In a way the decision to add the term as a candidate is made without being very
+										Element:span
+											about if the term will actually reach the required
+										Element:em
+											certain
+										Element:code
+											min_doc_count
+											. This might cause many (globally) high frequent terms to be missing in the final result if low frequent terms populated the candidate lists. To avoid this, the
+										Element:code
+											shard_size
+											parameter can be increased to allow more candidate terms on the shards. However, this increases memory consumption and network traffic.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											shard_min_doc_count
+											parameter
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The parameter
+										Element:code
+											shard_min_doc_count
+											regulates the
+										Element:span
+											a shard has if the term should actually be added to the candidate list or not with respect to the
+										Element:em
+											certainty
+										Element:code
+											min_doc_count
+											. Terms will only be considered if their local shard frequency within the set is higher than the
+										Element:code
+											shard_min_doc_count
+											. If your dictionary contains many low frequent terms and you are not interested in those (for example misspellings), then you can set the
+										Element:code
+											shard_min_doc_count
+											parameter to filter out candidate terms on a shard level that will with a reasonable certainty not reach the required
+										Element:code
+											min_doc_count
+											even after merging the local counts.
+										Element:code
+											shard_min_doc_count
+											is set to
+										Element:code
+											0
+											per default and has no effect unless you explicitly set it.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Setting
+										Element:code
+											min_doc_count
+											=
+										Element:code
+											0
+											will also return buckets for terms that didn’t match any hit. However, some of the returned terms which have a document count of zero might only belong to deleted documents or documents from other types, so there is no warranty that a
+										Element:code
+											match_all
+											query would find a positive document count for those terms.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When NOT sorting on
+										Element:code
+											doc_count
+											descending, high values of
+										Element:code
+											min_doc_count
+											may return a number of buckets which is less than
+										Element:code
+											size
+											because not enough data was gathered from the shards. Missing buckets can be back by increasing
+										Element:code
+											shard_size
+											. Setting
+										Element:code
+											shard_min_doc_count
+											too high will cause terms to be filtered out on a shard level. This value should be set much lower than
+										Element:code
+											min_doc_count/#shards
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Script
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Generating the terms using a script:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "genres" : { "terms" : { "script" : { "inline": "doc['genre'].value", "lang": "painless" } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This will interpret the
+										Element:code
+											script
+											parameter as an
+										Element:code
+											inline
+											script with the default script language and no script parameters. To use a file script use the following syntax:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "genres" : { "terms" : { "script" : { "file": "my_script", "params": { "field": "genre" } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											for indexed scripts replace the
+										Element:code
+											file
+											parameter with an
+										Element:code
+											id
+											parameter.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Value Script
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "genres" : { "terms" : { "field" : "gender", "script" : { "inline" : "'Genre: ' +_value" "lang" : "painless" } } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Filtering Values
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is possible to filter the values for which buckets will be created. This can be done using the
+										Element:code
+											include
+											and
+										Element:code
+											exclude
+											parameters which are based on regular expression strings or arrays of exact values. Additionally,
+										Element:code
+											include
+											clauses can filter using
+										Element:code
+											partition
+											expressions.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Filtering Values with regular expressions
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "aggs" : { "tags" : { "terms" : { "field" : "tags", "include" : ".*sport.*", "exclude" : "water_.*" } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In the above example, buckets will be created for all the tags that has the word
+													Element:code
+														sport
+														in them, except those starting with
+													Element:code
+														water_
+														(so the tag
+													Element:code
+														water_sports
+														will no be aggregated). The
+													Element:code
+														include
+														regular expression will determine what values are "allowed" to be aggregated, while the
+													Element:code
+														exclude
+														determines the values that should not be aggregated. When both are defined, the
+													Element:code
+														exclude
+														has precedence, meaning, the
+													Element:code
+														include
+														is evaluated first and only then the
+													Element:code
+														exclude
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The syntax is the same as
+													Element:a
+														regexp queries
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Filtering Values with exact values
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For matching based on exact values the
+													Element:code
+														include
+														and
+													Element:code
+														exclude
+														parameters can simply take an array of strings that represent the terms as they are found in the index:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "aggs" : { "JapaneseCars" : { "terms" : { "field" : "make", "include" : ["mazda", "honda"] } }, "ActiveCarManufacturers" : { "terms" : { "field" : "make", "exclude" : ["rover", "jensen"] } } } }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Filtering Values with partitions
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Sometimes there are too many unique terms to process in a single request/response pair so it can be useful to break the analysis up into multiple requests. This can be achieved by grouping the field’s values into a number of partitions at query-time and processing only one partition in each request. Consider this request which is looking for accounts that have not logged any access recently:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "size": 0, "aggs": { "expired_sessions": { "terms": { "field": "account_id", "include": { "partition": 0, "num_partitions": 20 }, "size": 10000, "order": { "last_access": "asc" } }, "aggs": { "last_access": { "max": { "field": "access_date" } } } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This request is finding the last logged access date for a subset of customer accounts because we might want to expire some customer accounts who haven’t been seen for a long while. The
+													Element:code
+														num_partitions
+														setting has requested that the unique account_ids are organized evenly into twenty partitions (0 to 19). and the
+													Element:code
+														partition
+														setting in this request filters to only consider account_ids falling into partition 0. Subsequent requests should ask for partitions 1 then 2 etc to complete the expired-account analysis.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Note that the
+													Element:code
+														size
+														setting for the number of results returned needs to be tuned with the
+													Element:code
+														num_partitions
+														. For this particular account-expiration example the process for balancing values for
+													Element:code
+														size
+														and
+													Element:code
+														num_partitions
+														would be as follows:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Use the
+													Element:code
+														cardinality
+														aggregation to estimate the total number of unique account_id values
+													Element:li
+														Pick a value for
+													Element:code
+														num_partitions
+														to break the number from 1) up into more manageable chunks
+													Element:li
+														Pick a
+													Element:code
+														size
+														value for the number of responses we want from each partition
+													Element:li
+														Run a test request
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If we have a circuit-breaker error we are trying to do too much in one request and must increase
+													Element:code
+														num_partitions
+														. If the request was successful but the last account ID in the date-sorted test response was still an account we might want to expire then we may be missing accounts of interest and have set our numbers too low. We must either
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														increase the
+													Element:code
+														size
+														parameter to return more results per partition (could be heavy on memory) or
+													Element:li
+														increase the
+													Element:code
+														num_partitions
+														to consider less accounts per request (could increase overall processing time as we need to make more requests)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Ultimately this is a balancing act between managing the elasticsearch resources required to process a single request and the volume of requests that the client application must issue to complete a task.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Multi-field terms aggregation
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											terms
+											aggregation does not support collecting terms from multiple fields in the same document. The reason is that the
+										Element:code
+											terms
+											agg doesn’t collect the string term values themselves, but rather uses
+										Element:a
+											global ordinals
+											to produce a list of all of the unique values in the field. Global ordinals results in an important performance boost which would not be possible across multiple fields.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two approaches that you can use to perform a
+										Element:code
+											terms
+											agg across multiple fields:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:a
+											Script
+										Element:dd
+											Use a script to retrieve terms from multiple fields. This disables the global ordinals optimization and will be slower than collecting terms from a single field, but it gives you the flexibility to implement this option at search time.
+										Element:dt
+										Element:span
+										Element:a
+										Element:code
+											copy_to
+											field
+										Element:dd
+											If you know ahead of time that you want to collect the terms from two or more fields, then use
+										Element:code
+											copy_to
+											in your mapping to create a new dedicated field at index time which contains the values from both fields. You can aggregate on this single field, which will benefit from the global ordinals optimization.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Collect mode
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Deferring calculation of child aggregations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For fields with many unique terms and a small number of required results it can be more efficient to delay the calculation of child aggregations until the top parent-level aggs have been pruned. Ordinarily, all branches of the aggregation tree are expanded in one depth-first pass and only then any pruning occurs. In some scenarios this can be very wasteful and can hit memory constraints. An example problem scenario is querying a movie database for the 10 most popular actors and their 5 most common co-stars:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "actors" : { "terms" : { "field" : "actors", "size" : 10 }, "aggs" : { "costars" : { "terms" : { "field" : "actors", "size" : 5 } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Even though the number of actors may be comparatively small and we want only 50 result buckets there is a combinatorial explosion of buckets during calculation - a single actor can produce n² buckets where n is the number of actors. The sane option would be to first determine the 10 most popular actors and only then examine the top co-stars for these 10 actors. This alternative strategy is what we call the
+										Element:code
+											breadth_first
+											collection mode as opposed to the
+										Element:code
+											depth_first
+											mode.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											breadth_first
+											is the default mode for fields with a cardinality bigger than the requested size or when the cardinality is unknown (numeric fields or scripts for instance). It is possible to override the default heuristic and to provide a collect mode directly in the request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "actors" : { "terms" : { "field" : "actors", "size" : 10, "collect_mode" : "breadth_first"
+										Element:a
+										Element:span
+											}, "aggs" : { "costars" : { "terms" : { "field" : "actors", "size" : 5 } } } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											the possible values are
+										Element:code
+											breadth_first
+											and
+										Element:code
+											depth_first
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When using
+										Element:code
+											breadth_first
+											mode the set of documents that fall into the uppermost buckets are cached for subsequent replay so there is a memory overhead in doing this which is linear with the number of matching documents. Note that the
+										Element:code
+											order
+											parameter can still be used to refer to data from a child aggregation when using the
+										Element:code
+											breadth_first
+											setting - the parent aggregation understands that this child aggregation will need to be called first before any of the other child aggregations.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Nested aggregations such as
+										Element:code
+											top_hits
+											which require access to score information under an aggregation that uses the
+										Element:code
+											breadth_first
+											collection mode need to replay the query on the second pass but only for the documents belonging to the top buckets.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Execution hint
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+											The automated execution optimization is experimental, so this parameter is provided temporarily as a way to override the default behaviour
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are different mechanisms by which terms aggregations can be executed:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											by using field values directly in order to aggregate data per-bucket (
+										Element:code
+											map
+											)
+										Element:li
+											by using ordinals of the field and preemptively allocating one bucket per ordinal value (
+										Element:code
+											global_ordinals
+											)
+										Element:li
+											by using ordinals of the field and dynamically allocating one bucket per ordinal value (
+										Element:code
+											global_ordinals_hash
+											)
+										Element:li
+											by using per-segment ordinals to compute counts and remap these counts to global counts using global ordinals (
+										Element:code
+											global_ordinals_low_cardinality
+											)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Elasticsearch tries to have sensible defaults so this is something that generally doesn’t need to be configured.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											map
+											should only be considered when very few documents match a query. Otherwise the ordinals-based execution modes are significantly faster. By default,
+										Element:code
+											map
+											is only used when running an aggregation on scripts, since they don’t have ordinals.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											global_ordinals_low_cardinality
+											only works for leaf terms aggregations but is usually the fastest execution mode. Memory usage is linear with the number of unique values in the field, so it is only enabled by default on low-cardinality fields.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											global_ordinals
+											is the second fastest option, but the fact that it preemptively allocates buckets can be memory-intensive, especially if you have one or more sub aggregations. It is used by default on top-level terms aggregations.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											global_ordinals_hash
+											on the contrary to
+										Element:code
+											global_ordinals
+											and
+										Element:code
+											global_ordinals_low_cardinality
+											allocates buckets dynamically so memory usage is linear to the number of values of the documents that are part of the aggregation scope. It is used by default in inner aggregations.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "tags" : { "terms" : { "field" : "tags", "execution_hint": "map"
+										Element:a
+										Element:span
+											} } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+										Element:span
+											[
+											the possible values are
+										Element:span
+											experimental
+											]
+										Element:span
+											This functionality is experimental and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but experimental features are not subject to the support SLA of official GA features.
+										Element:code
+											map
+											,
+										Element:code
+											global_ordinals
+											,
+										Element:code
+											global_ordinals_hash
+											and
+										Element:code
+											global_ordinals_low_cardinality
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please note that Elasticsearch will ignore this execution hint if it is not applicable and that there is no backward compatibility guarantee on these hints.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Missing value
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											missing
+											parameter defines how documents that are missing a value should be treated. By default they will be ignored but it is also possible to treat them as if they had a value.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "aggs" : { "tags" : { "terms" : { "field" : "tags", "missing": "N/A"
+										Element:a
+										Element:span
+											} } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											Documents without a value in the
+										Element:code
+											tags
+											field will fall into the same bucket as documents that have the value
+										Element:code
+											N/A
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Significant Terms Aggregation
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Pipeline Aggregations »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

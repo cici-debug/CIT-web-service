@@ -1,0 +1,460 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					ActiveCampaign Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					ActiveCampaign
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to ActiveCampaign in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This integration is maintained by ActiveCampaign.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once the Segment library is integrated with your server, toggle ActiveCampaign on in your Segment integrations and add your API URL and API Key. You can find both of these in your ActiveCampaign account on the My Settings page under the API tab.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Segment ActiveCampaign integration is 100% handled through Segment, so you don’t need to install ActiveCampaign site tracking or event tracking Javascript code.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								ActiveCampaign supports the
+							Element:code
+								identify
+								,
+							Element:code
+								track
+								, and
+							Element:code
+								page
+								methods.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If the contact you are passing in doesn’t already exist in your ActiveCampaign account, they will automatically be added through this method. If the contact does already exist, they will simply be updated.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Basic Fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you
+										Element:code
+											identify
+											a contact, we’ll pass that contact’s information to ActiveCampaign with
+										Element:code
+											userId
+											as ActiveCampaign’s External User ID. ActiveCampaign accepts these basic fields from Segment.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											first_name
+										Element:li
+										Element:code
+											last_name
+										Element:li
+										Element:code
+											email
+										Element:li
+										Element:code
+											phone
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Tags
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can add tags to a contact by passing in a trait called
+										Element:code
+											tags
+											. If you would like to delete all tags currently on a contact, you can pass in a trait called
+										Element:code
+											tagsReset
+											with a value of
+										Element:code
+											1
+											. You can pass both
+										Element:code
+											tags
+											and
+										Element:code
+											tagsReset
+											if you wish, or just one of the two. If you pass both, all tags will be deleted and then any new tags will be added.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "type": "identify", "userId": "12345", "traits": { "firstName": "Peter", "lastName": "Gibbons", "email": "peter@initech.com", "tags" : [ "checkout", "abandoned" ], "tagsReset": "1" } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Custom Fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											ActiveCampaign also supports updating a contact’s custom fields with this integration. To send custom fields to ActiveCampaign you need to create the custom field first in ActiveCampaign for each custom field you want to send. Then when you call identify with keys that match those traits, those custom fields for the contact will be updated.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, if you have a contact in ActiveCampaign with these custom fields:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can update those fields using this identify call:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "type": "identify", "userId": "12345", "traits": { "firstName": "Peter", "lastName": "Gibbons", "email": "peter@initech.com", "shirtSize": "medium", "state": "California", "multiChoice": [Value1, Value2] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the example these traits are
+										Element:code
+											shirt size
+											,
+										Element:code
+											state
+											, and
+										Element:code
+											multiChoice
+											. They will be shown as
+										Element:code
+											%SHIRT_SIZE%
+											,
+										Element:code
+											%STATE%
+											, and
+										Element:code
+											%MULTI_CHOICE%
+											in ActiveCampaign, but you can record them in lower-case to identify and they will still be populated. The
+										Element:code
+											multiChoice
+											field applies to listbox or checkbox custom fields in ActiveCampaign (where more than one option value is allowed).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your custom field has the same name as a
+										Element:a
+											reserved trait
+											, that custom field will not be updated.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Lists
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can add a contact to or unsubscribe a contact from any number of lists by passing in a trait called
+										Element:code
+											lists
+											. As shown in the example below, this trait should be an array, with each element having an
+										Element:code
+											id
+											and a
+										Element:code
+											status
+											. The value of
+										Element:code
+											status
+											must be either
+										Element:code
+											active
+											or
+										Element:code
+											unsubscribed
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "type": "identify", "userId": "12345", "traits": { "firstName": "Peter", "lastName": "Gibbons", "email": "peter@initech.com", "lists" : [ { "id" : "1", "status" : "active" }, { "id" : "7", "status" : "unsubscribed" } ] } }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note: in order for the
+							Element:code
+								Track
+								call to work, you need to have Event Tracking enabled in your ActiveCampaign account. You can enable this by visiting the Tracking tab on the My Settings page in your ActiveCampaign account. This page is accessible via the menu under your avatar in the top right.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you
+							Element:code
+								track
+								an event, we will send that event to ActiveCampaign as an
+							Element:code
+								event tracking
+								event. The
+							Element:code
+								event
+								parameter will be the event tracked for the contact with the
+							Element:code
+								email
+								parameter. If you want to pass a value for that event, you can pass the value in as the
+							Element:code
+								acValue
+								property of
+							Element:code
+								properties
+								. In the example below, the event name is
+							Element:code
+								Clicked a button
+								and the value for the event is
+							Element:code
+								Signup button
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "type": "track", "event": "Clicked a button", "properties": { "acValue": "Signup button"} }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note: in order for the
+							Element:code
+								Page
+								call to work, you need to have Site Tracking enabled in your ActiveCampaign account. You can enable this by visiting the Tracking tab on the My Settings page in your ActiveCampaign account. This page is accessible via the menu under your avatar in the top right.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you call
+							Element:code
+								page
+								, we will send that event to ActiveCampaign as a
+							Element:code
+								site tracking
+								event. The
+							Element:code
+								referrer
+								and
+							Element:code
+								url
+								parameters will be tracked for the contact with the
+							Element:code
+								email
+								parameter.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+								✅
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your API key can be found by navigating to your Active Campaign account and clicking on My Settings > API. It should look something like
+										Element:code
+											5292218aadbe410acf66c44164c4be2de4bbf184c509ef699d85a0e8da1d9fabeda175df
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API url
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your API url can be found by navigating to your Active Campaign account and clicking on My Settings > API. It should look something like
+										Element:code
+											https://<account-name>.api-us1.com
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!

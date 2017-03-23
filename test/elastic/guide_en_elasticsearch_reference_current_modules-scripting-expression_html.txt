@@ -1,0 +1,752 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Lucene Expressions Language
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Lucene’s expressions compile a
+							Element:code
+								javascript
+								expression to bytecode. They are designed for high-performance custom ranking and sorting functions and are enabled for
+							Element:code
+								inline
+								and
+							Element:code
+								stored
+								scripting by default.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Performance
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Expressions were designed to have competitive performance with custom Lucene code. This performance is due to having low per-document overhead as opposed to other scripting engines: expressions do more "up-front".
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This allows for very fast execution, even faster than if you had written a
+										Element:code
+											native
+											script.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Syntax
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Expressions support a subset of javascript syntax: a single expression.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											See the
+										Element:a
+											expressions module documentation
+											for details on what operators and functions are available.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Variables in
+										Element:code
+											expression
+											scripts are available to access:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											document fields, e.g.
+										Element:code
+											doc['myfield'].value
+										Element:li
+											variables and methods that the field supports, e.g.
+										Element:code
+											doc['myfield'].empty
+										Element:li
+											Parameters passed into the script, e.g.
+										Element:code
+											mymodifier
+										Element:li
+											The current document’s score,
+										Element:code
+											_score
+											(only available when used in a
+										Element:code
+											script_score
+											)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can use Expressions scripts for
+										Element:code
+											script_score
+											,
+										Element:code
+											script_fields
+											, sort scripts, and numeric aggregation scripts, simply set the
+										Element:code
+											lang
+											parameter to
+										Element:code
+											expression
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Numeric field API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:thead
+										Element:tr
+										Element:th
+											Expression
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].value
+										Element:td
+										Element:p
+											The value of the field, as a
+										Element:code
+											double
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].empty
+										Element:td
+										Element:p
+											A boolean indicating if the field has no values within the doc.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].length
+										Element:td
+										Element:p
+											The number of values in this document.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].min()
+										Element:td
+										Element:p
+											The minimum value of the field in this document.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].max()
+										Element:td
+										Element:p
+											The maximum value of the field in this document.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].median()
+										Element:td
+										Element:p
+											The median value of the field in this document.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].avg()
+										Element:td
+										Element:p
+											The average of the values in this document.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].sum()
+										Element:td
+										Element:p
+											The sum of the values in this document.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a document is missing the field completely, by default the value will be treated as
+										Element:code
+											0
+											. You can treat it as another value instead, e.g.
+										Element:code
+											doc['myfield'].empty ? 100 : doc['myfield'].value
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a document has multiple values for the field, by default the minimum value is returned. You can choose a different value instead, e.g.
+										Element:code
+											doc['myfield'].sum()
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a document is missing the field completely, by default the value will be treated as
+										Element:code
+											0
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Boolean fields are exposed as numerics, with
+										Element:code
+											true
+											mapped to
+										Element:code
+											1
+											and
+										Element:code
+											false
+											mapped to
+										Element:code
+											0
+											. For example:
+										Element:code
+											doc['on_sale'].value ? doc['price'].value * 0.5 : doc['price'].value
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Date field API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Date fields are treated as the number of milliseconds since January 1, 1970 and support the Numeric Fields API above, plus access to some date-specific fields:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:thead
+										Element:tr
+										Element:th
+											Expression
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.centuryOfEra
+										Element:td
+										Element:p
+											Century (1-2920000)
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.dayOfMonth
+										Element:td
+										Element:p
+											Day (1-31), e.g.
+										Element:code
+											1
+											for the first of the month.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.dayOfWeek
+										Element:td
+										Element:p
+											Day of the week (1-7), e.g.
+										Element:code
+											1
+											for Monday.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.dayOfYear
+										Element:td
+										Element:p
+											Day of the year, e.g.
+										Element:code
+											1
+											for January 1.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.era
+										Element:td
+										Element:p
+											Era:
+										Element:code
+											0
+											for BC,
+										Element:code
+											1
+											for AD.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.hourOfDay
+										Element:td
+										Element:p
+											Hour (0-23).
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.millisOfDay
+										Element:td
+										Element:p
+											Milliseconds within the day (0-86399999).
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.millisOfSecond
+										Element:td
+										Element:p
+											Milliseconds within the second (0-999).
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.minuteOfDay
+										Element:td
+										Element:p
+											Minute within the day (0-1439).
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.minuteOfHour
+										Element:td
+										Element:p
+											Minute within the hour (0-59).
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.monthOfYear
+										Element:td
+										Element:p
+											Month within the year (1-12), e.g.
+										Element:code
+											1
+											for January.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.secondOfDay
+										Element:td
+										Element:p
+											Second within the day (0-86399).
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.secondOfMinute
+										Element:td
+										Element:p
+											Second within the minute (0-59).
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.year
+										Element:td
+										Element:p
+											Year (-292000000 - 292000000).
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.yearOfCentury
+										Element:td
+										Element:p
+											Year within the century (1-100).
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].date.yearOfEra
+										Element:td
+										Element:p
+											Year within the era (1-292000000).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following example shows the difference in years between the
+										Element:code
+											date
+											fields date0 and date1:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											doc['date1'].date.year - doc['date0'].date.year
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											geo_point
+											field API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:thead
+										Element:tr
+										Element:th
+											Expression
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].empty
+										Element:td
+										Element:p
+											A boolean indicating if the field has no values within the doc.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].lat
+										Element:td
+										Element:p
+											The latitude of the geo point.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											doc['field_name'].lon
+										Element:td
+										Element:p
+											The longitude of the geo point.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following example computes distance in kilometers from Washington, DC:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											haversin(38.9072, 77.0369, doc['field_name'].lat, doc['field_name'].lon)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In this example the coordinates could have been passed as parameters to the script, e.g. based on geolocation of the user.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Limitations
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are a few limitations relative to other script languages:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Only numeric, boolean, date, and geo_point fields may be accessed
+										Element:li
+											Stored fields are not available
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Painless Debugging
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Native (Java) Scripts »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

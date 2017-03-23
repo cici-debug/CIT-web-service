@@ -1,0 +1,724 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Creating Custom Field Types
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this example, we create a custom field type called "Highlightfield", which will mimic the base text field type with the added feature that the displayed text for the field will be highlighted in a color chosen when the field is created in Studio.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example requires the following steps, which are covered in the sections and subsections below:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:a
+								Creating the JavaScript Controller
+							Element:li
+							Element:a
+								Defining the Handlebar Templates
+							Element:li
+							Element:a
+								Adding the Field Type to Studio
+							Element:li
+							Element:a
+								Enabling Search and Filtering
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Naming a Custom Field Type in Sugar
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When choosing a name for a custom field type, keep in mind the following rules:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								The first letter of a custom field type's name must be capitalized.
+							Element:li
+								All subsequent letters in the field type's name must be lowercase.
+							Element:li
+								A field type's name cannot contain non-letter characters such as 0-9, hyphens, or dashes.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Therefore, in this example, the field type "Highlightfield" cannot be called HighLightField or highlightfield.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Creating the JavaScript Controller
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, create a controller file. Since we are starting from scratch, we need to extend the base field template. To accomplish this, create
+							Element:code
+								./custom/clients/base/fields/Highlightfield/Highlightfield.js
+								. This file will contain the JavaScript needed to render the field and format the values. By default, all fields extend the base template and do not require you to add the
+							Element:code
+								extendsFrom
+								property. An example template is shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/clients/base/fields/Highlightfield/Highlightfield.js
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								({ /** * Called when initializing the field * @param options */ initialize: function(options) { this._super('initialize', [options]); }, /** * Called when rendering the field * @private */ _render: function() { this._super('_render'); }, /** * Called when formatting the value for display * @param value */ format: function(value) { return this._super('format', [value]); }, /** * Called when unformatting the value for storage * @param value */ unformat: function(value) { return this._super('unformat', [value]); } })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note
+								: This controller file example contains methods for
+							Element:code
+								initialize
+								,
+							Element:code
+								_render
+								,
+							Element:code
+								format
+								, and
+							Element:code
+								unformat
+								. These are shown for your ease of use but are not necessarily needed for this customization. For example, you could choose to create an empty controller consisting of nothing other than
+							Element:code
+								({})
+								and the field would render as expected in this example.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Defining the Handlebar Templates
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Next, define the handlebar templates. The templates will nearly match the base template found in
+							Element:code
+								./clients/base/fields/base/
+								with the minor difference of an additional attribute of
+							Element:code
+								style="background:{{def.backcolor}}; color:{{def.textcolor}}"
+								for the detail and list templates.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Detail View
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The first template to define is the Sidecar detail view. This template handles the display of data on the record view.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/clients/base/fields/Highlightfield/detail.hbs
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{{! The data for field colors are passed into the handlebars template through the def array. For this example, the def.backcolor and def.textcolor properties. These indexes are defined in: ./custom/modules/DynamicFields/templates/Fields/TemplateHighlightfield.php }} {{#if value}} <div class="ellipsis_inline" data-placement="bottom" style="background:{{def.backcolor}}; color:{{def.textcolor}}"> {{value}} </div> {{/if}}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Edit View
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now define the Sidecar edit view. This template handles the display of the field in the edit view.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/clients/base/fields/Highlightfield/edit.hbs.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{{! We have not made any edits to this file that differ from stock, however, we could add styling here just as we did for the detail and list templates. }} <input type="text" name="{{name}}" value="{{value}}" {{#if def.len}}maxlength="{{def.len}}"{{/if}} {{#if def.placeholder}}placeholder="{{str def.placeholder this.model.module}}"{{/if}} class="inherit-width"> <p class="help-block">
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											List View
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, define the list view. This template handles the display of the custom field in list views.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/clients/base/fields/Highlightfield/list.hbs
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{{! The data for field colors are passed into the handlebars template through the def array. Our case being the def.backcolor and def.textcolor properties. These indexes are defined in: ./custom/modules/DynamicFields/templates/Fields/TemplateHighlightfield.php }} <div class="ellipsis_inline" data-placement="bottom" data-original-title="{{#unless value}} {{#if def.placeholder}}{{str def.placeholder this.model.module}}{{/if}}{{/unless}}{{value}}" style="background:{{def.backcolor}}; color:{{def.textcolor}}"> {{#if def.link}} <a href="{{#if def.events}}javascript:void(0);{{else}}{{href}}{{/if}}">{{value}}</a>{{else}}{{value}} {{/if}} </div>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Adding the Field Type to Studio
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To enable the new field type for use in Studio, define the Studio field template. This will also allow us to map any additional properties we need for the templates. For this example, map the
+							Element:code
+								ext1
+								and
+							Element:code
+								ext2
+								fields from the
+							Element:code
+								fields_meta_data
+								table to the
+							Element:code
+								backcolor
+								and
+							Element:code
+								textcolor
+								definitions. Also, set the
+							Element:code
+								dbfield
+								definition to
+							Element:code
+								varchar
+								so that the correct database field type is created.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/modules/DynamicFields/templates/Fields/TemplateHighlightfield.php
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php if (!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); require_once('modules/DynamicFields/templates/Fields/TemplateField.php'); class TemplateHighlightfield extends TemplateField { var $type = 'varchar'; var $supports_unified_search = true; /** * TemplateAutoincrement Constructor: Map the ext attribute fields to the relevant color properties * * References: get_field_def function below * * @returns field_type */ function __construct() { $this->vardef_map['ext1'] = 'backcolor'; $this->vardef_map['ext2'] = 'textcolor'; $this->vardef_map['backcolor'] = 'ext1'; $this->vardef_map['textcolor'] = 'ext2'; } //BEGIN BACKWARD COMPATIBILITY // AS 7.x does not have EditViews and DetailViews anymore these are here // for any modules in backwards compatibility mode. function get_xtpl_edit() { $name = $this->name; $returnXTPL = array(); if (!empty($this->help)) { $returnXTPL[strtoupper($this->name . '_help')] = translate($this->help, $this->bean->module_dir); } if (isset($this->bean->$name)) { $returnXTPL[$this->name] = $this->bean->$name; } else { if (empty($this->bean->id)) { $returnXTPL[$this->name] = $this->default_value; } } return $returnXTPL; } function get_xtpl_search() { if (!empty($_REQUEST[$this->name])) { return $_REQUEST[$this->name]; } } function get_xtpl_detail() { $name = $this->name; if (isset($this->bean->$name)) { return $this->bean->$name; } return ''; } //END BACKWARD COMPATIBILITY /** * Function: get_field_def * Description: Get the field definition attributes that are required for the Highlightfield Field * the primary reason this function is here is to set the dbType to 'varchar', * otherwise 'Highlightfield' would be used by default. * References: __construct function above * * @return Field Definition */ function get_field_def() { $def = parent::get_field_def(); //set our fields database type $def['dbType'] = 'varchar'; //map our extension fields for colorizing the field $def['backcolor'] = !empty($this->backcolor) ? $this->backcolor : $this->ext1; $def['textcolor'] = !empty($this->textcolor) ? $this->textcolor : $this->ext2; return $def; } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note
+								: For the custom field type, the
+							Element:code
+								ext1
+								,
+							Element:code
+								ext2
+								,
+							Element:code
+								ext3
+								, and
+							Element:code
+								ext4
+								database fields in the
+							Element:code
+								fields_meta_data
+								table offer additional property storage.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating the Form Controller
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, set up the field's form controller. This controller will handle the field's form template in Admin > Studio > Fields and allow us to assign color values to the Smarty template.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/DynamicFields/templates/Fields/Forms/Highlightfield.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php if (!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); require_once('custom/modules/DynamicFields/templates/Fields/TemplateHighlightfield.php'); /** * Implement get_body function to correctly populate the template for the ModuleBuilder/Studio * Add field page. * * @param Sugar_Smarty $ss * @param array $vardef * */ function get_body(&$ss, $vardef) { global $app_list_strings, $mod_strings; $vars = $ss->get_template_vars(); $fields = $vars['module']->mbvardefs->vardefs['fields']; $fieldOptions = array(); foreach ($fields as $id => $def) { $fieldOptions[$id] = $def['name']; } $ss->assign('fieldOpts', $fieldOptions); //If there are no colors defined, use black text on // a white background if (isset($vardef['backcolor'])) { $backcolor = $vardef['backcolor']; } else { $backcolor = '#ffffff'; } if (isset($vardef['textcolor'])) { $textcolor = $vardef['textcolor']; } else { $textcolor = '#000000'; } $ss->assign('BACKCOLOR', $backcolor); $ss->assign('TEXTCOLOR', $textcolor); $colorArray = $app_list_strings['highlightColors']; asort($colorArray); $ss->assign('highlightColors', $colorArray); $ss->assign('textColors', $colorArray); $ss->assign('BACKCOLORNAME', $app_list_strings['highlightColors'][$backcolor]); $ss->assign('TEXTCOLORNAME', $app_list_strings['highlightColors'][$textcolor]); return $ss->fetch('custom/modules/DynamicFields/templates/Fields/Forms/Highlightfield.tpl'); } ?>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating the Smarty Template
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the form controller is in place, create the Smarty template. The .tpl below will define the center content of the field's Studio edit view. The template includes a
+										Element:code
+											coreTop.tpl
+											and
+										Element:code
+											coreBottom.tpl
+											file. These files add the base field properties such as "Name" and "Display Label" that are common across all field types. This allows us to focus on the fields that are specific to our new field type.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/DynamicFields/templates/Fields/Forms/Highlightfield.tpl
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{include file="modules/DynamicFields/templates/Fields/Forms/coreTop.tpl"} <tr> <td class='mbLBL'>{sugar_translate module="DynamicFields" label="COLUMN_TITLE_DEFAULT_VALUE"}:</td> <td> {if $hideLevel < 5} <input type='text' name='default' id='default' value='{$vardef.default}' maxlength='{$vardef.len|default:50}'> {else} <input type='hidden' id='default' name='default' value='{$vardef.default}'>{$vardef.default} {/if} </td> </tr> <tr> <td class='mbLBL'>{sugar_translate module="DynamicFields" label="COLUMN_TITLE_MAX_SIZE"}:</td> <td> {if $hideLevel < 5} <input type='text' name='len' id='field_len' value='{$vardef.len|default:25}' onchange="forceRange(this,1,255);changeMaxLength(document.getElementById('default'),this.value);"> <input type='hidden' id="orig_len" name='orig_len' value='{$vardef.len}'> {if $action=="saveSugarField"} <input type='hidden' name='customTypeValidate' id='customTypeValidate' value='{$vardef.len|default:25}' onchange="if (parseInt(document.getElementById('field_len').value) < parseInt(document.getElementById('orig_len').value)) return confirm(SUGAR.language.get('ModuleBuilder', 'LBL_CONFIRM_LOWER_LENGTH')); return true;"> {/if} {literal} <script> function forceRange(field, min, max) { field.value = parseInt(field.value); if (field.value == 'NaN')field.value = max; if (field.value > max) field.value = max; if (field.value < min) field.value = min; } function changeMaxLength(field, length) { field.maxLength = parseInt(length); field.value = field.value.substr(0, field.maxLength); } </script> {/literal} {else} <input type='hidden' name='len' value='{$vardef.len}'>{$vardef.len} {/if} </td> </tr> <tr> <td class='mbLBL'>{sugar_translate module="DynamicFields" label="LBL_HIGHLIGHTFIELD_BACKCOLOR"}:</td> <td> {if $hideLevel < 5} {html_options name="ext1" id="ext1" selected=$BACKCOLOR options=$highlightColors} {else} <input type='hidden' id='ext1' name='ext1' value='{$BACKCOLOR}'> {$BACKCOLORNAME} {/if} </td> </tr> <tr> <td class='mbLBL'>{sugar_translate module="DynamicFields" label="LBL_HIGHLIGHTFIELD_TEXTCOLOR"}:</td> <td> {if $hideLevel < 5} {html_options name="ext2" id="ext2" selected=$TEXTCOLOR options=$highlightColors} {else} <input type='hidden' id='ext2' name='ext2' value='{$TEXTCOLOR}'> {$TEXTCOLORNAME} {/if} </td> </tr> {include file="modules/DynamicFields/templates/Fields/Forms/coreBottom.tpl"}
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Registering the Field Type
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have defined the Studio template, register the field as a valid field type. For this example, the field will inherit the base field type as it is a text field. In doing this, we are able override the core functions. The most used override is the
+										Element:code
+											save
+											function shown below.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/include/SugarFields/Fields/Highlightfield/SugarFieldHighlightfield.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php require_once('include/SugarFields/Fields/Base/SugarFieldBase.php'); require_once('data/SugarBean.php'); class SugarFieldHighlightfield extends SugarFieldBase { //this function is called to format the field before saving. For example we could put code in here // to check spelling or to change the case of all the letters public function save(&$bean, $params, $field, $properties, $prefix = '') { $GLOBALS['log']->debug("SugarFieldHighlightfield::save() function called."); parent::save($bean, $params, $field, $properties, $prefix); } } ?>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating Language Definitions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For the new field, you must define several language extensions to ensure everything is displayed correctly. This section includes three steps:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Adding the Custom Field to the Type List
+										Element:li
+											Creating Labels for Studio
+										Element:li
+											Defining Dropdown Controls
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Adding the Custom Field to the Type List
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Define the new field type in the field types list. This will allow an Administrator to select the Highlightfield field type in Studio when creating a new field.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/Extension/modules/ModuleBuilder/Ext/Language/en_us.Highlightfield.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $mod_strings['fieldTypes']['Highlightfield'] = 'Highlighted Text';
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Creating Labels for Studio
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once the field type is defined, add the labels for the Studio template.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/Extension/modules/DynamicFields/Ext/Language/en_us.Highlightfield.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $mod_strings['LBL_HIGHLIGHTFIELD'] = 'Highlighted Text'; $mod_strings['LBL_HIGHLIGHTFIELD_FORMAT_HELP'] = ''; $mod_strings['LBL_HIGHLIGHTFIELD_BACKCOLOR'] = 'Background Color'; $mod_strings['LBL_HIGHLIGHTFIELD_TEXTCOLOR'] = 'Text Color';
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Defining Dropdown Controls
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For this example, we must define dropdown lists, which will be available in Studio for an administrator to add or remove color options for the field type.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/Extension/application/Ext/Language/en_us.Highlightfield.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $app_strings['LBL_HIGHLIGHTFIELD_OPERATOR_CONTAINS'] = 'contains'; $app_strings['LBL_HIGHLIGHTFIELD_OPERATOR_NOT_CONTAINS'] = 'does not contain'; $app_strings['LBL_HIGHLIGHTFIELD_OPERATOR_STARTS_WITH'] = 'starts with'; $app_list_strings['highlightColors'] = array( '#0000FF' => 'Blue', '#00ffff' => 'Aqua', '#FF00FF' => 'Fuchsia', '#808080' => 'Gray', '#ffff00' => 'Olive', '#000000' => 'Black', '#800000' => 'Maroon', '#ff0000' => 'Red', '#ffA500' => 'Orange', '#ffff00' => 'Yellow', '#800080' => 'Purple', '#ffffff' => 'White', '#00ff00' => 'Lime', '#008000' => 'Green', '#008080' => 'Teal', '#c0c0c0' => 'Silver', '#000080' => 'Navy' );
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Enabling Search and Filtering
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To enable Highlightfield for searching and filtering, define the filter operators and the Sugar widget.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Defining the Filter Operators
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The filter operators, defined in
+										Element:code
+											./custom/clients/base/filters/operators/operators.php
+											, allow the custom field be used for searching in Sidecar listviews.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/clients/base/filters/operators/operators.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php require_once('clients/base/filters/operators/operators.php'); $viewdefs['base']['filter']['operators']['Highlightfield'] = array( '$contains' => 'LBL_HIGHLIGHTFIELD_OPERATOR_CONTAINS', '$not_contains' => 'LBL_HIGHLIGHTFIELD_OPERATOR_NOT_CONTAINS', '$starts' => 'LBL_HIGHLIGHTFIELD_OPERATOR_STARTS_WITH', );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: The labels for the filters in this example are defined in
+										Element:code
+											./custom/Extension/application/Ext/Language/en_us.Highlightfield.php
+											. For the full list of filters in the system, you can look at
+										Element:code
+											./clients/base/filters/operators/operators.php
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Defining the Sugar Widget
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, define the Sugar widget. The widget will help our field for display on Reports and subpanels in backward compatibility. It also controls how search filters are applied to our field.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/include/generic/SugarWidgets/SugarWidgetFieldHighlightfield.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php if (!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); require_once('include/generic/SugarWidgets/SugarWidgetFieldvarchar.php'); class SugarWidgetFieldHighlightfield extends SugarWidgetFieldVarchar { function SugarWidgetFieldText(&$layout_manager) { parent::SugarWidgetFieldVarchar($layout_manager); } function queryFilterEquals($layout_def) { return $this->reporter->db->convert($this->_get_column_select($layout_def), "text2char") . " = " . $this->reporter->db->quoted($layout_def['input_name0']); } function queryFilterNot_Equals_Str($layout_def) { $column = $this->_get_column_select($layout_def); return "($column IS NULL OR " . $this->reporter->db->convert($column, "text2char") . " != " . $this->reporter->db->quoted($layout_def['input_name0']) . ")"; } function queryFilterNot_Empty($layout_def) { $column = $this->_get_column_select($layout_def); return "($column IS NOT NULL AND " . $this->reporter->db->convert($column, "length") . " > 0)"; } function queryFilterEmpty($layout_def) { $column = $this->_get_column_select($layout_def); return "($column IS NULL OR " . $this->reporter->db->convert($column, "length") . " = 0)"; } function displayList($layout_def) { return nl2br(parent::displayListPlain($layout_def)); } } ?>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once the files are in place, navigate to Admin > Repair > Quick Repair and Rebuild. It is also best practice to clear your browser cache before using the a new field type in Studio.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 03/21/2016 04:19pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

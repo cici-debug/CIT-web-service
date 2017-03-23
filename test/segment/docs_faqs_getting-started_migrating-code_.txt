@@ -1,0 +1,616 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					How do I migrate code from other analytics tools
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Switching from your current client-side javascript event tracking to Segment is easy. Below you can find migration guides for the following tools:
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Google Analytics
+				Element:li
+					Mixpanel
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					If you’d like us to add more tools or mobile/server-side examples to this guide
+				Element:a
+					let us know
+					!
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Google Analytics
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Custom Events
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Google Analytics Custom Events are simple to record in Segment. You’ll record them with our track method and use the same properties you would when sending to Google Analytics directly.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The only mapping exception is the Event Action. That will automatically be populated by the Event Name you include in the track call.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here’s an example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														ga('send', { 'hitType': 'event', 'eventCategory': 'Account', 'eventAction': 'Signed Up', 'eventLabel': 'Premium', 'eventValue': 4 });
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Since Event Category is required we’ll populate it with ‘All’ if you don’t specify one. You can read more about this in
+													Element:a
+														our Google Analytics docs
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Ecommerce
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Segment has full support for the Google Analytics E-Commere API and the
+													Element:a
+														Enhanced E-Commerce API
+														as well. Make sure you follow
+													Element:a
+														our e-commerce quickstart
+														to make sure you’ll be able to use all e-commerce features in the tools we support.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For an e-commerce transaction to appear in Google Analytics you’ll need to enable e-commerce for your Google Analytics view and send a Completed Order event to Segment. This simplifies things a lot compared to the direct Google Analytics code.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here’s an example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														ga('require', 'ecommerce'); ga('ecommerce:addTransaction', { 'id': '93745', 'revenue': '30', 'shipping': '3', 'tax': '2', 'currency': USD }); ga('ecommerce:addItem', { 'id': '23423', 'name': 'Monopoly: 3rd Edition', 'sku': 'J90-32', 'category': 'Games', 'price': '19.00', 'quantity': '1' }); ga('ecommerce:addItem', { 'id': '22744', 'name': 'Uno Card Game', 'sku': 'Q93-32', 'category': 'Cards', 'price': '3.00', 'quantity': '2' }); ga('ecommerce:send');
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														At the very minimum you must include an orderId for each Order and for each product inside that order you must include an id and name. All other properties are optional.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Custom Dimensions
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Through Segment you can record user-scope custom dimensions via our identify, page, or track methods.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A full explanation can be found in
+													Element:a
+														our Google Analytics docs
+														page, but here’s a quick example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														ga('set', 'dimension5', 'Male'); ga('send', 'pageview');
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														(In this example dimension 5 has been setup as Gender in the Google Analytics Admin interface.)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Becomes:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														analytics.identify({ Gender: 'Male' }); analytics.page();
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														(This example assumes you have already mapped Gender to the correct dimension in your Segment source settings for Google Analytics.)
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Everything Else
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To see a full list of Google Analytics features and how they work through Segment read
+													Element:a
+														our Google Analytics docs page
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:hr
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Mixpanel
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Event Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Event tracking is Mixpanel’s bread and butter. Below are all the relevant Mixpanel functions and how you can map them to Segment functions.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:code
+																	mixpanel.track
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Switching your event tracking from Mixpanel to Segment couldn’t be easier. Our trackmethod maps directly to Mixpanel’s. The event name is the first argument and the event properties are the second argument.
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	mixpanel.track('Registered',{ type: 'Referral' });
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Becomes:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	analytics.track('Registered', type: 'Referral' });
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:code
+																	mixpanel.identify
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The identify method in Mixpanel is used to merge together events from multiple environments so your unique events number is accurate and your funnels don’t break.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Since mixpanel.identify only takes a single argument (a userID) it maps directly to ouridentify method:
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:code
+																	mixpanel.identify('123');
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Becomes:
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:code
+																	analytics.identify('123');
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:code
+																	mixpanel.register
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Mixpanel has the idea of Super Properties, which are user traits that get attached to every event that the user does. In Segment you can set Mixpanel Super Properties using our identify method. Super properties are only supported in client-side libraries
+																Element:a
+																	Analytics.js
+																	,
+																Element:a
+																	iOS
+																	,
+																Element:a
+																	Android
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Here’s an example:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	mixpanel.register({ "gender": "male", "hairColor": "brown" });
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Becomes
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	analytics.identify({ gender: 'male', hairColor: 'brown' });
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	This also works when you include a userId argument in your identify call.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:code
+																	mixpanel.alias
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Alias is necessary in Mixpanel to tie together an anonymous visitor with an identified one. The Mixpanel and Segment alias methods both work the same.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	In client-side javascript passing a single argument will alias the current anonymous or identified visitor distinct_id to the userId you pass into it:
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:code
+																	mixpanel.alias('1234');
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Becomes:
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:code
+																	analytics.alias('1234');
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:code
+																	mixpanel.track_links
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If you are tracking links with Mixpanel’s
+																Element:a
+																	track_links
+																	helper you can switch that code to the Segment
+																Element:a
+																	trackLink helper function
+																	in
+																Element:a
+																	Analytics.js
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	And here’s an example:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	// track click for link id #nav mixpanel.track_links("#free-trial-link", "Clicked Free-Trial Link", { plan: 'Enterprise'
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Becomes:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	var link = document.getElementById('free-trial-link'); analytics.trackLink(link, 'Clicked Free-Trial Link', { plan: 'Enterprise' });
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:code
+																	mixpanel.track_forms
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If you are tracking links with
+																Element:a
+																	Mixpanel’s track_forms helper
+																	you can switch that code to
+																Element:a
+																	the Segment trackForm helper function
+																	in Analytics.js.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	And here’s an example:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	// track submission for form id "register" mixpanel.track_forms("#register", "Created Account", plan: 'Premium' });
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Becomes:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	var form = document.getElementById('register'); analytics.trackForm(form, 'Created Account', plan: 'Premium' });
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														People Tracking
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Mixpanel people tracking is a separate database from the event tracking outlined above. For that reason there are separate API methods to record data to Mixpanel People.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:code
+														mixpanel.people.set
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This method sets people properties in Mixpanel People. In Segment you will use our
+													Element:a
+														identify
+														method to accomplish this.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Here’s an example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														mixpanel.people.set({ "$email": "friends@segment.com", "$name": "Jake Peterson" });
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Becomes:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														analytics.identify({ email: 'friends@segment.com', name: 'Jake Peterson' });
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This also works when you include a userId argument in your identify call.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As you can see Segment also recognizes special traits like email and name and translates them to the keys that Mixpanel expects (we automatically add the dollar sign).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For more information check out
+													Element:a
+														our Mixpanel docs
+														.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:code
+																	mixpanel.people.increment
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	To use Mixpanel increment through Segment you won’t event need anything in your code! All you have to do is list the events you’d like to increment automatically in your Mixpanel Advanced Options from your Segment source integrations page.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Read more in
+																Element:a
+																	our Mixpanel Increment Docs
+																	.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:code
+																	mixpanel.people.track_charge
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Mixpanel’s Revenue report requires the use of a special function called track_charge. In Segment that special function becomes a simple track call. By using the event name
+																Element:code
+																	Order Completed
+																	we’ll also use that event for any tools you use that recognize our
+																Element:a
+																	ecommerce spec
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	mixpanel.people.track_charge(30.50, 'orderId': 'F9274' });
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Becomes:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	analytics.track('Completed Order', revenue: 30.50, orderId: 'F9274' });
+															Node:
+															(type) c
+															(layer)5
+																Element:hr
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If you have any questions or see anywhere we can improve our documentation, please
+																Element:a
+																	let us know
+																	or kick off a conversation in the
+																Element:a
+																	Segment Community
+																	!
+															Node:
+															(type) c
+															(layer)5
+																Element:footer
+																Element:span
+																Element:span
+																	Was this document helpful?
+																Element:span
+																Element:label
+																Element:span
+																	Yes
+																Element:label
+																Element:span
+																	No
+															Node:
+															(type) c
+															(layer)5
+																Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a

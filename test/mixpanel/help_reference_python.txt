@@ -1,0 +1,980 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Python API Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Mixpanel Python library is designed to be used for scripting, or in circumstances when a user isn't directly interacting with your application on the web or a mobile device.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Mixpanel also provides a powerful and easy to use
+				Element:a
+					client-side JavaScript library for web applications
+					. This library offers platform-specific features and conveniences that can make Mixpanel implementations much simpler, and can scale naturally to an unlimited number of clients. The client-side JavaScript library is the preferred way to add Mixpanel to user-facing web applications.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					see the client side JavaScript library
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Installing the library
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can get the library using pip.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								pip
+							Element:span
+								install
+							Element:span
+								mixpanel
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once the library is installed, use the Mixpanel library in your applications with:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								import
+							Element:span
+								mixpanel
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sending events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel events are sent using an instance of the Mixpanel class.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can instantiate an instance of Mixpanel with a String containing your Mixpanel project token. You can find your project token in the settings dialog of the Mixpanel web application.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you have an instance of the tracker, you can track events by providing the event name and properties to
+							Element:a
+								Mixpanel.track()
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								from
+							Element:span
+								mixpanel
+							Element:span
+								import
+							Element:span
+								Mixpanel
+							Element:span
+								mp
+							Element:span
+								=
+							Element:span
+								Mixpanel
+							Element:span
+								(
+							Element:span
+								PROJECT_TOKEN
+							Element:span
+								)
+							Element:span
+								# Tracks an event, 'Sent Message',
+							Element:span
+								# with distinct_id user_id
+							Element:span
+								mp
+							Element:span
+								.
+							Element:span
+								track
+							Element:span
+								(
+							Element:span
+								user_id
+							Element:span
+								,
+							Element:span
+								'Sent Message'
+							Element:span
+								)
+							Element:span
+								# You can also include properties to describe
+							Element:span
+								# the circumstances of the event
+							Element:span
+								mp
+							Element:span
+								.
+							Element:span
+								track
+							Element:span
+								(
+							Element:span
+								user_id
+							Element:span
+								,
+							Element:span
+								'Plan Upgraded'
+							Element:span
+								,
+							Element:span
+								{
+							Element:span
+								'Old Plan'
+							Element:span
+								:
+							Element:span
+								'Business'
+							Element:span
+								,
+							Element:span
+								'New Plan'
+							Element:span
+								:
+							Element:span
+								'Premium'
+							Element:span
+								})
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel determines default geolocation data ($city, $region, mp_country_code) using the IP address on the incoming request. As all server-side calls will likely originate from the same IP (that is, the IP of your server), this can have the unintended effect of setting the location of all of your users to the location of your datacenter.
+							Element:a
+								Read about best practices for geolocation with server-side implementations
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Combining anonymous and identifiable user data
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It's important to send the same distinct_id with each event that an individual user triggers. Events recorded with different distinct_ids will be treated in Mixpanel as if they were performed by different users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are times when it can be convenient to start referring to a user by a different identifier in your implementation. The most common case is after registration, when a user switches from being an anonymous user (with an anonymous distinct_id) to an authenticated user with an (authenticated id). In this case, you can create an
+							Element:a
+								alias()
+								for the user to keep the distinct_id consistent. An alias is a string stored in a Mixpanel lookup table that is associated with an anonymous distinct_id. Once written, aliases are not editable. Any data sent to Mixpanel with an alias as the distinct_id will be remapped and written to disk using the alias's corresponding anonymous distinct_id. This allows you to start identifying a user by an authenticated id without changing the distinct_id that is ultimately written in Mixpanel.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								# This call will send a request to Mixpanel to
+							Element:span
+								# associate all future events with new_internal_id
+							Element:span
+								# with existing events associated with
+							Element:span
+								# original_anonymous_id
+							Element:span
+								mp
+							Element:span
+								.
+							Element:span
+								alias
+							Element:span
+								(
+							Element:span
+								new_internal_id
+							Element:span
+								,
+							Element:span
+								original_anonymous_id
+							Element:span
+								)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Typically, you will call
+							Element:a
+								Mixpanel.alias()
+								once in a user's lifetime, when the user first signs up and is assigned an internal id.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Aliases don't take effect until the alias request hits the Mixpanel server. Because of this, you'll need to take special care if you're using Mixpanel.alias() with a custom consumer, so you can be sure that your alias message arrives before any events or updates associated with the new alias.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Storing user profiles
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In addition to events, you can send People Analytics profile updates to Mixpanel. Mixpanel can maintain a profile of each of your users, storing information you know about them. An update is a message that changes the properties of a People Analytics profile.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can use profiles to explore and segment users by who they are, rather than what they did. You can also use profiles to send notifications, such as emails, SMS, or push notifications.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel determines default geolocation data ($city, $region, mp_country_code) using the IP address on the incoming request. As all server-side calls will likely originate from the same IP (that is, the IP of your server), this can have the unintended effect of setting the location of all of your users to the location of your datacenter.
+							Element:a
+								Read about best practices for geolocation with server-side implementations
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Setting profile properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Instances of Mixpanel have a method to send profile updates.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											# create or update a profile with First Name, Last Name,
+										Element:span
+											# E-Mail Address, Phone Number, and Favorite Color
+										Element:span
+											mp
+										Element:span
+											.
+										Element:span
+											people_set
+										Element:span
+											(
+										Element:span
+											'12345'
+										Element:span
+											,
+										Element:span
+											{
+										Element:span
+											'$first_name'
+										Element:span
+											:
+										Element:span
+											'John'
+										Element:span
+											,
+										Element:span
+											'$last_name'
+										Element:span
+											:
+										Element:span
+											'Doe'
+										Element:span
+											,
+										Element:span
+											'$email'
+										Element:span
+											:
+										Element:span
+											'john.doe@example.com'
+										Element:span
+											,
+										Element:span
+											'$phone'
+										Element:span
+											:
+										Element:span
+											'5555555555'
+										Element:span
+											,
+										Element:span
+											'Favorite Color'
+										Element:span
+											:
+										Element:span
+											'red'
+										Element:span
+											})
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This call to
+										Element:a
+											people_set()
+											will change the value of properties on user 12345's profile. If there isn't a profile with distinct_id 12345 in Mixpanel already, a new profile will be created. If user 12345 already has has any of these properties set on their profile, the old values will be overwritten with the new ones.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Appending to list properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use
+										Element:a
+											people_append()
+											to add an item to an existing list-valued property. The values you send with the append will be added to the end of the list for each named property. If the property doesn't exist, it will be created with a one element list as its value.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											mp
+										Element:span
+											.
+										Element:span
+											people_append
+										Element:span
+											(
+										Element:span
+											'12345'
+										Element:span
+											,
+										Element:span
+											{
+										Element:span
+											'Favorite Fruits'
+										Element:span
+											:
+										Element:span
+											'Apples'
+										Element:span
+											})
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Other types of profile updates
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are a few other types of profile updates. You can get more information about them from the
+										Element:a
+											Mixpanel Library API Reference
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Tracking revenue
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel makes it easy to analyze the revenue you make from individual customers. By associating charges with user profiles, you can compare revenue across different customer segments and calculate things like lifetime value.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can track a single transaction with
+							Element:a
+								Mixpanel.people_track_charge()
+								. Sending a message created with people_track_charge will add transactions to the individual user profile, which will also be reflected in the
+							Element:a
+								Mixpanel Revenue report
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								# Records a charge of $9.99 from user '12345'
+							Element:span
+								mp
+							Element:span
+								.
+							Element:span
+								people_track_charge
+							Element:span
+								(
+							Element:span
+								'12345'
+							Element:span
+								,
+							Element:span
+								9.99
+							Element:span
+								)
+							Element:span
+								# records a charge of $30.50 on the 2nd of January
+							Element:span
+								mp
+							Element:span
+								.
+							Element:span
+								people_track_charge
+							Element:span
+								(
+							Element:span
+								"12345"
+							Element:span
+								,
+							Element:span
+								30.50
+							Element:span
+								,
+							Element:span
+								{
+							Element:span
+								'$time'
+							Element:span
+								:
+							Element:span
+								'2013-01-02T09:32:00'
+							Element:span
+								})
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Scaling your server-side tracking
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, the Mixpanel class sends a request to Mixpanel immediately for every tracking message or profile update. This is convenient for getting started quickly, but almost all server-side use of the Mixpanel library will eventually want to do the IO associated with tracking in a separate thread or process from the events being tracked.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Mixpanel library provides the
+							Element:a
+								Consumer
+								class for finer control of your tracking IO.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In addition to your token, the Mixpanel constructor takes an optional
+								endpointstring Either the string 'events' (for messages intended to go to the Mixpanel /track endpoint), or the string 'people' (for messages intended for the Mixpanel /people endpoint). json_messagestring A JSON message, encoded in a string, that can be used by the service at the named endpoint. The structure of meaningful JSON messages is described in
+							Element:code
+								consumer
+								argument. This argument, if provided and not None, should be an object with a method named
+							Element:code
+								send()
+								, that takes two arguments:
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								the Mixpanel HTTP API reference
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can use the send() method of your Consumer to send your messages to a separate process, add them to a queue, or write them to a log.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								class
+							Element:span
+								LoggingConsumer
+							Element:span
+								(
+							Element:span
+								object
+							Element:span
+								):
+							Element:span
+								def
+							Element:span
+								__init__
+							Element:span
+								(
+							Element:span
+								self
+							Element:span
+								):
+							Element:span
+								self
+							Element:span
+								.
+							Element:span
+								mp_log
+							Element:span
+								=
+							Element:span
+								open
+							Element:span
+								(
+							Element:span
+								"MIXPANEL_LOG.txt"
+							Element:span
+								,
+							Element:span
+								"w+"
+							Element:span
+								)
+							Element:span
+								def
+							Element:span
+								send
+							Element:span
+								(
+							Element:span
+								self
+							Element:span
+								,
+							Element:span
+								endpoint
+							Element:span
+								,
+							Element:span
+								json_message
+							Element:span
+								):
+							Element:span
+								self
+							Element:span
+								.
+							Element:span
+								mp_log
+							Element:span
+								.
+							Element:span
+								write
+							Element:span
+								(
+							Element:span
+								"{0}::{1}
+							Element:span
+								\n
+							Element:span
+								"
+							Element:span
+								.
+							Element:span
+								format
+							Element:span
+								(
+							Element:span
+								endpoint
+							Element:span
+								,
+							Element:span
+								message
+							Element:span
+								))
+							Element:span
+								# Whenever you track with logging_mp, your messages will
+							Element:span
+								# be written to MIXPANEL_LOG.txt rather than being sent
+							Element:span
+								# to the Mixpanel servers
+							Element:span
+								logging_mp
+							Element:span
+								=
+							Element:span
+								Mixpanel
+							Element:span
+								(
+							Element:span
+								YOUR_TOKEN
+							Element:span
+								,
+							Element:span
+								LoggingConsumer
+							Element:span
+								())
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using a custom consumer is most powerful when you combine it with the existing consumers in the mixpanel module.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								import
+							Element:span
+								mixpanel
+							Element:span
+								# The default Mixpanel consumer will take
+							Element:span
+								# endpoints and messages and send them to Mixpanel
+							Element:span
+								consumer
+							Element:span
+								=
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								Consumer
+							Element:span
+								()
+							Element:span
+								with
+							Element:span
+								open
+							Element:span
+								(
+							Element:span
+								"MIXPANEL_LOG.txt"
+							Element:span
+								,
+							Element:span
+								"r+"
+							Element:span
+								)
+							Element:span
+								as
+							Element:span
+								read_log
+							Element:span
+								:
+							Element:span
+								for
+							Element:span
+								line
+							Element:span
+								in
+							Element:span
+								read_log
+							Element:span
+								:
+							Element:span
+								(
+							Element:span
+								endpoint
+							Element:span
+								,
+							Element:span
+								message
+							Element:span
+								)
+							Element:span
+								=
+							Element:span
+								line
+							Element:span
+								.
+							Element:span
+								split
+							Element:span
+								(
+							Element:span
+								'::'
+							Element:span
+								,
+							Element:span
+								1
+							Element:span
+								)
+							Element:span
+								consumer
+							Element:span
+								.
+							Element:span
+								send
+							Element:span
+								(
+							Element:span
+								endpoint
+							Element:span
+								,
+							Element:span
+								message
+							Element:span
+								)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The combination of package-provided consumers and your own custom consumer makes it simple to use the Mixpanel library with a queueing system. For example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								# In your time-sensitive process
+							Element:span
+								class
+							Element:span
+								EnqueueingConsumer
+							Element:span
+								(
+							Element:span
+								object
+							Element:span
+								):
+							Element:span
+								def
+							Element:span
+								send
+							Element:span
+								(
+							Element:span
+								self
+							Element:span
+								,
+							Element:span
+								endpoint
+							Element:span
+								,
+							Element:span
+								json_message
+							Element:span
+								):
+							Element:span
+								YOUR_QUEUE
+							Element:span
+								.
+							Element:span
+								set
+							Element:span
+								(
+							Element:span
+								'mixpanel_queue'
+							Element:span
+								,
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								dumps
+							Element:span
+								([
+							Element:span
+								endpoint
+							Element:span
+								,
+							Element:span
+								json_message
+							Element:span
+								]))
+							Element:span
+								mp
+							Element:span
+								=
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								Mixpanel
+							Element:span
+								(
+							Element:span
+								YOUR_TOKEN
+							Element:span
+								,
+							Element:span
+								EnqueueingConsumer
+							Element:span
+								())
+							Element:span
+								# Track just like you would in any other situation
+							Element:span
+								mp
+							Element:span
+								.
+							Element:span
+								track
+							Element:span
+								(
+							Element:span
+								user_id
+							Element:span
+								,
+							Element:span
+								'Sent Message'
+							Element:span
+								)
+							Element:span
+								mp
+							Element:span
+								.
+							Element:span
+								people_increment
+							Element:span
+								(
+							Element:span
+								user_id
+							Element:span
+								,
+							Element:span
+								{
+							Element:span
+								'Messages Sent'
+							Element:span
+								:
+							Element:span
+								1
+							Element:span
+								})
+							Element:span
+								# In a worker process on another machine
+							Element:span
+								consumer
+							Element:span
+								=
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								Consumer
+							Element:span
+								()
+							Element:span
+								while
+							Element:span
+								True
+							Element:span
+								:
+							Element:span
+								job
+							Element:span
+								=
+							Element:span
+								YOUR_QUEUE
+							Element:span
+								.
+							Element:span
+								get
+							Element:span
+								(
+							Element:span
+								'mixpanel_queue'
+							Element:span
+								)
+							Element:span
+								consumer
+							Element:span
+								.
+							Element:span
+								send
+							Element:span
+								(
+							Element:span
+								*
+							Element:span
+								JSON
+							Element:span
+								.
+							Element:span
+								loads
+							Element:span
+								(
+							Element:span
+								job
+							Element:span
+								))
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For applications where overall load is light, but the latency of a particular process is an issue, you can also use
+								Document Sections
+							Element:a
+								mixpanel-python-async
+								, a third party consumer that processes tracking requests efficiently in a separate thread.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+								Learn more
+							Element:li
+							Element:a
+								Introduction
+							Element:li
+							Element:a
+								Installing the library
+							Element:li
+							Element:a
+								Sending events
+							Element:li
+							Element:a
+								Linking two user IDs
+							Element:li
+							Element:a
+								Storing user profiles
+							Element:li
+							Element:a
+								Tracking revenue
+							Element:li
+							Element:a
+								Scaling your server-side tracking
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Full API reference
+							Element:li
+							Element:a
+								Example scripts
+							Element:li
+							Element:a
+								Library source code

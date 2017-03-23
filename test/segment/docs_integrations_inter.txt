@@ -1,0 +1,1051 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Intercom Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					Intercom
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to Intercom in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you toggle on Intercom in Segment, this is what happens:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Our CDN is updated within 5-10 minutes. Then our snippet will start asynchronously loading Intercom’s library.js onto your page. This means you should remove Intercom’s snippet from your page.
+							Element:li
+								Because Intercom only associates Track events with known users, an
+							Element:a
+								Identify
+								call with a userId is required before Track events will be associated properly.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Calling
+							Element:a
+								in Analytics.js triggers the Intercom update method, which will look for new Intercom messages that should be displayed to the current user.
+							Element:code
+								page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								and
+							Element:code
+								page
+							Element:a
+								methods don’t have any effect on Intercom when used from our server-side or mobile SDKs.
+							Element:code
+								screen
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have the Intercom’s
+							Element:strong
+								Acquire
+								package, simply calling
+							Element:code
+								.page()
+								(which is already included in our snippet) will trigger the chat widget to appear. Otherwise, you would need to call
+							Element:code
+								identify
+								to make the chat widget appear.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								If you have the
+							Element:strong
+								Acquire
+								package and calling
+							Element:code
+								page
+								still does not show your chat widget, be sure to check your “Visitors on your website” setting inside your Intercom account!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											From the Browser
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:a
+											on
+										Element:code
+											identify
+										Element:code
+											analytics.js
+											, we create the
+										Element:code
+											intercomSettings
+											object and load Intercom’s javascript into the page. Here’s an example
+										Element:code
+											identify
+											call that you can send:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.identify('user1234', { email: 'teemo@segment.com', name: 'Teemo', company: { id: '813', name: 'Teemo Holding Company' createdAt: 'Thu Mar 24 2016 17:44:51 GMT+0000 (UTC)' }, createdAt: 'Thu Mar 24 2016 17:46:45 GMT+0000 (UTC)' });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here’s how we create the
+										Element:code
+											intercomSettings
+											object:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											The
+										Element:code
+											userId
+											parameter (the first argument) is set to
+										Element:code
+											intercomSettings.user_id
+											.
+										Element:li
+											The
+										Element:code
+											traits
+											parameter (the second argument) is set to
+										Element:code
+											intercomSettings.custom_attributes
+											.
+										Element:li
+											If you send
+										Element:code
+											traits.email
+											we set it as
+										Element:code
+											intercomSettings.email
+											.
+										Element:li
+											If you send
+										Element:code
+											traits.name
+											we set it as
+										Element:code
+											intercomSettings.name
+											.
+										Element:li
+											If you send
+										Element:code
+											traits.company
+											we set it as
+										Element:code
+											intercomSettings.company
+											.
+										Element:li
+											If you send
+										Element:code
+											traits.createdAt
+											as a javascript Date object, a valid date string, milliseconds since the epoch, or as seconds like a Unix timestamp, we set
+										Element:code
+											intercomSettings.created_at
+											as the unix timestamp in seconds for that created date.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											-
+										Element:code
+											traits.avatar
+											is read-only. Intercom determines the avatar based on the email address of the user.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Passing
+										Element:code
+											traits.company
+											will create a new Intercom Company if the
+										Element:code
+											company_id
+											does not match a known company. If company is a string, we will set the
+										Element:code
+											company_id
+											as a hash of
+										Element:code
+											company_name
+											as an id is required to
+										Element:a
+											associate the user to the company
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											may be used to create/update company profiles explicitly.
+										Element:code
+											group
+											call
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Collect Context
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With this option selected,
+										Element:code
+											identify
+											calls will include contextual information collected by
+										Element:a
+											Segment’s mobile libraries
+											if it is available. This info will be set as Custom Attributes on the Intercom user.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The fields collected from the
+										Element:a
+											context object
+											are device.type, device.manufacturer, device.model, os.name, os.version, app.name, app.version and will populate in Intercom as device_type, device_manufacturer, etc.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Server-Side & Mobile
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you call
+										Element:a
+											from any of the server-side or mobile sources, we create or update a user in Intercom. We’ll map our
+										Element:code
+											identify
+										Element:a
+											special traits
+											(
+										Element:code
+											email
+											,
+										Element:code
+											firstName
+											,
+										Element:code
+											lastName
+											,
+										Element:code
+											createdAt
+											, and
+										Element:code
+											company
+											) to Intercom special properties.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You must enter an
+										Element:strong
+											API key
+											in your Intercom Advanced settings on your Segment integrations page to make server-side or mobile calls to Intercom.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to use Intercom’s
+										Element:code
+											last_request_at
+											, you’ll need to pass in
+										Element:code
+											active: true
+											in the context object. Then, by default we will set
+										Element:code
+											last_request_at
+											to the current time; however, if you pass in your own timestamp, pass it in as
+										Element:code
+											lastRequestAt
+											(in camelCase), and we’ll set
+										Element:code
+											last_request_at
+											to that value in our server-side sources (coming soon on mobile!).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to include
+										Element:code
+											last_seen_user_agent
+											then include it in the
+										Element:code
+											context.userAgent
+											. Similarly with
+										Element:code
+											last_seen_ip
+											which is used for geolocation, you can include the IP address at
+										Element:code
+											context.ip
+											.
+										Element:a
+											Click here for an example
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment supports Intercom events in all of our sources through the
+							Element:a
+								method.
+							Element:code
+								track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you send
+							Element:code
+								properties.revenue
+								and
+							Element:code
+								properties.currency
+								, we will format that according to
+							Element:a
+								Intercom’s Monetary Amount
+								and send it as:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								price: { amount: <properties.revenue> * 100, // since Intercom requires this in cents currency: <properties.currency> // will default to 'usd' }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Limited Properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Intercom can only store
+										Element:a
+											5 event properties
+											per event. That means if you send an event to Segment with more than 5 properties, Intercom will only show the first 5 properties.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Limited Events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Intercom only allows a total of
+										Element:a
+											120 unique event names
+											(see the questions titled “Is there a limit on the number of event types I can send?”). That means if you are sending Segment more than 120 unique event names, Intercom will only accept the first 120 events that hit their servers.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Server-side Race Condition
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Because our server-side libraries batch calls by default, it may happen that an Identify call intended to create a user arrives simultaneously with a Track event associated with this user. If the Track event is processed before the user is created, an error will result and the event will not be recorded.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											Adding a Flush method
+											immediately following the Identify, and before any subsequent Track event, will help the Identify call reach Intercom first to create the user. Generally, this prevents the race condition, but an additional timeout can be used if necessary.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Group
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment supports Intercom companies in all of our sources through the
+							Element:a
+								method. Users can be put into multiple groups, which will associate them to multiple companies in Intercom.
+							Element:code
+								group
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.group('companyId123', { name: 'Segment' });
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment also maps to Intercom’s special properties
+							Element:code
+								monthly_spend
+								and
+							Element:code
+								plan
+								. All you have to do is set
+							Element:code
+								traits.monthlySpend
+								and
+							Element:code
+								traits.plan
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Features
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Disassociating Users from a Company
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can unassociate a user from a company by passing in a field inside the
+										Element:code
+											company
+											trait with
+										Element:code
+											remove: true
+											in your
+										Element:code
+											identify
+											calls.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.identify({ userId: '019mr8mf4r', traits: { name: 'Michael Bolton', email: 'mbolton@initech.com', plan: 'Enterprise', company: { id: 12345, remove: true } } });
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Secure Mode
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to enable Intercom
+										Element:a
+											secure mode
+											for
+										Element:code
+											analytics.js
+											, you can pass in the
+										Element:code
+											user_hash
+											variable inside the context object.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											user_hash
+											should be a SHA256 hash of your Intercom API secret and the
+										Element:strong
+											userId
+											. The hash is not based on the email, it’s based on the
+										Element:code
+											userId
+											. Here’s an example rendering an identify call with secure mode:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.identify('<%= current_user.id %>', { email: '<%= current_user.email %>', createdAt: '<%= current_user.created %>' }, { Intercom: { user_hash: '<%= OpenSSL::HMAC.hexdigest("sha256", "YOUR_INTERCOM_APP_SECRET", current_user.id) %>' } });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											YOUR_INTERCOM_APP_SECRET
+											is found in Intercom’s secure mode setup guide.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Secure Mode plus filtering via Integrations Object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If using Intercom secure mode AND
+													Element:a
+														selective integrations functionality
+														, the context object will look like this:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ Intercom: { user_hash: '<%= OpenSSL::HMAC.hexdigest("sha256", "YOUR_INTERCOM_APP_SECRET", current_user.id) %>' }, integrations: { All: false, Intercom: true } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Unsubscribe Users
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To unsubscribe users from emails, you may set a flag from
+										Element:strong
+											server side
+											libraries,
+										Element:code
+											unsubscribedFromEmails
+											, inside
+										Element:code
+											context
+											object:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											node.js
+											example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.identify({ userId: '4832094283057439285723523452345', anonymousId:'43254364571', context:{ Intercom: { unsubscribedFromEmails: true } }, traits: { firstName: 'John ', lastName: 'Jacob', email: 'jingleheimer@schmidt.com' } });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: This will only work from server side libraries. NOT
+										Element:code
+											analytics.js
+											!
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Last Seen
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default Intercom updates the
+										Element:strong
+											Last Seen
+											user trait whenever a user’s profile is updated by identify calls. If you want to update a user without updating their
+										Element:strong
+											Last Seen
+											time, pass
+										Element:code
+											active
+											with a value of
+										Element:code
+											false
+											into the context (see below). Note that this only works server-side;
+										Element:strong
+											Last Seen
+											will always be updated client-side. This setting can be passed to the context for
+										Element:a
+											calls only. Please note that id or name are necessary to update company.
+										Element:code
+											identify
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here’s a full
+										Element:code
+											python
+											example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.identify(user_id='some_user_id', traits={ "email": "ben@intercom.io", "firstName": "Ben", "lastName": "McRedmond" "createdAt": 1363902294011, "plan": "Premium" }, context={ "ip": "192.168.0.1", "active": False, "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.47 Safari/537.36" })
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Intercom Tags
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our API doesn’t support Intercom tags. Traits can be used instead of tags to create segments of users, and the advantage is you can use those traits in other integrations like Segment.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Conditionally show the Intercom chat widget
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can take advantage of Intercom’s
+										Element:code
+											hide_default_launcher
+											option to selectively show the chat widget. According to Intercom’s
+										Element:a
+											docs
+											, you want to first hide the Messenger for all users inside their UI via Messenger settings. Then think about how you want to programmatically decide which users you’d like to show the widget to. Then you can pass an Intercom specific integration setting like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											// with analytics.js analytics.identify('teemo', { someTrait: 'x'}, { Intercom: { hideDefaultLauncher: true } });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: You can pass in the Intercom specific option via all supported calls for this integration (
+										Element:code
+											page
+											,
+										Element:code
+											identify
+											, and
+										Element:code
+											group
+											)!
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											I’m seeing a
+										Element:code
+											403 Forbidden
+											error
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You probably have
+										Element:a
+											Intercom’s secure mode
+											setting turned on but are not passing the
+										Element:code
+											user_hash
+											correctly or at all.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You may also have to
+										Element:a
+											whitelist your domain
+											in Intercom’s dashboard. Otherwise, events on non-whitelisted pages may be rejected with a 403 error.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											My Intercom Widget doesn’t show up
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Make sure you are sending a
+										Element:code
+											page
+											and
+										Element:code
+											identify
+											call when the page is loaded. This allows Intercom to register the page and the user, which would enable the widget to appear.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are sending those two calls, then check that the CSS selector for the widget is correct. The default is
+										Element:code
+											#IntercomDefaultWidget
+											, but if you
+										Element:a
+											customize your widget
+											, then be sure to update this field accordingly.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+								✅
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Custom Inbox Button Selector
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, Intercom will inject their own inbox button onto the page, but you can choose to use your own custom button instead by providing a CSS selector like:
+										Element:code
+											#my-button
+											.
+										Element:em
+											Note: you must have enabled the
+											The default value is
+										Element:strong
+											Show the Intercom Inbox
+											setting for this to work.
+										Element:code
+											#IntercomDefaultWidget
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Enter your API Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note: this is
+										Element:strong
+											required
+											to send data to Intercom from your servers. You can find your API key after activating your account under the
+										Element:strong
+											Configure > API Keys
+											at
+										Element:a
+											Intercom.io
+											. It should be 40 characters long, and look something like this:
+										Element:code
+											4ad6ce80fc1d441324cfb11cdf8d3ade8fc7e8fd
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											App ID (required for analytics.js)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note: this is
+										Element:strong
+											required
+											to send data to Intercom from your browser. You can find your API key after activating your account under the
+										Element:strong
+											Gear Menu > Configure > API Keys
+											at
+										Element:a
+											Intercom.io
+											. It should be 8 or 40 characters long, and look something like this:
+										Element:code
+											9iefb489
+											or
+										Element:code
+											5113430c43a1b34770769dedb3eb3435be1dd1e9
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Specific Nested Trait and Property Handling
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Intercom does not accept nested custom traits or properties so by default we’ll flatten any custom nested properties. If you have specific properties that you’d like handled differently, enter the nested property name on the left, and how you’d like it to be transformed when it’s sent to Intercom on the right. You can either flatten, stringify, or drop specific nested custom properties. If you’d like your custom nested properties stringified or dropped by default, you can do so in the Default Nested Trait and Property Handling option.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Include Context with Identify Calls
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Pass context data with Identify calls as Custom Attributes. Includes device.type, device.manufacturer, device.model, os.name, os.version, app.name, app.version
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Default Nested Trait and Property Handling
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Intercom does not accept nested custom traits or properties so by default we’ll flatten any custom nested properties. You can choose the default method for handling custom nested properties by selecting the default here. If there are specific properties you’d like handled differently than the default, you can do so in the Specific Nested Trait and Property Handling option.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Rich Link Properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To use Intercom’s Rich Link object, list the name of the exact Segment property name and make sure the value of those properties only include
+										Element:code
+											url
+											and
+										Element:code
+											value
+											keys.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											browser
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

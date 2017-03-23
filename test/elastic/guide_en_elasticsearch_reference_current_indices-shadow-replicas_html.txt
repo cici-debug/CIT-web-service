@@ -1,0 +1,406 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Shadow replica indices
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Deprecated in 5.2.0.
+											Shadow replicas don’t see much usage and we are planning to remove them
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you would like to use a shared filesystem, you can use the shadow replicas settings to choose where on disk the data for an index should be kept, as well as how Elasticsearch should replay operations on all the replica shards of an index.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to fully utilize the
+										Element:code
+											index.data_path
+											and
+										Element:code
+											index.shadow_replicas
+											settings, you need to allow Elasticsearch to use the same data directory for multiple instances by setting
+										Element:code
+											node.add_lock_id_to_custom_path
+											to false in elasticsearch.yml:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											node.add_lock_id_to_custom_path: false
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You will also need to indicate to the security manager where the custom indices will be, so that the correct permissions can be applied. You can do this by setting the
+										Element:code
+											path.shared_data
+											setting in elasticsearch.yml:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											path.shared_data: /opt/data
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This means that Elasticsearch can read and write to files in any subdirectory of the
+										Element:code
+											path.shared_data
+											setting.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can then create an index with a custom data path, where each node will use this path for the data:
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Because shadow replicas do not index the document on replica shards, it’s possible for the replica’s known mapping to be behind the index’s known mapping if the latest cluster state has not yet been processed on the node containing the replica. Because of this, it is highly recommended to use pre-defined mappings when using shadow replicas.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -XPUT 'localhost:9200/my_index' -d ' { "index" : { "number_of_shards" : 1, "number_of_replicas" : 4, "data_path": "/opt/data/my_index", "shadow_replicas": true } }'
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the above example, the "/opt/data/my_index" path is a shared filesystem that must be available on every node in the Elasticsearch cluster. You must also ensure that the Elasticsearch process has the correct permissions to read from and write to the directory used in the
+										Element:code
+											index.data_path
+											setting.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											data_path
+											does not have to contain the index name, in this case, "my_index" was used but it could easily also have been "/opt/data/"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An index that has been created with the
+										Element:code
+											index.shadow_replicas
+											setting set to "true" will not replicate document operations to any of the replica shards, instead, it will only continually refresh. Once segments are available on the filesystem where the shadow replica resides (after an Elasticsearch "flush"), a regular refresh (governed by the
+										Element:code
+											index.refresh_interval
+											) can be used to make the new data searchable.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Since documents are only indexed on the primary shard, realtime GET requests could fail to return a document if executed on the replica shard, therefore, GET API requests automatically have the
+										Element:code
+											?preference=_primary
+											flag set if there is no preference flag already set.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to ensure the data is being synchronized in a fast enough manner, you may need to tune the flush threshold for the index to a desired number. A flush is needed to fsync segment files to disk, so they will be visible to all other replica nodes. Users should test what flush threshold levels they are comfortable with, as increased flushing can impact indexing performance.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Elasticsearch cluster will still detect the loss of a primary shard, and transform the replica into a primary in this situation. This transformation will take slightly longer, since no
+										Element:code
+											IndexWriter
+											is maintained for each shadow replica.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Below is the list of settings that can be changed using the update settings API:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											index.data_path
+											(string)
+										Element:dd
+											Path to use for the index’s data. Note that by default Elasticsearch will append the node ordinal by default to the path to ensure multiple instances of Elasticsearch on the same machine do not share a data directory.
+										Element:dt
+										Element:span
+										Element:code
+											index.shadow_replicas
+										Element:dd
+											Boolean value indicating this index should use shadow replicas. Defaults to
+										Element:code
+											false
+											.
+										Element:dt
+										Element:span
+										Element:code
+											index.shared_filesystem
+										Element:dd
+											Boolean value indicating this index uses a shared filesystem. Defaults to the
+										Element:code
+											true
+											if
+										Element:code
+											index.shadow_replicas
+											is set to true,
+										Element:code
+											false
+											otherwise.
+										Element:dt
+										Element:span
+										Element:code
+											index.shared_filesystem.recover_on_any_node
+										Element:dd
+											Boolean value indicating whether the primary shards for the index should be allowed to recover on any node in the cluster. If a node holding a copy of the shard is found, recovery prefers that node. Defaults to
+										Element:code
+											false
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Index Templates
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Node level settings related to shadow replicas »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,880 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Advanced Techniques
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Learn about some of the advanced methods that SugarQuery has to offer, that are not as commonly used.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Get First Record
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Getting the first record in a result set, can be accomplished by by using the
+							Element:code
+								limit()
+								method. The
+							Element:code
+								getOne()
+								method is similar in that it gets the first record, but it also returns the first piece of data for that record.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											getOne()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Get the first piece of data on the first record returned by the generated query. In this example we want the 'name' from the Account with a given ID.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$SugarQuery = new SugarQuery(); $SugarQuery->select(array('name')); $SugarQuery->from(BeanFactory::newBean('Accounts')); $SugarQuery->where()->equals('id',$id); //Get the Name of the account $accountName = $SugarQuery->getOne();
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Aggregates
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											setCountQuery()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Currently the only method available for creating an aggregate column, is the
+										Element:code
+											setCountQuery()
+											method on the SugarQuery_Builder_Select Object. You can add this method to your
+										Element:code
+											select()
+											method chain, to add
+										Element:code
+											count(0) as record_count
+											to the SQL SELECT statement.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$SugarQuery = new SugarQuery(); $SugarQuery->select(array('name'))->setCountQuery(); $SugarQuery->from(BeanFactory::newBean('Accounts')); $SugarQuery->groupByRaw('accounts.name');
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above example will output the following SQL query:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											SELECT accounts.name name, count(0) AS record_count FROM accounts GROUP BY accounts.name
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Arguments
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														No arguments
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														SugarQuery_Builder_Select Object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Allows for method chaining on the Select Object.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Unions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Unions allow joining multiple queries with the same selected fields to be combined during output. You can use Unions in SugarQuery by using the
+							Element:code
+								union()
+								method.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											union()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To add a union, you can use the corresponding
+										Element:code
+											union()
+											method. The example below will join two SQL queries:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//fetch the bean of the module to query $bean = BeanFactory::newBean('Accounts'); //specify fields to fetch $fields = array( 'id', 'name' ); //create first query $sq1 = new SugarQuery(); $sq1->select($fields); $sq1->from($bean, array('team_security' => false)); $sq1->Where()->in('account_type', array('Customer')); //create second query $sq2 = new SugarQuery(); $sq2->select($fields); $sq2->from($bean, array('team_security' => false)); $sq2->Where()->in('account_type', array('Investor')); //create union $sqUnion = new SugarQuery(); $sqUnion->union($sq1); $sqUnion->union($sq2); $sqUnion->limit(5);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The resulting SQL statement from the
+										Element:code
+											compileSql()
+											function for the parameters above in MySQL would be:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											(SELECT accounts.id id, accounts.name name FROM accounts WHERE accounts.deleted = 0 AND accounts.account_type IN ('Customer')) UNION ALL (SELECT accounts.id id, accounts.name name FROM accounts WHERE accounts.deleted = 0 AND accounts.account_type IN ('Investor')) LIMIT 0,5
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Arguments
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Required
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														$select
+													Element:td
+													Element:em
+														SugarQuery
+													Element:td
+														true
+													Element:td
+														The SugarQuery Object you wish to add to the UNION query
+													Element:tr
+													Element:td
+														$all
+													Element:td
+													Element:em
+														Boolean
+													Element:td
+														false
+													Element:td
+														Whether to use UNION ALL or just UNION in the query. Default is TRUE.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														SugarQuery_Builder_Union Object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Allows for method chaining on the Union Object.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Raw Methods
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The SugarQuery Object has a few helper methods that allow raw SQL statement parts to be passed into. This allows for more complex statements or edge case scenarios where a helper function may not have met the requirements for the query.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											whereRaw()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To add to the WHERE clause of SugarQuery Object with raw SQL syntax, you can utilize the
+										Element:code
+											whereRaw()
+											method. This method will append the specified statement, to the WHERE clause using an AND operator, and will wrap the entire statement in parenthesis. The following is an example use with the output :
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$SugarQuery = new SugarQuery(); $SugarQuery->select(array('name')); $SugarQuery->from(BeanFactory::newBean('Accounts')); $SugarQuery->whereRaw("name LIKE '%T%'");
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above example will output the following SQL query:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											SELECT accounts.name name FROM accounts WHERE accounts.deleted = 0 AND (name LIKE '%T%')
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Arguments
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Required
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														$sql
+													Element:td
+													Element:em
+														String
+													Element:td
+														true
+													Element:td
+														The WHERE clause SQL to be appended to the where clause on the SugarQuery object. All conditions passed in are wrapped in parenthesis and appended using AND (if other conditions exist on where clause).
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														SugarQuery_Builder_Where Object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Allows for method chaining on the Where Object.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											joinRaw()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To add a JOIN statement that may not align with the relationships stated in Vardefs, you can use the
+										Element:code
+											joinRaw()
+											method. The following example, joins to the contacts_cstm table from Accounts, on a custom relate field.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$SugarQuery = new SugarQuery(); $SugarQuery->select(array('name')); $SugarQuery->from(BeanFactory::newBean('Accounts')); $SugarQuery->joinRaw("INNER JOIN contacts_cstm cc1 ON accounts.id = cc1.account_id_c");
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above example will output the following SQL query:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											SELECT accounts.name name FROM accounts INNER JOIN contacts_cstm cc1 ON accounts.id = cc1.accounts_id_c WHERE accounts.deleted = 0
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Arguments
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Required
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														$sql
+													Element:td
+													Element:em
+														String
+													Element:td
+														true
+													Element:td
+														The JOIN statement to be added to the SQL query
+													Element:tr
+													Element:td
+														$options
+													Element:td
+													Element:em
+														Array
+													Element:td
+														false
+													Element:td
+													Element:p
+														An array containing any of the following options:
+													Element:ul
+													Element:li
+													Element:strong
+														alias
+														-
+													Element:em
+														String
+														- The alias used for the JOIN
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														SugarQuery_Builder_Join Object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Allows for method chaining on the SugarQuery_Builder_Join Object.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											groupByRaw()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To add multiple fields to the GROUP BY statement on the SugarQuery Object, it may sometime's be easiest to use the groupByRaw() method.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$SugarQuery->groupByRaw("accounts.account_type,accounts.industry");
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Arguments
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Required
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														$sql
+													Element:td
+													Element:em
+														String
+													Element:td
+														true
+													Element:td
+														The GROUP BY statement, without the GROUP BY keyword.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														SugarQuery Object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Allows for method chaining on the SugarQuery Object.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											orderByRaw()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using the
+										Element:code
+											oderBy()
+											method only allows for adding a single field to the SugarQuery object at a time. In some cases, you might consider using the
+										Element:code
+											orderByRaw()
+											method to add multiple fields or the entire ORDER BY statement to the SugarQuery object.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$SugarQuery->orderByRaw("accounts.name DESC, accounts.date_modified");
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Arguments
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Required
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														$sql
+													Element:td
+														String
+													Element:td
+														true
+													Element:td
+														The ORDER BY statement, without the ORDER BY keyword.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														SugarQuery Object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Allows for method chaining on the SugarQuery Object.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											havingRaw()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using the
+										Element:code
+											havingRaw()
+											method allows for adding a having statement to the SugarQuery object.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$SugarQuery->havingRaw("record_count >= 3");
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Arguments
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Required
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														$sql
+													Element:td
+														String
+													Element:td
+														true
+													Element:td
+														The HAVING statement, without the HAVING keyword.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Returns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														SugarQuery Object
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Allows for method chaining on the SugarQuery Object.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Last modified: 04/15/2016 03:30pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

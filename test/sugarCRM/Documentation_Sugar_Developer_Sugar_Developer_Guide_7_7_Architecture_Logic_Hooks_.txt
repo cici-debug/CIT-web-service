@@ -1,0 +1,646 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Logic Hooks
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Logic Hook framework allows you to add actions to specific events that occur within the system.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Hook Definitions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Logic hook actions and trigger events are defined in the hook definition.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Locations
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Custom logic hook definitions can be located in the following paths:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Path
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+										Element:code
+											./custom/Extension/modules/<module>/Ext/LogicHooks/<file>.php
+										Element:td
+											Defines hook actions that will be executed for the specified events on a specific module using the extension framework. This path should be used when developing module specific hooks. More information can be found in the
+										Element:a
+											LogicHooks
+											extension section.
+										Element:tr
+										Element:td
+										Element:code
+											./custom/modules/<module>/logic_hooks.php
+										Element:td
+											Defines hook actions that will be executed for the specified events on a specific module. You should avoid using this path as it may be overwritten by module loadable plugins.
+										Element:tr
+										Element:td
+										Element:code
+											./custom/Extension/application/Ext/LogicHooks/<file>.php
+										Element:td
+											Defines hook actions that will be executed for the specified events on all modules using the extension framework. This path should be used when developing application hooks. More information can be found in the
+										Element:a
+											LogicHooks
+											extension section.
+										Element:tr
+										Element:td
+										Element:code
+											./custom/modules/logic_hooks.php
+										Element:td
+											Defines hook actions that will be executed for the specified events on all modules. You should avoid using this path as it may be overwritten by module loadable plugins.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Definition Properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The logic hooks must have
+										Element:code
+											$hook_version
+											and
+										Element:code
+											$hook_array
+											defined in its definition before it can be used by the system.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														hook_version
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All logic hook definitions will define a
+													Element:code
+														$hook_version
+														. This determines the version of the logic hook framework. Currently, the only supported hook version is 1.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														$hook_version = 1;
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														hook_array
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The logic hook definition will also contain a
+													Element:code
+														$hook_array
+														. This defines the specific of the action to execute. The hook array will be defined as follows:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:strong
+														Name
+													Element:td
+													Element:strong
+														Type
+													Element:td
+													Element:strong
+														Description
+													Element:tr
+													Element:td
+														event_name
+													Element:td
+														String
+													Element:td
+														The name of the event to append the action to
+													Element:tr
+													Element:td
+														process_index
+													Element:td
+														Integer
+													Element:td
+														The order of action execution
+													Element:tr
+													Element:td
+														description
+													Element:td
+														String
+													Element:td
+														A short description of the hook action
+													Element:tr
+													Element:td
+														file_path
+													Element:td
+														String
+													Element:td
+														The path to the logic hook file in the
+													Element:code
+														./custom/
+														directory, or null if using namespaces
+													Element:tr
+													Element:td
+														class_name
+													Element:td
+														String
+													Element:td
+														The name of the logic hook action class including any namespaces
+													Element:tr
+													Element:td
+														method_name
+													Element:td
+														String
+													Element:td
+														The name of the logic hook action method
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Your definition should resemble the code block below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php $hook_version = 1; $hook_array['<event_name>'][] = array( <process_index>, //Integer '<description>', //String '<file_path>', //String or null if using namespaces '<class_name>', //String '<method_name>', //String );
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Hook Method
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The hook action class can be located anywhere you choose. We recommended grouping the hooks with the module they are associated within the
+							Element:code
+								./custom/
+								directory. You can create a hook action method either with a namespace or without.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Namespaced Hooks
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As of 7.7, developers can create namespaced logic hooks. When using namespaces, the file path in
+										Element:code
+											./custom/
+											will be automatically built out when using the corresponding namespace. The filename defining the class must match the class name exactly to allow the autoloader to find the class definition.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Namespace
+										Element:td
+										Element:strong
+											File Path
+										Element:tr
+										Element:td
+											Sugarcrm\Sugarcrm\custom
+										Element:td
+											./custom/
+										Element:tr
+										Element:td
+											Sugarcrm\Sugarcrm\custom
+										Element:td
+											./custom/src/
+										Element:tr
+										Element:td
+											Sugarcrm\Sugarcrm\custom\any\path
+										Element:td
+											./custom/any/path/
+										Element:tr
+										Element:td
+											Sugarcrm\Sugarcrm\custom\any\path
+										Element:td
+											./custom/src/any/path/
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Accounts/Ext/LogicHooks/<file>.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $hook_array['before_save'][] = array( 1, 'Hook description', null, 'Sugarcrm\\Sugarcrm\\custom\\modules\\Accounts\\className', 'methodName' ); ?>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/Accounts/className.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php namespace Sugarcrm\Sugarcrm\custom\modules\Accounts; class className { function methodName($bean, $event, $arguments) { //logic } } ?>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The logic hook method signature may contain different arguments depending on the hook event you have selected.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Hooks without Namespaces
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Accounts/Ext/LogicHooks/<file>.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $hook_array['before_save'][] = array( 1, 'Hook description', 'custom/modules/Accounts/customLogicHook.php', 'className', 'methodName' ); ?>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/Accounts/customLogicHook.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php class className { function methodName($bean, $event, $arguments) { //logic } } ?>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The logic hook method signature may contain different arguments depending on the hook event you have selected.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Considerations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When using logic hooks, keep in mind the following best practices:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								As of PHP 5.3, objects are automatically passed by reference. When creating logic hook signatures, do not append the ampersand (&) to the
+							Element:code
+								$bean
+								variable. Doing this will cause unexpected behavior.
+							Element:li
+								There is no hook that fires specifically for the ListView, DetailView or EditView events. Instead, use either the
+							Element:code
+								process_record
+								or
+							Element:code
+								after_retrieve
+								logic hooks.
+							Element:li
+								In order to compare new values with previous values, use
+							Element:code
+								fetched_row
+								to determine whether a change has occurred:
+							Element:br
+							Element:pre
+							Element:code
+								if ($bean->fetched_row['{field}'] != $bean->{field}) { //logic }
+							Element:li
+								Make sure that the permissions on the
+							Element:code
+								logic_hooks.php
+								file and the class file that it references are readable by the web server. Otherwise, Sugar will not read the files and your business logic extensions will not work. For example, *nix developers who are extending the Tasks logic should use the following command for the
+							Element:code
+								logic_hooks
+								file and the same command for the class file that will be called:
+							Element:br
+							Element:pre
+							Element:code
+								chmod +r ./custom/modules/Tasks/logic_hooks.php
+							Element:li
+								Make sure that the entire
+							Element:code
+								./custom/
+								directory is writable by the web server or else the logic hooks code will not work properly.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Topics
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Application Hooks
+							Element:p
+								Application hooks execute logic when working with the global application.
+							Element:li
+							Element:a
+								Module Hooks
+							Element:p
+								Module hooks execute logic when working with Sugar modules (e.g. Accounts, Cases, etc.).
+							Element:li
+							Element:a
+								User Hooks
+							Element:p
+								User hooks execute logic around user actions such as logging in and logging out.
+							Element:li
+							Element:a
+								Job Queue Hooks
+							Element:p
+								Job Queue hooks execute logic when working with the Job Queue module.
+							Element:li
+							Element:a
+								SNIP Hooks
+							Element:p
+								SNIP hooks execute logic when working with the SNIP email-archiving service.
+							Element:li
+							Element:a
+								API Hooks
+							Element:p
+								API hooks execute logic when working with the REST API and routing.
+							Element:li
+							Element:a
+								Web Logic Hooks
+							Element:p
+								Web logic hooks let administrators post record and event information to a specified URL when certain sugar events take place.
+							Element:li
+							Element:a
+								Logic Hook Release Notes
+							Element:p
+								This page documents historical changes to Sugar's logic hook libraries.
+							Element:li
+							Element:a
+								Examples
+							Element:p
+								These pages demonstrate some common examples of logic hooks in Sugar.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 03/30/2016 10:15pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

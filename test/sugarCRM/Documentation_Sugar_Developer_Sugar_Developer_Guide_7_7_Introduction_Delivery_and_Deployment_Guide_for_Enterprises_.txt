@@ -1,0 +1,2095 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Delivery and Deployment Guide for Enterprises
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:span
+								SugarCRM Professional Services has a set of best practices for managing instances, delivering upgraded customizations
+								, and deploying those upgraded customizations into Sugar On-Site for our Enterprise customers. The following is an example of deployment practices used by SugarCRM Professional Services team when engaged on Enterprise Sugar development projects. It does not list all possible customizations that can be made in the system, it is intended to be used as a guide for how to automate the deployment of certain types of customizations into an on-premise Sugar instance. The techniques below can not be used with Sugar On-Demand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Deploying Application Configuration and Metadata
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of System Settings
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											System settings are stored in various places. In this section, we will address each type of storage for settings, and how to migrate each.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Storage types:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											config_override.php
+										Element:ul
+										Element:li
+										Element:span
+											This is a file stored in the Sugar root directory that allows for overriding core config values (found in config.php). In the UI, the main place to make changes to this is via Admin -> System Settings
+										Element:li
+										Element:strong
+											database 'config' table
+										Element:ul
+										Element:li
+											It is loaded, used, and accessible throughout the Sugar application through the Config API.
+										Element:li
+										Element:span
+											System Tab Settings
+										Element:li
+										Element:span
+											Forecasting Settings
+										Element:li
+										Element:span
+											Portal Settings
+										Element:ul
+										Element:li
+										Element:span
+											This is a simple key/value/category store. There aren't too many components that use this. Here are some:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:b
+														config_override.php
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														System considerations:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:span
+														File System:
+													Element:ul
+													Element:li
+													Element:i
+													Element:span
+														config_override.php is placed in Sugar web root directory
+													Element:li
+													Element:span
+														Scripts required
+													Element:ul
+													Element:li
+													Element:span
+														PHP
+													Element:ul
+													Element:li
+														You will need to write a script to read the current config_override.php and merge the existing array with the new values you'd like to change. This can be done one time, and re-used for all future config_override.php changes
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														Steps to migrate:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:span
+														Assess the values to be changed, added, or removed
+													Element:li
+													Element:span
+														Write a script to read the existing config_override.php, make the changes to the array, and re-write the file back to the system.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:b
+														database 'config' table
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														System considerations:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:span
+														Database:
+													Element:ul
+													Element:li
+													Element:i
+													Element:span
+														The 'config' table stores all these values. They are stored in a very simple table schema.
+													Element:li
+													Element:span
+														Scripts required
+													Element:ul
+													Element:li
+													Element:span
+														PHP
+													Element:ul
+													Element:li
+														Write a simple PHP script to use Sugar object API. See Figure 1
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														Steps to migrate:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:span
+														Write script to use our object API for config table changes (See Figure 1)
+													Element:li
+													Element:span
+														Copy script to Sugar root directory
+													Element:li
+													Element:span
+														Execute the script
+													Element:li
+													Element:span
+														Remove the script
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														Screenshots:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:span
+														Figure 1:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of Reports
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The customer creates a report in the Reports module. They would like to deploy that report so that end users can all access and run it.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Database
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Row is inserted into the Reports module (saved_reports table)
+										Element:li
+										Element:i
+										Element:span
+											(For new team combinations) Row is inserted into the team_sets table
+										Element:li
+										Element:i
+										Element:span
+											(For new team combinations) Rows are inserted into the team_sets_teams table
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:span
+											SQL
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Retrieve the relevant rows (saved_reports, team_sets, team_sets_teams) and create a SQL script to insert them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Additional notes:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											In the System considerations section, "new combination of teams" means that when creating the report, the end user created the Report with a set of teams that doesn't exist on any other record. This results in new entries in the team_sets and team_sets_teams tables.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Steps to migrate:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:span
+											Build a report in the dev instance
+										Element:li
+										Element:span
+											Select the database rows associated with that report (saved_reports, possibly team_sets and team_sets_teams tables)
+										Element:ol
+										Element:li
+										Element:span
+											example: "SELECT * FROM saved_reports WHERE id = 'REPORT_ID'"
+										Element:li
+										Element:span
+											Export the row/rows into a SQL file
+										Element:li
+										Element:span
+											Execute on the next system
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of Dashboards
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The customer wants to deploy the pre-built dashboards in an automated way. See Figure 1 below. This example has two dashboards, "Help Dashboard" and "My Dashboard". Each dashboard has zero or more dashlets.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Database:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Row is inserted into the
+										Element:b
+										Element:i
+											dashboards
+										Element:i
+										Element:span
+											table for each user dashboard. The metadata column stores all the dashlets associated with that dashboard, and the assigned_user_id column stores the user who will see this dashboard.
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:span
+											PHP
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											After deploying the
+										Element:b
+										Element:i
+											dashboards
+										Element:i
+										Element:span
+											you will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+										Element:span
+											script found in the admin section.
+										Element:li
+										Element:span
+											Custom scripts:
+										Element:b
+											YES (if applying to multiple users)
+										Element:ul
+										Element:li
+										Element:span
+											Because users and id are dynamic, if applying to multiple users, you will need a custom script to retrieve those user ids and set them for each sql insert.
+										Element:li
+										Element:span
+											SQL
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Script required to import the entry from the
+										Element:b
+										Element:i
+											dashboards
+										Element:i
+										Element:span
+											table.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Steps to migrate:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:span
+											Build a dashlet against a specific user
+										Element:li
+										Element:span
+											Select the database rows associated with that user
+										Element:ol
+										Element:li
+										Element:span
+											example: "SELECT * FROM dashlets WHERE assigned_user_id = 'USER_ID'"
+										Element:li
+										Element:span
+											Pick the dashboard you'd like to apply to other users, and export it into a SQL file
+										Element:li
+										Element:span
+											Decide what set of users you need to create the dashboard for.
+										Element:li
+										Element:span
+											Write a script to pull that list of users, dynamically set the assigned_user_id and id (id must be unique) with the insert query you exported in step 3, and run for each one of those users.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Screenshots:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											Figure 1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of Roles
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The customer wants to deploy the roles in an automated way. This includes creating new roles and updating previously existing roles.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Database:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Row is inserted into the
+										Element:b
+										Element:i
+											acl_roles
+										Element:i
+										Element:span
+											table for each role setting. Depending on how specific the role is, we might have
+										Element:b
+										Element:i
+											acl_fields
+										Element:i
+										Element:span
+											and
+										Element:b
+										Element:i
+											acl_actions
+										Element:i
+										Element:span
+											mapped to roles through
+										Element:b
+										Element:i
+											acl_roles_actions
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+											PHP
+										Element:ul
+										Element:li
+											Sugar has a SugarACL object API that can be used to create, read, and write roles and role definitions.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Steps to migrate:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:span
+											Write a script using our object API to create or write roles
+										Element:ol
+										Element:li
+										Element:span
+											Define the metadata for the changes or additions to be made
+										Element:li
+										Element:span
+											Write logic to add/update based on metadata
+										Element:li
+										Element:span
+											Execute script on dev instance and confirm changes
+										Element:li
+										Element:span
+											Use script to promote to next instance
+										Element:li
+										Element:span
+											Note: See functional sample script below
+										Element:ol
+										Element:li
+										Element:a
+										Element:span
+											https://gist.github.com/sadekbaroudi/3191513e2bbce2170326
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of Teams
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The customer wants to deploy the teams in an automated way. This should be done via the Sugar object API.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:span
+											PHP
+										Element:ul
+										Element:li
+										Element:em
+										Element:span
+											Follow steps in "Additional Notes" section below for details on building Team scripts.
+										Element:li
+										Element:em
+											TeamSets are cached per user by SugarCache. SugarCache should be cleared after installing new teams.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Additional notes:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											To build a script to do this, see the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											modules/Teams/Save.php
+										Element:ul
+										Element:li
+										Element:span
+											This file is called when a user posts data through the form in the UI. This code should be replicated (until the Teams module is refactored).
+										Element:li
+										Element:span
+											modules/Teams/Team.php
+										Element:ul
+										Element:li
+										Element:span
+											function save() - this should be called as part of the save
+										Element:li
+										Element:span
+											function mark_deleted() - this should be called on the object when you want to delete a team, be sure to make sure there are no related users before doing so.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Steps to migrate:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:ol
+										Element:li
+										Element:span
+											Write a script using our Teams object API
+										Element:ol
+										Element:li
+										Element:span
+											Create needed team object
+										Element:li
+										Element:span
+											Set appropriate data on object and/or POST data
+										Element:li
+										Element:span
+											After saving, potentially add users to the team
+										Element:li
+										Element:span
+											Execute script on dev instance and confirm changes
+										Element:li
+										Element:span
+											Use script to promote to next instance
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of User Settings
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The customer wants to deploy the user settings in an automated way. There are a couple of places where we store User settings.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Storage types:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											User Preferences
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is a key value pair with a serialized and then base64 encoded value. We store many user preferences, all encoded. These are non-critical settings, and can be blown away. However, doing so will require the user to reconfigure their preferences. The data is stored in the user_preferences table. This includes data such as:
+										Element:span
+											Subpanel display order,
+											Timezone preferences, etc.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Users module settings
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These are direct values on the Users module (users table). Here we track persistent User attributes such as:
+										Element:span
+											Address,
+										Element:span
+											Phone number,
+										Element:span
+											etc
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:b
+														User preferences
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														System considerations:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:span
+														Database:
+													Element:ul
+													Element:li
+													Element:i
+													Element:span
+														Row is inserted into the
+													Element:b
+													Element:i
+														user_preferences
+													Element:i
+													Element:span
+														table for each user setting change.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:span
+														Scripts required
+													Element:ul
+													Element:li
+														PHP
+													Element:ul
+													Element:li
+													Element:span
+														In order to update values with a user's preferences, you would need to write a custom script to read, update, and rewrite to the user_preferences table
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														Steps to Migrate:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:span
+														Write a script using our User Preferences API
+													Element:ol
+													Element:li
+													Element:span
+														Query the database to retrieve the row for a given user
+													Element:li
+													Element:span
+														base64 decode the value
+													Element:li
+													Element:span
+														unserialize the value
+													Element:li
+													Element:span
+														update the data required
+													Element:li
+													Element:span
+														serialize the data
+													Element:li
+													Element:span
+														base64 encode
+													Element:li
+													Element:span
+														rewrite the row to the database
+													Element:li
+													Element:span
+														(repeat for all applicable users)
+													Element:ol
+													Element:li
+													Element:span
+														(See modules/UserPreferences/UserPreference.php or modules/Users/User.php, specifically getPreference() and setPreference())
+													Element:li
+													Element:span
+														Load the User object
+													Element:li
+													Element:span
+														Call getPreference for the specified value
+													Element:li
+													Element:span
+														Make changes
+													Element:li
+													Element:span
+														Call setPreference for the specified value
+													Element:ol
+													Element:li
+													Element:span
+														Better performance method (direct database queries and updates):
+													Element:li
+													Element:span
+														More robust, but slower performance method (API):
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:b
+														User table
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														System considerations:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:span
+														Database:
+													Element:ul
+													Element:li
+													Element:i
+													Element:span
+														Users table is updated
+													Element:li
+													Element:span
+														Scripts required:
+													Element:ul
+													Element:li
+													Element:span
+														SQL
+													Element:ul
+													Element:li
+													Element:span
+														You can directly update the Users table directly, provided the data is not encoded or encrypted (like password).
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:b
+														Steps to Migrate:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:span
+														Write a SQL script to update values in the users table based on need
+													Element:li
+													Element:span
+														Execute script on dev instance and confirm changes
+													Element:li
+													Element:span
+														Use script to promote to next instance
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of custom fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											A user wants to deploy custom fields created in an automated way. This includes anything created through Studio.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											File System:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Files are potentially created in the following directories:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Custom field vardef:
+										Element:i
+										Element:span
+										Element:br
+										Element:i
+										Element:span
+											custom/Extension/modules/<module_name>/Ext/Vardefs/sugarfield_<field_name>.php
+										Element:li
+										Element:i
+										Element:span
+											Custom field label (and app_list_string if necessary): ./custom/Extension/modules/Accounts/Ext/Language/en_us.lang.php
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Database:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											The <module_name>_cstm table is created, if it doesn't already exist.
+										Element:li
+										Element:i
+										Element:span
+											The field <field_name>_c is created against that table
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:span
+											A Quick Repair and Rebuild is required after copying the files and fields_meta_data table values.
+										Element:li
+										Element:span
+											SQL
+										Element:ul
+										Element:li
+										Element:span
+											You will need to insert the relevant entries from the fields_meta_data table
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Steps to migrate:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:span
+											Export the fields_meta_data entries for the custom fields into a script
+										Element:li
+										Element:span
+											Copy the files for the custom fields
+										Element:li
+										Element:span
+											Apply #1 and #2 to another system, and execute a
+										Element:strong
+											Quick Repair and Rebuild
+										Element:ol
+										Element:li
+										Element:span
+											Execute the DDL generated by the QRR above
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of custom modules
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											A developer creates a custom module and wants to deploy it, this use case refers to a basic module, because each additional feature (logic hooks, relationships,dependencies, etc) has its
+										Element:span
+											own deployment scenario.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											File System:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											./custom/Extension/application/Ext/Include/<package_name>.php
+										Element:li
+										Element:i
+										Element:span
+											./modules/<new_module>/*
+										Element:li
+										Element:i
+										Element:span
+											./custom/modules/<new_module>/*
+										Element:li
+										Element:i
+										Element:span
+											./custom/themes/default/images/*<new_mode>*.(gif/png)
+										Element:li
+										Element:i
+										Element:span
+											./custom/Extension/modules/<new_module>/*
+										Element:li
+										Element:span
+											Database:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											new tables <new_module> and <new_module>_audit
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Note: the DDL gets generated by the Quick Repair and Rebuild script, at which point you can execute manually or automatically
+										Element:li
+										Element:i
+										Element:span
+											fields_meta_data table
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Note: this stores all the custom fields built through Studio (not Module Builder) after the module is deployed. Make sure you retrieve all rows from this table that apply to this module and create a SQL script to insert into the next system
+										Element:li
+											Scripts required
+										Element:ul
+										Element:li
+										Element:i
+											After deploying the custom module, you will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+											script found in the admin section.
+										Element:li
+										Element:span
+											SQL
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Script required to import the entry from the <
+										Element:b
+										Element:i
+											new_module>
+										Element:i
+										Element:span
+											and
+										Element:b
+										Element:i
+											<new_module>
+										Element:i
+										Element:span
+											_audit table
+										Element:b
+										Element:i
+											.
+										Element:li
+										Element:i
+										Element:span
+											Script required to import fields_meta_data table entries for this module (if there are any)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Additional notes:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											For a full custom module deployment scenario, this deployment scenario should be ran
+										Element:b
+											first
+										Element:span
+											then all of the extended module features deployment scenarios should be run:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Steps to migrate:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:span
+											Copy all files listed in file system section above
+										Element:li
+										Element:span
+											Export fields_meta_data table entries as apply to the custom module (if any)
+										Element:li
+										Element:span
+											Run Quick Repair and Rebuild
+										Element:ol
+										Element:li
+										Element:span
+											E
+											ither manually or automatically run the DDL output from QRR
+										Element:li
+										Element:span
+											Test functionality
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of custom Relationships
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											A user wants to deploy custom relationships created in an automated way. This includes anything created through Studio.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											Follow the same instructions as for Custom
+											Fields
+										Element:span
+											, but:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Ignore the fields_meta_data table
+										Element:li
+										Element:span
+											Be sure to consider the following:
+										Element:ul
+										Element:li
+										Element:span
+											custom/Extension/modules/<side_1_of_relationship>/Ext/
+										Element:li
+										Element:span
+											custom/Extension/modules/<side_2_of_relationship>/Ext/
+										Element:li
+										Element:span
+											custom/Extension/modules/relationships/
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											Otherwise, the same process applies.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of custom View or Layout metadata (Web)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The user creates custom layouts and views for web from studio and wants to deploy them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											File System:
+										Element:ul
+										Element:li
+										Element:b
+										Element:i
+											Layouts:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											./custom/modules/<module>/clients/<platform>/layouts/<layout>/ <layout>.php
+										Element:li
+										Element:b
+										Element:i
+											Views
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Creating a layout from Studio actually augments the Sidecar view metadata instead of Sidecar layout metadata
+										Element:li
+										Element:i
+										Element:span
+											./custom/modules/<module>/clients/<platform>/views/<layout>/ <layout>.php
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:i
+											After deploying you will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+											script found in the admin section.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Additional notes:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											For layouts(record) you have the option to simply save the modified layout. In this case the metadata for the layout can be found in ./custom/working/modules/<module>/<platform>/views/<view>/<view>.php
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Layouts created from studio create views in .custom/modules/<module>/views
+										Element:i
+										Element:span
+										Element:br
+										Element:i
+										Element:span
+											The created views can be
+										Element:b
+										Element:i
+											record
+										Element:i
+										Element:span
+											|
+										Element:b
+										Element:i
+											list
+										Element:i
+										Element:span
+											|
+										Element:b
+										Element:i
+											selection-list
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											For the two popup layouts(created from studio), extra metadata is provided in the ./custom/modules/<module>/metadata/popupdefs.php
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of custom View or Layout metadata (mobile)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The user creates custom layouts and views for mobile from studio and wants to deploy them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											File System: YES
+										Element:ul
+										Element:li
+										Element:b
+										Element:i
+											Layouts:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											./custom/modules/<module>/clients/mobile/layouts/<layout>/ <layout>.php
+										Element:li
+										Element:b
+										Element:i
+											Views
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											./custom/modules/<module>/clients/mobile/views/<view
+											>/ <view>.php
+										Element:li
+										Element:span
+											Database: NO
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											After deploying you will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+										Element:span
+											script found in the admin section.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Additional notes:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Layouts and views are handled the same as with web. From Studio, you can augment
+										Element:b
+										Element:i
+											detail
+										Element:i
+										Element:span
+											,
+										Element:b
+										Element:i
+											edit
+										Element:i
+										Element:span
+											and
+										Element:b
+										Element:i
+											list
+										Element:i
+										Element:span
+											views.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Deploying Application Code and Integrations
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of custom CSS (LESS)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											In order to update branding, developers can deploy customized CSS.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											File System: YES
+										Element:ul
+										Element:li
+										Element:em
+											./custom/themes/custom.less
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											You will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+										Element:span
+											script found in the admin section to rebuild the Sugar CSS bundles.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of Logic Hooks and Web Logic Hooks
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The developer
+											creates custom logic hooks, they want to deploy them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+										Element:strong
+											Logic Hook:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											File System: YES
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+										Element:b
+											application hooks
+										Element:span
+											:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											./custom/Extension/application/Ext/LogicHooks/<file>.php
+										Element:li
+										Element:b
+										Element:i
+											module specific hooks:
+										Element:ul
+										Element:li
+										Element:span
+											./custom/Extension/modules/<module>/Ext/LogicHooks/<file>.php
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											You will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+										Element:span
+											script found in the admin section to rebuild the extensions.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+										Element:i
+											Web Logic Hook:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Database: YES
+										Element:ul
+										Element:li
+										Element:b
+										Element:i
+											Only for weblogic hooks :
+										Element:i
+										Element:span
+											row is inserted into the
+										Element:b
+										Element:i
+											weblogichooks
+										Element:i
+										Element:span
+											table
+										Element:b
+										Element:i
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											After deploying the custom hooks and database entry in the
+										Element:b
+										Element:i
+											weblogichooks
+										Element:i
+										Element:span
+											table, you will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+										Element:span
+											script found in the admin section.
+										Element:ul
+										Element:li
+										Element:span
+											SQL
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Script required to import the entry from the
+										Element:b
+										Element:i
+											weblogichooks
+										Element:i
+										Element:span
+											table
+										Element:b
+										Element:i
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of custom API endpoints
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The user creates a custom api endpoints, he wants to deploy them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											File System
+										Element:ul
+										Element:li
+										Element:span
+											clients/<platform>/api/*
+										Element:li
+										Element:span
+											modules/:module/clients/<platform>/api/*
+										Element:li
+										Element:span
+											custom/clients/<platform>/api*
+										Element:li
+										Element:span
+											custom/modules/<module>/clients/<platform>/api/*
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											After deploying the custom api you will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+										Element:span
+											script found in the admin section. This will rebuild the ./cache/file_map.php and ./cache/include/api/ServiceDictionary.rest.php files to make
+											your endpoint available.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Additional notes:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											Logic for how api endpoints are loaded, can be found in ./include/api/ServiceDictionary.php (where api endpoints are loaded from, how they are built on Quick Build and Repair, etc.)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of custom Administration Panels
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The user creates custom administration panels, and wants to deploy them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											File System:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											./custom/Extension/modules/Administration/Ext/Administration/<file>.php
+										Element:li
+										Element:i
+										Element:span
+											./custom/Extension/modules/Administration/Ext/Language/<langtype.name>.php
+										Element:li
+										Element:i
+										Element:span
+											./custom/themes/default/images/<icon_image_name>.<img_extension>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:i
+										Element:span
+											and depending on the
+										Element:b
+										Element:i
+											admin panel url, either
+										Element:i
+										Element:span
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											./custom/modules/<linkUrlModule>/*
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											or
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											./custom/modules/<linkUrlModule>/clients/base/layouts/<route_name>/*
+										Element:li
+										Element:i
+										Element:span
+											./custom/modules/<linkUrlModule>/clients/base/views/<route_name>/*
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											After deploying the admin panels, you will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+										Element:span
+											script found in the admin section.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											Additional notes:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											The admin url can specify new sidecar routes, old bwc routes, edit view files, plain scripts, or just open a drawer. Determining the additional resources to be copied may be impossible without a standard in place.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:b
+											Use Case: Deployment of custom Jobs / Schedulers
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The user creates custom jobs and schedulers, and wants to deploy them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:b
+											System considerations:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:span
+											File System:
+										Element:strong
+											YES
+											:
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											./custom/Extension/modules/Schedulers/Ext/ScheduledTasks/<jobname>.php
+										Element:li
+										Element:i
+										Element:span
+											./custom/Extension/modules/Schedulers/Ext/Language/<langtype.jobname>.php
+										Element:li
+										Element:span
+											Database:
+										Element:strong
+											YES
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Row is inserted into the
+										Element:b
+										Element:i
+											schedulers
+										Element:i
+										Element:span
+											table, if a job is added as a scheduled job using
+										Element:i
+										Element:span
+											Administration > Scheduler.
+										Element:li
+										Element:span
+											Scripts required
+										Element:ul
+										Element:li
+										Element:i
+											After deploying the custom jobs, you will need to run the
+										Element:b
+										Element:i
+											Quick Repair and Rebuild
+										Element:i
+											script found in the admin section.
+										Element:li
+										Element:strong
+											SQL
+										Element:ul
+										Element:li
+										Element:i
+										Element:span
+											Script required to import the entry from the
+										Element:b
+										Element:i
+											schedulers
+										Element:i
+										Element:span
+											table
+										Element:b
+										Element:i
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 03/20/2017 01:02pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

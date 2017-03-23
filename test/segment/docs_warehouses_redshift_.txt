@@ -1,0 +1,538 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Redshift
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This guide will explain how to provision a Redshift cluster and allow the Segment warehouse connector to write to it.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Segment warehouse connector runs a periodic ETL (Extract - Transform - Load) process to pull raw event data stored in S3 and programatically inserts the structured event data into your Redshift cluster.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To do so, our connector first establishes an encrypted connection with the cluster over TLS. The connector then pulls the unstructured raw events from the S3 bucket associated with the
+							Element:a
+								Segment source
+								. The connector processes those raw events into a structured format, at which point a COPY command is executed to transfer the data from our bucket to your Redhift cluster.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Pick the best instance for your needs
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While the number of events (database records) are important, the storage capacity utilization of your cluster depends primarily on the number of unique tables and columns created in the cluster. Keep in mind that each unique
+										Element:code
+											.track()
+											event creates a new table, and each property sent creates a new column in that table. For reason, we highly recommend starting with a detailed
+										Element:a
+											tracking plan
+											before implementing Segment libraries to ensure that only necessary events are being passed to Segment in a consistent way.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two kinds of Redshift clusters:
+										Element:strong
+											Dense Compute
+											and
+										Element:strong
+											Dense Storage
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Dense Compute
+											clusters are designed to maximize query speed and performance at the expense of storage capacity. This is done by using fast CPUs, large amounts of RAM and solid-state storage. While there are no hard and fast rules for sizing a cluster, we recommend that customers with fewer than 20 million monthly events start with a single DC1 node cluster and add nodes as needed. A single node cluster includes 200GB, with a max size of 2.56TB.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Dense Storage
+											clusters are designed to maximize the amount of storage capacity for customers who have 100s of millions of events and prefer to save money on Redshift hosting costs. This is done by using slower CPUs, less RAM, and disk-based storage. A single DS2 node cluster includes 2TB of space, with a max size of 16TB.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Provision a new Redshift Cluster
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can skip this step if you already have a Redshift cluster
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Open the Redshift Console:
+										Element:img
+										Element:li
+										Element:p
+											Click on “Launch Cluster”:
+										Element:img
+										Element:li
+										Element:p
+											Fill out the cluster details (make sure to select a secure password!):
+										Element:img
+										Element:li
+										Element:p
+											Choose your cluster size:
+										Element:img
+										Element:li
+										Element:p
+											Setup your cluster Security Group or VPC and proceed to review (see below for instructions on settings up a VPC group)
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Permissioning Segment to Redshift
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now that you’ve provisioned your Redshift cluster, you’ll need to configure your Redshift cluster to allow Segment to access it.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Database User
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The username and password you’ve already created for your cluster is your admin password, which you should keep for your own usage. For Segment, and any other 3rd-parties, it is best to create distinct users. This will allow you to isolate queries from one another via
+										Element:a
+											WLM
+											and perform audits easier.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To create a
+										Element:a
+											new user
+											, you’ll need to log into the Redshift database directly and run the following SQL commands:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											-- create a user named "segment" that Segment will use when connecting to your Redshift cluster. CREATE USER segment PASSWORD '<enter password here>'; -- allows the "segment" user to create new schemas on the specified database. (this is the name you chose when provisioning your cluster) GRANT CREATE ON DATABASE '<enter database name here>' TO 'segment';
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When setting up your warehouse in Segment, use the username/password you’ve created here instead of your admin account.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Networking
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Redshift clusters can either be in a
+										Element:strong
+											EC2 Classic subnet
+											or
+										Element:strong
+											VPC subnet
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your cluster has a field called
+										Element:code
+											Cluster Security Groups
+											, proceed to
+										Element:a
+											EC2 Classic
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Or if your cluster has a field called
+										Element:code
+											VPC Security Groups
+											, proceed to
+										Element:a
+											EC2 VPC
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														EC2-Classic
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:p
+														Navigate to your Redshift Cluster settings:
+													Element:code
+														Redshift Dashboard > Clusters > Select Your Cluster
+													Element:li
+													Element:p
+														Click on the Cluster Security Groups
+													Element:p
+													Element:img
+													Element:li
+													Element:p
+														Open the Cluster Security Group
+													Element:p
+													Element:img
+													Element:li
+													Element:p
+														Click on “Add Connection Type”
+													Element:p
+													Element:img
+													Element:li
+													Element:p
+														Choose Connection Type CIDR/IP and authorize Segment to write into your Redshift Port using
+													Element:code
+														52.25.130.38/32
+													Element:p
+													Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														EC2-VPC
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+													Element:p
+														Navigate to your
+													Element:code
+														Redshift Dashboard > Clusters > Select Your Cluster
+													Element:li
+													Element:p
+														Click on the VPC Security Groups
+													Element:p
+													Element:img
+													Element:li
+													Element:p
+														Select the “Inbound” tab and then “Edit”
+													Element:p
+													Element:img
+													Element:li
+													Element:p
+														Allow Segment to write into your Redshift Port using
+													Element:code
+														52.25.130.38/32
+													Element:p
+													Element:img
+													Element:p
+														You can find more information on that
+													Element:a
+														here
+														.
+													Element:li
+													Element:p
+														Navigate back to your Redshift Cluster Settings:
+													Element:code
+														Redshift Dashboard > Clusters > Select Your Cluster
+													Element:li
+													Element:p
+														Select the “Cluster” button and then “Modify”
+													Element:img
+													Element:li
+													Element:p
+														Make sure the “Publicly Accessible” option is set to “Yes”
+													Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Electing to encrypt your data
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can elect to encrypt your data in your Redshift console and it will not affect Segment’s ability to read or write.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Syncing data in and out of Segment Warehouse
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It’s often the case that our customers want to combine 1st party transactional and operational data their Segment data to generate a 360 degree view of the customer. The challenge is that those data sets are often stored in separate data warehouses.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re interested in importing data into a Redshift cluster, it’s important that you follow these
+							Element:a
+								guidelines
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Additionally, there a number of tools which provide syncing services between databases (mySQL, SQL Server, Oracle, PostgreSQL). Here is a list of some we’ve seen used by customers.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								SymmetricDS (Open Source)
+							Element:li
+							Element:a
+								FlyData
+							Element:li
+							Element:a
+								Attunity
+							Element:li
+							Element:a
+								Informatica
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also unload data to a s3 bucket and then load the data into another Redshift instance manually.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Unload data from Redshift to S3
+							Element:li
+							Element:a
+								Load data from S3 to Redshift
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sync schedule
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your data will be available in Warehouses within 24-48 hours after your first sync. Your warehouse will then be on a sync schedule based on your
+							Element:a
+								Warehouse Plan
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment allows you to schedule the time and frequency of loading data into your data warehouse.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can schedule your warehouse syncs by going to
+							Element:code
+								Warehouse > Settings > Sync Schedule
+								. You can schedule up to the number of syncs allowed on your billing plan.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Distribution Key
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								id
+								column is the common distribution key used across all tables. When you execute a query, the Redshift query optimizer redistributes the rows to the compute nodes as needed to perform any joins and aggregations. The goal in selecting a table distribution style is to minimize the impact of the redistribution step by locating the data where it needs to be before the query is executed.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Reserved Words
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Redshift limits the use of
+							Element:a
+								reserved words
+								in schema, table, and column names. Additionally, you should not name traits or properties that conflict with top level Segment fields (e.g. userId, receivedAt, messageId, etc.). These traits and properties that conflict with Redshift or Segment fields will not be ETL-ed into your warehouse.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Additionally, Redshift limits the use of integers at the start of a schema or table name. We automatically prepend a
+							Element:code
+								_
+								to any schema, table or column name that starts with an integer. So a source named ‘3doctors’ will be loaded into a Redshift schema named
+							Element:code
+								_3doctors
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Query Speed
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The speed of your queries depends on the capabilities of the hardware you have chosen as well as the size of the dataset. The amount of data utilization in the cluster will also impact query speed. For Redshift clusters if you’re above 75% utilization, you will likely experience degradation in query speed.
+							Element:a
+								Here’s a guide on how to improve your query speeds.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Security
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								VPCs keep servers inaccessible to traffic from the internet. With VPC, you’re able to designate specific web servers access to your servers. In this case, you will be whitelisting the Segment IP to write to your data warehouse.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								CPU
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In an usual workload we have seen Redshift using around 20-40% of CPU, we take advantage of the COPY command to ensure to make full use of your cluster to load your data as fast as we can.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you have any questions or see anywhere we can improve our documentation, please
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								!
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:span
+							Element:span
+								Was this document helpful?
+							Element:span
+							Element:label
+							Element:span
+								Yes
+							Element:label
+							Element:span
+								No
+						Node:
+						(type) c
+						(layer)2
+							Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					BigQuery
+				Element:li
+				Element:a
+					Postgres
+				Element:li
+				Element:a
+					Redshift
+				Element:li
+				Element:a
+					Schema

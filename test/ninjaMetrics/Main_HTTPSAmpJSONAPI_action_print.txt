@@ -1,0 +1,663 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+				Element:a
+					Main: HTTPSAmpJSONAPI
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:big
+					Ninja Metrics HTTPS & JSON Event Interface
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Ninja Metrics JSON API allows you to push your application’s Event data into our pipeline.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All JSON Event payloads are POSTed to the following URL base:
+				Element:br
+				Element:a
+					https://api.ninjametrics.com/event
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All queries to server-side endpoints require the following parameters:
+				Element:br
+					?client_id=[client id from account manager]&app_id=[app id from account manager]&api_client=[self identified lib version]
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					For example:
+				Element:br
+				Element:a
+					https://api.ninjametrics.com/event?client_id=100&app_id=100&app_pwd=1234567890&api_client=CoolCompany/ruby_1.2a
+				Element:br
+					We also collect, for deployment tracking purposes to provide better support to our customers, any data in the User-Agent HTTP header field.
+				Element:br
+					The value for the timestamp key in any Event JSON payload should always be in the ISO-8601 standard (UTC): YYYY-MM-DDTHH:mm:ss.sssZ. JavaScript’s Date.toJSON() accomplishes this perfectly.
+				Element:br
+					For example …
+				Element:br
+					HTTPS POST
+				Element:a
+					https://api.ninjametrics.com/event?client_id=1&app_id=1&api_client=Spot/js_1.5.u
+				Element:br
+					with JSON payload body …
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2012-12-05T03:12:15.319Z", "data":{ ... } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The values used for the account_id, character_id, and shard_id keys must be initialized with the respective #9, #11, and #13 dimensional data loader Events before use in any Event payloads. Event type #9-15, 31, 35, 36 are used in initializing DIM data. REMEMBER: When not making use of a numeric key, you must put 0 for its value.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #1 Login
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.671Z", "data":{ "type":1, "account_id":"cool_guy@example.com", "character_id":"wizard", "shard_id":42, "platform":"Facebook Mobile", "area_id":0 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Optional parameters: character_id, shard_id, platform, area_id
+			Node:
+			(type) c
+			(layer)1
+				Element:dl
+				Element:dd
+				Element:ul
+				Element:li
+					platform is an open-ended String field that should be used consistently by the integrator.
+				Element:li
+					FUTURE: area_id must match numeric identifier given from map loading process.
+				Element:li
+					NOTE: One could have just the type and account_id parameters in the data section and only have to initialize the account_id parameter.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #2 Logout
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.739Z", "data":{ "type":2, "account_id":"cool_guy@example.com", "character_id":"wizard", "shard_id":42, "platform":"Facebook Mobile", "area_id":0 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Optional parameters: shard_id, platform, area_id
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					platform is an open-ended String field that should be used consistently by the integrator.
+				Element:li
+					FUTURE: area_id must match numeric identifier given from map loading process.
+				Element:li
+					NOTE: One could have just the type and account_id parameters in the data section and only have to initialize the account_id parameter.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #3 Change Subscription
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"1989-08-15T05:00:00.000Z", "data":{ "type":3, "account_id":"cool_guy@example.com", "account_status":"Active", "account_sub_type":"Paid", "account_sub_value":7.34, "account_sub_expires_timestamp":"1990-08-15T05:00:00.000Z" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Valid options for account_status: Active, Stopped, Expired, Failed, Cancelled Valid options for account_sub_type: Free, Paid, Premium
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					account_sub_value: how much does the subscription over this period cost?
+				Element:li
+					account_sub_expires_timestamp - timestamp = subscription period length
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #4 Group Enter
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.353Z", "data":{ "type":4, "account_id":"cool_guy@example.com", "character_id":"wizard", "character_lvl":50, "shard_id":42, "group_id":42 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Optional parameters: character_id, shard_id
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					group_id parameter values do not have to be initialized beforehand. The burden of using correct values in on the integrator.
+				Element:li
+					character_lvl must be numeric and should be set to 0 if unused
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #5 Group Exit
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.418Z", "data":{ "type":5, "account_id":"cool_guy@example.com", "character_id":"wizard", "character_lvl":52, "shard_id":42, "group_id":42 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Optional parameters: character_id, shard_id
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					group_id parameter values do not have to be initialized beforehand. The burden of using correct values in on the integrator.
+				Element:li
+					character_lvl must be numeric and should be set to 0 if unused
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #6 In-Game Social Event
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:28.000Z", "data":{ "type":6, "sender_account_id":"cool_guy@example.com", "sender_character_id":"wizard", "sender_character_level":52, "receiver_account_id":"small_cat", "receiver_character_id":"mage", "receiver_character_level":6, "shard_id":42, "social_event_name":"trade gold", "social_event_type":"economic" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Optional parameters: sender_character_id, receiver_character_id, shard_id.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					social_event_name, and social_event_type will accept any string.
+				Element:li
+					social_event_type examples: “clan invite”, “group invite”, “barter”. This should be used for social events not already explicitly called out. Do NOT use this for tracking Guild (#41,42) or Group (#4,5) Enter/Exit, Recruitment (#33,34) Send/Response.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #7 Off-Game-Interaction Send
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.935Z", "data":{ "type":7, "sender_account_id":"cool_guy@example.com", "sender_character_id":"wizard", "receiver_account_id":"small_cat", "receiver_character_id":"mage", "shard_id":42, "ogi_location":"https://www.facebook.com/wall/42", "ogi_category":"wall post" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Optional parameters: sender_character_id, receiver_character_id, shard_id. See Event#8 (just below) for suggested values for ogi_location, and ogi_category.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #8 Off-Game-Interaction Receive
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.869Z", "data":{ "type":8, "sender_account_id":"cool_guy@example.com", "sender_character_id":"wizard", "receiver_account_id":"small_cat", "receiver_character_id":"mage", "shard_id":42, "ogi_location":"https://www.facebook.com/wall/42", "ogi_category":"wall post", "ogi_receiver_action":"responded" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Optional parameters: sender_character_id, receiver_character_id, shard_id. ogi_location, ogi_category, and ogi_receiver_action will accept any string, so be sure to use them appropriately. We suggest you use a URI for ogi_location to specify where the off-game-interaction occurred. ogi_category examples: “forum post”, “wall post”, “service cancel”. ogi_receiver_action examples: “post response”, “cancel request”.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #9 Account Create
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-11T22:01:10.700Z", "data":{ "type":9, "account_id":"cool_guy@example.com", "account_sub_type":"Free", "account_lang":"en-US", "account_country":"US", "account_gender":"M", "account_dob":"1980-09-22T05:00:00.000Z", "account_currency_balance":42.42, "platform":"Facebook Mobile" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Account dimension data loader. Pseudo-Event that has to be fired before referencing account_id in any other Event.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					account_sub_type: Free, Paid, Premium
+				Element:li
+					account_lang - 2 to 4 letter language code from
+				Element:a
+					http://www.geonames.org/countries/
+					- examples: ar-YE, en-US, fr
+				Element:li
+					account_country - ISO-3166 alpha2 country-code from
+				Element:a
+					http://www.geonames.org/countries/
+					- examples: YE, US, VE
+				Element:li
+					account_gender: “M”, “F”, “T”, or “”
+				Element:li
+					platform is an open-ended String field that should be used consistently by the integrator
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #10 Account Delete
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"1989-08-15T05:00:00.000Z", "data":{ "type":10, "account_id":"cool_guy@example.com", "account_status":"Failed", "farmer_flag":"Y", "integrity_flag":"N" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Pseudo-Event that will remove the given account_id from dimension data. Required for accurate Churn analysis.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					account_status: Stopped, Expired, Failed, Cancelled
+				Element:li
+					farmer_flag: Y, N - was this account a gold farmer?
+				Element:li
+					integrity_flag: Y, N - did this account’s integrity get compromised?
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #11 Character Create
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-11T22:01:11.742Z", "data":{ "type":11, "account_id":"cool_guy@example.com", "character_id":"wizard","character_class":"magic", "character_sub_class":"healer", "character_gender":"T", "character_race":"fish", "character_name":"the character name", "shard_id":0 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Dimension data modification Event for initializing a character_id; must be called before referencing chracater_id in any other Event. Optional parameter: shard_id
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					character_gender: “M”, “F”, “T”, “”
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #12 Character Delete
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-11T22:01:11.925Z", "data":{ "type":12, "account_id":"wizard", "character_id":"cool_guy@example.com" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Remove character_id from dimension data.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #13 Shard Create
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-11T22:01:12.173Z", "data":{ "type":13, "shard_id":42, "shard_desc":"the shard with answers to it all" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Pseudo-Event for initializing a shard_id; must be called before referencing shard_id in any other Event.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #14 Set Virtual Currency
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-11T22:01:12.295Z", "data":{ "type":14, "virtual_currency_label":"mucha", "virtual_currency_ex_rate":0.01 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Load a named virtual currency and the exchange rate from said virtual currency to real currency. In the above example, 100 muchas = 1 USD. Call this loader event again with the same value for virtual_currency_label with a different value for virtual_currency_ex_rate to update the existing virtual currency exchange rate; be sure to use a later timestamp.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #15 Initialize Item
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-11T22:01:12.060Z", "data":{ "type":15, "item_id":66, "item_name":"the big blaster gun", "item_type":"weapon", "item_value":5, "item_segment":"UGC", "account_id":"cool_guy@example.com", "character_id":"wizard" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Load an Item definition.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					item_type may be any string, but use it consistently. some examples: “Raw materials”, “Mounts and pets”, “armor”, “tools”, “containers”
+				Element:li
+					item_value is a floating point value which would be used for the store price of the item
+				Element:li
+					item_segment may be “UGC” when the item is user-generated or “INGAME” when part of the original application
+				Element:li
+					IF the item_segment field is “UGC” then the account_id and character_id fields should be set appropriately, otherwise they should be empty strings
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #16 Item Used
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.483Z", "data":{ "type":16, "account_id":"cool_guy@example.com", "character_id":"wizard", "character_lvl":52, "shard_id":42, "item_id":66, "item_count":1, "area_id":42, "position_x":678, "position_y":231, "position_z":517 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Log an item usage. item_count is used for the number of times the item is used in this particular location; useful for spells, bullets. If position_x, position_y, or position_z are unavailable, then the unavailable coordinate(s) should be assigned -1.0.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #17 Item Transaction
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.548Z", "data":{ "type":17, "account_id":"cool_guy@example.com", "character_id":"wizard", "shard_id":42, "item_id":66, "item_name":"the big blaster gun", "item_price":3, "transaction_type":0, "currency_type":0, "virtual_currency_label":"", "currency_value":3 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Log a purchase/sale of an item. Multiple Item Transaction events may have to be called for a single transaction if multiple currencies are used. Example: 4 gold, 5 silver, 3 copper for a fish trap. item_price is the purchase price a user must pay for the item. See Event#18 (right below) for information on the last four fields.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #18 Currency Transaction
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.217Z", "data":{ "type":18, "account_id":"cool_guy@example.com", "character_id":"wizard", "shard_id":42, "transaction_type":0, "currency_type":0, "virtual_currency_label":"", "currency_value":3.45, "transaction_desc":"spend 3.45USD" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Log currency being spent or acquired by an application user.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					transaction_type: 0 if currency is spent, 1 if currency is acquired
+				Element:li
+					currency_type: 0 if real-world currency, 1 if virtual currency
+				Element:li
+					virtual_currency_label: name of a virtual currency already initialized with Event#14, used in this transaction
+				Element:li
+					currency_value: floating point representation of how much currency was trasacted
+				Element:li
+					transaction_desc: optional description of the transaction limited to 200 characters
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #19 User Generated Content Rating
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.281Z", "data":{ "type":19, "account_id":"theAccountId", "character_id":"theCharacterId", "shard_id":42, "item_id":764, "item_name":"theItemName", "ugc_rating":"theUgcRating" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Any player can give any UGC item a rating. The ugc_rating field is an open-ended field that will accept any numeric or string value.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #20 Message
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:27.805Z", "data":{ "type":20, "sender_account_id":"account 1", "sender_character_id":"char 1", "receiver_account_id":"account 2", "receiver_character_id":"char 2", "shard_id":0, "message_ch_label":"twitter", "message_desc":"pulled from twitter", "message_char_count":140 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Log a message between two users. This does not log any message content, just the interaction between two users. message_ch_label should be a unique string identifier for the channel/medium.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #21 Begin Combat with an NPC
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:28.130Z", "data":{ "type":21, "account_id":"cool_guy@example.com", "character_id":"wizard", "shard_id":42, "npc_id":"the_mercenary_npc", "area_id":0, "position_x":678, "position_y":231, "position_z":517 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Be sure to initialize the npc_id with Event#31. area_id is the unique numeric identifier for area, which must be previously initialized using Event #TODO. If position_x, position_y, or position_z are unavailable, then the unavailable coordinate(s) should be assigned -1.0.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #22 End Combat with an NPC
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:28.193Z", "data":{ "type":22, "account_id":"cool_guy@example.com", "character_id":"wizard", "shard_id":42, "npc_id":"the_mercenary_npc", "area_id":0, "position_x":678, "position_y":231, "position_z":517 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					See notes on the fields in Event#21 documentation.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #23 Kill an NPC
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:28.257Z", "data":{ "type":23, "account_id":"cool_guy@example.com", "character_id":"wizard", "shard_id":42, "npc_id":"the_mercenary_npc", "character_lvl":52 } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					See field notes from previous Events.
+			Node:
+			(type) c
+			(layer)1
+				Element:hr
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Event #24 Player Xp
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+					{ "timestamp":"2013-01-14T15:36:28.336Z", "data":{ "type":24, "account_id":"cool_guy@example.com", "character_id":"wizard", "shard_id":42, "xp_amount":3, "character_lvl":52, "grouped_flag":"N" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The xp_amount field is an unsigned whole number with maximum size of 18. The grouped_flag is used to tell if XP points were awarded for individual or group behaviors: “Y” or “N”.
+					Retrieved from https://developer.ninjametrics.com/Main/HTTPSAmpJSONAPI Page last modified on November 14, 2013, at 06:01 AM

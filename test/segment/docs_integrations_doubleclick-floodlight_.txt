@@ -1,0 +1,478 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					DoubleClick Floodlight Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					DoubleClick Floodlight
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to DoubleClick Floodlight in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The DoubleClick Floodlight integration allows you to make calls directly to Floodlight based on your mapped events. All you have to do is drop in your
+							Element:strong
+								DoubleClick Advertiser ID
+								into your settings and map the Segment
+							Element:code
+								track
+								events to their corresponding Floodlight tags.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’d like to send mobile data, this integration
+							Element:em
+								requires
+								you to send device specific information such as the
+							Element:code
+								IDFA
+								or the
+							Element:code
+								AdvertisingId
+								and thus you should send events via our
+							Element:strong
+								mobile
+								libraries. You can also send data from
+							Element:code
+								analytics.js
+								and we will make direct HTTP requests to Doubleclick Floodlight from your browser.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to send
+							Element:code
+								track
+								events to DoubleClick Floodlight, you
+							Element:strong
+								must
+								first create the Floodlight tags inside your DoubleClick Campaign Manager and then map the Segment events to those tags inside Segment settings.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want to track custom properties, be sure to create
+							Element:a
+								custom variables
+								inside DoubleClick Campaign Manager.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once all the configurations are finished, whenever we receive a mapped Segment event, we will map the following properties and settings:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:code
+								dc_rdid
+								will be set as
+							Element:code
+								IDFA
+								or
+							Element:code
+								AdvertisingId
+								(for mobile data only)
+							Element:li
+							Element:code
+								src
+								will be pulled from your integration settings
+							Element:li
+							Element:code
+								cat
+								and
+							Element:code
+								type
+								will be pulled from your event mappings from the settings
+							Element:li
+							Element:code
+								ord
+								will be a random number to prevent browser caching
+							Element:li
+							Element:code
+								u$
+								(if any) will be pulled from your property mapping setting
+							Element:li
+							Element:code
+								dc_lat
+								will be set to
+							Element:code
+								0
+								or
+							Element:code
+								1
+								depending on whether the device has
+							Element:strong
+								Limit Ad Tracking
+								enabled (for mobile data only)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Important:
+								Floodlight requires that you
+							Element:a
+								set a
+								with that of the app where the track event took place. Our Android library automatically collects the
+							Element:code
+								User-Agent
+								header
+							Element:code
+								userAgent
+								. However, for iOS library you must manually send the user agent string inside the
+							Element:code
+								context
+								object. If
+							Element:code
+								context.userAgent
+								is not provided, we will try to generate a user agent string based on some device and operating system information that we
+							Element:em
+								do
+								already collect.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Such generated user agent string might look something like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								Segment/1.0 (iPhone OS; CPU iPhone7,2; en-US) Apple; Version 8.1.3
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Assuming the below is an example Floodlight tag mapping:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With the following
+										Element:code
+											track
+											call:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											[[SEGAnalytics sharedAnalytics] track:@"Free El" properties:@{ @"show": @"Stranger Things", @"source": @"Netflix", @"greatestShowEver": YES }];
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Will send the following
+										Element:code
+											GET
+											request to DoubleClick Floodlight:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											https://ad.doubleclick.net/ddm/activity/src=1234567;cat=fghij456;type=abcde123;dc_rdid=38400000-8cf0-11bd-b23e-10b96e4ddddd;u1=Stranger%20Things;u2=Netflix;u3=true;ord=1312312312;dc_lat=0
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+										Element:code
+											dc_rdid
+											and
+										Element:code
+											dc_lat
+											will be automatically collected by our mobile libraries and
+										Element:code
+											ord
+											will be uniquely generated for each event.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting up Custom Variables
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are two things you need to do in order to send custom track properties as custom Floodlight variables. Firstly, please refer to their
+							Element:a
+								docs
+								on how to create a custom variable inside DoubleClick:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Custom Floodlight variables use the keys u1=, u2=, and so on, and can take any values that you choose to pass to them. You can include custom Floodlight variables in any of your Floodlight activity tags and report on their values in Report Builder.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To create or edit a custom variable:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For each custom variable you want to create or edit, enter a Friendly Name, which is the name for the variable that is used in reports. For example, if you are using a custom variable to include users’ ZIP codes in the Floodlight tags, you could use ZIP Code as the Friendly Name.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Choose the Type of custom variable you’re creating. Choose string if you want the variable to include alphanumeric characters or special characters. The only characters you can’t use are “, < and >. Choose number if you want to pass numeric values.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you add Custom Floodlight Variables to a report as metrics, note that they will be summed in the report as if they are numeric values, even if the variables are actually strings. The string variables will display a value of 0.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Click Save.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								COPA Compliance
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								DoubleClick Floodlight lets you set a parameter called
+							Element:code
+								tag_for_child_directed_treatment
+								as either
+							Element:code
+								0
+								or
+							Element:code
+								1
+								if you want to mark a particular tag as coming from a user under the age of 13, under the
+							Element:a
+								COPA
+								compliance.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want to set this flag, you can send an integration option namespaced as
+							Element:code
+								copaCompliant
+								with
+							Element:code
+								true
+								or
+							Element:code
+								false
+								(default):
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.with(context).track("Free El", new Properties().putValue("show", "Stranger Things").putValue("source", "Netflix").putValue("greatestShowEver", true), new Options().setIntegrationOptions("DoubleClick Floodlight", new ValueMap().putValue("copaCompliant", true));
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sending Personally Identifiable Information (PII)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Please refrain from mapping custom variables that are PII. Please refer to the
+							Element:a
+								warning
+								by DoubleClick:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The terms of your DoubleClick contract prohibit passing any information to us that we could use or recognize as personally identifiable information (PII). If you enter certain key-values into a field in a DoubleClick product, you may see a warning that reminds you that you must not use key-values to pass data that we would recognize as PII. Key-values that trigger this warning include, for example, email and username. Note that it is okay to use these key-values if your purpose is not to collect information that DoubleClick could use or recognize as PII. (For example, email=weekly is fine, but passing a user’s email address is not.) If you do choose one of these key-values, DoubleClick may contact you in the future to confirm that you are not using them in a way that is prohibited.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+								✅
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Conversion events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use these fields to map your Segment event names to Floodlight tags. We’ll only send Floodlight the conversion events you specify.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											DoubleClick Advertiser ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your advertiser ID that is the source of the Floodlight activity. This should be the
+										Element:code
+											src
+											of your tag string.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											client

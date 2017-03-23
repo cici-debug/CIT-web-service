@@ -1,0 +1,504 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Salesforce Marketing Cloud Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					Salesforce Marketing Cloud
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to Salesforce Marketing Cloud in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment’s Salesforce Marketing Cloud integration allows you to add contacts without using SOAP APIs.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											A Note About ExactTarget
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											ExactTarget was recently acquired by Salesforce and renamed “Salesforce Marketing Cloud.” Throughout Segment, we’ll stick to the name Salesforce Marketing Cloud, but know that the names “Salesforce Marketing Cloud” and “ExactTarget” refer to the same product.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											API Access
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, you’ll need to provide Segment access to your Salesforce Marketing Cloud account. We’ll do that by creating a Salesforce Marketing Cloud application.
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											If you don’t already have one, create a Salesforce Marketing Cloud
+										Element:a
+											App Center
+											account. (This account is separate from your regular Marketing Cloud login.)
+										Element:li
+											If you already have apps set up, click
+										Element:strong
+											Create New App
+											.
+										Element:li
+											Click
+										Element:strong
+											API Integration
+											.
+										Element:li
+											Give your integration a name. A good default is
+										Element:code
+											Segment
+											for the name, and
+										Element:code
+											segment
+											for the Package name.
+										Element:li
+											Select “Production ExactTarget Account” and click
+										Element:strong
+											Link to Account
+											to link your App Center account to your Marketing Cloud account. (Alternatively, if you don’t yet have a Marketing Cloud account, you can create a new one now.) Click
+										Element:strong
+											Next
+											.
+										Element:li
+											Next, change the application’s permissions to match
+										Element:a
+											these settings
+											and click
+										Element:strong
+											Next
+											.
+										Element:li
+											Review your settings (they should look something like
+										Element:a
+											this
+											). Click
+										Element:strong
+											Finish
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You should now see a Summary menu, which contains your
+										Element:em
+											Client ID
+											and
+										Element:em
+											Client Secret
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Set Up Contact Data Storage
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Segment will pass any traits you specify in an
+										Element:code
+											identify
+											call through to the
+										Element:em
+											Identify Data Extension
+											you specify in the Segment UI. You’ll need to create this Data Extension manually in SMC’s Contact Builder UI. When creating a Data Extension in SMC, you can set up as many or as few traits as you would like, but a good starting point for your schema is to include Segment’s
+										Element:a
+											standard identify traits
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Data Formatting
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								SMC is very strict about the format of your data, and will reject most calls that don’t fit an expected format. We format your data in a very consistent way to make setting up your integration as easy as possible.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To keep your data format consistent, predictable, and readable within SMC’s interface, we convert all your property keys to
+							Element:code
+								Title Case
+								before sending them to SMC. For example, the following example data:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "name": "firstLast", "email": "first@example.com", "createdAt": "1970-01-01T00:00:01.989Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								or
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "name": "first_last", "email": "first@example.com", "createdAt": "1970-01-01T00:00:01.989Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Will both be converted into:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "Name": "First Last", "Email": "first@example.com", "Created At": "1970-01-01T00:00:01.989Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are a few more things you should to know about sending data to SMC:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Your Identify Data Extension must have a Primary Key called
+							Element:code
+								Contact Key
+								(we’ll use the
+							Element:code
+								userId
+								from your Segment events to populate this field) so we can link users to SMC’s built-in Contact Key property. (Your
+							Element:code
+								track
+								events can use whichever Primary Key you specify.)
+							Element:li
+								SMC doesn’t have a good way of handling nested objects, so we exclude them from data we send over.
+							Element:li
+								SMC accepts ISO-8601-formatted dates, and will reject any calls that include dates which don’t match that format. Be sure to send your dates in ISO format.
+							Element:li
+								SMC ignores casing differences (e.g.
+							Element:code
+								created at
+								and
+							Element:code
+								Created At
+								are interpreted the same way), so don’t worry about that.
+							Element:li
+								SMC ignores keys that don’t exist in the target data extension, so if you send a trait
+							Element:code
+								"nonexistent": "xyz"
+								with your data but there’s no matching
+							Element:code
+								nonexistent
+								column on SMC’s end, that trait will simply be ignored.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you call
+							Element:code
+								identify
+								, we’ll create a Salesforce Marketing Cloud Contact and upsert the user’s
+							Element:code
+								traits
+								into the Data Extension you specified in the Segment UI.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								You must include an
+							Element:em
+								Note:
+							Element:code
+								email
+								trait and a
+							Element:code
+								userId
+								trait with all calls; we won’t forward any
+							Element:code
+								identify
+								calls that are missing both.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you call
+							Element:code
+								track
+								, we’ll fire an event using Salesforce Marketing Cloud’s [eventing API][
+							Element:a
+								https://code.exacttarget.com/apis-sdks/rest-api/v1/hub/data-events/putDataExtensionRowByKeyAsync.html
+								]. This flexible API allows you to upsert information related to a contact into any Data Extension you choose.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, you’ll need to set up event mappings in the Segment UI, which tells us which Segment events we should forward to Salesforce Marketing Cloud, and to which Data Extension we should send any given event. When you fire a mapped event through Segment, we’ll send the data through to the Data Extension you specified. These data extensions upsert data so whatever you specify as the primary key, new data will be upserted off of the value of that key. For instance, if you use “Contact Key”, we’ll pass through your calls
+							Element:code
+								userId
+								as the value and that data extension will only have 1 row per
+							Element:code
+								userId
+								, updated with the latest values for each attribute.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We also let you choose other properties so that you can have 1 row per product, or 1 row per transaction based on a property on your call. If you are creating a data extension table for an
+							Element:code
+								Order Completed
+								event, you could use “Order Id” to grab the value from the
+							Element:code
+								orderId
+								property.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Similar to our conversions above, we will titlecase all properties so
+							Element:code
+								order_id
+								and
+							Element:code
+								orderId
+								both become “Order Id”.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Finally, we have a checkbox,
+							Element:code
+								UUID Primary Key
+								that will override whatever you have in the Primary Key Field and we will pass through a Primary Key with a key of ‘Uuid’ and the value being a UUID.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+								✅
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Client ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your Salesforce Marketing Cloud Client ID. For instructions on how to find your Client ID, check out our
+										Element:a
+											documentation
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Client Secret
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your Salesforce Marketing Cloud Client Secret. For instructions on how to find your Client Secret, check out our
+										Element:a
+											documentation
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Conversion events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use these fields to map your Segment event names to Salesforce Marketing Cloud Data Extensions. We’ll only send SMC the conversion events you specify.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Identify Data Extension External Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:em
+											External Key
+											of the Salesforce Marketing Cloud
+										Element:em
+											Data Extension
+											to which you’d like to send Identify data. You can find this in the SMC interface by navigating to
+										Element:strong
+											Data & Analytics > Contact Builder > Data Extensions
+											; the extension’s name will appear in the
+										Element:em
+											External Key
+											column.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

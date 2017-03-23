@@ -1,0 +1,537 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Tribe node
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:span
+								feature allows a
+							Element:em
+								tribes
+							Element:span
+								to act as a federated client across multiple clusters.
+							Element:em
+								tribe node
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The tribe node works by retrieving the cluster state from all connected clusters and merging them into a global cluster state. With this information at hand, it is able to perform read and write operations against the nodes in all clusters as if they were local. Note that a tribe node needs to be able to connect to each single node in every configured cluster.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								elasticsearch.yml
+								config file for a tribe node just needs to list the clusters that should be joined, for instance:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								tribe: t1:
+							Element:a
+							Element:span
+								cluster.name: cluster_one t2:
+							Element:img
+							Element:a
+							Element:span
+								cluster.name: cluster_two
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+							Element:code
+								t1
+								and
+							Element:code
+								t2
+								are arbitrary names representing the connection to each cluster.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The example above configures connections to two clusters, name
+							Element:code
+								t1
+								and
+							Element:code
+								t2
+								respectively. The tribe node will create a
+							Element:a
+								node client
+								to connect each cluster using
+							Element:a
+								unicast discovery
+								by default. Any other settings for the connection can be configured under
+							Element:code
+								tribe.{name}
+								, just like the
+							Element:code
+								cluster.name
+								in the example.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The merged global cluster state means that almost all operations work in the same way as a single cluster: distributed search, suggest, percolation, indexing, etc.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								However, there are a few exceptions:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								The merged view cannot handle indices with the same name in multiple clusters. By default it will pick one of them, see later for on_conflict options.
+							Element:li
+								Master level read operations (eg
+							Element:a
+								,
+							Element:em
+								Cluster State
+							Element:a
+								) will automatically execute with a local flag set to true since there is no master.
+							Element:em
+								Cluster Health
+							Element:li
+								Master level write operations (eg
+							Element:a
+								) are not allowed. These should be performed on a single cluster.
+							Element:em
+								Create Index
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The tribe node can be configured to block all write operations and all metadata operations with:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								tribe: blocks: write: true metadata: true
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The tribe node can also configure blocks on selected indices:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								tribe: blocks: write.indices: hk*,ldn* metadata.indices: hk*,ldn*
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When there is a conflict and multiple clusters hold the same index, by default the tribe node will pick one of them. This can be configured using the
+							Element:code
+								tribe.on_conflict
+								setting. It defaults to
+							Element:code
+								any
+								, but can be set to
+							Element:code
+								drop
+								(drop indices that have a conflict), or
+							Element:code
+								prefer_[tribeName]
+								to prefer the index from a specific tribe.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Tribe node settings
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The tribe node starts a node client for each listed cluster. The following configuration options are passed down from the tribe node to each node client:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											node.name
+											(used to derive the
+										Element:code
+											node.name
+											for each node client)
+										Element:li
+										Element:code
+											network.host
+										Element:li
+										Element:code
+											network.bind_host
+										Element:li
+										Element:code
+											network.publish_host
+										Element:li
+										Element:code
+											transport.host
+										Element:li
+										Element:code
+											transport.bind_host
+										Element:li
+										Element:code
+											transport.publish_host
+										Element:li
+										Element:code
+											path.home
+										Element:li
+										Element:code
+											path.conf
+										Element:li
+										Element:code
+											path.logs
+										Element:li
+										Element:code
+											path.scripts
+										Element:li
+										Element:code
+											shield.*
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Almost any setting (except for
+										Element:code
+											path.*
+											) may be configured at the node client level itself, in which case it will override any passed through setting from the tribe node. Settings you may want to set at the node client level include:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											network.host
+										Element:li
+										Element:code
+											network.bind_host
+										Element:li
+										Element:code
+											network.publish_host
+										Element:li
+										Element:code
+											transport.host
+										Element:li
+										Element:code
+											transport.bind_host
+										Element:li
+										Element:code
+											transport.publish_host
+										Element:li
+										Element:code
+											cluster.name
+										Element:li
+										Element:code
+											discovery.zen.ping.unicast.hosts
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											path.scripts: some/path/to/config
+										Element:a
+										Element:span
+											network.host: 192.168.1.5
+										Element:img
+										Element:a
+										Element:span
+											tribe: t1: cluster.name: cluster_one t2: cluster.name: cluster_two network.host: 10.1.2.3
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											path.scripts
+											setting is inherited by both
+										Element:code
+											t1
+											and
+										Element:code
+											t2
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											network.host
+											setting is inherited by
+										Element:code
+											t1
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											t3
+											node client overrides the inherited from the tribe node.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Transport
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Index Modules »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

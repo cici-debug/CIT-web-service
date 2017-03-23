@@ -1,0 +1,481 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Date Index Name Processor
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The purpose of this processor is to point documents to the right time based index based on a date or timestamp field in a document by using the
+							Element:a
+								date math index name support
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The processor sets the
+							Element:code
+								_index
+								meta field with a date math index name expression based on the provided index name prefix, a date or timestamp field in the documents being processed and the provided date rounding.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, this processor fetches the date or timestamp from a field in the document being processed. Optionally, date formatting can be configured on how the field’s value should be parsed into a date. Then this date, the provided index name prefix and the provided date rounding get formatted into a date math index name expression. Also here optionally date formatting can be specified on how the date should be formatted into a date math index name expression.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								An example pipeline that points documents to a monthly index that starts with a
+							Element:code
+								myindex-
+								prefix based on a date in the
+							Element:code
+								date1
+								field:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT _ingest/pipeline/monthlyindex { "description": "monthly date-time index naming", "processors" : [ { "date_index_name" : { "field" : "date1", "index_name_prefix" : "myindex-", "date_rounding" : "M" } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using that pipeline for an index request:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT /myindex/type/1?pipeline=monthlyindex { "date1" : "2016-04-25T12:02:01.789Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "_index" : "myindex-2016-04-01", "_type" : "type", "_id" : "1", "_version" : 1, "result" : "created", "_shards" : { "total" : 2, "successful" : 1, "failed" : 0 }, "created" : true }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The above request will not index this document into the
+							Element:code
+								myindex
+								index, but into the
+							Element:code
+								myindex-2016-04-01
+								index because it was rounded by month. This is because the date-index-name-processor overrides the
+							Element:code
+								_index
+								property of the document.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To see the date-math value of the index supplied in the actual index request which resulted in the above document being indexed into
+							Element:code
+								myindex-2016-04-01
+								we can inspect the effects of the processor using a simulate request.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST _ingest/pipeline/_simulate { "pipeline" : { "description": "monthly date-time index naming", "processors" : [ { "date_index_name" : { "field" : "date1", "index_name_prefix" : "myindex-", "date_rounding" : "M" } } ] }, "docs": [ { "_source": { "date1": "2016-04-25T12:02:01.789Z" } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								and the result:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "docs" : [ { "doc" : { "_id" : "_id", "_index" : "<myindex-{2016-04-25||/M{yyyy-MM-dd|UTC}}>", "_type" : "_type", "_source" : { "date1" : "2016-04-25T12:02:01.789Z" }, "_ingest" : { "timestamp" : "2016-11-08T19:43:03.850+0000" } } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The above example shows that
+							Element:code
+								_index
+								was set to
+							Element:code
+								<myindex-{2016-04-25||/M{yyyy-MM-dd|UTC}}>
+								. Elasticsearch understands this to mean
+							Element:code
+								2016-04-01
+								as is explained in the
+							Element:a
+								date math index name documentation
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Table 17. Date index name options
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:colgroup
+							Element:col
+							Element:col
+							Element:col
+							Element:col
+							Element:thead
+							Element:tr
+							Element:th
+								Name
+							Element:th
+								Required
+							Element:th
+								Default
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								field
+							Element:td
+							Element:p
+								yes
+							Element:td
+							Element:p
+								-
+							Element:td
+							Element:p
+								The field to get the date or timestamp from.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								index_name_prefix
+							Element:td
+							Element:p
+								no
+							Element:td
+							Element:p
+								-
+							Element:td
+							Element:p
+								A prefix of the index name to be prepended before the printed date.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								date_rounding
+							Element:td
+							Element:p
+								yes
+							Element:td
+							Element:p
+								-
+							Element:td
+							Element:p
+								How to round the date when formatting the date into the index name. Valid values are:
+							Element:code
+								y
+								(year),
+							Element:code
+								M
+								(month),
+							Element:code
+								w
+								(week),
+							Element:code
+								d
+								(day),
+							Element:code
+								h
+								(hour),
+							Element:code
+								m
+								(minute) and
+							Element:code
+								s
+								(second).
+							Element:tr
+							Element:td
+							Element:p
+								`date_formats `
+							Element:td
+							Element:p
+								no
+							Element:td
+							Element:p
+								yyyy-MM-dd’T'HH:mm:ss.SSSZ
+							Element:td
+							Element:p
+								An array of the expected date formats for parsing dates / timestamps in the document being preprocessed. Can be a Joda pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								timezone
+							Element:td
+							Element:p
+								no
+							Element:td
+							Element:p
+								UTC
+							Element:td
+							Element:p
+								The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								locale
+							Element:td
+							Element:p
+								no
+							Element:td
+							Element:p
+								ENGLISH
+							Element:td
+							Element:p
+								The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								index_name_format
+							Element:td
+							Element:p
+								no
+							Element:td
+							Element:p
+								yyyy-MM-dd
+							Element:td
+							Element:p
+								The format to be used when printing the parsed date into the index name. An valid Joda pattern is expected here.
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								« Date Processor
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								Fail Processor »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

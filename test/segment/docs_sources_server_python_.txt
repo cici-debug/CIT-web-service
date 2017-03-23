@@ -1,0 +1,1918 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Analytics for Python
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Our Python library lets you record analytics data from your Python code. The requests hit our servers, and then we route your data to any analytics service you enable on your integrations page.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This library is open-source, so you can
+				Element:a
+					check it out on Github
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All of our server-side libraries are built for high-performance, so you can use them in your web server controller code. This library uses an internal queue to make
+				Element:code
+					identify
+					and
+				Element:code
+					track
+					calls non-blocking and fast. It also batches messages and flushes asynchronously to our servers using a separate thread.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Want to stay updated on releases? Subscribe to the
+				Element:a
+					release feed
+					.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Install
+							Element:code
+								analytics-python
+								via pip:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								pip install analytics-python
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re using a system for managing dependencies, you’ll want to pin the library to
+							Element:code
+								1.X
+								to avoid breaking changes when the library is updated
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Inside your app, you’ll want to
+							Element:strong
+								set your
+								before making any analytics calls:
+							Element:code
+								write_key
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								import analytics analytics.write_key = 'YOUR_WRITE_KEY'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								If you need to send data to multiple Segment sources, you can initialize a new Client for each
+							Element:code
+								write_key
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Development Settings
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default initialization settings are production-ready and queue messages to be processed by a background thread.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In development you might want to enable some settings to make it easier to spot problems. Enabling
+										Element:code
+											analytics.debug
+											will log debugging info to the Python logger. You can also add an
+										Element:code
+											on_error
+											handler to specifically print out the response you’re seeing from our API.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											def on_error(error, items): print("An error occurred:", error) analytics.debug = True analytics.on_error = on_error
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Using Django?
+											Check out the
+										Element:a
+											Django docs
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								lets you tie a user to their actions and record traits about them. It includes a unique User ID and any optional traits you know about them.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We recommend calling
+							Element:code
+								identify
+								a single time when the user’s account is first created, and only identifying again later when their traits change.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								identify
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.identify('019mr8mf4r', { 'email': 'john@example.com', 'name': 'John Smith', 'friends': 30 })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The example
+							Element:code
+								identify
+								call is identifying John by his unique User ID (the one you know him by in your database) and labeling him with
+							Element:code
+								email
+								,
+							Element:code
+								name
+								and
+							Element:code
+								friends
+								traits.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:em
+								string or int
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								dict, optional
+							Element:td
+								A dict of traits you know about the user. Things like:
+							Element:code
+								email
+								,
+							Element:code
+								name
+								or
+							Element:code
+								friends
+								.
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								dict, optional
+							Element:td
+								A dict containing any context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								datetime, optional
+							Element:td
+								A
+							Element:code
+								datetime
+								object representing when the
+							Element:code
+								identify
+								took place. This is most useful if you’re importing historical data. If the
+							Element:code
+								identify
+								just happened, leave it blank and we’ll use the server’s time.
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:em
+								string or int, optional
+							Element:td
+								An anonymous session ID for this user.
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								dict, optional
+							Element:td
+								A dictionary of integrations to enable or disable
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								identify method payload
+								in our
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								lets you record the actions your users perform.Every action triggers what we call an “event”, which can also have associated properties.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to track events that are indicators of success for your site, like
+							Element:strong
+								Signed Up
+								,
+							Element:strong
+								Item Purchased
+								or
+							Element:strong
+								Article Bookmarked
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, we recommend tracking just a few important events. You can always add more later!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								track
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.track('f4ca124298', 'Signed Up', { 'plan': 'Enterprise' })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This call is telling us that your user just triggered the
+							Element:strong
+								Signed Up
+								event and chose your hypothetical
+							Element:code
+								'Enterprise'
+								plan.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								event properties can be anything you want to record, for example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.track('f4ca124298', 'Article Bookmarked', { 'title': 'Snow Fall', 'subtitle': 'The Avalance at Tunnel Creek', 'author': 'John Branch' })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								track
+								method has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:em
+								string
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								event
+							Element:em
+								string
+							Element:td
+								The name of the event you’re tracking. We recommend human-readable names like
+							Element:strong
+								Song Played
+								or
+							Element:strong
+								Status Updated
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								dict, optional
+							Element:td
+								A dictionary of properties for the event. If the event was
+							Element:strong
+								Product Added
+								, it might have properties like
+							Element:code
+								price
+								or
+							Element:code
+								product
+								.
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								dict, optional
+							Element:td
+								A dict containing any context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								datetime, optional
+							Element:td
+								A
+							Element:code
+								datetime
+								object representing when the
+							Element:code
+								track
+								took place. This is most useful if you’re importing historical data. If the
+							Element:code
+								track
+								just happened, leave it blank and we’ll use the server’s time.
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:em
+								string or int, optional
+							Element:td
+								An anonymous session ID for this user.
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								dict, optional
+							Element:td
+								A dictionary of integrations to enable or disable
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on
+							Element:strong
+								best practices in event naming
+								as well as the
+							Element:strong
+								in our
+							Element:code
+								track
+								method payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								method lets you record page views on your website, along with optional extra information about the page being viewed.
+							Element:code
+								page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re using our client-side setup in combination with the Python library, page calls are
+							Element:strong
+								already tracked for you
+								by default. However, if you want to record your own page views manually and aren’t using our client-side library, read on!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								page
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.page('user_id', 'Docs', 'Python', { 'url': 'http://segment.com' })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								page
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+								_string
+							Element:td
+								The ID for the user that is a part of the group.
+							Element:tr
+							Element:td
+							Element:code
+								category
+							Element:em
+								string, optional
+							Element:td
+								The category of the page. Useful for things like ecommerce where many pages often live under a larger category.
+							Element:tr
+							Element:td
+							Element:code
+								name
+							Element:em
+								string, optional
+							Element:td
+								The name of the of the page, for example
+							Element:strong
+								Signup
+								or
+							Element:strong
+								Home
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								dict, optional
+							Element:td
+								A dictionary of properties of the page. A few properties specially recognized and automatically translated:
+							Element:code
+								url
+								,
+							Element:code
+								title
+								,
+							Element:code
+								referrer
+								and
+							Element:code
+								path
+								, but you can add your own too!
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								dict, optional
+							Element:td
+								A dict containing any context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								datetime, optional
+							Element:td
+								A
+							Element:code
+								datetime
+								object representing when the
+							Element:code
+								page
+								took place. This is most useful if you’re importing historical data. If the
+							Element:code
+								page
+								just happened, leave it blank and we’ll use the server’s time.
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:em
+								string or int, optional
+							Element:td
+								An anonymous session ID for this user.
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								dict, optional
+							Element:td
+								A dictionary of integrations to enable or disable
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								in our
+							Element:code
+								page
+								method payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Screen
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								method lets you record screen views on your mobile app, along with optional extra information about the screen being viewed.
+							Element:code
+								screen
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re using our mobile SDK in combination with the library, screen calls are
+							Element:strong
+								already tracked for you
+								by default. However, if you want to record your own screen views manually and aren’t using our SDK library, read on!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								screen
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.screen('user_id', 'Settings', 'Brightness', { 'from': 'Home Screen' })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								screen
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:em
+								string or number
+							Element:td
+								The ID for the user that is a part of the group.
+							Element:tr
+							Element:td
+							Element:code
+								category
+							Element:em
+								string, optional
+							Element:td
+								The category of the page. Useful for things like ecommerce where many pages often live under a larger category.
+							Element:tr
+							Element:td
+							Element:code
+								name
+							Element:em
+								string, optional
+							Element:td
+								The name of the of the page, for example
+							Element:strong
+								Signup
+								or
+							Element:strong
+								Home
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								dict, optional
+							Element:td
+								A dictionary of properties of the screen.
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								dict, optional
+							Element:td
+								A dict containing any context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								datetime, optional
+							Element:td
+								A
+							Element:code
+								datetime
+								object representing when the
+							Element:code
+								screen
+								took place. This is most useful if you’re importing historical data. If the
+							Element:code
+								screen
+								just happened, leave it blank and we’ll use the server’s time.
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:em
+								string or int, optional
+							Element:td
+								An anonymous session ID for this user.
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								dict, optional
+							Element:td
+								A dictionary of integrations to enable or disable
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								in our
+							Element:code
+								screen
+								method payload
+							Element:a
+								Spec
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Group
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								group
+								lets you associate an
+							Element:a
+								identified user
+								with a group. A group could be a company, organization, account, project or team! It also lets you record custom traits about the group, like industry or number of employees.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This is useful for tools like
+							Element:a
+								Intercom
+								,
+							Element:a
+								Preact
+								and
+							Element:a
+								Totango
+								, as it ties the user to a
+							Element:strong
+								group
+								of other users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								group
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.group('user_id', 'group_id', { 'name': 'Initech', 'domain': 'Accounting Software' })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								group
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:em
+								string or number
+							Element:td
+								The ID for the user that is a part of the group.
+							Element:tr
+							Element:td
+							Element:code
+								group_id
+							Element:em
+								string or number
+							Element:td
+								The ID of the group.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								dict, optional
+							Element:td
+								A dict of traits you know about the group. For a company, they might be things like
+							Element:code
+								name
+								,
+							Element:code
+								address
+								, or
+							Element:code
+								phone
+								.
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								dict, optional
+							Element:td
+								A dict containing any context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								datetime, optional
+							Element:td
+								A
+							Element:code
+								datetime
+								object representing when the
+							Element:code
+								group
+								took place. This is most useful if you’re importing historical data. If the
+							Element:code
+								group
+								just happened, leave it blank and we’ll use the server’s time.
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+							Element:em
+								string or int, optional
+							Element:td
+								An anonymous session ID for this user.
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								dict, optional
+							Element:td
+								A dictionary of integrations to enable or disable
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find more details about
+							Element:code
+								group
+								including the
+							Element:strong
+								in our
+							Element:code
+								group
+								method payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Alias
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								alias
+								is how you associate one identity with another. This is an advanced method, but it is required to manage user identities successfully in
+							Element:em
+								some
+								of our integrations.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In
+							Element:a
+								Mixpanel
+								it’s used to associate an anonymous user with an identified user once they sign up. For
+							Element:a
+								KISSmetrics
+								and
+							Element:a
+								Trak.io
+								if your user switches IDs, you can use ‘alias’ to rename the ‘userId’.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								alias
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.alias(previous_id, user_id)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								alias
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								previous_id
+							Element:em
+								string
+							Element:td
+								The previous ID for this user to alias from.
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:em
+								string
+							Element:td
+								The user ID to alias to.
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								dict, optional
+							Element:td
+								A dict containing any context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								datetime, optional
+							Element:td
+								A
+							Element:code
+								datetime
+								object representing when the
+							Element:code
+								track
+								took place. This is most useful if you’re importing historical data. If the
+							Element:code
+								track
+								just happened, leave it blank and we’ll use the server’s time.
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								dict, optional
+							Element:td
+								A dictionary of integrations to enable or disable
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s a full example of how we might use the
+							Element:code
+								alias
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								# the anonymous user does actions under an anonymous ID analytics.track('92734232-2342423423-973945', 'Anonymous Event') # the anonymous user signs up and is aliased to their new user ID analytics.alias('92734232-2342423423-973945', '1234') # the user is identified analytics.identify('1234', { plan: 'Free' }) # the identified user does actions analytics.track('1234', 'Identified Action')
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more details about
+							Element:code
+								alias
+								including the
+							Element:strong
+								, check out our
+							Element:code
+								alias
+								call payload
+							Element:a
+								Spec
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Historical Import
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can import historical data by adding the
+							Element:code
+								timestamp
+								argument to any of your method calls. This can be helpful if you’ve just switched to Segment.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Historical imports can only be done into integrations that can accept historical timestamp’ed data. Most analytics tools like Mixpanel, Amplitude, Kissmetrics, etc. can handle that type of data just fine. One common integration that does not accept historical data is Google Analytics since their API cannot accept historical data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								If you’re tracking things that are happening right now, leave out the
+							Element:code
+								timestamp
+								and our servers will timestamp the requests for you.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								import datetime from dateutil.tz import tzutc timestamp = datetime.datetime(2538, 10, 17, 0, 0, 0, 0, tzinfo=tzutc()) analytics.track('019mr8mf4r', 'Bought a game', { 'game': 'Duke Nukem forever' }, timestamp=timestamp)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Timezones in Python
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Python’s
+										Element:code
+											datetime
+											module supports two types of date and time objects: “naive” objects without timezone information, and “aware” objects that include timezones. By default, newly created
+										Element:code
+											datetime
+											objects are naive. You’ll want to make sure to use timezone aware objects when importing data to be sure the timezone information is sent correctly.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We created an aware datetime object in our example above using the
+										Element:code
+											tzinfo
+											argument to the
+										Element:code
+											datetime
+											constructor. Note that if we’d omitted the argument, we wouldn’t have passed along timezone info:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											>>> naive = datetime.datetime(2015, 1, 5, 0, 0, 0, 0) >>> aware = datetime.datetime(2015, 1, 5, 0, 0, 0, 0, tzinfo=tzutc()) >>> naive.isoformat() '2015-01-05T00:00:00' >>> aware.isoformat() '2015-01-05T00:00:00+00:00'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have an ISO format timestamp string that contains timezone information,
+										Element:code
+											dateutil.parser
+											is capable of creating aware datetime objects:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											>>> import dateutil.parser >>> dateutil.parser.parse('2012-10-17T18:58:57.911Z') datetime.datetime(2012, 10, 17, 18, 58, 57, 911000, tzinfo=tzutc()) >>> dateutil.parser.parse('2016-06-06T01:46:33.939388+00:00') datetime.datetime(2016, 6, 6, 1, 46, 33, 939388, tzinfo=tzutc()) >>> dateutil.parser.parse('2016-06-06T01:46:33.939388+07:00') datetime.datetime(2016, 6, 6, 1, 46, 33, 939388, tzinfo=tzoffset(None, 25200)) >>> dateutil.parser.parse('2016-06-06T01:46:33.939388-07:00') datetime.datetime(2016, 6, 6, 1, 46, 33, 939388, tzinfo=tzoffset(None, -25200))
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you find yourself with a naive object, and know what timezone it should be in, you can also use
+										Element:a
+											pytz
+											to create an aware
+										Element:code
+											datetime
+											object from the naive one:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											>>> import datetime >>> import pytz >>> naive = datetime.datetime.now() >>> aware = pytz.timezone('US/Pacific').localize(naive) >>> naive.isoformat() '2016-06-05T21:52:14.499635' >>> aware.isoformat() '2016-06-05T21:52:14.499635-07:00'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											pytz documentation
+											contains some good additional information on timezone usage, as well as how to handle some of the more interesting edge cases.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Whatever your method, make sure you use aware
+										Element:code
+											datetime
+											objects when importing your data or it will be in the wrong timezone.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											# Check that a datetime object d is aware assert d.tzinfo is not None and d.tzinfo.utcoffset(d) is not None
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Server Logs Example
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											import dateutil.parser import analytics analytics.write_key = 'YOUR_WRITE_KEY' log = [ '2012-10-17T18:58:57.911Z 019mr8mf4r /purchased/tshirt' ] for entry in log: timestamp_str, user_id, url = entry.split(' ') timestamp = dateutil.parser.parse(timestamp_str) # resulting datetime.datetime object is aware # have a timezone? check yo'self assert timestamp.tzinfo is not None and timestamp.tzinfo.utcoffset(timestamp) is not None analytics.track(user_id, 'Shirt Bought', { 'color': 'Blue', 'revenue': 17.90 }, timestamp=timestamp) analytics.flush()
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Selecting Integrations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								alias
+								,
+							Element:code
+								group
+								,
+							Element:code
+								identify
+								,
+							Element:code
+								page
+								and
+							Element:code
+								track
+								calls can all be passed an object of
+							Element:code
+								integrations
+								that lets you turn certain integrations on or off. By default all integrations are enabled.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s an example
+							Element:code
+								track
+								call with the
+							Element:code
+								integrations
+								object shown.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.track('9742', 'Song Played', integrations={ 'all': False, 'KISSmetrics': True, 'Google Analytics': False })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this case, we’re specifying that we want this identify to only go to KISSmetrics.
+							Element:code
+								'all': False
+								says that no integration should be enabled unless otherwise specified.
+							Element:code
+								'KISSmetrics': True
+								turns on KISSmetrics, etc.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Integration flags are
+							Element:strong
+								case sensitive
+								and match
+							Element:a
+								the integration’s name in the docs
+								(i.e. “AdLearn Open Platform”, “awe.sm”, “MailChimp”, etc.).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:p
+								Available at the business level, filtering track calls can be done right from the Segment UI on your source schema page. We recommend using the UI if possible since it’s a much simpler way of managing your filters and can be updated with no code changes on your side.
+							Element:li
+							Element:p
+								If you are on a grandfathered plan, events sent server-side that are filtered through the Segment dashboard will still count towards your API usage.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Batching
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Our libraries are built to support high performance environments. That means it is safe to use analytics-python on a web server that’s serving hundreds of requests per second.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Every method you call
+							Element:strong
+								does not
+								result in an HTTP request, but is queued in memory instead. Messages are flushed in batch in the background, which allows for much faster operation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, our library will make a request whenever there aren’t currently any in-flight requests to our servers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There is a maximum of
+							Element:code
+								500kb
+								per batch request and
+							Element:code
+								15kb
+								per call.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											What happens if there are just too many messages?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the module detects that it can’t flush faster than it’s receiving messages, it’ll simply stop accepting messages. This means your program will never crash because of a backed up analytics queue. The default
+										Element:code
+											max_queue_size
+											is
+										Element:code
+											10000
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How do I flush right now?!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also flush on demand. For example, at the end of your program, you’ll want to flush to make sure there’s nothing left in the queue. Just call the
+										Element:code
+											flush
+											method:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.flush()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Calling this method will
+										Element:em
+											block
+											the calling thread until there’s no messages left in the queue. You’ll want to use it as part of your cleanup scripts and avoid using it as part of the request lifecycle.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Detecting errors
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can listen to events to be called on failed flushes:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											def on_error(error, items): print('Failure', error) analytics.on_error = on_error
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Logging
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								analytics-python uses the standard python logging module. By default, logging is enabled and set at the
+							Element:code
+								logging.WARNING
+								level. If you want it to talk more, you can set a different
+							Element:code
+								log_level
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								import logging logging.getLogger('segment').setLevel('DEBUG')
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Options
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you hate defaults or want to send data to multiple sources, then you can create your own Clients. Keep in mind that each client runs a separate background thread, so you won’t want to create these on every request. Check out these gizmos:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								from analytics import Client Client('YOUR_WRITE_KEY', debug=True, on_error=on_error, send=True, max_queue_size=100000)
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								debug
+							Element:em
+								bool
+							Element:td
+							Element:code
+								True
+								to log more verbosely,
+							Element:code
+								False
+								by default.
+							Element:tr
+							Element:td
+							Element:code
+								send
+							Element:em
+								bool
+							Element:td
+							Element:code
+								False
+								to avoid sending data to Segment,
+							Element:code
+								True
+								by default.
+							Element:tr
+							Element:td
+							Element:code
+								on_error
+							Element:em
+								function
+							Element:td
+								Set an error handler to be called whenever errors occur
+							Element:tr
+							Element:td
+							Element:code
+								max_queue_size
+							Element:em
+								int
+							Element:td
+								Maximum number of elements allowed in the queue. If this condition is ever reached, that means you’re identifying / tracking faster than you can flush. If this happens, let us know!
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Django
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To add analytics to your Django web server, you need to drop in the initialization code in the top-most
+							Element:code
+								urls.py
+								. It turns out that
+							Element:a
+								this is the only place that gets called once
+								. A signal
+							Element:a
+								may be added
+								in future Django versions.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								import analytics analytics.write_key = 'YOUR_WRITE_KEY' urlpatterns = patterns('', # Examples: url(r'^$', 'mysite.views.index', name='index') # ... )
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Will this work in production / uWSGI / gUnicorn?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Yes!
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How do I add logging to Django?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’re troubleshooting your analytics, you’ll want to turn on logging.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You need to add the
+										Element:code
+											analytics
+											logger and handler to your
+										Element:code
+											settings.py
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											LOGGING = { 'version': 1, 'formatters': { 'simple': { 'format': '%(levelname)s %(message)s' } }, 'handlers': { 'console': { 'level': 'DEBUG', 'class': 'logging.StreamHandler', 'formatter': 'simple' } }, 'loggers': { 'segment': { 'handlers': ['console'], 'level': 'DEBUG', 'propagate': True, } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											and turn on module logging in your initialization call in
+										Element:code
+											urls.py
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											import logging import analytics analytics.debug = True # turn on debug logging analytics.write_key = 'YOUR_WRITE_KEY'
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Google App Engine
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We have heard from our customers that Google App Engine does not resolve project dependencies, so you’ll need to get
+							Element:a
+								requests
+								and
+							Element:a
+								python-dateutil
+								and add it into your project so that analytics-python can find it.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Request Size Limits
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Keep in mind that we have a size limit of 15kb per request and 500kb per batch request!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’re having trouble we have a few tips that help common problems.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my debugger
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check that you’ve followed all the steps in the
+										Element:a
+											Quickstart
+											.
+										Element:li
+										Element:p
+											Make sure that you’re calling one of our API methods once the library is successfully installed—
+										Element:a
+											,
+										Element:code
+											identify
+										Element:a
+											, etc.
+										Element:code
+											track
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my end tools
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check your credentials for that integration.
+										Element:li
+										Element:p
+											Make sure that the integration you are troubleshooting can accept server-side API calls. Compatibility is shown on the
+										Element:a
+											integration docs
+											pages and on the sheets on your Segment source Integrations page.
+										Element:li
+										Element:p
+											Check out the
+										Element:a
+											integration’s documentation
+											to see if there are other requirements for using the method and integration you’re trying to get working.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Overriding Context Value
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In some cases, you will want to manually pass in
+										Element:code
+											ip
+											or
+										Element:code
+											userAgent
+											values. Since we do not automatically send these in, you will manually pass these through the
+										Element:code
+											context
+											object like so:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.track('9742', 'Song Played', context={ 'ip': 1234, 'userAgent': 'Mozilla/5.0 (Linux; U; Android 4.1.1; en-gb; Build/KLP) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30' })
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Be sure to see the full
+										Element:a
+											reference of supported keys
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Versioning
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Check that you have the most recent version.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											python -c "import analytics; print analytics.VERSION"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Does it match
+										Element:a
+											the most current version
+											?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If not, update your version.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											pip install -U analytics-python
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											or
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											easy_install --upgrade analytics-python
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

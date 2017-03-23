@@ -1,0 +1,452 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								cat shards
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								shards
+								command is the detailed view of what nodes contain which shards. It will tell you if it’s a primary or replica, the number of docs, the bytes it takes on disk, and the node where it’s located.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here we see a single index, with three primary shards and no replicas:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								% curl 192.168.56.20:9200/_cat/shards wiki1 0 p STARTED 3014 31.1mb 192.168.56.10 H5dfFeA wiki1 1 p STARTED 3013 29.6mb 192.168.56.30 bGG90GE wiki1 2 p STARTED 3973 38.1mb 192.168.56.20 I8hydUG
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Index pattern
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have many shards, you may wish to limit which indices show up in the output. You can always do this with
+										Element:code
+											grep
+											, but you can save some bandwidth by supplying an index pattern to the end.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											% curl 192.168.56.20:9200/_cat/shards/wiki* wiki2 0 p STARTED 197 3.2mb 192.168.56.10 H5dfFeA wiki2 1 p STARTED 205 5.9mb 192.168.56.30 bGG90GE wiki2 2 p STARTED 275 7.8mb 192.168.56.20 I8hydUG
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Relocation
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Let’s say you’ve checked your health and you see two relocating shards. Where are they from and where are they going?
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											% curl 192.168.56.10:9200/_cat/health 1384315316 20:01:56 foo green 3 3 12 6 2 0 0 % curl 192.168.56.10:9200/_cat/shards | fgrep RELO wiki1 0 r RELOCATING 3014 31.1mb 192.168.56.20 I8hydUG -> 192.168.56.30 bGG90GE wiki1 1 r RELOCATING 3013 29.6mb 192.168.56.10 H5dfFeA -> 192.168.56.30 bGG90GE
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Shard states
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Before a shard can be used, it goes through an
+										Element:code
+											INITIALIZING
+											state.
+										Element:code
+											shards
+											can show you which ones.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											% curl -XPUT 192.168.56.20:9200/_settings -d'{"number_of_replicas":1}' {"acknowledged":true} % curl 192.168.56.20:9200/_cat/shards wiki1 0 p STARTED 3014 31.1mb 192.168.56.10 H5dfFeA wiki1 0 r INITIALIZING 0 14.3mb 192.168.56.30 bGG90GE wiki1 1 p STARTED 3013 29.6mb 192.168.56.30 bGG90GE wiki1 1 r INITIALIZING 0 13.1mb 192.168.56.20 I8hydUG wiki1 2 r INITIALIZING 0 14mb 192.168.56.10 H5dfFeA wiki1 2 p STARTED 3973 38.1mb 192.168.56.20 I8hydUG
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If a shard cannot be assigned, for example you’ve overallocated the number of replicas for the number of nodes in the cluster, the shard will remain
+										Element:code
+											UNASSIGNED
+											with the
+										Element:a
+											reason code
+										Element:code
+											ALLOCATION_FAILED
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											% curl -XPUT 192.168.56.20:9200/_settings -d'{"number_of_replicas":3}' % curl 192.168.56.20:9200/_cat/health 1384316325 20:18:45 foo yellow 3 3 9 3 0 0 3 % curl 192.168.56.20:9200/_cat/shards wiki1 0 p STARTED 3014 31.1mb 192.168.56.10 H5dfFeA wiki1 0 r STARTED 3014 31.1mb 192.168.56.30 bGG90GE wiki1 0 r STARTED 3014 31.1mb 192.168.56.20 I8hydUG wiki1 0 r UNASSIGNED ALLOCATION_FAILED wiki1 1 r STARTED 3013 29.6mb 192.168.56.10 H5dfFeA wiki1 1 p STARTED 3013 29.6mb 192.168.56.30 bGG90GE wiki1 1 r STARTED 3013 29.6mb 192.168.56.20 I8hydUG wiki1 1 r UNASSIGNED ALLOCATION_FAILED wiki1 2 r STARTED 3973 38.1mb 192.168.56.10 H5dfFeA wiki1 2 r STARTED 3973 38.1mb 192.168.56.30 bGG90GE wiki1 2 p STARTED 3973 38.1mb 192.168.56.20 I8hydUG wiki1 2 r UNASSIGNED ALLOCATION_FAILED
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Reasons for unassigned shard
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											These are the possible reasons for a shard to be in a unassigned state:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											INDEX_CREATED
+										Element:td
+										Element:p
+											Unassigned as a result of an API creation of an index.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											CLUSTER_RECOVERED
+										Element:td
+										Element:p
+											Unassigned as a result of a full cluster recovery.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											INDEX_REOPENED
+										Element:td
+										Element:p
+											Unassigned as a result of opening a closed index.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											DANGLING_INDEX_IMPORTED
+										Element:td
+										Element:p
+											Unassigned as a result of importing a dangling index.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											NEW_INDEX_RESTORED
+										Element:td
+										Element:p
+											Unassigned as a result of restoring into a new index.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											EXISTING_INDEX_RESTORED
+										Element:td
+										Element:p
+											Unassigned as a result of restoring into a closed index.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											REPLICA_ADDED
+										Element:td
+										Element:p
+											Unassigned as a result of explicit addition of a replica.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											ALLOCATION_FAILED
+										Element:td
+										Element:p
+											Unassigned as a result of a failed allocation of the shard.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											NODE_LEFT
+										Element:td
+										Element:p
+											Unassigned as a result of the node hosting it leaving the cluster.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											REROUTE_CANCELLED
+										Element:td
+										Element:p
+											Unassigned as a result of explicit cancel reroute command.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											REINITIALIZED
+										Element:td
+										Element:p
+											When a shard moves from started back to initializing, for example, with shadow replicas.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											REALLOCATED_REPLICA
+										Element:td
+										Element:p
+											A better replica location is identified and causes the existing replica allocation to be cancelled.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« cat thread pool
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											cat segments »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

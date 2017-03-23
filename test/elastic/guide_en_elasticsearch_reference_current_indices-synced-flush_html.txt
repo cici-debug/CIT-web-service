@@ -1,0 +1,406 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Synced Flush
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Elasticsearch tracks the indexing activity of each shard. Shards that have not received any indexing operations for 5 minutes are automatically marked as inactive. This presents an opportunity for Elasticsearch to reduce shard resources and also perform a special kind of flush, called
+							Element:code
+								synced flush
+								. A synced flush performs a normal flush, then adds a generated unique marker (sync_id) to all shards.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Since the sync id marker was added when there were no ongoing indexing operations, it can be used as a quick way to check if the two shards' lucene indices are identical. This quick sync id comparison (if present) is used during recovery or restarts to skip the first and most costly phase of the process. In that case, no segment files need to be copied and the transaction log replay phase of the recovery can start immediately. Note that since the sync id marker was applied together with a flush, it is very likely that the transaction log will be empty, speeding up recoveries even more.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This is particularly useful for use cases having lots of indices which are never or very rarely updated, such as time based data. This use case typically generates lots of indices whose recovery without the synced flush marker would take a long time.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To check whether a shard has a marker or not, look for the
+							Element:code
+								commit
+								section of shard stats returned by the
+							Element:a
+								indices stats
+								API:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET twitter/_stats?level=shards
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								which returns something similar to:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ ... "indices": { "twitter": { "primaries": {}, "total": {}, "shards": { "0": [ { "routing": { ... }, "commit": { "id": "te7zF7C4UsirqvL6jp/vUg==", "generation": 2, "user_data": { "sync_id": "AU2VU0meX-VX2aNbEUsD"
+							Element:a
+							Element:span
+								, ... }, "num_docs": 0 } } ... ], ... } } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								the
+							Element:code
+								sync id
+								marker
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Synced Flush API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Synced Flush API allows an administrator to initiate a synced flush manually. This can be particularly useful for a planned (rolling) cluster restart where you can stop indexing and don’t want to wait the default 5 minutes for idle indices to be sync-flushed automatically.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While handy, there are a couple of caveats for this API:
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Synced flush is a best effort operation. Any ongoing indexing operations will cause the synced flush to fail on that shard. This means that some shards may be synced flushed while others aren’t. See below for more.
+										Element:li
+											The
+										Element:code
+											sync_id
+											marker is removed as soon as the shard is flushed again. That is because a flush replaces the low level lucene commit point where the marker is stored. Uncommitted operations in the transaction log do not remove the marker. In practice, one should consider any indexing operation on an index as removing the marker as a flush can be triggered by Elasticsearch at any time.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is harmless to request a synced flush while there is ongoing indexing. Shards that are idle will succeed and shards that are not will fail. Any shards that succeeded will have faster recovery times.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST twitter/_flush/synced
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The response contains details about how many shards were successfully sync-flushed and information about any failure.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is what it looks like when all shards of a two shards and one replica index successfully sync-flushed:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_shards": { "total": 2, "successful": 2, "failed": 0 }, "twitter": { "total": 2, "successful": 2, "failed": 0 } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is what it looks like when one shard group failed due to pending operations:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_shards": { "total": 4, "successful": 2, "failed": 2 }, "twitter": { "total": 4, "successful": 2, "failed": 2, "failures": [ { "shard": 1, "reason": "[2] ongoing operations on primary" } ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above error is shown when the synced flush fails due to concurrent indexing operations. The HTTP status code in that case will be
+										Element:code
+											409 CONFLICT
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sometimes the failures are specific to a shard copy. The copies that failed will not be eligible for fast recovery but those that succeeded still will be. This case is reported as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_shards": { "total": 4, "successful": 1, "failed": 1 }, "twitter": { "total": 4, "successful": 3, "failed": 1, "failures": [ { "shard": 1, "reason": "unexpected error", "routing": { "state": "STARTED", "primary": false, "node": "SZNr2J_ORxKTLUCydGX4zA", "relocating_node": null, "shard": 1, "index": "twitter" } } ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a shard copy fails to sync-flush, the HTTP status code returned will be
+										Element:code
+											409 CONFLICT
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The synced flush API can be applied to more than one index with a single call, or even on
+										Element:code
+											_all
+											the indices.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST kimchy,elasticsearch/_flush/synced POST _flush/synced
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Flush
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Refresh »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

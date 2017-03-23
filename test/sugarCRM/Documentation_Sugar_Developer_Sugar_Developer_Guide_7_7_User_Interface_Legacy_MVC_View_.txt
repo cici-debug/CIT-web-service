@@ -1,0 +1,482 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					View
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Displaying information to the browser.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What are Views?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Views, otherwise known as actions, are typically used to render views or to process logic. Views are not just limited to HTML data. You can send JSON encoded data as part of a view or any other structure you wish. As with the controllers, there is a default class called SugarView which implements much of the basic logic for views, such as handling of headers and footers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are five main actions for a module:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Display Actions
+							Element:ul
+							Element:li
+							Element:strong
+								Detail View
+								: A detail view displays a read-only view of a particular record. Usually, this is accessed via the list view. The detail view displays the details of the object itself and related items (subpanels).
+							Element:br
+								Subpanels are miniature list views of items that are related to the parent object. For example, Tasks assigned to a Project, or Contacts for an Opportunity will appear in subpanels in the Project or Opportunity detail view. The file ./<module>/metadata/detailviewdefs.php defines a module's detail view page layout. The file ./<module>/metadata/subpaneldefs.php defines the subpanels that are displayed in the module's detail view page.
+							Element:li
+							Element:strong
+								Edit View
+								: The edit view page is accessed when a user creates a new record or edits details of an existing one. Edit view can also be accessed directly from the list view. The file ./<module>/metadata/editviewdefs.php defines a module's edit view page layout.
+							Element:li
+							Element:strong
+								List View
+								: This Controller action enables the search form and search results for a module. Users can perform actions such as delete, export, update multiple records (mass update), and drill into a specific record to view and edit the details. Users can see this view by default when they click one of the module tabs at the top of the page. Files in each module describe the contents of the list and search view.
+							Element:li
+								Process Actions
+							Element:ul
+							Element:li
+							Element:strong
+								Save
+								: This Controller action is processed when the user clicks Save in the record's edit view.
+							Element:li
+							Element:strong
+								Delete
+								: This action is processed when the user clicks "Delete" in the detail view of a record or in the detail view of a record listed in a subpanel.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Implementation
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Class File Structure
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											./include/MVC/Views/SugarView.php
+										Element:li
+											./include/MVC/Views/view.<view>.php
+										Element:li
+											./custom/include/MVC/Views/view.<view>.php
+										Element:li
+											./modules/<module>/views/view.<view>.php
+										Element:li
+											./custom/modules/<module>/views/view.<view>.php
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Class Loading
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+											The ViewFactory class loads the view based off the the following sequence loading the first file it finds:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											./custom/modules/<module>/views/view.<view>.php
+										Element:li
+											./modules/<module>/views/view.<view>.php
+										Element:li
+											./custom/include/MVC/View/view.<view>.php
+										Element:li
+											./include/MVC/Views/view.<view>.php
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Methods
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are two main methods to override within a view:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											preDisplay()
+											: This performs pre-processing within a view. This method is relevant only for extending existing views. For example, the include/MVC/View/views/view.edit.php file uses it, and enables developers who wishes to extend this view to leverage all of the logic done in preDisplay() and either override the display() method completely or within your own display() method call parent::display().
+										Element:li
+										Element:strong
+											display()
+											: This method displays the data to the screen. Place the logic to display output to the screen here.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating Views
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Creating a new/view action consists of a controller action and a view file. The first step is to define your controller action. If the module does not contain a controller.php file in ./modules/<module>/ you will create the following file:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/<module>/controller.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<?php class <module>Controller extends SugarController { function action_MyView() { $this->view = 'myview'; } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on controllers can be found in the
+										Element:a
+											Controller
+											section.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The next step is to define your view file. This example extends the ViewDetail class but you can extend any of the classes you choose in ./include/MVC/View/views/.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/<module>/views/view.newview.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<?php require_once('include/MVC/View/views/view.detail.php'); class <module>ViewMyView extends ViewDetail { function display() { echo 'This is my new view<br>'; } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Overriding Views
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following section will demonstrate how to extend and override a view. When overriding existing actions and views, you won't need to make any changes to the controller. This approach will be very similar for any view you may choose to modify. If the module you are extending the view for does not contain an existing view in its modules views directory ( ./modules/<module>/views/ ), you will need to extend the views base class. Otherwise, you will extend the view class found within the file.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the case of a detail view, you would check for the file ./modules/<module>/views/view.detail.php. If this file does not exist, you will create ./custom/modules/<module>/views/view.detail.php and extend the base ViewDetail class with the name <module>ViewDetail.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/<module>/views/view.detail.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php require_once('include/MVC/View/views/view.detail.php'); class <module>ViewDetail extends ViewDetail { function display() { echo 'This is my addition to the DetailView<br>'; //call parent display method parent::display(); } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If ./modules/<module>/views/view.detail.php does exist, you would create ./custom/modules/<module>/views/view.detail.php and extend the base <module>ViewDetail class with the name Custom<module>ViewDetail.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/<module>/views/view.detail.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php require_once('modules/<module>/views/view.detail.php'); class Custom<module>ViewDetail extends <module>ViewDetail { function display() { echo 'This is my addition to the DetailView<br>'; //call parent display method parent::display(); } }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Display Options for Views
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Sugar MVC provides developers with granular control over how the screen looks when a view is rendered. Each view can have a config file associated with it. In the case of an edit view, the developer would create the file ./customs/modules/<module>/views/view.edit.config.php . When the edit view is rendered, this config file will be picked up. When loading the view, ViewFactory class will merge the view config files from the following possible locations with precedence order (high to low):
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								./customs/modules/<module>/views/view.<view>.config.php
+							Element:li
+								./modules/<module>/views/view.<view>.config.php
+							Element:li
+								./custom/include/MVC/View/views/view.<view>.config.php
+							Element:li
+								./include/MVC/View/views/view.<view>.config.php
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Implementation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The format of these files is as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$view_config = array( 'actions' => array( 'popup' => array( 'show_header' => false, 'show_subpanels' => false, 'show_search' => false, 'show_footer' => false, 'show_JavaScript' => true, ), ), 'req_params' => array( 'to_pdf' => array( 'param_value' => true, 'config' => array( 'show_all' => false ), ), ), );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To illustrate this process, let us take a look at how the 'popup' action is processed. In this case, the system will go to the actions entry within the view_config and determine the proper configuration. If the request contains the parameter to_pdf, and is set to be true, then it will automatically cause the show_all configuration parameter to be set false, which means none of the options will be displayed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 03/22/2016 12:14am
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

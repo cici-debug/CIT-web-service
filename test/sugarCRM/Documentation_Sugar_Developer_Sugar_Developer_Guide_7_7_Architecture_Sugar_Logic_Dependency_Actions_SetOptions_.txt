@@ -1,0 +1,462 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					SetOptions
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The SugarLogic
+							Element:code
+								SetOptions
+								action, located in
+							Element:code
+								./include/Expressions/Actions/SetOptionsAction.php
+								, is used to set the options list of a dropdown field based on a formula.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Implementation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								While the dependency metadata for your module can be defined in
+							Element:code
+								./modules/<module>/metadata/dependencydefs.php
+								and
+							Element:code
+								./custom/modules/<module>/metadata/dependencydef.php
+								, it is recommended to use the
+							Element:a
+								extension framework
+								when customizing stock modules to prevent third party plugins from conflicting with your customizations. The following section will demonstrate how to implement a read-only dependency.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setoptions Parameters
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:strong
+								Parameter
+							Element:td
+							Element:strong
+								Type
+							Element:td
+							Element:strong
+								Description
+							Element:tr
+							Element:td
+								target
+							Element:td
+								String
+							Element:td
+								The name of the dropdown field that you want to change the option list for
+							Element:tr
+							Element:td
+								keys
+							Element:td
+								String
+							Element:td
+								A formula used to get the option list keys for the target field or a list name from which keys will be extracted.
+							Element:tr
+							Element:td
+								labels
+							Element:td
+								String
+							Element:td
+								A formula used to get the option list labels for the target field or a list name from which labels will be extracted.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more information on the various parameters in the dependency definitions, please refer to the
+							Element:a
+								dependency actions
+								documentation.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Examples
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following sections outline the various ways this dependency can be implemented.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Using an Existing DropDown List
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also set the options list to any current options list already in the system For example if you wanted to have the industry dropdown in Accounts show the 'bug_type_dom' list from Bugs you could do this
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $dependencies['Leads']['setoptions_industry'] = array( 'hooks' => array("edit","save"), 'trigger' => 'true', 'triggerFields' => array('industry'), 'onload' => true, 'actions' => array( array( 'name' => 'SetOptions', 'params' => array( 'target' => 'industry', 'keys' => 'getDropdownKeySet("bug_type_dom")', 'labels' => 'getDropdownValueSet("bug_type_dom")' ), ), ), );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This would grab the keys and label from the 'bug_type_dom' using the
+										Element:code
+											getDropdownKeySet()
+											and
+										Element:code
+											getDropdownValueSet()
+											JavaScript functions and display them instead of the normal list.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have the file in place, you will need to navigate to Admin > Repairs > and run a Quick Repair and Rebuild.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: It is important that the module name is plural ('Accounts' vs. 'Account') and that the name of the dependency, "setoptions_industry" in this example, is unique.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Complex Dynamic Lists
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For our first example, we will change a dropdown called
+										Element:code
+											fruits_c
+											to include only fruits that are in season. This could be done with a dependent dropdown but that would require the user to pick the proper season. With this, we can have a function that returns only fruit that is in season right now. I added the dropdown
+										Element:code
+											fruits_c
+											to Leads and created a new list for it that looks like this
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$app_list_strings['fruits_list']=array ( 'Apples' => 'Apples', 'Strawberries' => 'Strawberries', 'Mangos' => 'Mangos', 'Pineapples' => 'Pineapples', 'Blackberries' => 'BlackBerries', 'BlueBerries' => 'BlueBerries', );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To keep it simple I made the labels and the keys the same.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Then I extended SugarLogic as outlined in
+										Element:a
+											Extending SugarLogic
+											and made a new function called
+										Element:code
+											fruitInSeason()
+											that returns a string reflecting what fruit is in season right now. To work for the
+										Element:code
+											createList()
+											function it would return a list like
+										Element:strong
+											"Apples","Mangos","BlueBerries"
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/<module>/Ext/Dependencies/custom_phone_alternate.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<?php
+										Element:br
+											$dependencies['Leads']['setoptions_fruit'] = array(
+										Element:br
+											'hooks' => array("edit","save"),
+										Element:br
+											'trigger' => 'true',
+										Element:br
+											'triggerFields' => array('fruits_c'),
+										Element:br
+											'onload' => true,
+										Element:br
+											'actions' => array(
+										Element:br
+											array(
+										Element:br
+											'name' => 'SetOptions',
+										Element:br
+											'params' => array(
+										Element:br
+											'target' => 'fruits_c',
+										Element:br
+											'keys' => "createList(fruitInSeason())",
+										Element:br
+											'labels' => "createList(fruitInSeason())"
+										Element:br
+											),
+										Element:br
+											),
+										Element:br
+											),
+										Element:br
+											);
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											createList()
+											function is a JavaScript function from Sidecar. It requires a comma delimited quote enclosed list of options.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We only want this to affect EditViews and Saves, not normal record views since they need to be able to display all fruits and not a truncated list of them. So we make the 'hooks' array
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											'hooks' => array("edit","save"),
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have the file in place, you will need to navigate to Admin > Repairs > and run a Quick Repair and Rebuild.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: It is important that the module name is plural ('Leads' vs. 'Lead') and that the name of the dependency, "setoptions_fruit" in this example, is unique.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 04/06/2016 03:06pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

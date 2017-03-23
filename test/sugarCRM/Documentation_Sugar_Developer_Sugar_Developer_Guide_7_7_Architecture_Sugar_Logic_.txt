@@ -1,0 +1,680 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Sugar Logic
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sugar Logic, a feature in all commercial editions of Sugar, enables custom business logic that is easy to create, manage, and reuse on both the server and client.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sugar Logic is made up of multiple components that build on each other and is extensible at every step. The base component is the Sugar Formula Engine, which parses and evaluates human-readable formulas. Dependencies are units made up of triggers and actions that can express custom business logic. Each dependency defines a list of actions to be performed depending on the outcome of a trigger formula.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Terminology
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Formula
+								: An expression that conforms to the Formula Engine syntax, consisting of nested functions and field variables
+							Element:li
+							Element:strong
+								Function
+								: A method that can be called in a formula
+							Element:li
+							Element:strong
+								Trigger
+								: A formula that evaluates to either true or false when a field in the equation is updated or when a record is retrieved/saved
+							Element:li
+							Element:strong
+								Action
+								: A method that modifies the current record or layout in some way
+							Element:li
+							Element:strong
+								Dependency
+								: A complete logical unit that includes a trigger and one or more actions
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sugar Formula Engine
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Formulas
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The fundamental object is called a formula. A formula can be evaluated for a given record using the Sugar Logic parser.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Some example formulas are:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Basic addition:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											add(1, 2)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Boolean values:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											not(equal($billing_state, "CA"))
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Calculation:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											multiply(number($employees), $seat_cost, 0.0833)
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Types
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Sugar Logic has several fundamental types:
+													Element:a
+														number
+														,
+													Element:a
+														string
+														,
+													Element:a
+														boolean
+														, and
+													Element:a
+														enum
+														(lists). Functions may take in any of these types or combinations thereof and return as output one of these types. Fields may also often have their value set to only a certain type.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Number Type
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Number types essentially represent any real number (which includes positive, negative, and decimal numbers). They can be plainly typed as input to any function. For example, the operation (10 + 10 + (15 - 5)) can be performed as follows:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	add(10, 10, subtract(15, 5))
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	String Type
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	A string type is very much like a string in most programming languages. However, it can only be declared within double quotes. For example, consider this function, which returns the length of the input string:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	strlen("Hello World")
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The function would appropriately return the value 11.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Boolean Type
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	A boolean type is simple. It can be one of two values: "true" or "false". This type mainly acts as a flag that indicates whether a condition has been met or not. For example, this function contains takes two strings as input and returns "true" if the first string contains the second string, or "false" otherwise:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	and(contains("Hello World", "llo Wo"), true)
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The function would appropriately return the value "true".
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Enum Type (list)
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	An enum type is a collection of items. The items do not need to all be of the same type, they can be varied. An enum can be declared using the enum function as follows:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	enum("hello world!", false, add(10, 15))
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Alternatively, the
+																Element:code
+																	createList()
+																	function (an alias to enum) can be used to create enums in a formula.
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	createList("hello world!", false, add(10, 15))
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	This function would appropriately return an enum type containing "hello world!", false, and 25 as its elements.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Link Type (relationship)
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	A link represents one side of a relationship and is used to access related records. For example, the accounts link field of Contacts is used to access the account_type field of the account related to a contact:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																Element:code
+																	related($accounts, "account_type")
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	For most of the out-of-the-box relationships, links are named with the name of the related module, in lower case.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Follow these steps to find the name of the link fields for relationships that do not follow the convention above:
+															Node:
+															(type) c
+															(layer)5
+																Element:ol
+																Element:li
+																	Open the vardef file for the module you are working on:
+																Element:code
+																	./cache/modules/{module}/{module}vardefs.php
+																Element:li
+																	Find the link field that matches the relationship you are looking for.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Functions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Functions are methods to be used in formulas. Each function has a function name, a parameter count, a parameter type requirement, and returns a value. Some functions such as
+										Element:code
+											add()
+											can take any number of parameters. For example:
+										Element:code
+											add(1)
+											,
+										Element:code
+											add(1, 2)
+											, and
+										Element:code
+											add(1, 2, 3)
+											are all valid formulas. Functions are designed to produce the same result whether executed on the server or client.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Triggers
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A trigger is an object that listens for changes in field values and, after a change occurs, triggers the associated
+										Element:a
+											actions
+											in a
+										Element:a
+											dependency
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Actions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Actions are functions that modify a target in some way and are fired when the trigger is TRUE. Most Actions require at least two parameters: a target and a formula. For example, a style action will change the style of a field based on a passed-in string formula. A value action will update a value of a field by evaluating a passed in formula.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											notActions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											notActions are functions that modify a target in some way and are fired when the trigger is FALSE. notActions are optional and if they are not defined then nothing will fire when the trigger is FALSE. Most notActions require at least two parameters: a target and a formula. For example, a style action will change the style of a field based on a passed-in string formula. A value action will update a value of a field by evaluating a passed in formula.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Dependencies
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A Dependency describes a set of rules based on a trigger and a set of actions. Examples include a field whose properties must be updated dynamically or a panel which must be hidden when a drop down value is not selected. When a Dependency is triggered it will appropriately carry out the action it is designed to. A basic Dependency is when a field's value is dependent on the result of evaluating a Expression. For example, consider a page with five fields with It's "a", "b", "c", "d", and "sum". A generic Dependency can be created between "sum" and the other four fields by using an Expression that links them together, in this case an add Expression. So we can define the Expression in this manner: 'add($a, $b, $c, $d)' where each field id is prefixed with a dollar ($) sign so that the value of the field is dynamically replaced at the time of the execution of the Expression.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An example of a more customized Dependency is when the field's style must be somehow updated to a certain value. For example, the DIV with id "temp" must be colored blue. In this case we need to change the background-color property of "temp". So we define a StyleAction in this case and pass it the field id and the style change that needs to be performed and when the StyleAction is triggered, it will change the style of the object as we have specified.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sugar Logic Based Features
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Calculated Fields
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Fields with calculated values can now be created from within Studio and Module Builder. The values are calculated based on Sugar Logic formulas. These formulas are used to create a new dependency that are executed on the client side in edit views and the server side on save. The formulas are saved in the varies or vardef extensions and can be created and edited directly. For example, the metadata for a simple calculated commission field in opportunities might look like:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														'commission_c' => array( 'name' => 'commission_c', 'type' => 'currency', 'calculated' => true, 'formula' => 'multiply($amount, 0.1)', //enforced causes the field to appear read-only on the layout 'enforced' => true ),
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Dependent fields
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A dependent field will only appear on a layout when the associated formula evaluates to the Boolean value true. Currently these cannot be created through Studio and must be enabled manually with a custom vardef or vardef extension. The "dependency" property contains the expression that defines when this field should be visible. An example field that only appears when an account has an annual revenue greater than one million.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														'dep_field'=> array( 'name' => 'dep_field', 'type' => 'varchar', 'dependency' => 'greaterThan($annual_revenue, 1000000)', ),
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Dependent dropdowns
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Dependent dropdowns are dropdowns for which options change when the selected value in a trigger dropdown changes. The metadata is defined in the vardefs and contains two major components, a "trigger" id which is the name of the trigger dropdown field and a 'visibility grid' that defines the set of options available for each key in the trigger dropdown. For example, you could define a sub-industry field in accounts whose available values depend on the industry field.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														'sub_industry_c' => array( 'name' => 'sub_industry_c', 'type' => 'enum', 'options' => 'sub_industry_dom', 'visibility_grid'=> array( 'trigger' => 'industry', 'values' => array( 'Education' => array( 'primary', 'secondary', 'college' ), 'Engineering' => array( 'mechanical', 'electrical', 'software' ), ), ), ),
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Clearing the Sugar Logic Cache
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								./updatecache.php
+								script traverses the Expression directory for every file that ends with "Expression.php" (ignoring a small list of excepted files) and constructs both a PHP and a JavaScript functions cache file which resides in
+							Element:code
+								./cache/Expressions/functions_cache.js
+								and
+							Element:code
+								./cache/Expressions/functionmap.php
+								. If you create your custom expressions, you will need to rebuild the sugar logic functions by navigating to:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								Admin > Repair > Rebuild Sugar Logic Functions
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Topics
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Dependency Actions
+							Element:p
+								The following sections outline the available SugarLogic dependency actions.
+							Element:li
+							Element:a
+								Extending Sugar Logic
+							Element:p
+								How to write custom Sugar Logic functions.
+							Element:li
+							Element:a
+								Using Sugar Logic Directly
+							Element:p
+								How to use Sugar Logic
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 03/31/2016 10:13pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

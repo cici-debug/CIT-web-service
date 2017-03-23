@@ -1,0 +1,496 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Controller
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The basic actions of a module.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Controllers
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The main controller, named SugarController, addresses the basic actions of a module from EditView and DetailView to saving a record. Each module can override this SugarController by adding a controller.php file into its directory. This file extends the SugarController, and the naming convention for the class is: <module>Controller
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Inside the controller you define an action method. The naming convention for the method is: action_<action name>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are more fine grained control mechanisms that a developer can use to override the controller processing. For example if a developer wanted to create a new save action, there are three places where they could possibly override.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								action_save:
+								This is the broadest specification and gives the user full control over the save process.
+							Element:li
+							Element:strong
+								pre_save:
+								A user could override the population of parameters from the form.
+							Element:li
+							Element:strong
+								post_save:
+								This is where the view is being setup. At this point the developer could set a redirect url, do some post save processing, or set a different view.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Upgrade-Safe Implementation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can also add a custom Controller that extends the module's Controller if such a Controller already exists. For example, if you want to extend the Controller for a module, you should check if that module already has a module-specific controller. If so, you extend from that controller class. Otherwise, you extend from SugarController class. In both cases, you should place the custom controller class file in ./custom/modules/<module>/Controller.php instead of the module directory. Doing so makes your customization upgrade-safe.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											File Structure
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											./include/MVC/Controller/SugarController.php
+										Element:li
+											./include/MVC/Controller/ControllerFactory.php
+										Element:li
+											./modules/<module>/Controller.php
+										Element:li
+											./custom/modules/<module>/controller.php
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Implementation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the module does not contain a controller.php file in ./modules/<module>/, you will create the following file:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/<module>/controller.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											class <module>Controller extends SugarController { function action_<action>() { $this->view = '<action lowercase>'; } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the module does contain a controller.php file, you will need to extend it by doing the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/modules/<module>/controller.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											require_once('modules/<module>/controller.php'); class Custom<module>Controller extends <module>Controller { function action_<action>() { $this->view = '<action lowercase>'; } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											When creating or moving files you will need to rebuild the file map.
+										Element:strong
+											Note:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on rebulding the file map can be found in the
+										Element:a
+											SugarAutoLoader
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Mapping Actions to Files
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can choose not to provide a custom action method as defined above, and instead specify your mappings of actions to files in $action_file_map. Take a look at ./include/MVC/Controller/action_file_map.php as an example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								$action_file_map['subpanelviewer'] = 'include/SubPanel/SubPanelViewer.php'; $action_file_map['save2'] = 'include/generic/Save2.php'; $action_file_map['deleterelationship'] = 'include/generic/DeleteRelationship.php'; $action_file_map['import'] = 'modules/Import/index.php';
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here the developer has the opportunity to map an action to a file. For example, Sugar uses a generic sub-panel file for handling subpanel actions. You can see above that there is an entry mapping the action 'subpanelviewer' to ./include/SubPanel/SubPanelViewer.php.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The base SugarController class loads the action mappings in the following path sequence:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								./include/MVC/Controller
+							Element:li
+								./modules/<module>
+							Element:li
+								./custom/modules/<module>
+							Element:li
+								./custom/include/MVC/Controller
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Each one loads and overrides the previous definition if in conflict. You can drop a new action_file_map in the later path sequence that extends or overrides the mappings defined in the previous one.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Upgrade-Safe Implementation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to add custom action_file_map.php to an existing module that came with the SugarCRM release, you should place the file at ./custom/modules/<module>/action_file_map.php
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														File Structure
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														./include/MVC/Controller/action_file_map.php
+													Element:li
+														./modules/<module>/action_file_map.php
+													Element:li
+														./custom/modules/<module>/action_file_map.php
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Implementation
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														$action_file_map['soapRetrieve'] = 'custom/SoapRetrieve/soap.php';
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Classic Support (Not Recommended)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Classic support allows you to have files that represent actions within your module. Essentially, you can drop in a PHP file into your module and have that be handled as an action. This is not recommended, but is considered acceptable for backward compatibility. The better practice is to take advantage of the action_<action> structure.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														File Structure
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														./modules/<module>/<action>.php
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Controller Flow Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example, if a request comes in for DetailView the controller will handle the request as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Start in index.php and load the SugarApplication instance.
+							Element:li
+								SugarApplication instantiates the SugarControllerFactory.
+							Element:li
+								SugarControllerFactory loads the appropriate Controller.
+							Element:li
+								SugarControllerFactory checks for ./custom/modules/<module>/Controller.php.
+							Element:ol
+							Element:li
+								If not found, check for ./modules/<module>/Controller.php.
+							Element:li
+								If not found, load SugarController.php.
+							Element:li
+								Calls on the appropriate action.
+							Element:ol
+							Element:li
+								Look for ./custom/modules/<module>/<action>.php. If found and ./custom/modules/<module>/views/view.<action>.php is not found, use this view.
+							Element:li
+								If not found check for modules/<module>/<action>.php. If found and ./modules/<module>/views/view.<action>.php is not found, then use the ./modules/<module>/<action>.php action.
+							Element:li
+								If not found, check for the method action_<action> in the controller.
+							Element:li
+								If not found, check for an action_file_mapping.
+							Element:li
+								If not found, report error "Action is not defined".
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 03/29/2016 04:37pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

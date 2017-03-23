@@ -1,0 +1,845 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Sending Android push notifications from Mixpanel
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Introduction
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This guide will show you how to configure an Android app to send and receive push notifications. You should first read the
+							Element:a
+								Android API reference
+								, and set up your application to update People Analytics records. In particular, you should be comfortable getting access to the MixpanelAPI object using your Mixpanel API key and calling
+							Element:a
+								MixpanelAPI.People.identify
+								with a distinct id to identify your users to Mixpanel.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Enabling Google Cloud Messaging in your Firebase Console
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Google is migrating from the Google Cloud Messaging (GCM) platform to Firebase Cloud Messaging (FCM). FCM and GCM share the same core infrastructure, and for now, Google will continue its support of GCM functionality for client applications. For more information, refer to the
+							Element:a
+								GCM/FCM FAQ
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel’s Android SDK relies on GCM methods to generate device tokens, and Mixpanel continues to deliver push notifications via GCM. Existing GCM API Keys are entirely valid - however, GCM will reject any newly created API keys from the cloud console.
+							Element:strong
+								New API Keys must be generated from the Firebase Console.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To enable Google Cloud Messaging (GCM) for Android, you will first need to create a new project from Google's
+							Element:a
+								Firebase Console
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you have created a new project, proceed to the project Overview page, and select "Add Firebase to your Android app".
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When prompted, enter your application’s Package Name. This can be found in your AndroidManifest.xml. Then select “ADD APP”.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Firebase will then generate a google-services.json file that you must add to your application’s “app” directory.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Next, add the Google Play Services dependencies to your application's build.gradle files.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At this point, you’ve added your app to Firebase. Select the app options icon, then click “Manage”.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Select the Cloud Messaging tab in your Settings. Here, you can find your API Key to upload to Mixpanel along with the Sender ID (you’ll need this later to generate tokens).
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Uploading your Google API key to Mixpanel
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order for Mixpanel to send Google Cloud Messaging notifications on your behalf, you will need to enter the Google API key generated from the last step into Mixpanel. To upload it, log in to your Mixpanel project, click your name in the upper righthand corner of your Mixpanel project, and select Settings from the dropdown.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In the settings pop-up, click on the "Notifications" tab. Then click on the word "Change" on the "Android GCM API Key" line, and paste in your Google API key into the text field that appears. Click the "Save changes" button underneath the text field to confirm.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting up your AndroidManifest.xml
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You will need to edit your Android application's AndroidManifest.xml to allow all of the permissions necessary for your application to register, receive and react to Google Cloud Messaging notifications, and to install a listener for push notification messages from Google's servers.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To set up your permissions, Replace "YOUR_PACKAGE_NAME" with your own app's package name in the the following snippet of xml, and add them to your AndroidManifest.xml before the
+							Element:code
+								<application>
+								tag:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								<permission
+							Element:span
+								android:name=
+							Element:span
+								"YOUR_PACKAGE_NAME.permission.C2D_MESSAGE"
+							Element:span
+								android:protectionLevel=
+							Element:span
+								"signature"
+							Element:span
+								/>
+							Element:span
+								<uses-permission
+							Element:span
+								android:name=
+							Element:span
+								"YOUR_PACKAGE_NAME.permission.C2D_MESSAGE"
+							Element:span
+								/>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You will also need the following permissions tags in your AndroidManifest.xml file. These tags can be pasted into the file directly below the C2D_MESSAGE tags, but you should leave their values as-is.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								<uses-permission
+							Element:span
+								android:name=
+							Element:span
+								"android.permission.INTERNET"
+							Element:span
+								/>
+							Element:span
+								<uses-permission
+							Element:span
+								android:name=
+							Element:span
+								"android.permission.GET_ACCOUNTS"
+							Element:span
+								/>
+							Element:span
+								<uses-permission
+							Element:span
+								android:name=
+							Element:span
+								"com.google.android.c2dm.permission.RECEIVE"
+							Element:span
+								/>
+							Element:span
+								<uses-permission
+							Element:span
+								android:name=
+							Element:span
+								"android.permission.WAKE_LOCK"
+							Element:span
+								/>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now you'll need to inform the OS to allow a service to run that will handle inbound notifications. Replace "YOUR_PACKAGE_NAME"with your own app's package name in the the following snippet of xml, and add them to your AndroidManifest.xml inside of your
+							Element:code
+								<application>
+								tag:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								<receiver
+							Element:span
+								android:name=
+							Element:span
+								"com.mixpanel.android.mpmetrics.GCMReceiver"
+							Element:span
+								android:permission=
+							Element:span
+								"com.google.android.c2dm.permission.SEND"
+							Element:span
+								>
+							Element:span
+								<intent-filter>
+							Element:span
+								<action
+							Element:span
+								android:name=
+							Element:span
+								"com.google.android.c2dm.intent.RECEIVE"
+							Element:span
+								/>
+							Element:span
+								<action
+							Element:span
+								android:name=
+							Element:span
+								"com.google.android.c2dm.intent.REGISTRATION"
+							Element:span
+								/>
+							Element:span
+								<category
+							Element:span
+								android:name=
+							Element:span
+								"YOUR_PACKAGE_NAME"
+							Element:span
+								/>
+							Element:span
+								</intent-filter>
+							Element:span
+								</receiver>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Be sure to change the
+								. If you don't use your own package name, your Google Cloud Messaging notifications won't work.
+							Element:code
+								YOUR_PACKAGE_NAME
+								to the name of your application package when you paste these tags into your manifest
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Android devices with an SDK version less than 8 cannot receive Google Cloud Messaging notifications. If notifications are necessary for your app's functionality, add the attribute
+							Element:code
+								android:minSdkVersion="8"
+								to the
+							Element:code
+								<uses-sdk>
+								tag in your AndroidManifest.xml file.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Setting up your app to receive notifications
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Next, you'll need to tell Mixpanel which user record in People Analytics should receive the messages when they are sent from the Mixpanel app. To do this, add a call to
+							Element:a
+								People.initPushHandling
+								right after you identify the user with people analytics. initPushHandling takes a single argument, your twelve digit Google Sender ID, represented as a string. This is the ID from your Google API console URL, mentioned above in
+							Element:a
+								Enabling Google Cloud Messaging
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You must call identify before calling initPushHandling, or it won't be able to register your user. We recommend you call identify as early as you can, in your application's onCreate method if possible, so you might have code that looks like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								protected
+							Element:span
+								void
+							Element:span
+								onCreate
+							Element:span
+								(
+							Element:span
+								Bundle
+							Element:span
+								savedInstanceState
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								mMixpanel
+							Element:span
+								=
+							Element:span
+								MixpanelAPI
+							Element:span
+								.
+							Element:span
+								getInstance
+							Element:span
+								(
+							Element:span
+								this
+							Element:span
+								,
+							Element:span
+								YOUR_MIXPANEL_PROJECT_ID_TOKEN
+							Element:span
+								);
+							Element:span
+								MixpanelAPI
+							Element:span
+								.
+							Element:span
+								People
+							Element:span
+								people
+							Element:span
+								=
+							Element:span
+								mMixpanel
+							Element:span
+								.
+							Element:span
+								getPeople
+							Element:span
+								();
+							Element:span
+								people
+							Element:span
+								.
+							Element:span
+								identify
+							Element:span
+								(
+							Element:span
+								THE_DISTINCT_ID_FOR_THE_USER
+							Element:span
+								);
+							Element:span
+								people
+							Element:span
+								.
+							Element:span
+								initPushHandling
+							Element:span
+								(
+							Element:span
+								YOUR_12_DIGIT_GOOGLE_SENDER_ID
+							Element:span
+								);
+							Element:span
+								}
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Send a push notification
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Once you have set up your permissions and intent filter in AndroidManifest.xml and added people.initPushHandling to your code you're ready to send a notification.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Install and run your application on an Android device (not the emulator, it can't receive notifications.) Make sure to run the app until the calls to People.identify and People.initPushHandling have been run. For apps built according to our recommendations, these calls are in the onCreate method of your main application activity, so it is enough to simply open the app.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Press the back button to shut down your app. You should already be calling
+							Element:a
+								MixpanelAPI.flush
+								in the onDestroy method of your main application activity, so closing it should send all waiting messages to Mixpanel.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Now log in to your Mixpanel project and select "Explore" from the left-hand navigation. There should be a user in the list with an "Android Devices" property. Select the user and click "Push Notification".
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Compose your message, schedule it to send immediately, and click "Send this message".
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The message should show up on your device.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:img
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Learning more
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel has a
+							Element:a
+								short sample Android application on github
+								that includes support for push notifications and demonstrates some of our recommended practices.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We also recommend you take a look at
+							Element:a
+								the complete Mixpanel Android API reference
+								, which provides detailed information for all objects and methods available in the Mixpanel library.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Advanced features
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The information above should allow you to enable and use Mixpanel push notifications for many applications, but if you want to handle registration and message handling manually, or if you are using multiple Mixpanel projects within the same application, there are some other things you should know.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Using the low level notifications API
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using GCMReceiver and initPushHandling is a simple and straightforward way to get Mixpanel push notifications into your app, but if your application is already configured and handling Google Cloud Messaging you can use lower level methods to work with Mixpanel's notification features. You shouldn't intermix these techniques with calls to initPushHandling.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can send a registration id directly to Mixpanel using
+										Element:a
+											People.setPushRegistrationId
+											. As of the release of Android Studio, you can register a device for push using the
+										Element:a
+											GoogleCloudMessaging API
+											directly. To register a device using GCM, you should call the method
+										Element:a
+											register
+											with the application context and pass the value returned by this call to
+										Element:a
+											People.setPushRegistrationId
+											. Similarly, you can unregister a device with
+										Element:a
+											People.clearPushRegistrationId
+											by passing the id along with this call. Both of these methods should be called after you've called People.identify, or Mixpanel won't know which user to register or unregister.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A sample of code you set up to handle registration might look like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											public
+										Element:span
+											void
+										Element:span
+											registerPush
+										Element:span
+											(
+										Element:span
+											GoogleCloudMessaging
+										Element:span
+											gcm
+										Element:span
+											){
+										Element:span
+											String
+										Element:span
+											registrationId
+										Element:span
+											=
+										Element:span
+											gcm
+										Element:span
+											.
+										Element:span
+											register
+										Element:span
+											(
+										Element:span
+											"YOUR_SENDER_ID"
+										Element:span
+											);
+										Element:span
+											MixpanelAPI
+										Element:span
+											.
+										Element:span
+											People
+										Element:span
+											people
+										Element:span
+											=
+										Element:span
+											mMixpanel
+										Element:span
+											.
+										Element:span
+											getPeople
+										Element:span
+											();
+										Element:span
+											people
+										Element:span
+											.
+										Element:span
+											identify
+										Element:span
+											(
+										Element:span
+											"USER_DISTINCT_ID"
+										Element:span
+											);
+										Element:span
+											people
+										Element:span
+											.
+										Element:span
+											setPushRegistrationId
+										Element:span
+											(
+										Element:span
+											registrationId
+										Element:span
+											);
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Incoming messages from Mixpanel will contain the key "mp_message", associated with the text of the message from Mixpanel as a string. You can handle or ignore the messages in your receivers with code like the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											public
+										Element:span
+											void
+										Element:span
+											onReceive
+										Element:span
+											(
+										Element:span
+											Context
+										Element:span
+											context
+										Element:span
+											,
+										Element:span
+											Intent
+										Element:span
+											intent
+										Element:span
+											)
+										Element:span
+											{
+										Element:span
+											if
+										Element:span
+											(
+										Element:span
+											intent
+										Element:span
+											.
+										Element:span
+											getExtras
+										Element:span
+											().
+										Element:span
+											containsKey
+										Element:span
+											(
+										Element:span
+											"mp_message"
+										Element:span
+											))
+										Element:span
+											{
+										Element:span
+											String
+										Element:span
+											mp_message
+										Element:span
+											=
+										Element:span
+											intent
+										Element:span
+											.
+										Element:span
+											getExtras
+										Element:span
+											().
+										Element:span
+											getString
+										Element:span
+											(
+										Element:span
+											"mp_message"
+										Element:span
+											);
+										Element:span
+											//mp_message now contains the notification's text
+										Element:span
+											}
+										Element:span
+											else
+										Element:span
+											{
+										Element:span
+											// Not sent from mixpanel, you can do whatever you'd like
+										Element:span
+											...
+										Element:span
+											}
+										Element:span
+											}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are handling registration and receiving notifications yourself, you shouldn't include the Mixpanel GCMReceiver <receiver> tag in your AndroidManifest.xml file.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											initPushHandling and multiple projects
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you are allowing Mixpanel to handle registering and unregistering users for you, whenever you call
+										Element:a
+											initPushHandling
+											, all instances of MixpanelAPI you have created that have an identified user will take the register into account. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											Document Sections
+										Element:span
+											mMixpanel
+										Element:span
+											=
+										Element:span
+											MixpanelAPI
+										Element:span
+											.
+										Element:span
+											getInstance
+										Element:span
+											(
+										Element:span
+											this
+										Element:span
+											,
+										Element:span
+											"YOUR_MIXPANEL_PROJECT_TOKEN"
+										Element:span
+											);
+										Element:span
+											mMixpanel
+										Element:span
+											.
+										Element:span
+											getPeople
+										Element:span
+											().
+										Element:span
+											identify
+										Element:span
+											(
+										Element:span
+											"some distinct_id_1"
+										Element:span
+											);
+										Element:span
+											mMixpanel2
+										Element:span
+											=
+										Element:span
+											MixpanelAPI
+										Element:span
+											.
+										Element:span
+											getInstance
+										Element:span
+											(
+										Element:span
+											this
+										Element:span
+											,
+										Element:span
+											"YOUR_OTHER_MIXPANEL_PROJECT_TOKEN"
+										Element:span
+											);
+										Element:span
+											mMixpanel2
+										Element:span
+											.
+										Element:span
+											getPeople
+										Element:span
+											().
+										Element:span
+											identify
+										Element:span
+											(
+										Element:span
+											"some distinct_id_2"
+										Element:span
+											);
+										Element:span
+											mMixpanel2
+										Element:span
+											.
+										Element:span
+											initPushHandling
+										Element:span
+											(
+										Element:span
+											"123456789123"
+										Element:span
+											);
+										Element:span
+											//both users distinct_id_1 and distinct_id_2 in their respective projects
+										Element:span
+											//will be treated as having enabled push.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Introduction
+										Element:li
+										Element:a
+											Enabling Firebase Cloud Messaging in your Firebase Console
+										Element:li
+										Element:a
+											Uploading your Google API key to Mixpanel
+										Element:li
+										Element:a
+											Setting up your AndroidManifest.xml
+										Element:li
+										Element:a
+											Setting up your app to receive notifications
+										Element:li
+										Element:a
+											Sending a push notification
+										Element:li
+										Element:a
+											Learning more
+										Element:li
+										Element:a
+											Advanced features

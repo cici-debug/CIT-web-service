@@ -21,7 +21,9 @@ def html_parse(site_string):
 	for ele in body.cssselect('nav'):
 		ele.drop_tree()
 
-
+	#goSquared
+	for ele in body.cssselect('.navOffset'):
+		ele.drop_tree()
 	#exoscale
 	for ele in body.cssselect('hgroup'):
 		ele.drop_tree()

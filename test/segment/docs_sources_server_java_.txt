@@ -1,0 +1,1232 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Analytics for Java
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Our Java library lets you record analytics data from your Java code. The requests hit our servers, and then we route your data to any analytics service you enable on your integrations page.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This library is open-source, so you can
+				Element:a
+					check it out on Github
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All of our server-side libraries are built for high-performance, so you can use them in your web server controller code. This library uses an internal queue to make all calls non-blocking and fast. It also batches messages and flushes asynchronously to our servers.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Want to stay updated on releases? Subscribe to the
+				Element:a
+					release feed
+					.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Install the library
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The recommended way to install the library for Java is with a build system like Gradle or Maven. This makes it dead simple to upgrade and swap out integrations. The library is distributed via
+										Element:a
+											Maven Central
+											as a
+										Element:code
+											jar
+											dependency.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here’s what it would look like with Maven:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Add to
+										Element:code
+											pom.xml
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<dependency> <groupId>com.segment.analytics.java</groupId> <artifactId>analytics</artifactId> <version>LATEST</version> </dependency>
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											or if you’re using Gradle:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											compile 'com.segment.analytics.java:analytics:+'
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Initialize the SDK
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Before you can send us events, you need to initialize an instance of the Analytics class. To do so, you must use the
+										Element:code
+											Analytics.Builder
+											class.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											Analytics analytics = Analytics.builder(writeKey).build();
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Of course, you’ll want to replace writeKey with your actual
+										Element:strong
+											Write Key
+											which you can find in Segment under your source settings.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Builder can also be used to customize behaviour of the Analytics instance.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											There is an internal
+										Element:code
+											AnalyticsClient
+											class. Do not confuse this class with the public
+										Element:code
+											Analytics
+											class and do not use this class directly.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Analytics class has a method called
+										Element:code
+											enqueue
+											that takes a
+										Element:code
+											MessageBuilder
+											. Each message class has a corresponding builder that is used to construct instances of a message.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Although not enforced at compile time, make sure you provide either of
+										Element:code
+											userId
+											or
+										Element:code
+											anonymousId
+											for each message. Failing to do so will raise an exception at runtime.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following examples use
+										Element:a
+											Guava’s
+											immutable maps, but feel free to use plain old Java maps instead.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								identify
+								lets you tie a user to their actions and record traits about them. It includes a unique User ID and any optional traits you know about them.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We recommend calling
+							Element:code
+								identify
+								a single time when the user’s account is first created, and only identifying again later when their traits change.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								identify
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.enqueue(IdentifyMessage.builder() .userId("f4ca124298") .traits(ImmutableMap.builder() .put("name", "Michael Bolton") .put("email", "mbolton@initech.com") .build() ) );
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This call is identifying Michael by his unique User ID (the one you know him by in your database) and labeling him with
+							Element:code
+								name
+								and
+							Element:code
+								email
+								traits.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								Traits, optional
+							Element:td
+								A dictionary of traits you know about the user. Things like:
+							Element:code
+								email
+								,
+							Element:code
+								name
+								or
+							Element:code
+								friends
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								The enqueue method takes a
+							Element:code
+								MessageBuilder
+								instance and not a
+							Element:code
+								Message
+								instance directly. This is to allow you to use a
+							Element:code
+								MessageTransformer
+								that applies to all incoming messages and transform or add data. Read more in our
+							Element:a
+								transformer reference section
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								identify method payload
+								in our
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								lets you record the actions your users perform. Every action triggers what we call an “event”, which can also have associated properties.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to track events that you’re interested in, such as
+							Element:strong
+								Signed Up
+								,
+							Element:strong
+								Item Purchased
+								or
+							Element:strong
+								Article Bookmarked
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, we recommend tracking just a few important events. You can always add more later!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								track
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.enqueue(TrackMessage.builder("Item Purchased") .userId("f4ca124298") .properties(ImmutableMap.builder() .put("revenue", 39.95) .put("shipping", "2-day") .build() ) );
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example
+							Element:code
+								track
+								call tells us that your user just triggered the
+							Element:strong
+								Item Purchased
+								event with a revenue of $39.95 and chose your hypothetical ‘2-day’ shipping.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								event properties can be anything you want to record. In this case, revenue and shipping.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								track
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								event
+							Element:em
+								String
+							Element:td
+								The name of the event you’re tracking. We recommend human-readable names like
+							Element:strong
+								Song Played
+								or
+							Element:strong
+								Status Updated
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								Properties, optional
+							Element:td
+								A dictionary of properties for the event. If the event was
+							Element:strong
+								Product Added
+								, it might have properties like
+							Element:code
+								price
+								or
+							Element:code
+								product
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on
+							Element:strong
+								best practices in event naming
+								as well as the
+							Element:strong
+								in our
+							Element:code
+								track
+								method payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Screen
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								method lets you record whenever a user sees a screen of your mobile app, along with optional extra information about the page being viewed.
+							Element:code
+								screen
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to record a screen event an event whenever the user opens a screen in your app. This could be a view, fragment, dialog or activity depending on your app.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Not all services support screen, so when it’s not supported explicitly, the screen method tracks as an event with the same parameters.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								screen
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.enqueue(ScreenMessage.builder("Schedule") .userId("f4ca124298") .properties(ImmutableMap.builder() .put("category", "Sports") .put("path", "/sports/schedule") .build() ) );
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								screen
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								name
+							Element:em
+								String
+							Element:td
+								The webpage name you’re tracking. We recommend human-readable names like
+							Element:strong
+								Login
+								or
+							Element:strong
+								Register
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								Properties, optional
+							Element:td
+								A dictionary of properties for the webpage visit. If the event was
+							Element:strong
+								Login
+								, it might have properties like
+							Element:code
+								path
+								or
+							Element:code
+								title
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								in our
+							Element:code
+								screen
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Group
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								group
+								lets you associate an
+							Element:a
+								identified user
+								user with a group. A group could be a company, organization, account, project or team! It also lets you record custom traits about the group, like industry or number of employees.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This is useful for tools like
+							Element:a
+								Intercom
+								,
+							Element:a
+								Preact
+								and
+							Element:a
+								Totango
+								, as it ties the user to a
+							Element:strong
+								group
+								of other users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								group
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.enqueue(GroupMessage.builder("some-group-id") .userId("f4ca124298") .traits(ImmutableMap.builder() .put("name", "Segment") .put("size", 50) .build() ) );
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								group
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								groupId
+							Element:em
+								String
+							Element:td
+								The ID for this group in your database.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								Traits, optional
+							Element:td
+								A dictionary of traits you know about the group. Things like:
+							Element:code
+								name
+								or
+							Element:code
+								website
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find more details about
+							Element:code
+								group
+								, including the
+							Element:strong
+								, in our
+							Element:code
+								group
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Alias
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								alias
+								is how you associate one identity with another. This is an advanced method, but it is required to manage user identities successfully in
+							Element:em
+								some
+								of our integrations.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In
+							Element:a
+								Mixpanel
+								it’s used to associate an anonymous user with an identified user once they sign up. For
+							Element:a
+								KISSmetrics
+								, if your user switches IDs, you can use ‘alias’ to rename the ‘userId’.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								alias
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.enqueue(AliasMessage.builder("previousId") .userId("f4ca124298") );
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s a full example of how we might use the
+							Element:code
+								alias
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								// the anonymous user does actions ... track("anonymous_user", "Anonymous Event"); // the anonymous user signs up and is aliased alias("anonymous_user", "identified@gmail.com"); // the signed up user is identified identify("identified@gmail.com", new Traits("plan", "Free")); // the identified user does actions ... track("identified@gmail.com", "Identified Action");
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more details about
+							Element:code
+								alias
+								, including the
+							Element:strong
+								, check out our
+							Element:code
+								alias
+								call payload
+							Element:a
+								Spec
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Historical Import
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can import historical data by adding the
+							Element:code
+								timestamp
+								argument to any of your method calls. This can be helpful if you’ve just switched to Segment.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Historical imports can only be done into integrations that can accept historical timestamp’ed data. Most analytics tools like Mixpanel, Amplitude, Kissmetrics, etc. can handle that type of data just fine. One common integration that does not accept historical data is Google Analytics since their API cannot accept historical data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								If you’re tracking things that are happening right now, leave out the
+							Element:code
+								timestamp
+								and our servers will timestamp the requests for you.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Date historicalDate = ...; analytics.enqueue(TrackMessage.builder("Button Clicked") .userId("f4ca124298") .timestamp(historicalDate) );
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Selecting Integrations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								alias
+								,
+							Element:code
+								group
+								,
+							Element:code
+								identify
+								,
+							Element:code
+								page
+								and
+							Element:code
+								track
+								calls can all be passed an object of
+							Element:code
+								integrations
+								that lets you turn certain integrations on or off. By default all integrations are enabled.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Similar to timestamp, the builders take a map of integrations that control which analytics integrations you want each message to go to.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.enqueue(TrackMessage.builder("Button Clicked") .userId("f4ca124298") .enableIntegration("All", false) .enableIntegration("Amplitude", true) );
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this case, we’re specifying that we want this identify to only go to Amplitude.
+							Element:code
+								"all", false
+								says that no integration should be enabled unless otherwise specified.
+							Element:code
+								{ "Amplitude", true }
+								turns on Amplitude.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Integration flags are
+							Element:strong
+								case sensitive
+								and match
+							Element:a
+								the integration’s name in the docs
+								(i.e. “AdLearn Open Platform”, “awe.sm”, “MailChimp”, etc.).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:p
+								Available at the business level, filtering track calls can be done right from the Segment UI on your source schema page. We recommend using the UI if possible since it’s a much simpler way of managing your filters and can be updated with no code changes on your side.
+							Element:li
+							Element:p
+								If you are on a grandfathered plan, events sent server-side that are filtered through the Segment dashboard will still count towards your API usage.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Context
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re running a web server, you might want to send context variables such as
+							Element:code
+								userAgent
+								or
+							Element:code
+								ip
+								with your
+							Element:code
+								page
+								or
+							Element:code
+								screen
+								calls. You can do so by setting the
+							Element:code
+								Context
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								analytics.enqueue(TrackMessage.builder("Button Clicked") .userId("f4ca124298") .context(ImmutableMap.builder() .put("ip", "12.212.12.49") .put("language", "en-us") .build() ) );
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Batching
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Our libraries are built to support high performance environments. That means it is safe to use analytics-java on a web server that’s serving hundreds of requests per second. For more information, check out the
+							Element:a
+								java benchmark
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Every method you call
+							Element:strong
+								does not
+								result in an HTTP request, but is queued in memory instead. Messages are flushed in batch in the background, which allows for much faster operation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There is a maximum of
+							Element:code
+								500kb
+								per batch request and
+							Element:code
+								15kb
+								per call.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How do I flush right now?!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also flush on demand. For example, at the end of your program, you’ll want to flush to make sure there’s nothing left in the queue. Just call the
+										Element:code
+											flush
+											method:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											analytics.flush()
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Calling this method will notify the client to upload any events in the queue.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Multiple Clients
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Different parts of your app may require different types of batching. In that case, you can initialize different
+							Element:code
+								Analytics
+								instances. Simply use the builder method (you can reuse it with different parameters) to create different instances.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.Builder builder = Analytics.builder(writeKey); Analytics first = builder.build(); Analytics second = builder.flushInterval(2, TimeUnit.SECONDS).build();
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Logging
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can enable verbose logging to see what data is being sent over HTTP when debugging issues. You can enable logging by initializing the library like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics analytics = Analytics.builder("<writeKey>") .log(STDOUT) .build();
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Snapshots
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To add a snapshot dependency to your builds, make sure you add the snapshot repository so your build system can look up the dependency.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Maven users can add the following to their
+							Element:code
+								pom.xml
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<repository> <id>ossrh</id> <name>Sonatype Snapshot Repository</name> <url>https://oss.sonatype.org/content/repositories/snapshots/</url> <releases> <enabled>false</enabled> </releases> <snapshots> <enabled>true</enabled> </snapshots> </repository>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Gradle users should declare this in their repositories block:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								repositories { mavenCentral() maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' } }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re having trouble we have a few tips that help common problems.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my debugger
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check that you’ve followed all the steps in the
+										Element:a
+											Quickstart
+											.
+										Element:li
+										Element:p
+											Make sure that you’re calling one of our API methods once the library is successfully installed—
+										Element:a
+											,
+										Element:code
+											identify
+										Element:a
+											, etc.
+										Element:code
+											track
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my end tools
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check your credentials for that integration.
+										Element:li
+										Element:p
+											Make sure that the integration you are troubleshooting can accept server-side API calls. Compatibility is shown on the
+										Element:a
+											integration docs
+											pages and on the sheets on your Segment source Integrations page.
+										Element:li
+										Element:p
+											Check out the
+										Element:a
+											integration’s documentation
+											to see if there are other requirements for using the method and integration you’re trying to get working.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

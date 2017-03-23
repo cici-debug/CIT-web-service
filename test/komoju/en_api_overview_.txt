@@ -1,0 +1,2534 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Overview
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					Checkout
+				Element:li
+				Element:a
+					Buys
+				Element:li
+				Element:a
+					API Resources
+				Element:li
+				Element:a
+					Webhooks
+			Node:
+			(type) c
+			(layer)1
+				Element:br
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Komoju v1 API provides a RESTful HTTP interface for creating payments. You can view a detailed breakdown of each resource in the
+				Element:a
+					resources page
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Currently the API supports eight payment methods:
+				Element:a
+					Credit Card
+					,
+				Element:a
+					Bank Transfer
+					,
+				Element:a
+					Konbini
+					,
+				Element:a
+					PayEasy
+					,
+				Element:a
+					BitCash
+					,
+				Element:a
+					NET CASH
+					,
+				Element:a
+					nanaco
+					and
+				Element:a
+					WebMoney
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Requests to the API must use
+				Element:strong
+					HTTPS
+					and use the endpoint
+				Element:strong
+					https://sandbox.komoju.com/api/v1
+					. All data returned from the API is in JSON format. Character encoding used to make requests should use UTF-8.
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Authentication
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Komoju provides merchants with secret and publishable API keys for making requests to the API. You can view these keys in your merchant account settings page.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API uses
+				Element:a
+					HTTP Basic Authentication
+					to authenticate API requests. You will need to pass your API key as the username (password is not needed). For example
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -u secret_key: "https://sandbox.komoju.com/api/v1/payments"
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Response & Errors
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								HTTP Status Codes
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Komoju uses HTTP status codes to indicate the success or failure of a request. Below are the the following status codes your application should handle.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Code
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								200 OK
+							Element:td
+								The server successfully processed the request
+							Element:tr
+							Element:td
+							Element:code
+								202 Accepted
+							Element:td
+								The resource is successfully created but the process is not finished
+							Element:tr
+							Element:td
+							Element:code
+								204 No Content
+							Element:td
+								The server successfully processed the request, but is not returning any content.
+							Element:tr
+							Element:td
+							Element:code
+								401 Not Authorized
+							Element:td
+								API key provided was invalid or missing
+							Element:tr
+							Element:td
+							Element:code
+								403 Forbidden
+							Element:td
+								API key provided doesn’t have permission to access specified resource
+							Element:tr
+							Element:td
+							Element:code
+								404 Not Found
+							Element:td
+								Resource not found
+							Element:tr
+							Element:td
+							Element:code
+								422 Unprocessible Entity
+							Element:td
+								Missing or invalid parameters
+							Element:tr
+							Element:td
+							Element:code
+								500 Internal Server Error
+							Element:td
+								Something went wrong on our side
+							Element:tr
+							Element:td
+							Element:code
+								502 Bad Gateway
+							Element:td
+								Upstream payment processor returned an error
+							Element:tr
+							Element:td
+							Element:code
+								503 Service Unavailable
+							Element:td
+								Server maintenance
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Errors
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Errors are returned in JSON format. A
+							Element:code
+								code
+								and
+							Element:code
+								message
+								parameter are returned for each error message.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Attributes
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Type
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:code
+														message
+													Element:td
+													Element:em
+														string
+													Element:td
+														a string describing the error message
+													Element:tr
+													Element:td
+													Element:code
+														code
+													Element:td
+													Element:em
+														string
+													Element:td
+														error code
+													Element:tr
+													Element:td
+													Element:code
+														param
+													Element:td
+													Element:em
+														string
+													Element:td
+														parameter having the validation error
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														JSON Object
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "error": { "message": "A required parameter (amount) is missing", "code": "missing_parameter", "param": "amount" } }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Error Codes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Error Code
+							Element:th
+								HTTP Status Code
+							Element:th
+								Example Message
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:code
+								bad_request
+							Element:td
+							Element:code
+								400
+							Element:td
+							Element:code
+								The server cannot or will not process the request due to something that is perceived to be a client error.
+							Element:tr
+							Element:td
+							Element:code
+								unauthorized
+							Element:td
+							Element:code
+								401
+							Element:td
+							Element:code
+								User authorization failed.
+							Element:tr
+							Element:td
+							Element:code
+								not_found
+							Element:td
+							Element:code
+								404
+							Element:td
+							Element:code
+								The requested resource could not be found but may be available again in the future.
+							Element:tr
+							Element:td
+							Element:code
+								internal_server_error
+							Element:td
+							Element:code
+								500
+							Element:td
+							Element:code
+								We're sorry but something went wrong. Please try your request again.
+							Element:tr
+							Element:td
+							Element:code
+								forbidden
+							Element:td
+							Element:code
+								403
+							Element:td
+							Element:code
+								You are not authorized to perform that action.
+							Element:tr
+							Element:td
+							Element:code
+								unprocessable_entity
+							Element:td
+							Element:code
+								422
+							Element:td
+							Element:code
+								The request was well-formed but was unable to be followed due to semantic errors.
+							Element:tr
+							Element:td
+							Element:code
+								bad_gateway
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								We are unable to process your request due to an invalid response from the upstream server.
+							Element:tr
+							Element:td
+							Element:code
+								gateway_timeout
+							Element:td
+							Element:code
+								504
+							Element:td
+							Element:code
+								When attempting to process your payment, we encountered a gateway timeout. Fear not, we have not processed the payment. Please try your payment again.
+							Element:tr
+							Element:td
+							Element:code
+								service_unavailable
+							Element:td
+							Element:code
+								503
+							Element:td
+							Element:code
+								The server is down for maintenance. Please try again later.
+							Element:tr
+							Element:td
+							Element:code
+								request_failed
+							Element:td
+							Element:code
+								402
+							Element:td
+							Element:code
+								The request failed
+							Element:tr
+							Element:td
+							Element:code
+								invalid_payment_type
+							Element:td
+							Element:code
+								422
+							Element:td
+							Element:code
+								Payment method was invalid. %{provided} is not one of %{allowed}.
+							Element:tr
+							Element:td
+							Element:code
+								invalid_token
+							Element:td
+							Element:code
+								422
+							Element:td
+							Element:code
+								The token you requested is invalid
+							Element:tr
+							Element:td
+							Element:code
+								invalid_currency
+							Element:td
+							Element:code
+								422
+							Element:td
+							Element:code
+								The currency you requested is invalid.
+							Element:tr
+							Element:td
+							Element:code
+								not_refundable
+							Element:td
+							Element:code
+								422
+							Element:td
+							Element:code
+								The payment you requested is not refundable.
+							Element:tr
+							Element:td
+							Element:code
+								not_cancellable
+							Element:td
+							Element:code
+								422
+							Element:td
+							Element:code
+								This payment is noncancellable.
+							Element:tr
+							Element:td
+							Element:code
+								fraudulent
+							Element:td
+							Element:code
+								422
+							Element:td
+							Element:code
+								This payment is fraudulent.
+							Element:tr
+							Element:td
+							Element:code
+								invalid_parameter
+							Element:td
+							Element:code
+								422
+							Element:td
+							Element:code
+								The value of %{param} is invalid
+							Element:tr
+							Element:td
+							Element:code
+								missing_parameter
+							Element:td
+							Element:code
+								422
+							Element:td
+							Element:code
+								A required parameter (%{param}) is missing
+							Element:tr
+							Element:td
+							Element:code
+								insufficient_funds
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								Insufficient funds
+							Element:tr
+							Element:td
+							Element:code
+								used_number
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								Used number
+							Element:tr
+							Element:td
+							Element:code
+								card_declined
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								Card declined
+							Element:tr
+							Element:td
+							Element:code
+								invalid_password
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								Invalid password
+							Element:tr
+							Element:td
+							Element:code
+								bad_verification_value
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								Bad verification value
+							Element:tr
+							Element:td
+							Element:code
+								exceeds_limit
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								Exceeds limit
+							Element:tr
+							Element:td
+							Element:code
+								card_expired
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								Card expired
+							Element:tr
+							Element:td
+							Element:code
+								invalid_number
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								The number you requested is invalid.
+							Element:tr
+							Element:td
+							Element:code
+								invalid_account
+							Element:td
+							Element:code
+								502
+							Element:td
+							Element:code
+								Invalid account
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Pagination
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Requests containing more that 10 items will be paginated by default. Komoju has a
+				Element:code
+					page
+					and
+				Element:code
+					per_page
+					parameter for use in pagination. Note
+				Element:code
+					per_page
+					parameter has a maximum value of 100.
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -u komoju-mart: "https://sandbox.komoju.com/api/v1/payments?page=2&per_page=100"
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Payments
+			Node:
+			(type) c
+			(layer)1
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Payment Resource
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:thead
+													Element:tr
+													Element:th
+														Field
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:code
+														id
+													Element:td
+													Element:strong
+														string
+													Element:tr
+													Element:td
+													Element:code
+														resource
+													Element:td
+													Element:strong
+														string
+														Value of
+													Element:code
+														payment
+													Element:tr
+													Element:td
+													Element:code
+														status
+													Element:td
+													Element:strong
+														string
+														The status of the payment
+													Element:tr
+													Element:td
+													Element:code
+														amount
+													Element:td
+													Element:strong
+														integer
+														The amount to be charged before tax. Must be equal or greater than 0. Use a ‘.’ as a decimal separator, and no thousands separator
+													Element:tr
+													Element:td
+													Element:code
+														tax
+													Element:td
+													Element:strong
+														integer
+														The amount of tax to be charged, or ‘auto’ to use the current consumption tax rate in Japan. Use a ‘.’ as a decimal separator, and no thousands separator. If the tax is more precise than the currency allows, it will be rounded using a round half up algorithm.
+													Element:tr
+													Element:td
+													Element:code
+														customer
+													Element:td
+													Element:strong
+														string
+														The ID of the customer the payment was created with.
+													Element:tr
+													Element:td
+													Element:code
+														payment_deadline
+													Element:td
+													Element:strong
+														timestamp
+														Time when the payment will expire. This is a timestamp in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ.
+													Element:tr
+													Element:td
+													Element:code
+														payment_details
+													Element:td
+													Element:strong
+														hash or token
+														Describes the payment method used to make the payment
+													Element:tr
+													Element:td
+													Element:code
+														payment_method_fee
+													Element:td
+													Element:strong
+														integer
+														An additional fee added to specific payment types
+													Element:tr
+													Element:td
+													Element:code
+														total
+													Element:td
+													Element:strong
+														integer
+														The payment total, this is the amount + tax + payment
+													Element:em
+														method
+														fee
+													Element:tr
+													Element:td
+													Element:code
+														currency
+													Element:td
+													Element:strong
+														string
+														3 letter ISO currency code of the transaction
+													Element:tr
+													Element:td
+													Element:code
+														description
+													Element:td
+													Element:strong
+														string
+														Description of the payment (used in e-mail receipts if enabled).
+													Element:tr
+													Element:td
+													Element:code
+														subscription
+													Element:td
+													Element:strong
+														subscription
+														Shown if payment was part of a subscription
+													Element:tr
+													Element:td
+													Element:code
+														captured_at
+													Element:td
+													Element:strong
+														timestamp
+														An ISO 8601 formatted timestamp of when a payment was captured
+													Element:tr
+													Element:td
+													Element:code
+														external_order_num
+													Element:td
+													Element:strong
+														string
+														This is the merchant unique ID for the transaction. It will be included in all callbacks to identify the transaction.
+													Element:tr
+													Element:td
+													Element:code
+														metadata
+													Element:td
+													Element:strong
+														hash
+														A set of key-value pairs
+													Element:tr
+													Element:td
+													Element:code
+														created_at
+													Element:td
+													Element:strong
+														timestamp
+														An ISO 8601 formatted timestamp of when a payment was created
+													Element:tr
+													Element:td
+													Element:code
+														amount_refunded
+													Element:td
+													Element:strong
+														integer
+														The amount in cents refunded
+													Element:tr
+													Element:td
+													Element:code
+														locale
+													Element:td
+													Element:strong
+														string
+														Sets the language to use for e-mail receipts and payment instructions
+													Element:tr
+													Element:td
+													Element:code
+														refunds
+													Element:td
+													Element:strong
+														hash
+														Refund information
+													Element:tr
+													Element:td
+													Element:code
+														refund_requests
+													Element:td
+														translation missing: en.serializers.payments.refund_requests
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Payment Details
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The API attempts to abstract the differences between the different payment methods as much as possible. In order to make it easy to integrate multiple payment methods Komoju uses a
+				Element:code
+					payments_details
+					hash in requests and responses for payments.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The
+				Element:code
+					payment_details
+					hash requires a
+				Element:code
+					type
+					parameter which can be one of
+				Element:code
+					bank_transfer
+					、
+				Element:code
+					credit_card
+					、
+				Element:code
+					konbini
+					、
+				Element:code
+					pay_easy
+					、
+				Element:code
+					web_money
+					、
+				Element:code
+					bit_cash
+					、
+				Element:code
+					nanaco
+					、
+				Element:code
+					net_cash
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Examples
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Bank transfer
+				Element:li
+					Credit Card
+				Element:li
+					Konbini
+				Element:li
+					PayEasy
+				Element:li
+					WebMoney
+				Element:li
+					BitCash
+				Element:li
+					nanaco
+				Element:li
+					NET CASH
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/payments \ -u komoju-mart: \ -d "amount=1000" \ -d "currency=JPY" \ -d "external_order_num=123" \ -d "metadata[foobar]=hoge" \ -d "payment_details[prepaid_number]=1111111111111111" \ -d "payment_details[type]=net_cash"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/payments \ -u komoju-mart: \ -d "amount=1000" \ -d "currency=JPY" \ -d "external_order_num=123" \ -d "metadata[foobar]=hoge" \ -d "payment_details[email]=test@example.com" \ -d "payment_details[phone]=090-1111-2222" \ -d "payment_details[store]=lawson" \ -d "payment_details[type]=konbini"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/payments \ -u komoju-mart: \ -d "amount=1000" \ -d "currency=JPY" \ -d "external_order_num=123" \ -d "metadata[foobar]=hoge" \ -d "payment_details[email]=test@example.com" \ -d "payment_details[family_name]=山田" \ -d "payment_details[family_name_kana]=ヤマダ" \ -d "payment_details[given_name]=太郎" \ -d "payment_details[given_name_kana]=タロウ" \ -d "payment_details[phone]=090-1111-2222" \ -d "payment_details[type]=pay_easy"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/payments \ -u komoju-mart: \ -d "amount=1000" \ -d "currency=JPY" \ -d "external_order_num=123" \ -d "metadata[foobar]=hoge" \ -d "payment_details[email]=test@example.com" \ -d "payment_details[family_name]=山田" \ -d "payment_details[family_name_kana]=ヤマダ" \ -d "payment_details[given_name]=太郎" \ -d "payment_details[given_name_kana]=タロウ" \ -d "payment_details[phone]=080-1111-2222" \ -d "payment_details[type]=bank_transfer"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/payments \ -u komoju-mart: \ -d "amount=1000" \ -d "currency=JPY" \ -d "external_order_num=123" \ -d "metadata[foobar]=hoge" \ -d "payment_details[prepaid_number]=1111111111111111" \ -d "payment_details[type]=nanaco"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/payments \ -u komoju-mart: \ -d "amount=1000" \ -d "currency=JPY" \ -d "external_order_num=123" \ -d "metadata[foobar]=hoge" \ -d "payment_details[prepaid_number]=1111111111111111" \ -d "payment_details[type]=web_money"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/payments \ -u komoju-mart: \ -d "amount=1000" \ -d "currency=JPY" \ -d "external_order_num=123" \ -d "metadata[foobar]=hoge" \ -d "payment_details[family_name]=Yamada" \ -d "payment_details[given_name]=Taro" \ -d "payment_details[month]=01" \ -d "payment_details[number]=4111111111111111" \ -d "payment_details[type]=credit_card" \ -d "payment_details[verification_value]=123" \ -d "payment_details[year]=2018"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/payments \ -u komoju-mart: \ -d "amount=1000" \ -d "currency=KRW" \ -d "external_order_num=123" \ -d "metadata[foobar]=hoge" \ -d "payment_details[culture_id]=11111111" \ -d "payment_details[culture_password]=11111111" \ -d "payment_details[type]=culture_voucher"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/payments \ -u komoju-mart: \ -d "amount=100" \ -d "currency=JPY" \ -d "payment_details[prepaid_number]=1111111111111111" \ -d "payment_details[type]=bit_cash"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "blflnmbl9pzmfyzrydswnoldc", "resource": "payment", "status": "captured", "amount": 1000, "tax": 80, "customer": null, "payment_deadline": "2017-01-11T07:52:34Z", "payment_details": { "type": "net_cash", "email": null, "short_amount": 0, "prepaid_cards": [ { "last_four_digits": "1111", "points": 1080 } ] }, "payment_method_fee": 0, "total": 1080, "currency": "JPY", "description": null, "subscription": null, "captured_at": "2017-01-04T07:52:35Z", "external_order_num": "123", "metadata": { "foobar": "hoge" }, "created_at": "2017-01-04T07:52:34Z", "amount_refunded": 0, "locale": "ja", "refunds": [ ], "refund_requests": [ ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "4wwkq1vpwgzl1cgkz3excvfmy", "resource": "payment", "status": "authorized", "amount": 1000, "tax": 80, "customer": null, "payment_deadline": "2017-01-07T14:59:59Z", "payment_details": { "type": "konbini", "email": "test@example.com", "store": "lawson", "confirmation_code": null, "receipt": "303001", "instructions_url": "https://komoju.com/ja/instructions/4wwkq1vpwgzl1cgkz3excvfmy" }, "payment_method_fee": 0, "total": 1080, "currency": "JPY", "description": null, "subscription": null, "captured_at": null, "external_order_num": "123", "metadata": { "foobar": "hoge" }, "created_at": "2017-01-04T07:52:35Z", "amount_refunded": 0, "locale": "ja", "refunds": [ ], "refund_requests": [ ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "adgy38l7srnc1cintgbm2m9fo", "resource": "payment", "status": "authorized", "amount": 1000, "tax": 80, "customer": null, "payment_deadline": "2017-01-14T14:59:59Z", "payment_details": { "type": "pay_easy", "email": "test@example.com", "bank_id": "58191", "customer_id": "20001900030947960025", "confirmation_id": "288916", "instructions_url": "https://komoju.com/ja/instructions/adgy38l7srnc1cintgbm2m9fo" }, "payment_method_fee": 0, "total": 1080, "currency": "JPY", "description": null, "subscription": null, "captured_at": null, "external_order_num": "123", "metadata": { "foobar": "hoge" }, "created_at": "2017-01-04T07:52:37Z", "amount_refunded": 0, "locale": "ja", "refunds": [ ], "refund_requests": [ ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "ettoo9dqwc02f0tburwfif0ha", "resource": "payment", "status": "authorized", "amount": 1000, "tax": 80, "customer": null, "payment_deadline": "2017-01-11T14:59:59Z", "payment_details": { "type": "bank_transfer", "email": "test@example.com", "order_id": "D4959232956", "bank_name": "三井住友銀行", "account_branch_name": "吉祥寺", "account_number": "7352514", "account_type": "普通預金", "account_name": "株式会社DEGICA（カブシキガイシャ デジカ）", "instructions_url": "https://komoju.com/ja/instructions/ettoo9dqwc02f0tburwfif0ha" }, "payment_method_fee": 0, "total": 1080, "currency": "JPY", "description": null, "subscription": null, "captured_at": null, "external_order_num": "123", "metadata": { "foobar": "hoge" }, "created_at": "2017-01-04T07:52:38Z", "amount_refunded": 0, "locale": "ja", "refunds": [ ], "refund_requests": [ ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "ab8ub42kaywku966310gxxk7a", "resource": "payment", "status": "captured", "amount": 1000, "tax": 80, "customer": null, "payment_deadline": "2017-01-11T07:52:38Z", "payment_details": { "type": "nanaco", "email": null, "short_amount": 0, "prepaid_cards": [ { "last_four_digits": "1111", "points": 1080 } ] }, "payment_method_fee": 0, "total": 1080, "currency": "JPY", "description": null, "subscription": null, "captured_at": "2017-01-04T07:52:38Z", "external_order_num": "123", "metadata": { "foobar": "hoge" }, "created_at": "2017-01-04T07:52:38Z", "amount_refunded": 0, "locale": "ja", "refunds": [ ], "refund_requests": [ ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "13bgxuyrg7uwv5ahrw8qtzpov", "resource": "payment", "status": "captured", "amount": 1000, "tax": 80, "customer": null, "payment_deadline": null, "payment_details": { "type": "web_money", "email": null, "short_amount": 0, "prepaid_cards": [ { "last_four_digits": "1111", "points": 1080 } ] }, "payment_method_fee": 0, "total": 1080, "currency": "JPY", "description": null, "subscription": null, "captured_at": "2017-01-04T07:52:39Z", "external_order_num": "123", "metadata": { "foobar": "hoge" }, "created_at": "2017-01-04T07:52:39Z", "amount_refunded": 0, "locale": "ja", "refunds": [ ], "refund_requests": [ ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "a52fo5c2w4rkdfpyirjhky1fx", "resource": "payment", "status": "captured", "amount": 1000, "tax": 80, "customer": null, "payment_deadline": "2017-01-11T14:59:59Z", "payment_details": { "type": "credit_card", "email": null, "brand": "visa", "last_four_digits": "1111", "month": 1, "year": 2018 }, "payment_method_fee": 0, "total": 1080, "currency": "JPY", "description": null, "subscription": null, "captured_at": "2017-01-04T07:52:40Z", "external_order_num": "123", "metadata": { "foobar": "hoge" }, "created_at": "2017-01-04T07:52:40Z", "amount_refunded": 0, "locale": "ja", "refunds": [ ], "refund_requests": [ ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "7vece2xh0glq17vc8waeb64q2", "resource": "payment", "status": "captured", "amount": 1000, "tax": 80, "customer": null, "payment_deadline": "2017-01-11T07:52:40Z", "payment_details": { "type": "culture_voucher", "culture_id": "11111111" }, "payment_method_fee": 0, "total": 1080, "currency": "KRW", "description": null, "subscription": null, "captured_at": "2017-01-04T07:52:40Z", "external_order_num": "123", "metadata": { "foobar": "hoge" }, "created_at": "2017-01-04T07:52:40Z", "amount_refunded": 0, "locale": "ja", "refunds": [ ], "refund_requests": [ ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "ctui3yw1enfk2tvgwlfv22ut5", "resource": "payment", "status": "captured", "amount": 100, "tax": 8, "customer": null, "payment_deadline": null, "payment_details": { "type": "bit_cash", "email": null }, "payment_method_fee": 0, "total": 108, "currency": "JPY", "description": null, "subscription": null, "captured_at": "2017-01-04T07:52:49Z", "external_order_num": null, "metadata": { }, "created_at": "2017-01-04T07:52:49Z", "amount_refunded": 0, "locale": "ja", "refunds": [ ], "refund_requests": [ ] }
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Credit Card
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Payment Details
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Request Parameter
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+				Element:em
+					string
+				Element:td
+					Value of
+				Element:code
+					credit_card
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+				Element:em
+					string
+				Element:td
+					The e-mail address used to send the payment receipt to. Note, this value is optional.
+				Element:tr
+				Element:td
+				Element:code
+					number
+				Element:td
+				Element:em
+					numeric
+				Element:td
+					credit card number
+				Element:tr
+				Element:td
+				Element:code
+					month
+				Element:td
+				Element:em
+					numeric
+				Element:td
+					expiry month
+				Element:tr
+				Element:td
+				Element:code
+					year
+				Element:td
+				Element:em
+					numeric
+				Element:td
+					expiry year
+				Element:tr
+				Element:td
+				Element:code
+					verification_value
+				Element:td
+				Element:em
+					numeric
+				Element:td
+					CCV security number
+				Element:tr
+				Element:td
+				Element:code
+					given_name
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customer given name
+				Element:tr
+				Element:td
+				Element:code
+					family_name
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customer family name
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Response Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+					Value of
+				Element:code
+					credit_card
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+					The e-mail address used to send payment receipt to.
+				Element:tr
+				Element:td
+				Element:code
+					brand
+				Element:td
+					Brand of credit card e.g.
+				Element:code
+					visa
+					,
+				Element:code
+					mastercard
+					, etc.
+				Element:tr
+				Element:td
+				Element:code
+					last_four_digits
+				Element:td
+					Last four digits of the credit card number
+				Element:tr
+				Element:td
+				Element:code
+					month
+				Element:td
+					Expiry month of the credit card
+				Element:tr
+				Element:td
+				Element:code
+					year
+				Element:td
+					Expiry year of the credit card
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Test Cards
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Card Number
+				Element:th
+					Type
+				Element:tbody
+				Element:tr
+				Element:td
+					3530111333300000
+				Element:td
+					JCB
+				Element:tr
+				Element:td
+					378282246310005
+				Element:td
+					American Express
+				Element:tr
+				Element:td
+					4111111111111111
+				Element:td
+					Visa
+				Element:tr
+				Element:td
+					5555555555554444
+				Element:td
+					MasterCard
+				Element:tr
+				Element:td
+					30569309025904
+				Element:td
+					Diners Club
+				Element:tr
+				Element:td
+					4123111111111000
+				Element:td
+					Insufficient funds
+				Element:tr
+				Element:td
+					4123111111111018
+				Element:td
+					Exceeds card limit
+				Element:tr
+				Element:td
+					4123111111111034
+				Element:td
+					Bad verification value
+				Element:tr
+				Element:td
+					4123111111111042
+				Element:td
+					Card expired
+				Element:tr
+				Element:td
+					4123111111111059
+				Element:td
+					Cannot use card
+				Element:tr
+				Element:td
+					4123111111111067
+				Element:td
+					Password error
+				Element:tr
+				Element:td
+					4123111111111067
+				Element:td
+					Invalid card
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Bank Transfer
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Once a payment is created we return a
+				Element:code
+					bank_number
+					which the user must send the funds to with the attached
+				Element:code
+					order_id
+					as their payee name. Once we receive the payment we will
+				Element:a
+					send a webhook
+					indicating the status of the payment.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Restrictions
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Bank transfers are only captured during regular business hours in Japan
+				Element:li
+					Payments expire after 14 days (
+				Element:a
+					send a webhook
+					indicating its expired)
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Payment Details
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Request Parameter
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+				Element:em
+					string
+				Element:td
+					value of
+				Element:code
+					bank_transfer
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+				Element:em
+					string
+				Element:td
+					The e-mail address used to send the payment receipt and instructions to. Note, this value is optional.
+				Element:tr
+				Element:td
+				Element:code
+					given_name
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customer given name
+				Element:tr
+				Element:td
+				Element:code
+					family_name
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customers family name
+				Element:tr
+				Element:td
+				Element:code
+					given_name_kana
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customer given name in katakana
+				Element:tr
+				Element:td
+				Element:code
+					family_name_kana
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customers family name in katakana
+				Element:tr
+				Element:td
+				Element:code
+					expiry_days
+				Element:td
+				Element:em
+					numeric
+				Element:td
+					The number of days before the payment expires (maximum 59 days). Note, this value is optional.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Response Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+					Value of
+				Element:code
+					bank_transfer
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+					The e-mail address used to send the payment receipt and instructions to.
+				Element:tr
+				Element:td
+				Element:code
+					order_id
+				Element:td
+					Remitters/payers name customer needs to use to send money as
+				Element:tr
+				Element:td
+				Element:code
+					bank_name
+				Element:td
+					The name of the bank the user needs to wire funds to
+				Element:tr
+				Element:td
+				Element:code
+					account_branch_name
+				Element:td
+					translation missing: en.serializers.bank
+				Element:em
+					transfer.account
+					branch_name
+				Element:tr
+				Element:td
+				Element:code
+					account_number
+				Element:td
+					The account number
+				Element:tr
+				Element:td
+				Element:code
+					account_type
+				Element:td
+					The account type (e.g. savings)
+				Element:tr
+				Element:td
+				Element:code
+					account_name
+				Element:td
+					The account name
+				Element:tr
+				Element:td
+				Element:code
+					instructions_url
+				Element:td
+					A URL for an instructions page
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					Convenience Store (Konbini)
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Restrictions
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Payment total has a minimum of 1 and a maximum of 299,999 JPY. The total is based on the amount + tax + transaction fee
+				Element:li
+					Payments expire after 3 days (we
+				Element:a
+					send a webhook
+					indicating its expired)
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Convenience Stores
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					When creating a Konbini payment you will need to pass a
+				Element:code
+					store
+					parameter inside the
+				Element:code
+					payment_details
+					hash. This value is the store slug (shown below) which the customer will make the purchase at.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					English Name
+				Element:th
+					Japanese Name
+				Element:th
+					Store Slug
+				Element:th
+					Logo
+				Element:tbody
+				Element:tr
+				Element:td
+					Circle K
+				Element:td
+					サークルK
+				Element:td
+				Element:code
+					circle-k
+				Element:td
+				Element:img
+				Element:tr
+				Element:td
+					Daily Yamazaki
+				Element:td
+					デイリーヤマザキ
+				Element:td
+				Element:code
+					daily-yamazaki
+				Element:td
+				Element:img
+				Element:tr
+				Element:td
+					Family Mart
+				Element:td
+					ファミリーマート
+				Element:td
+				Element:code
+					family-mart
+				Element:td
+				Element:img
+				Element:tr
+				Element:td
+					Lawson
+				Element:td
+					ローソン
+				Element:td
+				Element:code
+					lawson
+				Element:td
+				Element:img
+				Element:tr
+				Element:td
+					Ministop
+				Element:td
+					ミニストップ
+				Element:td
+				Element:code
+					ministop
+				Element:td
+				Element:img
+				Element:tr
+				Element:td
+					7-Eleven
+				Element:td
+					セブンイレブン
+				Element:td
+				Element:code
+					seven-eleven
+				Element:td
+				Element:img
+				Element:tr
+				Element:td
+					Sunkus
+				Element:td
+					サンクス
+				Element:td
+				Element:code
+					sunkus
+				Element:td
+				Element:img
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Payment Details
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Request Parameter
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+				Element:em
+					string
+				Element:td
+					value of
+				Element:code
+					konbini
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+				Element:em
+					string
+				Element:td
+					The e-mail address used to send the payment receipt and instructions to. Note, this value is optional.
+				Element:tr
+				Element:td
+				Element:code
+					store
+				Element:td
+				Element:em
+					string
+				Element:td
+					store slug
+				Element:tr
+				Element:td
+				Element:code
+					phone
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customers phone number (eg. 080-1111-1111)
+				Element:tr
+				Element:td
+				Element:code
+					expiry_days
+				Element:td
+				Element:em
+					numeric
+				Element:td
+					The number of days before the payment expires (maximum 59 days). Note, this value is optional.
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Response Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+					Value of
+				Element:code
+					konbini
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+					The e-mail address used to send the payment receipt and instructions to.
+				Element:tr
+				Element:td
+				Element:code
+					store
+				Element:td
+					Store slug name e.g.
+				Element:code
+					lawson
+					,
+				Element:code
+					family_mart
+					, etc.
+				Element:tr
+				Element:td
+				Element:code
+					confirmation_code
+				Element:td
+					A number customers will need when paying at the konbini (used by some konbini)
+				Element:tr
+				Element:td
+				Element:code
+					receipt
+				Element:td
+					A number customers will need when paying at the konbini
+				Element:tr
+				Element:td
+				Element:code
+					instructions_url
+				Element:td
+					A URL for an instructions page
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					WebMoney
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					WebMoney is a popular prepaid card in Japan. The API for WebMoney supports multiple prepaid card requests. For example, if the customer does not have enough funds to cover the cost of the payment you can continue the request by updating the payment and passing a second
+				Element:code
+					prepaid_number
+					in the
+				Element:code
+					payment_details
+					hash.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Continuing a WebMoney Request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					In the case the customer does not have enough funds we return a
+				Element:code
+					202 Accepted
+					status code with the payment status remaining in the
+				Element:code
+					pending
+					state. The pending payment can then be updated again using the
+				Element:a
+					payment update
+					endpoint and passing an additional prepaid card inside the payment details hash e.g.
+				Element:code
+					payment_details[prepaid_number]=XXXXXXXXXXXX
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Payment Details
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Request Parameter
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+				Element:em
+					string
+				Element:td
+					Value of
+				Element:code
+					web_money
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+				Element:em
+					string
+				Element:td
+					The e-mail address used to send the payment receipt to. Note, this value is optional.
+				Element:tr
+				Element:td
+				Element:code
+					prepaid_number
+				Element:td
+				Element:em
+					string
+				Element:td
+					16-character prepaid card number
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Response Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+					Value of
+				Element:code
+					web_money
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+					The e-mail address used to send the payment receipt to.
+				Element:tr
+				Element:td
+				Element:code
+					short_amount
+				Element:td
+					The amount of yen that payment was short by
+				Element:tr
+				Element:td
+				Element:code
+					prepaid_cards
+				Element:td
+					A list of prepaid cards used in this transaction
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Test Cards
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Card Number
+				Element:th
+					Type
+				Element:tbody
+				Element:tr
+				Element:td
+					1111111111111111
+				Element:td
+					WebMoney prepaid card with a 2000 yen balance
+				Element:tr
+				Element:td
+					e111111111111112
+				Element:td
+					Invalid card number
+				Element:tr
+				Element:td
+					e111111111111113
+				Element:td
+					Prepaid card has already been used
+				Element:tr
+				Element:td
+					e111111111111114
+				Element:td
+					Card has been declined due to an unknown error
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					NET CASH
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Similar to WebMoney, NET CASH is another prepaid card in Japan.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Continuing a NET CASH Request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Same case of WebMoney
+					. Please see that for reference.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Payment Details
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Request Parameter
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+				Element:em
+					string
+				Element:td
+					Value of
+				Element:code
+					net_cash
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+				Element:em
+					string
+				Element:td
+					The e-mail address used to send the payment receipt to. Note, this value is optional.
+				Element:tr
+				Element:td
+				Element:code
+					prepaid_number
+				Element:td
+				Element:em
+					string
+				Element:td
+					16-character prepaid card number
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Response Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+					Value of
+				Element:code
+					net_cash
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+					The e-mail address used to send the payment receipt to.
+				Element:tr
+				Element:td
+				Element:code
+					short_amount
+				Element:td
+					The amount of yen that payment was short by
+				Element:tr
+				Element:td
+				Element:code
+					prepaid_cards
+				Element:td
+					A list of prepaid cards used in this transaction
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Test Cards
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Card Number
+				Element:th
+					Type
+				Element:tbody
+				Element:tr
+				Element:td
+					1111111111111111
+				Element:td
+					NET CASH prepaid card with a 2000 yen balance
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					nanaco
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Similar to WebMoney, nanaco is another prepaid card in Japan.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Continuing a nanaco Request
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+					Same case of WebMoney
+					. Please see that for reference.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Payment Details
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Request Parameter
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+				Element:em
+					string
+				Element:td
+					Value of
+				Element:code
+					nanaco
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+				Element:em
+					string
+				Element:td
+					The e-mail address used to send the payment receipt to. Note, this value is optional.
+				Element:tr
+				Element:td
+				Element:code
+					prepaid_number
+				Element:td
+				Element:em
+					string
+				Element:td
+					16-character prepaid card number
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Response Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+					Value of
+				Element:code
+					nanaco
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+					The e-mail address used to send the payment receipt to.
+				Element:tr
+				Element:td
+				Element:code
+					short_amount
+				Element:td
+					The amount of yen that payment was short by
+				Element:tr
+				Element:td
+				Element:code
+					prepaid_cards
+				Element:td
+					A list of prepaid cards used in this transaction
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Test Cards
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Card Number
+				Element:th
+					Type
+				Element:tbody
+				Element:tr
+				Element:td
+					1111111111111111
+				Element:td
+					nanaco prepaid card with a 2000 yen balance
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					BitCash
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Similar to WebMoney, BitCash is another prepaid card in Japan. The integration is identical to WebMoney expect BitCash does not support continuing requests with additional prepaid cards. In the case a customer has insuffcient funds they can
+				Element:a
+					merge prepaid cards online
+					via the BitCash website.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Payment Details
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Request Parameter
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+				Element:em
+					string
+				Element:td
+					Value of
+				Element:code
+					bit_cash
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+				Element:em
+					string
+				Element:td
+					The e-mail address used to send the payment receipt to. Note, this value is optional.
+				Element:tr
+				Element:td
+				Element:code
+					prepaid_number
+				Element:td
+				Element:em
+					string
+				Element:td
+					16-character prepaid card number
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Response Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+					Value of
+				Element:code
+					bit_cash
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+					The e-mail address used to send the payment receipt to.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Test Cards
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Card Number
+				Element:th
+					Type
+				Element:tbody
+				Element:tr
+				Element:td
+					1111111111111111
+				Element:td
+					BitCash prepaid card with a 2000 yen balance
+				Element:tr
+				Element:td
+					e111111111111112
+				Element:td
+					Invalid card number
+				Element:tr
+				Element:td
+					e111111111111113
+				Element:td
+					Card has been declined due to an unknown error
+			Node:
+			(type) c
+			(layer)1
+				Element:h2
+					PayEasy
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					PayEasy allows customers to pay via online banking.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This is a delayed payment type, which means after a payment is created there is a period of time which elapses before the payment is captured. Komoju will
+				Element:a
+					send a webhook
+					once the payment has been captured.
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Restrictions
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					PayEasy payments have a minimum of ¥1 and a maximum of ¥999,999.
+				Element:li
+					Payments expire after 10 days (we
+				Element:a
+					send a webhook
+					indicating its expired)
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Payment Details
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Request Parameter
+				Element:th
+					Type
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+				Element:em
+					string
+				Element:td
+					value of
+				Element:code
+					pay_easy
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+				Element:em
+					string
+				Element:td
+					The e-mail address used to send the payment receipt and instructions to. Note, this value is optional.
+				Element:tr
+				Element:td
+				Element:code
+					given_name
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customers given name
+				Element:tr
+				Element:td
+				Element:code
+					family_name
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customers family name
+				Element:tr
+				Element:td
+				Element:code
+					given_name_kana
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customers given name in katakana
+				Element:tr
+				Element:td
+				Element:code
+					family_name_kana
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customers family name in katakana
+				Element:tr
+				Element:td
+				Element:code
+					phone
+				Element:td
+				Element:em
+					string
+				Element:td
+					Customers phone number (eg. 080-1111-1111)
+			Node:
+			(type) c
+			(layer)1
+				Element:table
+				Element:thead
+				Element:tr
+				Element:th
+					Response Parameter
+				Element:th
+					Description
+				Element:tbody
+				Element:tr
+				Element:td
+				Element:code
+					type
+				Element:td
+					Value of
+				Element:code
+					pay_easy
+				Element:tr
+				Element:td
+				Element:code
+					email
+				Element:td
+					The e-mail address used to send the payment receipt and instructions to.
+				Element:tr
+				Element:td
+				Element:code
+					bank_id
+				Element:td
+					A code required by customers when paying with pay-easy
+				Element:tr
+				Element:td
+				Element:code
+					customer_id
+				Element:td
+					A code required by customers when paying with pay-easy
+				Element:tr
+				Element:td
+				Element:code
+					confirmation_id
+				Element:td
+					A code required by customers when paying with pay-easy
+				Element:tr
+				Element:td
+				Element:code
+					instructions_url
+				Element:td
+					A URL for an instructions page
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Tokens
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					For security reasons you may want Komoju to handle sensitive customer information for you. Komoju exposes a tokens endpoint for this purpose to allow clients to create tokens directly with the API using your publishable key.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					You can use a payment details token anywhere payment details are used by passing the token
+				Element:code
+					id
+					field for
+				Element:code
+					payment_details
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Restrictions
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Tokens can only be used once
+				Element:li
+					Tokens expire after 30 days
+			Node:
+			(type) c
+			(layer)1
+				Element:h4
+					Examples
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+					Bank transfer
+				Element:li
+					Credit Card
+				Element:li
+					Konbini
+				Element:li
+					PayEasy
+				Element:li
+					WebMoney
+				Element:li
+					BitCash
+				Element:li
+					nanaco
+				Element:li
+					NET CASH
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[prepaid_number]=1111111111111111" \ -d "payment_details[type]=bit_cash"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[email]=test@example.com" \ -d "payment_details[family_name]=山田" \ -d "payment_details[family_name_kana]=ヤマダ" \ -d "payment_details[given_name]=太郎" \ -d "payment_details[given_name_kana]=タロウ" \ -d "payment_details[phone]=080-1111-2222" \ -d "payment_details[type]=bank_transfer"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[prepaid_number]=1111111111111111" \ -d "payment_details[type]=web_money"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[prepaid_number]=1111111111111111" \ -d "payment_details[type]=nanaco"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[culture_id]=11111111" \ -d "payment_details[culture_password]=11111111" \ -d "payment_details[type]=culture_voucher"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[family_name]=Yamada" \ -d "payment_details[given_name]=Taro" \ -d "payment_details[month]=01" \ -d "payment_details[number]=4111111111111111" \ -d "payment_details[type]=credit_card" \ -d "payment_details[verification_value]=123" \ -d "payment_details[year]=2018"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[email]=test@example.com" \ -d "payment_details[family_name]=山田" \ -d "payment_details[family_name_kana]=ヤマダ" \ -d "payment_details[given_name]=太郎" \ -d "payment_details[given_name_kana]=タロウ" \ -d "payment_details[phone]=090-1111-2222" \ -d "payment_details[type]=pay_easy"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[prepaid_number]=1111111111111111" \ -d "payment_details[type]=net_cash"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[email]=test@example.com" \ -d "payment_details[phone]=090-1111-2222" \ -d "payment_details[store]=lawson" \ -d "payment_details[type]=konbini"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					curl -X POST https://sandbox.komoju.com/api/v1/tokens \ -u komoju-mart: \ -d "payment_details[type]=dospara" \ -d "payment_details[user_no]=12345" \ -d "payment_details[user_password]=password"
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_e7a2d0175d9204f55f7e1fc6848178efcaa05a18aac91a6f64bec7b845a209d35agmbwixkqrf48kw6wliek98t", "resource": "token", "created_at": "2017-01-04T07:52:31Z", "payment_details": { "type": "bit_cash" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_d1b7b3e445d2276876714d5c2bef5ed87f773056e3ff1f1e594c65dd1905c24812ingqjf6wdrnzy6959eolcs6", "resource": "token", "created_at": "2017-01-04T07:52:31Z", "payment_details": { "type": "bank_transfer", "given_name": "太郎", "family_name": "山田", "given_name_kana": "タロウ", "family_name_kana": "ヤマダ", "phone": "080-1111-2222", "email": "test@example.com" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_a2e19700c6b5beb97758f2c2132d1de49b7e391405c1bb4d9794e87b65175fe97ullijya5b5bpqe6e82v8vjt3", "resource": "token", "created_at": "2017-01-04T07:52:31Z", "payment_details": { "type": "web_money" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_c15d7d4d2801c177c791cd36bd2da28c4b56c233128219a5e219c70dd0aaf7e23rvuj0dvevnwjbkravl0xwl9y", "resource": "token", "created_at": "2017-01-04T07:52:31Z", "payment_details": { "type": "nanaco" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_1cca1150dacc5539508f1f58ef94549b3f702fd8e15a617d38d5e8a51576ea871rsrdpdzxecfdrgk0djgky07k", "resource": "token", "created_at": "2017-01-04T07:52:31Z", "payment_details": { "type": "culture_voucher" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_2f308774203e08d6dce5abd2814c204459e531358e7c8e583ac9049e38f3c9d22vptfdnr59pr9gdgm1rev2mli", "resource": "token", "created_at": "2017-01-04T07:52:31Z", "payment_details": { "type": "credit_card", "given_name": "Taro", "family_name": "Yamada" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_d0bc60928955851710d5da2ff05ae542adc6406cafa57299bfbe646abff8bc5423c8zvljrqljbw0u191uyqksx", "resource": "token", "created_at": "2017-01-04T07:52:31Z", "payment_details": { "type": "pay_easy", "given_name": "太郎", "family_name": "山田", "given_name_kana": "タロウ", "family_name_kana": "ヤマダ", "email": "test@example.com", "phone": "090-1111-2222" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_bd269e95e1bf59c12f8f330df78ba1d24af6028c3dbd0a55400e7cbf542d10658piz60mheub8dslokpa1ez9ht", "resource": "token", "created_at": "2017-01-04T07:52:31Z", "payment_details": { "type": "net_cash" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_6f88cf1c9c987d40876e15e1d48fb649871f27181612c777dc3597469cb30f87a6ribb1sttxipurz1bfw9q3cs", "resource": "token", "created_at": "2017-01-04T07:52:32Z", "payment_details": { "type": "konbini", "store": "lawson", "email": "test@example.com", "phone": "090-1111-2222" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:pre
+				Element:code
+					{ "id": "tok_240eb0f6489827bdf7d12abed889816ce6e1ca827347b9d77ff588d99921b0651pimnlyp30cn7o19jkn3qvxoi", "resource": "token", "created_at": "2017-01-04T07:52:32Z", "payment_details": { "type": "dospara" } }
+			Node:
+			(type) c
+			(layer)1
+				Element:footer
+				Element:ul
+				Element:li
+				Element:a
+					Contact Us
+				Element:li
+				Element:a
+					Acceptable Use Policy
+				Element:li
+				Element:a
+					About Degica
+				Element:li
+				Element:a
+					Stickers
+				Element:li
+				Element:a
+					Blog
+				Element:li
+				Element:a
+				Element:span
+					English
+				Element:ul
+				Element:li
+				Element:a
+					English
+				Element:li
+				Element:a
+					日本語
+				Element:li
+				Element:a
+					한국어
+				Element:a
+				Element:img
+				Element:p
+					© 2005 - 2017 Degica, Inc.
+				Element:i
+					Komoju name and character are registered trademarks of Degica, Inc.

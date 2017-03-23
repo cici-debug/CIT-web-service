@@ -1,0 +1,751 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Term Vectors
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Returns information and statistics on terms in the fields of a particular document. The document could be stored in the index or artificially provided by the user. Term vectors are
+							Element:a
+								realtime
+								by default, not near realtime. This can be changed by setting
+							Element:code
+								realtime
+								parameter to
+							Element:code
+								false
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								curl -XGET 'http://localhost:9200/twitter/tweet/1/_termvectors?pretty=true'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Optionally, you can specify the fields for which the information is retrieved either with a parameter in the url
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								curl -XGET 'http://localhost:9200/twitter/tweet/1/_termvectors?fields=text,...'
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								or by adding the requested fields in the request body (see example below). Fields can also be specified with wildcards in similar way to the
+							Element:a
+								multi match query
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that the usage of
+							Element:code
+								/_termvector
+								is deprecated in 2.0, and replaced by
+							Element:code
+								/_termvectors
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Return values
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Three types of values can be requested:
+										Element:span
+											,
+										Element:em
+											term information
+										Element:span
+											and
+										Element:em
+											term statistics
+										Element:span
+											. By default, all term information and field statistics are returned for all fields but no term statistics.
+										Element:em
+											field statistics
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Term information
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														term frequency in the field (always returned)
+													Element:li
+														term positions (
+													Element:code
+														positions
+														: true)
+													Element:li
+														start and end offsets (
+													Element:code
+														offsets
+														: true)
+													Element:li
+														term payloads (
+													Element:code
+														payloads
+														: true), as base64 encoded bytes
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If the requested information wasn’t stored in the index, it will be computed on the fly if possible. Additionally, term vectors could be computed for documents not even existing in the index, but instead provided by the user.
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Start and end offsets assume UTF-16 encoding is being used. If you want to use these offsets in order to get the original text that produced this token, you should make sure that the string you are taking a sub-string of is also encoded using UTF-16.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Term statistics
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Setting
+													Element:code
+														term_statistics
+														to
+													Element:code
+														true
+														(default is
+													Element:code
+														false
+														) will return
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														total term frequency (how often a term occurs in all documents)
+													Element:li
+														document frequency (the number of documents containing the current term)
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														By default these values are not returned since term statistics can have a serious performance impact.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Field statistics
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Setting
+													Element:code
+														field_statistics
+														to
+													Element:code
+														false
+														(default is
+													Element:code
+														true
+														) will omit :
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														document count (how many documents contain this field)
+													Element:li
+														sum of document frequencies (the sum of document frequencies for all terms in this field)
+													Element:li
+														sum of total term frequencies (the sum of total term frequencies of each term in this field)
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Terms Filtering
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														With the parameter
+													Element:code
+														filter
+														, the terms returned could also be filtered based on their tf-idf scores. This could be useful in order find out a good characteristic vector of a document. This feature works in a similar manner to the
+													Element:a
+														second phase
+														of the
+													Element:a
+														More Like This Query
+														. See
+													Element:a
+														example 5
+														for usage.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following sub-parameters are supported:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:colgroup
+													Element:col
+													Element:col
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														max_num_terms
+													Element:td
+													Element:p
+														Maximum number of terms that must be returned per field. Defaults to
+													Element:code
+														25
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														min_term_freq
+													Element:td
+													Element:p
+														Ignore words with less than this frequency in the source doc. Defaults to
+													Element:code
+														1
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														max_term_freq
+													Element:td
+													Element:p
+														Ignore words with more than this frequency in the source doc. Defaults to unbounded.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														min_doc_freq
+													Element:td
+													Element:p
+														Ignore terms which do not occur in at least this many docs. Defaults to
+													Element:code
+														1
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														max_doc_freq
+													Element:td
+													Element:p
+														Ignore words which occur in more than this many docs. Defaults to unbounded.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														min_word_length
+													Element:td
+													Element:p
+														The minimum word length below which words will be ignored. Defaults to
+													Element:code
+														0
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														max_word_length
+													Element:td
+													Element:p
+														The maximum word length above which words will be ignored. Defaults to unbounded (
+													Element:code
+														0
+														).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Behaviour
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The term and field statistics are not accurate. Deleted documents are not taken into account. The information is only retrieved for the shard the requested document resides in. The term and field statistics are therefore only useful as relative measures whereas the absolute numbers have no meaning in this context. By default, when requesting term vectors of artificial documents, a shard to get the statistics from is randomly selected. Use
+										Element:code
+											routing
+											only to hit a particular shard.
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example 1. Returning stored term vectors
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, we create an index that stores term vectors, payloads etc. :
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -s -XPUT 'http://localhost:9200/twitter/' -d '{ "mappings": { "tweet": { "properties": { "text": { "type": "text", "term_vector": "with_positions_offsets_payloads", "store" : true, "analyzer" : "fulltext_analyzer" }, "fullname": { "type": "text", "term_vector": "with_positions_offsets_payloads", "analyzer" : "fulltext_analyzer" } } } }, "settings" : { "index" : { "number_of_shards" : 1, "number_of_replicas" : 0 }, "analysis": { "analyzer": { "fulltext_analyzer": { "type": "custom", "tokenizer": "whitespace", "filter": [ "lowercase", "type_as_payload" ] } } } } }'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Second, we add some documents:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -XPUT 'http://localhost:9200/twitter/tweet/1?pretty=true' -d '{ "fullname" : "John Doe", "text" : "twitter test test test " }' curl -XPUT 'http://localhost:9200/twitter/tweet/2?pretty=true' -d '{ "fullname" : "Jane Doe", "text" : "Another twitter test ..." }'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following request returns all information and statistics for field
+										Element:code
+											text
+											in document
+										Element:code
+											1
+											(John Doe):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -XGET 'http://localhost:9200/twitter/tweet/1/_termvectors?pretty=true' -d '{ "fields" : ["text"], "offsets" : true, "payloads" : true, "positions" : true, "term_statistics" : true, "field_statistics" : true }'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Response:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_id": "1", "_index": "twitter", "_type": "tweet", "_version": 1, "found": true, "term_vectors": { "text": { "field_statistics": { "doc_count": 2, "sum_doc_freq": 6, "sum_ttf": 8 }, "terms": { "test": { "doc_freq": 2, "term_freq": 3, "tokens": [ { "end_offset": 12, "payload": "d29yZA==", "position": 1, "start_offset": 8 }, { "end_offset": 17, "payload": "d29yZA==", "position": 2, "start_offset": 13 }, { "end_offset": 22, "payload": "d29yZA==", "position": 3, "start_offset": 18 } ], "ttf": 4 }, "twitter": { "doc_freq": 2, "term_freq": 1, "tokens": [ { "end_offset": 7, "payload": "d29yZA==", "position": 0, "start_offset": 0 } ], "ttf": 2 } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example 2. Generating term vectors on the fly
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Term vectors which are not explicitly stored in the index are automatically computed on the fly. The following request returns all information and statistics for the fields in document
+										Element:code
+											1
+											, even though the terms haven’t been explicitly stored in the index. Note that for the field
+										Element:code
+											text
+											, the terms are not re-generated.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -XGET 'http://localhost:9200/twitter/tweet/1/_termvectors?pretty=true' -d '{ "fields" : ["text", "some_field_without_term_vectors"], "offsets" : true, "positions" : true, "term_statistics" : true, "field_statistics" : true }'
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example 3. Artificial documents
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Term vectors can also be generated for artificial documents, that is for documents not present in the index. For example, the following request would return the same results as in example 1. The mapping used is determined by the
+										Element:code
+											index
+											and
+										Element:code
+											type
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:span
+										Element:strong
+											If dynamic mapping is turned on (default), the document fields not in the original mapping will be dynamically created.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -XGET 'http://localhost:9200/twitter/tweet/_termvectors' -d '{ "doc" : { "fullname" : "John Doe", "text" : "twitter test test test" } }'
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example 4. Per-field analyzer
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Additionally, a different analyzer than the one at the field may be provided by using the
+										Element:code
+											per_field_analyzer
+											parameter. This is useful in order to generate term vectors in any fashion, especially when using artificial documents. When providing an analyzer for a field that already stores term vectors, the term vectors will be re-generated.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -XGET 'http://localhost:9200/twitter/tweet/_termvectors' -d '{ "doc" : { "fullname" : "John Doe", "text" : "twitter test test test" }, "fields": ["fullname"], "per_field_analyzer" : { "fullname": "keyword" } }'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Response:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_index": "twitter", "_type": "tweet", "_version": 0, "found": true, "term_vectors": { "fullname": { "field_statistics": { "sum_doc_freq": 1, "doc_count": 1, "sum_ttf": 1 }, "terms": { "John Doe": { "term_freq": 1, "tokens": [ { "position": 0, "start_offset": 0, "end_offset": 8 } ] } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example 5. Terms filtering
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, the terms returned could be filtered based on their tf-idf scores. In the example below we obtain the three most "interesting" keywords from the artificial document having the given "plot" field value. Notice that the keyword "Tony" or any stop words are not part of the response, as their tf-idf must be too low.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /imdb/movies/_termvectors { "doc": { "plot": "When wealthy industrialist Tony Stark is forced to build an armored suit after a life-threatening incident, he ultimately decides to use its technology to fight against evil." }, "term_statistics" : true, "field_statistics" : true, "positions": false, "offsets": false, "filter" : { "max_num_terms" : 3, "min_term_freq" : 1, "min_doc_freq" : 1 } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Response:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_index": "imdb", "_type": "movies", "_version": 0, "found": true, "term_vectors": { "plot": { "field_statistics": { "sum_doc_freq": 3384269, "doc_count": 176214, "sum_ttf": 3753460 }, "terms": { "armored": { "doc_freq": 27, "ttf": 27, "term_freq": 1, "score": 9.74725 }, "industrialist": { "doc_freq": 88, "ttf": 88, "term_freq": 1, "score": 8.590818 }, "stark": { "doc_freq": 44, "ttf": 47, "term_freq": 1, "score": 9.272792 } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:br
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Reindex API
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Multi termvectors API »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,485 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Custom Relationships
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This page needs an overview
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Creating Custom Relationships
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Relationships are initially defined in the module's vardefs file under the relationships array. For reference, you can find them using the vardef path as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								./modules/<module>/vardefs.php
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Custom relationships are created in a different way using the Extension Framework. The process requires two steps which are explained in the following sections:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:a
+								Defining the Relationship MetaData
+							Element:li
+							Element:a
+								Defining the Relationship in the TableDictionary
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Defining the Relationship MetaData
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The definitions for custom relationships will be found in a path similar to:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											./custom/metadata/<relatonship name>MetaData.php
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This file will contain the
+										Element:code
+											$dictionary
+											information needed for the system to generate the relationship. The
+										Element:code
+											$dictionary
+											array will contain the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Index
+										Element:td
+										Element:strong
+											Type
+										Element:td
+										Element:strong
+											Description
+										Element:tr
+										Element:td
+											true_relationship_type
+										Element:td
+											String
+										Element:td
+											The relationship's structure (possible values: 'one-to-many' or 'many-to-many')
+										Element:tr
+										Element:td
+											from_studio
+										Element:td
+											Boolean
+										Element:td
+											Whether the relationship was created in Studio
+										Element:tr
+										Element:td
+											table
+										Element:td
+											String
+										Element:td
+											The name of the table that is created in the database to contain the link ids
+										Element:tr
+										Element:td
+											fields
+										Element:td
+											Array
+										Element:td
+											An array of fields to be created on the relationship join table
+										Element:tr
+										Element:td
+											indices
+										Element:td
+											Array
+										Element:td
+											The list of indexes to be created
+										Element:tr
+										Element:td
+											relationships
+										Element:td
+											Array
+										Element:td
+											An array defining relationships
+										Element:tr
+										Element:td
+											relationships.<rel>
+										Element:td
+											Array
+										Element:td
+											The array defining the relationship
+										Element:tr
+										Element:td
+											relationships.<rel>.lhs_module
+										Element:td
+											String
+										Element:td
+											Left-hand module (should match $beanList index)
+										Element:tr
+										Element:td
+											relationships.<rel>.lhs_table
+										Element:td
+											String
+										Element:td
+											Left-hand table name
+										Element:tr
+										Element:td
+											relationships.<rel>.lhs_key
+										Element:td
+											String
+										Element:td
+											The key to use from the table on the left
+										Element:tr
+										Element:td
+											relationships.<rel>.rhs_module
+										Element:td
+											String
+										Element:td
+											Right-hand module (should match $beanList index)
+										Element:tr
+										Element:td
+											relationships.<rel>.rhs_table
+										Element:td
+											String
+										Element:td
+											Right-hand table name
+										Element:tr
+										Element:td
+											relationships.<rel>.rhs_key
+										Element:td
+											String
+										Element:td
+											The key to use from the table on the right
+										Element:tr
+										Element:td
+											relationships.<rel>.relationship_type
+										Element:td
+											String
+										Element:td
+											The relationship type, typically stored as 'many-to-many'
+										Element:tr
+										Element:td
+											relationships.<rel>.join_table
+										Element:td
+											String
+										Element:td
+											The join table
+										Element:tr
+										Element:td
+											relationships.<rel>.join_key_lhs
+										Element:td
+											String
+										Element:td
+											Left table key, should exist in table field definitions above
+										Element:tr
+										Element:td
+											relationships.<rel>.join_key_rhs
+										Element:td
+											String
+										Element:td
+											Right table key, should exist in table field definitions above
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														MetaData Example
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Creating a custom 1:M relationship between Accounts and Contacts will yield the following metadata file:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/metadata/accounts_contacts_1MetaData.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php // created: 2013-09-20 15:15:47 $dictionary["accounts_contacts_1"] = array ( 'true_relationship_type' => 'one-to-many', 'from_studio' => true, 'relationships' => array ( 'accounts_contacts_1' => array ( 'lhs_module' => 'Accounts', 'lhs_table' => 'accounts', 'lhs_key' => 'id', 'rhs_module' => 'Contacts', 'rhs_table' => 'contacts', 'rhs_key' => 'id', 'relationship_type' => 'many-to-many', 'join_table' => 'accounts_contacts_1_c', 'join_key_lhs' => 'accounts_contacts_1accounts_ida', 'join_key_rhs' => 'accounts_contacts_1contacts_idb', ), ), 'table' => 'accounts_contacts_1_c', 'fields' => array ( 0 => array ( 'name' => 'id', 'type' => 'varchar', 'len' => 36, ), 1 => array ( 'name' => 'date_modified', 'type' => 'datetime', ), 2 => array ( 'name' => 'deleted', 'type' => 'bool', 'len' => '1', 'default' => '0', 'required' => true, ), 3 => array ( 'name' => 'accounts_contacts_1accounts_ida', 'type' => 'varchar', 'len' => 36, ), 4 => array ( 'name' => 'accounts_contacts_1contacts_idb', 'type' => 'varchar', 'len' => 36, ), ), 'indices' => array ( 0 => array ( 'name' => 'accounts_contacts_1spk', 'type' => 'primary', 'fields' => array ( 0 => 'id', ), ), 1 => array ( 'name' => 'accounts_contacts_1_ida1', 'type' => 'index', 'fields' => array ( 0 => 'accounts_contacts_1accounts_ida', ), ), 2 => array ( 'name' => 'accounts_contacts_1_alt', 'type' => 'alternate_key', 'fields' => array ( 0 => 'accounts_contacts_1contacts_idb', ), ), ), );
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Defining the Relationship in the TableDictionary
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once a relationship's metadata has been created, the metadata file will have a reference placed in the TableDictionary:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											./custom/Extension/application/Ext/TableDictionary/<relationship name>.php
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This file will contain an 'include' reference to the metadata file:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php include('custom/metadata/<relationship name>MetaData.php'); ?>
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														TableDictionary Example
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The custom 1:M relationship between Accounts and Contacts will yield the following TableDictionary file:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														./custom/Extension/application/Ext/TableDictionary/accounts_contacts_1.php
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														<?php //WARNING: The contents of this file are auto-generated include('custom/metadata/accounts_contacts_1MetaData.php'); ?>
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you have created the relationship through Studio, the files above will be automatically created. If you are manually creating the files, run a Quick Repair and Rebuild and run any SQL scripts generated. The Quick Repair and Rebuild will rebuild the file map and relationship cache as well as populate the relationship in the relationships table.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Last modified: 03/24/2016 04:26pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

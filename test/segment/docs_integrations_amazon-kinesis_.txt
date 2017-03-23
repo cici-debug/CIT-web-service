@@ -1,0 +1,429 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Amazon Kinesis Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					Amazon Kinesis
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to Amazon Kinesis in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you toggle on AWS Kinesis in Segment, we’ll start sending your customer data to an AWS Kinesis stream. Our AWS Kinesis integration supports all of the Segment methods, and will send data from any one of our libraries.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Data Model
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Let’s say you’re connecting your Segment customer data stream to Kinesis Stream
+							Element:code
+								arn:aws:kinesis:{region}:{account-id}:stream/{stream-name}
+								. If you send Segment the following
+							Element:code
+								track
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "userId": "user_1", "event": "User Registered", "properties": { "plan": "Pro Annual", "account_type" : "Facebook" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Segment Kinesis integration will issue a
+							Element:code
+								PutRecord
+								request with the following parameters:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								kinesis.putRecord({ Data: new Buffer(JSON.stringify(msg)).toString('base64') PartitionKey: msg.userId() || msg.anonymousId(), StreamName: 'stream-name' });
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment will use the the
+							Element:code
+								userId || anonymousId
+								as the
+							Element:code
+								PartitionKey
+								. The partition key is used by Amazon Kinesis to distribute data across shards. Amazon Kinesis segregates the data records that belong to a stream into multiple shards, using the partition key associated with each data record to determine which shard a given data record belongs to.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								The json payload is base64 stringified. Read more about our
+							Element:a
+								track spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Quickstart
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to get started, you’ll need to perform the following steps:
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+								Create a Kinesis stream
+							Element:li
+								Create an IAM user to allow Segment permission to write to your Kinesis Stream
+							Element:li
+								Create an IAM policy to allow Segment to issue
+							Element:code
+								PutRecord
+								on behalf of the user
+							Element:li
+								Attach the IAM policy to the IAM user
+							Element:li
+								Create a new Kinesis integration in the Segment UI.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											1. Create a Kinesis Stream
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A stream is composed of multiple shards, each of which provides a fixed unit of capacity. The total capacity of the stream is the sum of the capacities of its shards. Each shard corresponds to 1 MB/s of write capacity and 2 MB/s of read capacity. See the
+										Element:a
+											Amazon Kinesis Developer Guide
+											for more information on estimating number of shards needed for your stream.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Follow these
+										Element:a
+											instructions
+											to create a new AWS Kinesis Stream.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											2. Create an IAM user
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Follow these instructions to
+										Element:a
+											Create an IAM user
+											to allow Segment permission to write to your Kinesis Stream.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You’ll need to save the credential file with the
+										Element:code
+											Access Key ID
+											,
+										Element:code
+											Secret Access Key
+											to enter this information in the Segment integration UI. We will encrypt the access keys that you give us for this user. We firmly recommend creating a dedicated user with
+										Element:em
+											only
+											the
+										Element:code
+											putRecord
+											policy (below) attached, so that the keys you give us have effectively
+										Element:code
+											write-only
+											access to your streams.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											3. Create an IAM policy
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Sign in to the
+										Element:a
+											Identity and Access Management (IAM) console
+											and follow these instructions to
+										Element:a
+											Create an IAM policy
+											to allow Segment permission to write to your Kinesis Stream.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Select the
+										Element:strong
+											Create Policy from JSON
+											option and use the following template policy in the
+										Element:code
+											Policy Document
+											field. Be sure to change the {region}, {account-id} and {stream-name} with the applicable values.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Action": [ "kinesis:PutRecord" ], "Resource": [ "arn:aws:kinesis:{region}:{account-id}:stream/{stream-name}" ] } ] }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											4. Attach the IAM policy
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the
+										Element:a
+											Identity and Access Management (IAM) console
+											, follow these instructions to
+										Element:a
+											Attach the IAM policy to the IAM user
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											5. Create a new Kinesis integration
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the Segment source that you want to connect to your Kinesis integration, go to the Integrations tab. Search and select the Kinesis integration and enter the options:
+										Element:code
+											secretAccessKey
+											,
+										Element:code
+											accessKeyId
+											,
+										Element:code
+											region
+											,
+										Element:code
+											stream
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Debugging
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When you get started, we recommend using any of the open source
+							Element:a
+								Kinesis tailing utility
+								to validate that data is flowing correctly!
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+								✅
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											IAM User Access Key ID
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is the AWS Access Key ID for the Segment Kinesis AWS IAM user
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											AWS Kinesis Stream Region
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Kinesis Stream’s AWS region key
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											IAM User AWS Secret Access Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											AWS Secret Access Key for the Segment Kinesis AWS IAM user
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											AWS Kinesis Stream Name
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Kinesis Stream Name
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

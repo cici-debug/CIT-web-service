@@ -1,0 +1,813 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Numeric datatypes
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following numeric types are supported:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:colgroup
+							Element:col
+							Element:col
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								long
+							Element:td
+							Element:p
+								A signed 64-bit integer with a minimum value of
+							Element:code
+								-2
+								and a maximum value of
+							Element:sup
+								63
+							Element:code
+								2
+								.
+							Element:sup
+								63
+								-1
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								integer
+							Element:td
+							Element:p
+								A signed 32-bit integer with a minimum value of
+							Element:code
+								-2
+								and a maximum value of
+							Element:sup
+								31
+							Element:code
+								2
+								.
+							Element:sup
+								31
+								-1
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								short
+							Element:td
+							Element:p
+								A signed 16-bit integer with a minimum value of
+							Element:code
+								-32,768
+								and a maximum value of
+							Element:code
+								32,767
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								byte
+							Element:td
+							Element:p
+								A signed 8-bit integer with a minimum value of
+							Element:code
+								-128
+								and a maximum value of
+							Element:code
+								127
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								double
+							Element:td
+							Element:p
+								A double-precision 64-bit IEEE 754 floating point.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								float
+							Element:td
+							Element:p
+								A single-precision 32-bit IEEE 754 floating point.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								half_float
+							Element:td
+							Element:p
+								A half-precision 16-bit IEEE 754 floating point.
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								scaled_float
+							Element:td
+							Element:p
+								A floating point that is backed by a
+							Element:code
+								long
+								and a fixed scaling factor.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Below is an example of configuring a mapping with numeric fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT my_index { "mappings": { "my_type": { "properties": { "number_of_bytes": { "type": "integer" }, "time_in_seconds": { "type": "float" }, "price": { "type": "scaled_float", "scaling_factor": 100 } } } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								double
+								,
+							Element:code
+								float
+								and
+							Element:code
+								half_float
+								types consider that
+							Element:code
+								-0.0
+								and
+							Element:code
+								+0.0
+								are different values. As a consequence, doing a
+							Element:code
+								term
+								query on
+							Element:code
+								-0.0
+								will not match
+							Element:code
+								+0.0
+								and vice-versa. Same is true for range queries: if the upper bound is
+							Element:code
+								-0.0
+								then
+							Element:code
+								+0.0
+								will not match, and if the lower bound is
+							Element:code
+								+0.0
+								then
+							Element:code
+								-0.0
+								will not match.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Which type should I use?
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As far as integer types (
+										Element:code
+											byte
+											,
+										Element:code
+											short
+											,
+										Element:code
+											integer
+											and
+										Element:code
+											long
+											) are concerned, you should pick the smallest type which is enough for your use-case. This will help indexing and searching be more efficient. Note however that given that storage is optimized based on the actual values that are stored, picking one type over another one will have no impact on storage requirements.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For floating-point types, it is often more efficient to store floating-point data into an integer using a scaling factor, which is what the
+										Element:code
+											scaled_float
+											type does under the hood. For instance, a
+										Element:code
+											price
+											field could be stored in a
+										Element:code
+											scaled_float
+											with a
+										Element:code
+											scaling_factor
+											of
+										Element:code
+											100
+											. All APIs would work as if the field was stored as a double, but under the hood elasticsearch would be working with the number of cents,
+										Element:code
+											price*100
+											, which is an integer. This is mostly helpful to save disk space since integers are way easier to compress than floating points.
+										Element:code
+											scaled_float
+											is also fine to use in order to trade accuracy for disk space. For instance imagine that you are tracking cpu utilization as a number between
+										Element:code
+											0
+											and
+										Element:code
+											1
+											. It usually does not matter much whether cpu utilization is
+										Element:code
+											12.7%
+											or
+										Element:code
+											13%
+											, so you could use a
+										Element:code
+											scaled_float
+											with a
+										Element:code
+											scaling_factor
+											of
+										Element:code
+											100
+											in order to round cpu utilization to the closest percent in order to save space.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If
+										Element:code
+											scaled_float
+											is not a good fit, then you should pick the smallest type that is enough for the use-case among the floating-point types:
+										Element:code
+											double
+											,
+										Element:code
+											float
+											and
+										Element:code
+											half_float
+											. Here is a table that compares these types in order to help make a decision.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:col
+										Element:col
+										Element:thead
+										Element:tr
+										Element:th
+											Type
+										Element:th
+											Minimum value
+										Element:th
+											Maximum value
+										Element:th
+											Significant bits / digits
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											double
+										Element:td
+										Element:p
+										Element:code
+											2
+										Element:sup
+											-1074
+										Element:td
+										Element:p
+										Element:code
+											(2-2
+										Element:sup
+											-52
+											)·2
+										Element:sup
+											1023
+										Element:td
+										Element:p
+										Element:code
+											53
+											/
+										Element:code
+											15.95
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											float
+										Element:td
+										Element:p
+										Element:code
+											2
+										Element:sup
+											-149
+										Element:td
+										Element:p
+										Element:code
+											(2-2
+										Element:sup
+											-23
+											)·2
+										Element:sup
+											127
+										Element:td
+										Element:p
+										Element:code
+											24
+											/
+										Element:code
+											7.22
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											half_float
+										Element:td
+										Element:p
+										Element:code
+											2
+										Element:sup
+											-24
+										Element:td
+										Element:p
+										Element:code
+											65504
+										Element:td
+										Element:p
+										Element:code
+											11
+											/
+										Element:code
+											3.31
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Parameters for numeric fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following parameters are accepted by numeric types:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											coerce
+										Element:td
+										Element:p
+											Try to convert strings to numbers and truncate fractions for integers. Accepts
+										Element:code
+											true
+											(default) and
+										Element:code
+											false
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											boost
+										Element:td
+										Element:p
+											Mapping field-level query time boosting. Accepts a floating point number, defaults to
+										Element:code
+											1.0
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											doc_values
+										Element:td
+										Element:p
+											Should the field be stored on disk in a column-stride fashion, so that it can later be used for sorting, aggregations, or scripting? Accepts
+										Element:code
+											true
+											(default) or
+										Element:code
+											false
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											ignore_malformed
+										Element:td
+										Element:p
+											If
+										Element:code
+											true
+											, malformed numbers are ignored. If
+										Element:code
+											false
+											(default), malformed numbers throw an exception and reject the whole document.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											include_in_all
+										Element:td
+										Element:p
+											Whether or not the field value should be included in the
+										Element:a
+											field? Accepts
+										Element:code
+											_all
+										Element:code
+											true
+											or
+										Element:code
+											false
+											. Defaults to
+										Element:code
+											false
+											if
+										Element:a
+											is set to
+										Element:code
+											index
+										Element:code
+											false
+											, or if a parent
+										Element:a
+											field sets
+										Element:code
+											object
+										Element:code
+											include_in_all
+											to
+										Element:code
+											false
+											. Otherwise defaults to
+										Element:code
+											true
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											index
+										Element:td
+										Element:p
+											Should the field be searchable? Accepts
+										Element:code
+											true
+											(default) and
+										Element:code
+											false
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											null_value
+										Element:td
+										Element:p
+											Accepts a numeric value of the same
+										Element:code
+											type
+											as the field which is substituted for any explicit
+										Element:code
+											null
+											values. Defaults to
+										Element:code
+											null
+											, which means the field is treated as missing.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:code
+											store
+										Element:td
+										Element:p
+											Whether the field value should be stored and retrievable separately from the
+										Element:a
+											field. Accepts
+										Element:code
+											_source
+										Element:code
+											true
+											or
+										Element:code
+											false
+											(default).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Parameters for
+										Element:code
+											scaled_float
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											scaled_float
+											accepts an additional parameter:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											scaling_factor
+										Element:td
+										Element:p
+											The scaling factor to use when encoding values. Values will be multiplied by this factor at index time and rounded to the closest long value. For instance, a
+										Element:code
+											scaled_float
+											with a
+										Element:code
+											scaling_factor
+											of
+										Element:code
+											10
+											would internally store
+										Element:code
+											2.34
+											as
+										Element:code
+											23
+											and all search-time operations (queries, aggregations, sorting) will behave as if the document had a value of
+										Element:code
+											2.3
+											. High values of
+										Element:code
+											scaling_factor
+											improve accuracy but also increase space requirements. This parameter is required.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Nested datatype
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Object datatype »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

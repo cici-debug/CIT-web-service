@@ -1,0 +1,496 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Index APIs changes
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Closing / deleting indices while running snapshot
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In previous versions of Elasticsearch, closing or deleting an index during a full snapshot would make the snapshot fail. In 5.0, the close/delete index request will fail instead. The behavior for partial snapshots remains unchanged: Closing or deleting an index during a partial snapshot is still possible. The snapshot result is then marked as partial.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Warmers
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Thanks to several changes like doc values by default and disk-based norms, warmers are no longer useful. As a consequence, warmers and the warmer API have been removed: it is no longer possible to register queries that will run before a new IndexSearcher is published.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Don’t worry if you have warmers defined on your indices, they will simply be ignored when upgrading to 5.0.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											System CPU stats
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The recent CPU usage (as a percent) has been added to the OS stats reported under the node stats API and the cat nodes API. The breaking change here is that there is a new object in the
+										Element:code
+											os
+											object in the node stats response. This object is called
+										Element:code
+											cpu
+											and includes
+										Element:code
+											percent
+											and
+										Element:code
+											load_average
+											as fields. This moves the
+										Element:code
+											load_average
+											field that was previously a top-level field in the
+										Element:code
+											os
+											object to the
+										Element:code
+											cpu
+											object. The format of the
+										Element:code
+											load_average
+											field has changed to an object with fields
+										Element:code
+											1m
+											,
+										Element:code
+											5m
+											, and
+										Element:code
+											15m
+											representing the one-minute, five-minute and fifteen-minute loads respectively. If any of these fields are not present, it indicates that the corresponding value is not available.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the cat nodes API response, the
+										Element:code
+											cpu
+											field is output by default. The previous
+										Element:code
+											load
+											field has been removed and is replaced by
+										Element:code
+											load_1m
+											,
+										Element:code
+											load_5m
+											, and
+										Element:code
+											load_15m
+											which represent the one-minute, five-minute and fifteen-minute loads respectively. The field will be null if the corresponding value is not available.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Finally, the API for
+										Element:code
+											org.elasticsearch.monitor.os.OsStats
+											has changed. The
+										Element:code
+											getLoadAverage
+											method has been removed. The value for this can now be obtained from
+										Element:code
+											OsStats.Cpu#getLoadAverage
+											but it is no longer a double and is instead an object encapsulating the one-minute, five-minute and fifteen-minute load averages. Additionally, the recent CPU usage can be obtained from
+										Element:code
+											OsStats.Cpu#getPercent
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Suggest stats
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Suggest stats exposed through
+										Element:code
+											suggest
+											in indices stats has been merged with
+										Element:code
+											search
+											stats.
+										Element:code
+											suggest
+											stats is exposed as part of
+										Element:code
+											search
+											stats.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Creating indices starting with
+										Element:span
+											or
+										Element:em
+											-
+										Element:span
+										Element:em
+											+
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Elasticsearch no longer allows indices to be created started with
+										Element:span
+											or
+										Element:em
+											-
+										Element:span
+											, so that the multi-index matching and expansion is not confused. It was previously possible (but a really bad idea) to create indices starting with a hyphen or plus sign. Any index already existing with these preceding characters will continue to work normally.
+										Element:em
+											+
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Aliases API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											/_aliases
+											API no longer supports
+										Element:code
+											indexRouting
+											and
+										Element:code
+											index-routing
+											, only
+										Element:code
+											index_routing
+											. It also no longer support
+										Element:code
+											searchRouting
+											and
+										Element:code
+											search-routing
+											, only
+										Element:code
+											search_routing
+											. These were removed because they were untested and we prefer there to be only one (obvious) way to do things like this.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											OpType Create without an ID
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As of 5.0 indexing a document with
+										Element:code
+											op_type=create
+											without specifying an ID is not supported anymore.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Flush API
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											wait_if_ongoing
+											flag default has changed to
+										Element:code
+											true
+											causing
+										Element:code
+											_flush
+											calls to wait and block if another flush operation is currently running on the same shard. In turn, if
+										Element:code
+											wait_if_ongoing
+											is set to
+										Element:code
+											false
+											and another flush operation is already running the flush is skipped and the shards flush call will return immediately without any error. In previous versions
+										Element:code
+											flush_not_allowed
+											exceptions where reported for each skipped shard.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Suggester changes
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Document API changes »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

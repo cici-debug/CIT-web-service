@@ -1,0 +1,398 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					SetValue
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The SugarLogic
+							Element:code
+								SetValue
+								action, located in
+							Element:code
+								./include/Expressions/Actions/SetValueAction.php
+								, is used to set the value of a field based on a formula.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Implementation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								While the dependency metadata for your module can be defined in
+							Element:code
+								./modules/<module>/metadata/dependencydefs.php
+								and
+							Element:code
+								./custom/modules/<module>/metadata/dependencydef.php
+								, it is recommended to use the
+							Element:a
+								extension framework
+								when customizing stock modules to prevent third party plugins from conflicting with your customizations. The following section will demonstrate how to implement a read-only dependency.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								SetValue Parameters
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:strong
+								Parameter
+							Element:td
+							Element:strong
+								Type
+							Element:td
+							Element:strong
+								Description
+							Element:tr
+							Element:td
+								target
+							Element:td
+								String
+							Element:td
+								The name of the field to target for visibility.
+							Element:tr
+							Element:td
+								value
+							Element:td
+								String
+							Element:td
+								SugarLogic formula used to get the value for the target field.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more information on the various parameters in the dependency definitions, please refer to the
+							Element:a
+								dependency actions
+								documentation.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Examples
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The follow sections outline the various ways this dependency can be implemented.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Dependency Extensions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For our example, we will create a dependency on the Leads module that will display the number of activities related to a Lead. Activities are composed of calls, meetings, tasks, notes, and emails. An example extension definition is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/<module>/Ext/Dependencies/custom_phone_alternate.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<?php $dependencies['Leads']['activity_count_dep'] = array( 'hooks' => array("edit", "view"), //not including save so that the value isn't stored in the DB 'trigger' => 'true', //Optional, the trigger for the dependency. Defaults to 'true'. 'onload' => true, //Whether or not to trigger the dependencies when the page is loaded 'actions' => array( array( 'name' => 'SetValue', 'params' => array( 'target' => 'activity_count_c', 'value' => 'add( count($notes), count($calls), count($emails), count($meetings), count($tasks) )' ) ) ) );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have the file in place, you will need to navigate to Admin > Repairs > and run a Quick Repair and Rebuild.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: It is important that the module name is plural ('Cases' vs. 'Case') and that the name of the dependency, "activity_count_dep" in this example, is unique.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Chaining Dependencies
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also add as many actions as you need to the array. In the example below, we want to display our count value but prevent users from being able to edit the value. An example extension definition is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $dependencies['Leads']['number_of_cases_dep'] = array( 'hooks' => array("edit", "view"), //not including save so that the value isn't stored in the DB 'trigger' => 'true', //Optional, the trigger for the dependency. Defaults to 'true'. //'triggerFields' => array('status'), //unneeded for this example as its not field triggered 'onload' => true, 'actions' => array( array( 'name' => 'SetValue', 'params' => array( 'target' => 'activity_count_c', 'value' => 'add( count($notes), count($calls), count($emails), count($meetings), count($tasks) )' ) ), array( 'name' => 'ReadOnly', 'params' => array( 'target' => 'activity_count_c', 'value' => 'true', //Set to true instead of a formula because its always read-only ), ) ) );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have the file in place, you will need to navigate to Admin > Repairs > and run a Quick Repair and Rebuild.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: It is important that the module name is plural ('Cases' vs. 'Case') and that the name of the dependency, "number_of_cases_dep" in this example, is unique.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Dependencies in Field Definitions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Unlike several of the other dependencies,
+										Element:code
+											SetValue
+											is built into Studio. So this dependency can be set as a custom vardef value or in the vardefs file of a custom module. If you wanted to add this dependency to an existing field then you can create a vardef extension such as
+										Element:code
+											./custom/Extension/modules/<module>/Ext/Vardefs/
+											. An example extension definition is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Accounts/Ext/Vardefs/activity_count_c.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $dictionary['Lead']['fields']['activity_count_c']['options'] = 'numeric_range_search_dom'; $dictionary['Lead']['fields']['activity_count_2_c']['calculated'] = 'true'; $dictionary['Lead']['fields']['activity_count_2_c']['formula'] = 'add( count($calls), count($emails), count($meetings), count($notes), count($tasks) )'; $dictionary['Lead']['fields']['activity_count_2_c']['enforced'] = 'true'; $dictionary['Lead']['fields']['activity_count_2_c']['enable_range_search'] = '1';
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have the file in place, you will need to navigate to Admin > Repairs > and run a Quick Repair and Rebuild.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 04/01/2016 12:30pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

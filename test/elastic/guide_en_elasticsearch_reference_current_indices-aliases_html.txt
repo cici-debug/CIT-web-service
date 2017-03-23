@@ -1,0 +1,834 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Index Aliases
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								APIs in elasticsearch accept an index name when working against a specific index, and several indices when applicable. The index aliases API allow to alias an index with a name, with all APIs automatically converting the alias name to the actual index name. An alias can also be mapped to more than one index, and when specifying it, the alias will automatically expand to the aliases indices. An alias can also be associated with a filter that will automatically be applied when searching, and routing values. An alias cannot have the same name as an index.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here is a sample of associating the alias
+							Element:code
+								alias1
+								with index
+							Element:code
+								test1
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /_aliases { "actions" : [ { "add" : { "index" : "test1", "alias" : "alias1" } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								And here is removing that same alias:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /_aliases { "actions" : [ { "remove" : { "index" : "test1", "alias" : "alias1" } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Renaming an alias is a simple
+							Element:code
+								remove
+								then
+							Element:code
+								add
+								operation within the same API. This operation is atomic, no need to worry about a short period of time where the alias does not point to an index:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /_aliases { "actions" : [ { "remove" : { "index" : "test1", "alias" : "alias1" } }, { "add" : { "index" : "test2", "alias" : "alias1" } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Associating an alias with more than one index are simply several
+							Element:code
+								add
+								actions:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /_aliases { "actions" : [ { "add" : { "index" : "test1", "alias" : "alias1" } }, { "add" : { "index" : "test2", "alias" : "alias1" } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Multiple indices can be specified for an action with the
+							Element:code
+								indices
+								array syntax:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /_aliases { "actions" : [ { "add" : { "indices" : ["test1", "test2"], "alias" : "alias1" } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To specify multiple aliases in one action, the corresponding
+							Element:code
+								aliases
+								array syntax exists as well.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For the example above, a glob pattern can also be used to associate an alias to more than one index that share a common name:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST /_aliases { "actions" : [ { "add" : { "index" : "test*", "alias" : "all_test_indices" } } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this case, the alias is a point-in-time alias that will group all current indices that match, it will not automatically update as new indices that match this pattern are added/removed.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It is an error to index to an alias which points to more than one index.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It is also possible to swap an index with an alias in one operation:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT test
+							Element:a
+							Element:span
+								PUT test_2
+							Element:img
+							Element:a
+							Element:span
+								POST /_aliases { "actions" : [ { "add": { "index": "test_2", "alias": "test" } }, { "remove_index": { "index": "test" } }
+							Element:img
+							Element:a
+							Element:span
+								] }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								An index we’ve added by mistake
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The index we should have added
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+							Element:code
+								remove_index
+								is just like
+							Element:a
+							Element:em
+								Delete Index
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Filtered Aliases
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Aliases with filters provide an easy way to create different "views" of the same index. The filter can be defined using Query DSL and is applied to all Search, Count, Delete By Query and More Like This operations with this alias.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To create a filtered alias, first we need to ensure that the fields already exist in the mapping:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT /test1 { "mappings": { "type1": { "properties": { "user" : { "type": "keyword" } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now we can create an alias that uses a filter on field
+										Element:code
+											user
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /_aliases { "actions" : [ { "add" : { "index" : "test1", "alias" : "alias2", "filter" : { "term" : { "user" : "kimchy" } } } } ] }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Routing
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														It is possible to associate routing values with aliases. This feature can be used together with filtering aliases in order to avoid unnecessary shard operations.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following command creates a new alias
+													Element:code
+														alias1
+														that points to index
+													Element:code
+														test
+														. After
+													Element:code
+														alias1
+														is created, all operations with this alias are automatically modified to use value
+													Element:code
+														1
+														for routing:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /_aliases { "actions" : [ { "add" : { "index" : "test", "alias" : "alias1", "routing" : "1" } } ] }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														It’s also possible to specify different routing values for searching and indexing operations:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /_aliases { "actions" : [ { "add" : { "index" : "test", "alias" : "alias2", "search_routing" : "1,2", "index_routing" : "2" } } ] }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As shown in the example above, search routing may contain several values separated by comma. Index routing can contain only a single value.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If a search operation that uses routing alias also has a routing parameter, an intersection of both search alias routing and routing specified in the parameter is used. For example the following command will use "2" as a routing value:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /alias2/_search?q=user:kimchy&routing=2,3
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If an index operation that uses index routing alias also has a parent routing, the parent routing is ignored.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Add a single alias
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An alias can also be added with the endpoint
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											PUT /{index}/_alias/{name}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											where
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											index
+										Element:td
+										Element:p
+											The index the alias refers to. Can be any of
+										Element:code
+											* | _all | glob pattern | name1, name2, …
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											name
+										Element:td
+										Element:p
+											The name of the alias. This is a required option.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											routing
+										Element:td
+										Element:p
+											An optional routing that can be associated with an alias.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											filter
+										Element:td
+										Element:p
+											An optional filter that can be associated with an alias.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also use the plural
+										Element:code
+											_aliases
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Examples:
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:dl
+													Element:dt
+													Element:span
+														Adding time based alias
+													Element:dd
+													Element:pre
+														PUT /logs_201305/_alias/2013
+													Element:dt
+													Element:span
+														Adding a user alias
+													Element:dd
+													Element:p
+														First create the index and add a mapping for the
+													Element:code
+														user_id
+														field:
+													Element:pre
+														PUT /users { "mappings" : { "user" : { "properties" : { "user_id" : {"type" : "integer"} } } } }
+													Element:p
+														Then add the alias for a specific user:
+													Element:pre
+														PUT /users/_alias/user_12 { "routing" : "12", "filter" : { "term" : { "user_id" : 12 } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Aliases during index creation
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Aliases can also be specified during
+										Element:a
+											index creation
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT /logs_20162801 { "mappings" : { "type" : { "properties" : { "year" : {"type" : "integer"} } } }, "aliases" : { "current_day" : {}, "2016" : { "filter" : { "term" : {"year" : 2016 } } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Delete aliases
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The rest endpoint is:
+										Element:code
+											/{index}/_alias/{name}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											where
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											index
+										Element:td
+										Element:p
+										Element:code
+											* | _all | glob pattern | name1, name2, …
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											name
+										Element:td
+										Element:p
+										Element:code
+											* | _all | glob pattern | name1, name2, …
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Alternatively you can use the plural
+										Element:code
+											_aliases
+											. Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE /logs_20162801/_alias/current_day
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Retrieving existing aliases
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The get index alias api allows to filter by alias name and index name. This api redirects to the master and fetches the requested index aliases, if available. This api only serialises the found index aliases.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Possible options:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											index
+										Element:td
+										Element:p
+											The index name to get aliases for. Partially names are supported via wildcards, also multiple index names can be specified separated with a comma. Also the alias name for an index can be used.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											alias
+										Element:td
+										Element:p
+											The name of alias to return in the response. Like the index option, this option supports wildcards and the option the specify multiple alias names separated by a comma.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											ignore_unavailable
+										Element:td
+										Element:p
+											What to do if an specified index name doesn’t exist. If set to
+										Element:code
+											true
+											then those indices are ignored.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The rest endpoint is:
+										Element:code
+											/{index}/_alias/{alias}
+											.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Examples:
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All aliases for the index users:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /logs_20162801/_alias/*
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Response:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "logs_20162801" : { "aliases" : { "2016" : { "filter" : { "term" : { "year" : 2016 } } } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All aliases with the name 2016 in any index:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_alias/2016
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Response:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "logs_20162801" : { "aliases" : { "2016" : { "filter" : { "term" : { "year" : 2016 } } } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All aliases that start with 20 in any index:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_alias/20*
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Response:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "logs_20162801" : { "aliases" : { "2016" : { "filter" : { "term" : { "year" : 2016 } } } } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														There is also a HEAD variant of the get indices aliases api to check if index aliases exist. The indices aliases exists api supports the same option as the get indices aliases api. Examples:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														HEAD /_alias/2016 HEAD /_alias/20* HEAD /logs_20162801/_alias/*
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Types Exists
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Update Indices Settings »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

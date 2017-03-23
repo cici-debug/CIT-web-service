@@ -1,0 +1,447 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Tune for disk usage
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Disable the features you do not need
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default elasticsearch indexes and adds doc values to most fields so that they can be searched and aggregated out of the box. For instance if you have a numeric field called
+										Element:code
+											foo
+											that you need to run histograms on but that you never need to filter on, you can safely disable indexing on this field in your
+										Element:a
+											mappings
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT index { "mappings": { "type": { "properties": { "foo": { "type": "integer", "index": false } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											fields store normalization factors in the index in order to be able to score documents. If you only need matching capabilities on a
+										Element:code
+											text
+										Element:code
+											text
+											field but do not care about the produced scores, you can configure elasticsearch to not write norms to the index:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT index { "mappings": { "type": { "properties": { "foo": { "type": "text", "norms": false } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:a
+											fields also store frequencies and positions in the index by default. Frequencies are used to compute scores and positions are used to run phrase queries. If you do not need to run phrase queries, you can tell elasticsearch to not index positions:
+										Element:code
+											text
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT index { "mappings": { "type": { "properties": { "foo": { "type": "text", "index_options": "freqs" } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Furthermore if you do not care about scoring either, you can configure elasticsearch to just index matching documents for every term. You will still be able to search on this field, but phrase queries will raise errors and scoring will assume that terms appear only once in every document.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT index { "mappings": { "type": { "properties": { "foo": { "type": "text", "norms": false, "index_options": "freqs" } } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Don’t use default dynamic string mappings
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The default
+										Element:a
+											dynamic string mappings
+											will index string fields both as
+										Element:a
+											and
+										Element:code
+											text
+										Element:a
+											. This is wasteful if you only need one of them. Typically an
+										Element:code
+											keyword
+										Element:code
+											id
+											field will only need to be indexed as a
+										Element:code
+											keyword
+											while a
+										Element:code
+											body
+											field will only need to be indexed as a
+										Element:code
+											text
+											field.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This can be disabled by either configuring explicit mappings on string fields or setting up dynamic templates that will map string fields as either
+										Element:code
+											text
+											or
+										Element:code
+											keyword
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For instance, here is a template that can be used in order to only map string fields as
+										Element:code
+											keyword
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT index { "mappings": { "type": { "dynamic_templates": [ { "strings": { "match_mapping_type": "string", "mapping": { "type": "keyword" } } } ] } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Disable
+										Element:code
+											_all
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:a
+											field indexes the value of all fields of a document and can use significant space. If you never need to search against all fields at the same time, it can be disabled.
+										Element:code
+											_all
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Use
+										Element:code
+											best_compression
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_source
+											and stored fields can easily take a non negligible amount of disk space. They can be compressed more aggressively by using the
+										Element:code
+											best_compression
+										Element:a
+											codec
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Use the smallest numeric type that is sufficient
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The type that you pick for
+										Element:a
+											numeric data
+											can have a significant impact on disk usage. In particular, integers should be stored using an integer type (
+										Element:code
+											byte
+											,
+										Element:code
+											short
+											,
+										Element:code
+											integer
+											or
+										Element:code
+											long
+											) and floating points should either be stored in a
+										Element:code
+											scaled_float
+											if appropriate or in the smallest type that fits the use-case: using
+										Element:code
+											float
+											over
+										Element:code
+											double
+											, or
+										Element:code
+											half_float
+											over
+										Element:code
+											float
+											will help save storage.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Tune for search speed
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Testing »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,1454 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Analytics for Ruby
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Our Ruby library lets you record analytics data from your ruby code. The requests hit our servers, and then we route your data to any analytics service you enable on your integrations page.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This library is open-source, so you can
+				Element:a
+					check it out on Github
+					.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					All of our server-side libraries are built for high-performance, so you can use them in your web server controller code. This library uses an internal queue to make
+				Element:code
+					identify
+					and
+				Element:code
+					track
+					calls non-blocking and fast. It also batches messages and flushes asynchronously to our servers.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Want to stay updated on releases? Subscribe to the
+				Element:a
+					release feed
+					.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Install the Gem
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’re using bundler, add the following line to your project’s
+										Element:code
+											Gemfile
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											gem 'analytics-ruby', '~> 2.0.0', :require => 'segment/analytics'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Or, if you’re using the gem directly from your application, you’ll need to:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											gem install analytics-ruby
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Then initialize the gem with your Segment source’s
+										Element:strong
+											Write Key
+											and an optional error handler, like so:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											require 'segment/analytics' Analytics = Segment::Analytics.new({ write_key: 'YOUR_WRITE_KEY', on_error: Proc.new { |status, msg| print msg } })
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											That will create an instance of
+										Element:code
+											Analytics
+											that you can use to send data to Segment for your source.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’re using Rails, you can stick that initialization logic in
+										Element:code
+											config/initializers/analytics_ruby.rb
+											and omit the
+										Element:code
+											require
+											call.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note:
+											Our ruby gem makes requests asynchronously, which can sometimes be suboptimal and difficult to debug if you’re pairing it with a queuing system like Sidekiq/delayed job/sucker punch/resqueue. If you’d prefer to use a gem that makes requests synchronously, you can check out
+										Element:a
+											, an API-compatible drop-in replacement for the standard gem that does its work synchronously inline. Big thanks to
+										Element:code
+											simple_segment
+										Element:a
+											Mikhail Topolskiy
+											for his stewardship of this alternative gem!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								method is how you associate your users and their actions to a recognizable
+							Element:code
+								userId
+								and
+							Element:code
+								traits
+								. You can
+							Element:a
+								find details on the identify method payload in our Spec
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								identify
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:strong
+								Field
+							Element:th
+							Element:strong
+								Type
+							Element:th
+							Element:strong
+								Description
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+								String
+							Element:td
+								ID for this user in your database
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+								, optional
+							Element:td
+								String
+							Element:td
+								The ID associated with the user when you don’t know who they are (either
+							Element:code
+								user_id
+								or
+							Element:code
+								anonymous_id
+								must be given)
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+								, optional
+							Element:td
+								Hash
+							Element:td
+								A
+							Element:code
+								Hash
+								specifying which integrations this should be sent to.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+								optional
+							Element:td
+								Hash
+							Element:td
+								A
+							Element:code
+								Hash
+								of traits you know about the user. Things like:
+							Element:code
+								email
+								,
+							Element:code
+								name
+								or
+							Element:code
+								friends
+								.
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+								optional
+							Element:td
+								Time
+							Element:td
+								A
+							Element:code
+								Time
+								object representing when the
+							Element:code
+								identify
+								took place. This is most useful if you’re importing historical data. If the
+							Element:code
+								identify
+								just happened, leave it blank and we’ll use the server’s time.
+							Element:tr
+							Element:td
+							Element:code
+								context
+								optional
+							Element:td
+								Hash
+							Element:td
+								A
+							Element:code
+								Hash
+								that can include things like
+							Element:code
+								user_agent
+								or
+							Element:code
+								ip
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								identify
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.identify( user_id: '019mr8mf4r', traits: { email: "#{ user.email }", friends: 872 }, context: {ip: '8.8.8.8'})
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example call will identify your user by their unique User ID (the one you know him by in your database) and label them with
+							Element:code
+								email
+								and
+							Element:code
+								friends
+								traits.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								track
+								method lets you record any actions your users perform. You can find details on
+							Element:a
+								the track method payload
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								track
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								event
+							Element:td
+								String
+							Element:td
+								The name of the event you’re tracking. We recommend human-readable names like
+							Element:strong
+								Song Played
+								or
+							Element:strong
+								Status Updated
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+								optional
+							Element:td
+								Hash
+							Element:td
+								A
+							Element:code
+								Hash
+								of properties for the event. If the event was
+							Element:strong
+								Product Added
+								to their cart, it might have properties like
+							Element:code
+								price
+								or
+							Element:code
+								product
+								.
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+								optional
+							Element:td
+								DateTime
+							Element:td
+								A
+							Element:em
+								DateTime
+								representing when the event took place. If the
+							Element:code
+								identify
+								just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past make sure you send a
+							Element:code
+								timestamp
+								.
+							Element:tr
+							Element:td
+							Element:code
+								context
+								optional
+							Element:td
+								Hash
+							Element:td
+								A
+							Element:code
+								Hash
+								that can include things like
+							Element:code
+								user_agent
+								or
+							Element:code
+								ip
+								.
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+								optional
+							Element:td
+								String
+							Element:td
+								The ID associated with the user when you don’t know who they are (either
+							Element:code
+								user_id
+								or
+							Element:code
+								anonymous_id
+								must be given).
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+								optional
+							Element:td
+								Hash
+							Element:td
+								A
+							Element:code
+								Hash
+								specifying which integrations this should be sent to.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to track events that are indicators of success for your site, like
+							Element:strong
+								Signed Up
+								,
+							Element:strong
+								Item Purchased
+								or
+							Element:strong
+								Article Bookmarked
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, we recommend tracking just a few important events. You can always add more later!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								track
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.track( user_id: '019mr8mf4r', event: 'Item Purchased', properties: { revenue: 39.95, shipping: '2-day' })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example
+							Element:code
+								track
+								call tells us that your user just triggered the
+							Element:strong
+								Item Purchased
+								event with a revenue of $39.95 and chose your hypothetical ‘2-day’ shipping.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								event properties can be anything you want to record, for example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.track( user_id: 'f4ca124298', event: 'Article Bookmarked', properties: { title: 'Snow Fall', subtitle: 'The Avalance at Tunnel Creek', author: 'John Branch' })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more information about choosing which events to track, event naming and more, check out
+							Element:a
+								Analytics Academy
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								method lets you record page views on your website, along with optional extra information about the page being viewed.
+							Element:code
+								page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re using our client-side setup in combination with the Ruby library, page calls are
+							Element:strong
+								already tracked for you
+								by default. However, if you want to record your own page views manually and aren’t using our client-side library, read on!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								page
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								category
+								optional
+							Element:td
+								String
+							Element:td
+								The category of the page. Useful for things like ecommerce where many pages might live under a larger category.
+							Element:em
+								Note: if you only pass one string to
+							Element:code
+								page
+								we assume it’s a
+							Element:code
+								name
+								, not a
+							Element:code
+								category
+								. You
+							Element:strong
+								must
+								include a
+							Element:code
+								name
+								if you want to send a
+							Element:code
+								category
+								.
+							Element:tr
+							Element:td
+							Element:code
+								name
+								optional
+							Element:td
+								String
+							Element:td
+								The name of the of the page, for example
+							Element:strong
+								Signup
+								or
+							Element:strong
+								Home
+								.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+								optional
+							Element:td
+								Hash
+							Element:td
+								A hash of properties of the page. We’ll automatically send the
+							Element:code
+								url
+								,
+							Element:code
+								title
+								,
+							Element:code
+								referrer
+								and
+							Element:code
+								path
+								, but you can add your own too!
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+								optional
+							Element:td
+								String
+							Element:td
+								If you want to track users anonymously, you can include the Anonymous ID instead of a User ID
+							Element:tr
+							Element:td
+							Element:code
+								context
+								optional
+							Element:td
+								Hash
+							Element:td
+								An object containing any number of options or context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								page
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.page( user_id: user_id, category: 'Docs', name: 'Ruby library', properties: { url: 'https://segment.com/libraries/ruby/' })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								in our
+							Element:code
+								page
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Group
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								group
+								method associates an
+							Element:a
+								identified user
+								with a company, organization, project, workspace, team, tribe, platoon, assemblage, cluster, troop, gang, party, society or any other name you came up with for the same concept.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This is useful for tools like
+							Element:a
+								Intercom
+								,
+							Element:a
+								Preact
+								and
+							Element:a
+								Totango
+								, as it ties the user to a
+							Element:strong
+								group
+								of other users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								group
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								user_id
+							Element:td
+								String
+							Element:td
+								The ID for the user that is a part of the group.
+							Element:tr
+							Element:td
+							Element:code
+								group_id
+							Element:td
+								String
+							Element:td
+								The ID of the group.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+								optional
+							Element:td
+								Hash
+							Element:td
+								A hash of traits you know about the group. For a company, they might be things like
+							Element:code
+								name
+								,
+							Element:code
+								address
+								, or
+							Element:code
+								phone
+								.
+							Element:tr
+							Element:td
+							Element:code
+								context
+								optional
+							Element:br
+							Element:td
+								Hash
+							Element:td
+								A hash containing any context about the request. To see the full reference of supported keys, check them out in the
+							Element:a
+								context reference
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+								optional
+							Element:td
+								datetime
+							Element:td
+								A
+							Element:code
+								datetime
+								object representing when the group took place. If the group just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past make sure you send
+							Element:code
+								timestamp
+								.
+							Element:tr
+							Element:td
+							Element:code
+								anonymous_id
+								optional
+							Element:td
+								String
+							Element:td
+								An anonymous session ID for this user.
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+								optional
+							Element:td
+								Hash
+							Element:td
+								A hash of integrations to enable or disable
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								group
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.group( user_id: '019mr8mf4r', group_id: '56', traits: { name: 'Initech', description: 'Accounting Software'})
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find more details about
+							Element:code
+								group
+								including the
+							Element:strong
+								in our
+							Element:code
+								group
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Alias
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								alias
+								is how you associate one identity with another. This is an advanced method, but it is required to manage user identities successfully in
+							Element:em
+								some
+								of our integrations.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In
+							Element:a
+								Mixpanel
+								it’s used to associate an anonymous user with an identified user once they sign up. For
+							Element:a
+								KISSmetrics
+								, if your user switches IDs, you can use ‘alias’ to rename the ‘userId’.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								alias
+								method definition:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.alias(previous_id: 'previous id', user_id: 'new id')
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								alias
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:td
+								String
+							Element:td
+								The ID for this user in your database.
+							Element:tr
+							Element:td
+							Element:code
+								previousId
+							Element:td
+								String
+							Element:td
+								The previous ID to alias from.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s a full example of how we might use the
+							Element:code
+								alias
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								# the anonymous user does actions ... Analytics.track(user_id: 'anonymous_user', event: 'Anonymous Event') # the anonymous user signs up and is aliased Analytics.alias(previous_id: 'anonymous id', user_id: 'user id') # the identified user is identified Analytics.identify(user_id: 'user id', traits: { plan: 'Free' }) # the identified user does actions ... Analytics.track(user_id: 'user id', event: 'Identified Action')
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more details about
+							Element:code
+								alias
+								, including the
+							Element:strong
+								, check out our
+							Element:code
+								alias
+								call payload
+							Element:a
+								Spec
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Historical Import
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can import historical data by adding the
+							Element:code
+								timestamp
+								argument to any of your method calls. This can be helpful if you’ve just switched to Segment.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Historical imports can only be done into integrations that can accept historical timestamp’ed data. Most analytics tools like Mixpanel, Amplitude, Kissmetrics, etc. can handle that type of data just fine. One common integration that does not accept historical data is Google Analytics since their API cannot accept historical data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								If you’re tracking things that are happening right now, leave out the
+							Element:code
+								timestamp
+								and our servers will timestamp the requests for you.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Selecting Integrations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								alias
+								,
+							Element:code
+								group
+								,
+							Element:code
+								identify
+								,
+							Element:code
+								page
+								and
+							Element:code
+								track
+								calls can all be passed an object of
+							Element:code
+								integrations
+								that lets you turn certain integrations on or off. By default all integrations are enabled.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s an example
+							Element:code
+								track
+								call with the
+							Element:code
+								integrations
+								object shown.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								Analytics.track({ user_id: '83489', event: 'Song Paused', integrations: { all: false, KISSmetrics: true } })
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this case, we’re specifying that we want this identify to only go to KISSmetrics.
+							Element:code
+								all: false
+								says that no integration should be enabled unless otherwise specified.
+							Element:code
+								KISSmetrics: true
+								turns on KISSmetrics, etc.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Integration flags are
+							Element:strong
+								case sensitive
+								and match
+							Element:a
+								the integration’s name in the docs
+								(i.e. “AdLearn Open Platform”, “awe.sm”, “MailChimp”, etc.).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:p
+								Available at the business level, filtering track calls can be done right from the Segment UI on your source schema page. We recommend using the UI if possible since it’s a much simpler way of managing your filters and can be updated with no code changes on your side.
+							Element:li
+							Element:p
+								If you are on a grandfathered plan, events sent server-side that are filtered through the Segment dashboard will still count towards your API usage.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Performance
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Our libraries are built to support high performance environments. That means it is safe to use analytics-ruby on a web server that’s serving hundreds of requests per second.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Every method you call
+							Element:strong
+								does not
+								result in an HTTP request, but is queued in memory instead. Messages are flushed in batch in the background, which allows for much faster operation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, our library will flush:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								the very first time it gets a message
+							Element:li
+								whenever messages are queued and there is no outstanding request
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There is a maximum of
+							Element:code
+								500kb
+								per batch request and
+							Element:code
+								15kb
+								per call.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The queue consumer makes only
+							Element:strong
+								a single outbound request
+								at a time to avoid saturating your server’s resources. If multiple messages are in the queue, they are sent together in a batch call.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can specify the following additional options to determine how the queue operates and to help debug possible errors. None of them are required for normal operation.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								# Error handler to log statements Segment::Analytics.new({ write_key: 'YOUR_WRITE_KEY', on_error: Proc.new { |status, msg| print msg }, max_queue_size: 10000, batch_size: 100, stub: true })
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								on_error
+								optional
+							Element:td
+								Proc
+							Element:td
+								A handler which is called whenever errors are returned from the API. Useful for debugging and first time integrations.
+							Element:tr
+							Element:td
+							Element:code
+								max_queue_size
+								optional
+							Element:td
+								FixNum
+							Element:td
+								The max number of messages to put in the queue before refusing to queue more (defaults to
+							Element:code
+								10,000
+								).
+							Element:tr
+							Element:td
+							Element:code
+								batch_size
+								optional
+							Element:td
+								FixNum
+							Element:td
+								The max number of events/identifies to send in a single batch (defaults to
+							Element:code
+								100
+								). The API servers will not respond to messages over a certain size, so
+							Element:code
+								100
+								is a safe default.
+							Element:tr
+							Element:td
+							Element:code
+								stub
+								optional
+							Element:td
+								TrueClass|FalseClass
+							Element:td
+								If true, the requests don’t hit the server and are stubbed to be successful (defaults to
+							Element:code
+								false
+								).
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Flush
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re running any sort of script or internal queue system to upload data, you’ll want to call
+							Element:code
+								Analytics.flush
+								at the end of execution to ensure that all messages are sent to our servers.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								AppAnalytics = Segment::Analytics.new({ write_key: 'ONE_WRITE_KEY' }) AppAnalytics.flush
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Calling flush will block execution until all messages are processed, so it is not recommended in normal execution of your production application.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Turbolinks
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re using Ruby on Rails with the
+							Element:a
+								Turbolinks
+								setting enabled, and you’re adding
+							Element:a
+								Analytics.js
+								on your website, you’ll need to tweak the default configuration.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Instead of having the entire snippet in the
+							Element:code
+								<head>
+								of your site, you need to move the
+							Element:code
+								analytics.page()
+								call that is included in the snippet by default into the
+							Element:code
+								<body>
+								so that it will get triggered on every new page load. But you
+							Element:strong
+								must
+								have the first part of the snippet in the
+							Element:code
+								<head>
+								or the library will fail to load properly.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Multiple Clients
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Different parts of your application may require different types of batching, or even sending to multiple Segment sources. In that case, you can initialize multiple instances of
+							Element:code
+								Analytics
+								with different settings:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								AppAnalytics = Segment::Analytics.new({ write_key: 'ONE_WRITE_KEY' }) MarketingAnalytics = Segment::Analytics.new({ write_key: 'ANOTHER_WRITE_KEY' })
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re having trouble we have a few tips that help common problems.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my debugger
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check that you’ve followed all the steps in the
+										Element:a
+											Quickstart
+											.
+										Element:li
+										Element:p
+											Make sure that you’re calling one of our API methods once the library is successfully installed—
+										Element:a
+											,
+										Element:code
+											identify
+										Element:a
+											, etc.
+										Element:code
+											track
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my end tools
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check your credentials for that integration.
+										Element:li
+										Element:p
+											Make sure that the integration you are troubleshooting can accept server-side API calls. Compatibility is shown on the
+										Element:a
+											integration docs
+											pages and on the sheets on your Segment source Integrations page.
+										Element:li
+										Element:p
+											Check out the
+										Element:a
+											integration’s documentation
+											to see if there are other requirements for using the method and integration you’re trying to get working.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

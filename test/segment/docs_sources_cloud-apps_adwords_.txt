@@ -1,0 +1,388 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					AdWords Source
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								From your workspace’s
+							Element:code
+								/sources
+								page, click
+							Element:code
+								add source
+								.
+							Element:li
+							Element:p
+								Choose AdWords.
+							Element:li
+							Element:p
+								Give the source a nickname and a schema name. The nickname will be used to designate the source in the Segment interface, and the schema name is the namespace you’ll be querying against in your warehouse. Both can be whatever you like, but we recommend sticking to something that reflects the source itself, like
+							Element:code
+								AdWords
+								for nickname and
+							Element:code
+								adwords
+								,
+							Element:code
+								google_adwords
+								, or
+							Element:code
+								adwords_usa
+								for the schema name.
+							Element:p
+							Element:img
+							Element:li
+							Element:p
+								Finally, just click
+							Element:strong
+								Connect
+								on the next page to OAuth into Google.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That’s it!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Components
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sync
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											AdWords has a sync component, which means we’ll make requests to their API on your behalf on a 3 hour interval to pull the latest data into Segment. In the initial sync, we’ll grab all the Adwords objects (and their corresponding properties) according to the Collections table below. The objects will be written into a separate schema, corresponding to the source instance’s schema name you designated upon creation. For example, if you went with
+										Element:code
+											adwords
+											, the
+										Element:code
+											ads
+											collection will be accessible at
+										Element:code
+											adwords.ads
+											in SQL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our sync component uses an upsert API, so the data in your warehouse loaded via sync will reflect the latest state of the corresponding resource in AdWords. For example, if
+										Element:code
+											budget
+											from
+										Element:code
+											0
+											to
+										Element:code
+											100
+											between syncs, on its next sync that tickets status will be
+										Element:code
+											100
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The source syncs and warehouse syncs are independent processes. Source runs pull your data into the Segment Hub, and warehouse runs flush that data to your warehouse. Sources will sync with Segment every 3 hours. Depending on your Warehouses plan, we will push the Source data to your warehouse on the interval associated with your billing plan.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Collections
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								For a complete visual breakdown of the AdWords collections, all their properties, and ID linkages between objects,
+							Element:a
+								view the visual schema here
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Collections are the groupings of resources we pull from your source. In your warehouse, each collection gets its own table.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:thead
+							Element:tr
+							Element:th
+								Collection
+							Element:th
+								Type
+							Element:th
+								Description
+							Element:tbody
+							Element:tr
+							Element:td
+								ad_groups
+							Element:td
+								object
+							Element:td
+								An ad group is a set of ads that share the same daily or lifetime budget, schedule, bid type, bid info, and targeting data
+							Element:tr
+							Element:td
+								ads
+							Element:td
+								object
+							Element:td
+								An ad object contains the data necessary to visually display an ad and associate it with a corresponding ad set.
+							Element:tr
+							Element:td
+								campaigns
+							Element:td
+								object
+							Element:td
+								A campaign is a grouping of ad sets which are organized by the same business objective.
+							Element:tr
+							Element:td
+								campaign_performance_report
+							Element:td
+								object
+							Element:td
+								Campaign performance reports include a daily snapshot of performance statistics per campaign
+							Element:tr
+							Element:td
+								click_performance_report
+							Element:td
+								object
+							Element:td
+								Click performance reports include stats at the click level, including both valid and invalid clicks
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Permissions
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When setting up your AdWords Source, you may notice that we don’t list all AdWords accounts your Google user can view. This is because AdWords API does not expose a list of “managed” or sub-accounts to non-administrator via the API. That said, if you have read permissions to the account, you can enter your AdWords Customer ID directly. For more information about finding your AdWords Customer ID, see
+							Element:a
+								here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Reference
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											What unit is money in?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Currency values in AdWords are in micros, or one millionth of the smallest unit. For example, in USD, the value for
+										Element:code
+											campaign.budget
+											would be in one millionth of a cent.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											What AdWords MCC do you sync?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, we sync the “primary” AdWords account connected to your Google account, but if you’d like to override this, you can specify an AdWords Customer ID in settings.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

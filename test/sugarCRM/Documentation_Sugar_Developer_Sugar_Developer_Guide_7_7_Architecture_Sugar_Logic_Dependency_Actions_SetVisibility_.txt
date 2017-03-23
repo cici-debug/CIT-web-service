@@ -1,0 +1,405 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					SetVisibility
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The SugarLogic
+							Element:code
+								SetVisibility
+								action, located in
+							Element:code
+								./include/Expressions/Actions/VisibilityAction.php
+								, is used to determine the visibility logic of a field based on a formula.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Implementation
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								While the dependency metadata for your module can be defined in
+							Element:code
+								./modules/<module>/metadata/dependencydefs.php
+								and
+							Element:code
+								./custom/modules/<module>/metadata/dependencydef.php
+								, it is recommended to use the
+							Element:a
+								extension framework
+								when customizing stock modules to prevent third party plugins from conflicting with your customizations. The following section will demonstrate how to implement a read-only dependency.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								SetVisibility Parameters
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:strong
+								Parameter
+							Element:td
+							Element:strong
+								Type
+							Element:td
+							Element:strong
+								Description
+							Element:tr
+							Element:td
+								target
+							Element:td
+								String
+							Element:td
+								The name of the field to target for visibility.
+							Element:tr
+							Element:td
+								value
+							Element:td
+								String
+							Element:td
+							Element:p
+								This parameter can accept a boolean formula or
+							Element:code
+								true
+								and
+							Element:code
+								false
+								values. Normally you would put a
+							Element:br
+								SugarLogic formula here to set the boolean.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more information on the various parameters in the dependency definitions, please refer to the
+							Element:a
+								dependency actions
+								documentation.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Examples
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The follow sections outline the various ways this dependency can be implemented.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											SetVisibility Dependency Extensions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For our example, we will create a dependency on the Accounts module that shows the
+										Element:code
+											phone_alternate
+											field when the
+										Element:code
+											phone_office
+											field has been populated. An example is shown below.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/<module>/Ext/Dependencies/custom_phone_alternate.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $dependencies['Accounts']['phone_alternate_hide'] = array( 'hooks' => array("edit"), 'triggerFields' => array('phone_office'), 'onload' => true, //Actions is a list of actions to fire when the trigger is true 'actions' => array( array( 'name' => 'SetVisibility', 'params' => array( 'target' => 'phone_alternate', 'value' => 'not(equal($phone_office,""))', ), ), ), );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have the file in place, you will need to navigate to Admin > Repairs > and run a Quick Repair and Rebuild.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Note
+											: It is important that the module name is plural ('Accounts' vs. 'Account') and that the name of the dependency, "phone_alternate_hide" in this example, is unique.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Visibility Dependencies in Field Definitions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Unlike several of the other dependencies,
+										Element:code
+											SetVisibility
+											is built into Studio. So this dependency can be set as a custom vardef value or in the varefs file for a new module. If you wanted to add this dependency to an existing field then you could add a file to
+										Element:code
+											./custom/Extension/modules/<module>/Ext/Vardefs/
+											. An example is shown below.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To accomplish this, we will create an extension in
+										Element:code
+											./custom/Extension/modules/Accounts/Ext/Vardefs/
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/Extension/modules/Accounts/Ext/Vardefs/phone_alternate.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $dictionary['Account']['fields']['phone_alternate']['dependency']='not(equal($phone_office,""))
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, you will need to navigate to Admin > Repairs > and run a Quick Repair and Rebuild. Once that is done, you can enter a value into
+										Element:code
+											phone_office
+											and the
+										Element:code
+											phone_alternate
+											field will show up once you tab out of the
+										Element:code
+											phone_office
+											field. If you were coding a custom module with new fields, then you would just include it in the modules
+										Element:code
+											vardefs.php
+											file as shown below
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php $dictionary['myModule'] = array( ... 'fields' => array( ... 'phone_alternate' => array( 'name' => 'phone_alternate', 'vname' => 'LBL_PHONE_ALTERNATE', 'type' => 'varchar', 'len' => 10, 'dependency'=> 'not(equal($phone_office,""))', 'comment' => 'Other Phone Number', 'merge_filter' => 'enabled', ), ... ) ... );
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 04/01/2016 12:31pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

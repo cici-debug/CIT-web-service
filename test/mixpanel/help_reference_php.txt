@@ -1,0 +1,1099 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Mixpanel PHP Library
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Mixpanel PHP library is designed to be used for scripting, or in circumstances when a client can't or won't run client side scripts.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Mixpanel also provides a powerful and easy to use
+				Element:a
+					client-side JavaScript library for web applications
+					. This library offers platform-specific features and conveniences that can make Mixpanel implementations much simpler, and can scale naturally to an unlimited number of clients. The client-side JavaScript library is the preferred way to add Mixpanel to user-facing web applications.
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					see the client side JavaScript library
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Installing the library
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can get the library using
+							Element:a
+								Composer
+								by including the following in your project's composer.json requirements and running composer update:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								"require"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								...
+							Element:span
+								"mixpanel/mixpanel-php"
+							Element:span
+								:
+							Element:span
+								"2.*"
+							Element:span
+								...
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you're not using Composer for your package management, you can browse and download the library from GitHub at
+							Element:a
+								https://github.com/mixpanel/mixpanel-php
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Our library requires PHP 5.0 or greater.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Sending events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Track events in the mixpanel-php library by using the
+							Element:a
+								track
+								method on the Mixpanel class:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								<?php
+							Element:span
+								// import dependencies (using composer's autoload)
+							Element:span
+								// if not using Composer, you'll want to require the
+							Element:span
+								// lib/Mixpanel.php file here
+							Element:span
+								require
+							Element:span
+								'vendor/autoload.php'
+							Element:span
+								;
+							Element:span
+								// get the Mixpanel class instance, replace with your
+							Element:span
+								// project token
+							Element:span
+								$mp
+							Element:span
+								=
+							Element:span
+								Mixpanel
+							Element:span
+								::
+							Element:span
+								getInstance
+							Element:span
+								(
+							Element:span
+								"MIXPANEL_PROJECT_TOKEN"
+							Element:span
+								);
+							Element:span
+								// track an event
+							Element:span
+								$mp
+							Element:span
+								->
+							Element:span
+								track
+							Element:span
+								(
+							Element:span
+								"button clicked"
+							Element:span
+								,
+							Element:span
+								array
+							Element:span
+								(
+							Element:span
+								"label"
+							Element:span
+								=>
+							Element:span
+								"sign-up"
+							Element:span
+								));
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel determines default geolocation data ($city, $region, mp_country_code) using the IP address on the incoming request. As all server-side calls will likely originate from the same IP (that is, the IP of your server), this can have the unintended effect of setting the location of all of your users to the location of your datacenter.
+							Element:a
+								Read about best practices for geolocation with server-side implementations
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Super properties
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Super properties are properties that get sent with every subsequently tracked event. This is very useful for associating properties such as "Ad Source" to every event. If I want to send an "Ad Source" of "Google" for every event I track, I can store it in my Mixpanel instance with the
+							Element:a
+								register
+								method:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								In the PHP Library, registered Super Properties are only persisted for the life of the Mixpanel class instance. In general this will mean for the life of a single HTTP request.
+							Element:span
+								<?php
+							Element:span
+								require
+							Element:span
+								'vendor/autoload.php'
+							Element:span
+								;
+							Element:span
+								$mp
+							Element:span
+								=
+							Element:span
+								Mixpanel
+							Element:span
+								::
+							Element:span
+								getInstance
+							Element:span
+								(
+							Element:span
+								"MIXPANEL_PROJECT_TOKEN"
+							Element:span
+								);
+							Element:span
+								// register the Ad Source super property
+							Element:span
+								$mp
+							Element:span
+								->
+							Element:span
+								register
+							Element:span
+								(
+							Element:span
+								"Ad Source"
+							Element:span
+								,
+							Element:span
+								"Google"
+							Element:span
+								);
+							Element:span
+								// track an event with a property "Ad Source" = "Google"
+							Element:span
+								$mp
+							Element:span
+								->
+							Element:span
+								track
+							Element:span
+								(
+							Element:span
+								"button clicked"
+							Element:span
+								);
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Managing user identity
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In many cases you'll want to track multiple actions that a user takes over time. To do this, you'll need to provide a
+							Element:a
+								distinct id
+								to the library- a unique identifier associated with the source of events (usually a user)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To associate a distinct id with the events that you send, call
+							Element:a
+								identify
+								, which associates a user to subsequent tracked events.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								In the PHP Library, the value passed to
+							Element:span
+								<?php
+							Element:span
+								require
+							Element:span
+								'vendor/autoload.php'
+							Element:span
+								;
+							Element:span
+								$mp
+							Element:span
+								=
+							Element:span
+								Mixpanel
+							Element:span
+								::
+							Element:span
+								getInstance
+							Element:span
+								(
+							Element:span
+								"MIXPANEL_PROJECT_TOKEN"
+							Element:span
+								);
+							Element:span
+								// identify the current request as user 12345
+							Element:span
+								$mp
+							Element:span
+								->
+							Element:span
+								identify
+							Element:span
+								(
+							Element:span
+								12345
+							Element:span
+								);
+							Element:span
+								// track an event associated to user 12345
+							Element:span
+								$mp
+							Element:span
+								->
+							Element:span
+								track
+							Element:span
+								(
+							Element:span
+								"Logged In"
+							Element:span
+								);
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								identify
+								is only persisted for the life of the
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Mixpanel
+								instance. In general this will mean for the life of a single HTTP request.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It's important to send the same distinct_id with each event that an individual user triggers. Events recorded with different distinct_ids will be treated in Mixpanel as if they were performed by different users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are times when it can be convenient to start referring to a user by a different identifier in your implementation. The most common case is after registration, when a user switches from being an anonymous user (with an anonymous distinct_id) to an authenticated user with an (authenticated id). In this case, you can create an
+							Element:a
+								Alias
+								for the user to keep the distinct_id consistent. An alias is a string stored in a Mixpanel lookup table that is associated with an anonymous distinct_id. Once written, aliases are not editable. Any data sent to Mixpanel with an alias as the distinct_id will be remapped and written to disk using the alias's corresponding anonymous distinct_id. This allows you to start identifying a user by an authenticated id without changing the distinct_id that is ultimately written in Mixpanel.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								<?php
+							Element:span
+								require
+							Element:span
+								'vendor/autoload.php'
+							Element:span
+								;
+							Element:span
+								$mp
+							Element:span
+								=
+							Element:span
+								Mixpanel
+							Element:span
+								::
+							Element:span
+								getInstance
+							Element:span
+								(
+							Element:span
+								"MIXPANEL_PROJECT_TOKEN"
+							Element:span
+								);
+							Element:span
+								// create an alias for user 12345 (note that this is done asynchronously). Any subsequent events with a distinct_id equal to "johndoe1" will be remapped to "12345".
+							Element:span
+								$mp
+							Element:span
+								->
+							Element:span
+								createAlias
+							Element:span
+								(
+							Element:span
+								"12345"
+							Element:span
+								,
+							Element:span
+								"johndoe1"
+							Element:span
+								);
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Storing user profiles
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In addition to events, you can send People Analytics profile updates to Mixpanel. Mixpanel can maintain a profile of each of your users, storing information you know about them. An update is a message that changes the properties of a People Analytics profile.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can use profiles to explore and segment users by who they are, rather than what they did. You can also use profiles to send notifications, such as emails, SMS, or push notifications.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel determines default geolocation data ($city, $region, mp_country_code) using the IP address on the incoming request. As all server-side calls will likely originate from the same IP (that is, the IP of your server), this can have the unintended effect of setting the location of all of your users to the location of your datacenter.
+							Element:a
+								Read about best practices for geolocation with server-side implementations
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Setting profile properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Mixpanel class has a public property called
+										Element:a
+											people
+											that exposes an instance of
+										Element:a
+											Producers_MixpanelPeople
+											that you can use to make profile updates.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											<?php
+										Element:span
+											require
+										Element:span
+											'vendor/autoload.php'
+										Element:span
+											;
+										Element:span
+											$mp
+										Element:span
+											=
+										Element:span
+											Mixpanel
+										Element:span
+											::
+										Element:span
+											getInstance
+										Element:span
+											(
+										Element:span
+											"MIXPANEL_PROJECT_TOKEN"
+										Element:span
+											);
+										Element:span
+											// create or update a profile with First Name, Last Name,
+										Element:span
+											// E-Mail Address, Phone Number, and Favorite Color
+										Element:span
+											$mp
+										Element:span
+											->
+										Element:span
+											people
+										Element:span
+											->
+										Element:span
+											set
+										Element:span
+											(
+										Element:span
+											12345
+										Element:span
+											,
+										Element:span
+											array
+										Element:span
+											(
+										Element:span
+											'$first_name'
+										Element:span
+											=>
+										Element:span
+											"John"
+										Element:span
+											,
+										Element:span
+											'$last_name'
+										Element:span
+											=>
+										Element:span
+											"Doe"
+										Element:span
+											,
+										Element:span
+											'$email'
+										Element:span
+											=>
+										Element:span
+											"john.doe@example.com"
+										Element:span
+											,
+										Element:span
+											'$phone'
+										Element:span
+											=>
+										Element:span
+											"5555555555"
+										Element:span
+											,
+										Element:span
+											"Favorite Color"
+										Element:span
+											=>
+										Element:span
+											"red"
+										Element:span
+											));
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The call to
+										Element:a
+											people->set
+											will set the value of properties on user 12345's profile. If there isn't a profile with distinct_id 12345 in Mixpanel already, a new profile will be created. If user 12345 already has has any of these properties set on their profile, the old value will be overwritten with the new ones.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Incrementing numeric properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can change the current value of numeric properties using
+										Element:a
+											people->increment
+											. This is useful when you want to keep a running tally of things, such as games played, emails sent, or points earned.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											<?php
+										Element:span
+											require
+										Element:span
+											'vendor/autoload.php'
+										Element:span
+											;
+										Element:span
+											$mp
+										Element:span
+											=
+										Element:span
+											Mixpanel
+										Element:span
+											::
+										Element:span
+											getInstance
+										Element:span
+											(
+										Element:span
+											"MIXPANEL_PROJECT_TOKEN"
+										Element:span
+											);
+										Element:span
+											// increment user 12345's "login count" by one
+										Element:span
+											$mp
+										Element:span
+											->
+										Element:span
+											people
+										Element:span
+											->
+										Element:span
+											increment
+										Element:span
+											(
+										Element:span
+											12345
+										Element:span
+											,
+										Element:span
+											"login count"
+										Element:span
+											,
+										Element:span
+											1
+										Element:span
+											);
+										Element:span
+											// Use negative numbers to subtract- reduce
+										Element:span
+											// "credits remaining" by 10
+										Element:span
+											$mp
+										Element:span
+											->
+										Element:span
+											people
+										Element:span
+											->
+										Element:span
+											increment
+										Element:span
+											(
+										Element:span
+											12345
+										Element:span
+											,
+										Element:span
+											"credits remaining"
+										Element:span
+											,
+										Element:span
+											-
+										Element:span
+											10
+										Element:span
+											);
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Appending to list properties
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use
+										Element:a
+											people->append
+											to add an item to an existing list-valued property. The values you send with the append will be added to the end of the list for each named property. If the property doesn't exist, it will be created with a one element list as its value.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:span
+											<?php
+										Element:span
+											require
+										Element:span
+											'vendor/autoload.php'
+										Element:span
+											;
+										Element:span
+											$mp
+										Element:span
+											=
+										Element:span
+											Mixpanel
+										Element:span
+											::
+										Element:span
+											getInstance
+										Element:span
+											(
+										Element:span
+											"MIXPANEL_PROJECT_TOKEN"
+										Element:span
+											);
+										Element:span
+											// append "Apples" to user 12345's "favorites"
+										Element:span
+											$mp
+										Element:span
+											->
+										Element:span
+											people
+										Element:span
+											->
+										Element:span
+											append
+										Element:span
+											(
+										Element:span
+											12345
+										Element:span
+											,
+										Element:span
+											"favorites"
+										Element:span
+											,
+										Element:span
+											"Apples"
+										Element:span
+											);
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Other types of profile updates
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are a few other types of profile updates. They're exposed as public methods of
+										Element:a
+											Producers_MixpanelPeople
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Tracking revenue
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel makes it easy to analyze the revenue you make from individual customers. By associating charges with user profiles, you can compare revenue across different customer segments and calculate things like lifetime value.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can track a single transaction with the
+							Element:a
+								trackCharge
+								method on the Mixpanel->people object. Sending a message created with
+							Element:a
+								trackCharge
+								will add transactions to the individual user profile, which will be reflected in the
+							Element:a
+								Mixpanel Revenue report
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								<?php
+							Element:span
+								require
+							Element:span
+								'vendor/autoload.php'
+							Element:span
+								;
+							Element:span
+								$mp
+							Element:span
+								=
+							Element:span
+								Mixpanel
+							Element:span
+								::
+							Element:span
+								getInstance
+							Element:span
+								(
+							Element:span
+								"MIXPANEL_PROJECT_TOKEN"
+							Element:span
+								);
+							Element:span
+								// track a purchase or charge of $9.99 for user 12345
+							Element:span
+								// where the transaction happened just now
+							Element:span
+								$mp
+							Element:span
+								->
+							Element:span
+								people
+							Element:span
+								->
+							Element:span
+								trackCharge
+							Element:span
+								(
+							Element:span
+								12345
+							Element:span
+								,
+							Element:span
+								"9.99"
+							Element:span
+								);
+							Element:span
+								// track a purchase or charge of $20 for user 12345
+							Element:span
+								// where the transaction happened on June 01, 2013 at 5pm EST
+							Element:span
+								$mp
+							Element:span
+								->
+							Element:span
+								people
+							Element:span
+								->
+							Element:span
+								trackCharge
+							Element:span
+								(
+							Element:span
+								12345
+							Element:span
+								,
+							Element:span
+								"20.00"
+							Element:span
+								,
+							Element:span
+								strtotime
+							Element:span
+								(
+							Element:span
+								"01 Jun 2013 5:00:00 PM EST"
+							Element:span
+								));
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Scaling your server side tracking
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Message Consumers
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The PHP library stores all events and profile updates in an in-memory queue, that is flushed automatically when the instance of
+							Element:a
+								Mixpanel
+								is destroyed, or when the queue reaches a configurable threshold size (by default, 1000 items). You can also force the instance to send on demand by calling
+							Element:a
+								flush
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								At flush time, the messages are processed by an implementation of the
+							Element:a
+								ConsumerStrategies_AbstractConsumer
+								class that determines how the messages will be written. The default settings use
+							Element:a
+								ConsumerStrategies_CurlConsumer
+								, which uses cURL to write the messages over SSL to Mixpanel.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As your application scales, you may want to separate the IO for communicating with Mixpanel out of the processes that observe your events. You can write your events and updates to a file or a distributed queue by writing your own custom consumer.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To create
+							Element:a
+								a custom consumer
+								, you'll want to extend
+							Element:a
+								ConsumerStrategies_AbstractConsumer
+								and implement the persist method. Then you'll want to
+							Element:a
+								register it with the Mixpanel class and specify it for use
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								Document Sections
+							Element:span
+								<?php
+							Element:span
+								// Here's a simple consumer that just writes the events to
+							Element:span
+								// send out to the client.
+							Element:span
+								class
+							Element:span
+								MyLoggingConsumer
+							Element:span
+								extends
+							Element:span
+								ConsumerStrategies_AbstractConsumer
+							Element:span
+								{
+							Element:span
+								public
+							Element:span
+								function
+							Element:span
+								persist
+							Element:span
+								(
+							Element:span
+								$batch
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								echo
+							Element:span
+								"<pre>"
+							Element:span
+								;
+							Element:span
+								echo
+							Element:span
+								"Would send batch:
+							Element:span
+								\n
+							Element:span
+								"
+							Element:span
+								;
+							Element:span
+								echo
+							Element:span
+								json_encode
+							Element:span
+								(
+							Element:span
+								$batch
+							Element:span
+								)
+							Element:span
+								.
+							Element:span
+								"
+							Element:span
+								\n
+							Element:span
+								"
+							Element:span
+								;
+							Element:span
+								echo
+							Element:span
+								"</pre>"
+							Element:span
+								return
+							Element:span
+								true
+							Element:span
+								;
+							Element:span
+								}
+							Element:span
+								}
+							Element:span
+								$mp
+							Element:span
+								=
+							Element:span
+								new
+							Element:span
+								Mixpanel
+							Element:span
+								(
+							Element:span
+								"MIXPANEL_PROJECT_TOKEN"
+							Element:span
+								,
+							Element:span
+								array
+							Element:span
+								(
+							Element:span
+								// Provide the name of your consumer class to the Mixpanel constructor
+							Element:span
+								"consumers"
+							Element:span
+								=>
+							Element:span
+								array
+							Element:span
+								(
+							Element:span
+								"logger"
+							Element:span
+								=>
+							Element:span
+								"MyLoggingConsumer"
+							Element:span
+								),
+							Element:span
+								// Now tell the Mixpanel instance to use your class
+							Element:span
+								"consumer"
+							Element:span
+								=>
+							Element:span
+								"logger"
+							Element:span
+								));
+							Element:span
+								// This event will be sent to the client in a <pre> tag
+							Element:span
+								$mp
+							Element:span
+								->
+							Element:span
+								track
+							Element:span
+								(
+							Element:span
+								"test_event"
+							Element:span
+								,
+							Element:span
+								array
+							Element:span
+								(
+							Element:span
+								"color"
+							Element:span
+								=>
+							Element:span
+								"blue"
+							Element:span
+								));
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+								Learn more
+							Element:li
+							Element:a
+								Introduction
+							Element:li
+							Element:a
+								Installing the library
+							Element:li
+							Element:a
+								Sending events
+							Element:li
+							Element:a
+								Super properties
+							Element:li
+							Element:a
+								Managing user identity
+							Element:li
+							Element:a
+								Storing user profiles
+							Element:li
+							Element:a
+								Tracking revenue
+							Element:li
+							Element:a
+								Scaling your server-side tracking
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Full API reference
+							Element:li
+							Element:a
+								Library source code
+							Element:li
+							Element:a
+								Code Samples

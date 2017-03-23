@@ -1,0 +1,436 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Get Field Mapping
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The get field mapping API allows you to retrieve mapping definitions for one or more fields. This is useful when you do not need the complete type mapping returned by the
+							Element:a
+								API.
+							Element:em
+								Get Mapping
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following returns the mapping of the field
+							Element:code
+								message
+								only:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /twitter/_mapping/tweet/field/message
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For which the response is (assuming
+							Element:code
+								message
+								is a default string field):
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "twitter": { "mappings": { "tweet": { "message": { "full_name": "message", "mapping": { "message": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } } } } } } } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Multiple Indices, Types and Fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The get field mapping API can be used to get the mapping of multiple fields from more than one index or type with a single call. General usage of the API follows the following syntax:
+										Element:code
+											host:port/{index}/{type}/_mapping/field/{field}
+											where
+										Element:code
+											{index}
+											,
+										Element:code
+											{type}
+											and
+										Element:code
+											{field}
+											can stand for comma-separated list of names or wild cards. To get mappings for all indices you can use
+										Element:code
+											_all
+											for
+										Element:code
+											{index}
+											. The following are some examples:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /twitter,kimchy/_mapping/field/message GET /_all/_mapping/tweet,book/field/message,user.id GET /_all/_mapping/tw*/field/*.id
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Specifying fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The get mapping api allows you to specify one or more fields separated with by a comma. You can also use wildcards. The field names can be any of the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+											Full names
+										Element:td
+										Element:p
+											the full path, including any parent object name the field is part of (ex.
+										Element:code
+											user.id
+											).
+										Element:tr
+										Element:td
+										Element:p
+											Field names
+										Element:td
+										Element:p
+											the name of the field without the path to it (ex.
+										Element:code
+											id
+											for
+										Element:code
+											{ "user" : { "id" : 1 } }
+											).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above options are specified in the order the
+										Element:code
+											field
+											parameter is resolved. The first field found which matches is returned. This is especially important if index names or field names are used as those can be ambiguous.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, consider the following mapping:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "article": { "properties": { "id": { "type": "text" }, "title": { "type": "text"}, "abstract": { "type": "text"}, "author": { "properties": { "id": { "type": "text" }, "name": { "type": "text" } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To select the
+										Element:code
+											id
+											of the
+										Element:code
+											author
+											field, you can use its full name
+										Element:code
+											author.id
+											.
+										Element:code
+											name
+											will return the field
+										Element:code
+											author.name
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											curl -XGET "http://localhost:9200/publications/_mapping/article/field/author.id,abstract,name"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											returns:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "publications": { "article": { "abstract": { "full_name": "abstract", "mapping": { "abstract": { "type": "text" } } }, "author.id": { "full_name": "author.id", "mapping": { "id": { "type": "text" } } }, "name": { "full_name": "author.name", "mapping": { "name": { "type": "text" } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note how the response always use the same fields specified in the request as keys. The
+										Element:code
+											full_name
+											in every entry contains the full name of the field whose mapping were returned. This is useful when the request can refer to to multiple fields.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Other options
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											include_defaults
+										Element:td
+										Element:p
+											adding
+										Element:code
+											include_defaults=true
+											to the query string will cause the response to include default values, which are normally suppressed.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Get Mapping
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Types Exists »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,394 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					How to Export a List of Records
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								An example in bash script demonstrating how to export a list of records using the v10
+							Element:code
+								/<module>/export/:record_list_id
+								REST
+							Element:code
+								GET
+								endpoint.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Exporting Records
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authenticating
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											First, you will need to authenticate to the Sugar API. An example is shown below:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -X POST -H Cache-Control:no-cache -d '{ "grant_type":"password", "client_id":"sugar", "client_secret":"", "username":"admin", "password":"password", "platform":"custom_api" }' https://{site_url}/rest/v10/oauth2/token
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on authenticating can be found in the
+										Element:a
+											How to Authenticate and Log Out
+											example and
+										Element:a
+											/oauth2/logout
+											endpoint documentation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Filtering Records
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we will need to identify the records we want to export using the
+										Element:code
+											/<module>/filter
+											endpoint.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -s -X POST -H OAuth-Token:{access_token} -H Cache-Control:no-cache -d '{ "filter":[ { "$or":[ { "name":{ "$starts":"A" } }, { "name":{ "$starts":"b" } } ] } ], "max_num":2, "offset":0, "fields":"id", "order_by":"date_entered", "favorites":false, "my_items":false }' https://{site_url}/rest/v10/Accounts/filter
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on the filter API can be found in the
+										Element:a
+											/<module>/filter
+											documentation.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The data received from the server is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "next_offset":2, "records":[ { "id":"f16760a4-3a52-f77d-1522-5703ca28925f", "date_modified":"2016-04-05T10:23:28-04:00", "_acl":{ "fields":{ } }, "_module":"Accounts" }, { "id":"ec409fbb-2b22-4f32-7fa1-5703caf78dc3", "date_modified":"2016-04-05T10:23:28-04:00", "_acl":{ "fields":{ } }, "_module":"Accounts" } ] }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Creating a Record List
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once we have the list of ids, we then need to create a record list in Sugar that consists of those ids.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -s -X POST -H OAuth-Token:{access_token} -H Cache-Control:no-cache -d '{ "records":[ "f16760a4-3a52-f77d-1522-5703ca28925f", "ec409fbb-2b22-4f32-7fa1-5703caf78dc3" ] }' https://{site_url}/rest/v10/Accounts/record_list
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The data received from the server is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														{ "id":"ef963176-4845-bc55-b03e-570430b4173c", "assigned_user_id":"1", "module_name":"Accounts", "records":[ "f16760a4-3a52-f77d-1522-5703ca28925f", "ec409fbb-2b22-4f32-7fa1-5703caf78dc3" ], "date_modified":"2016-04-05 21:39:19" }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Exporting Records
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once we have the record list created, we can then export the CSV file.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											curl -i -s -X GET -H OAuth-Token:{access_token} -H Cache-Control:no-cache https://{site_url}/rest/v10/Accounts/export/ef963176-4845-bc55-b03e-570430b4173c
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											More information on exporting records can be found in the
+										Element:a
+											/<module>/export/:record_list_id
+											documentation.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The data received from the server is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														HTTP/1.1 200 OK Date: Tue, 05 Apr 2016 21:50:32 GMT Server: Apache/2.2.29 (Unix) DAV/2 PHP/5.3.29 mod_ssl/2.2.29 OpenSSL/0.9.8zg X-Powered-By: PHP/5.3.29 Expires: Cache-Control: max-age=10, private Pragma: Content-Disposition: attachment; filename=Accounts.csv Content-transfer-encoding: binary Last-Modified: Tue, 05 Apr 2016 21:50:32 GMT ETag: 9b34f5d74e0298aaf7fd1f27d02e14f2 Content-Length: 1703 Connection: close Content-Type: application/octet-stream; charset=ISO-8859-1 "Name","ID","Website","Office Phone","Alternate Phone","Fax","Billing Street","Billing City","Billing State","Billing Postal Code","Billing Country","Shipping Street","Shipping City","Shipping State","Shipping Postal Code","Shipping Country","Description","Type","Industry","Annual Revenue","Employees","SIC Code","Ticker Symbol","Parent Account ID","Ownership","Campaign ID","Rating","Assigned User Name","Assigned User ID","Team ID","Teams","Team Set ID","Date Created","Date Modified","Modified By Name","Modified By ID","Created By","Created By ID","Deleted","test","Facebook Account","Twitter Account","Google Plus ID","DUNS","Email","Invalid Email","Email Opt Out","Non-primary emails" "Arts & Crafts Inc","ec409fbb-2b22-4f32-7fa1-5703caf78dc3","www.hrinfo.tw","(252) 456-8602","","","777 West Filmore Ln","Los Angeles","CA","77076","USA","777 West Filmore Ln","Los Angeles","CA","77076","USA","","Customer","Hospitality","","","","","","","","","Max Jensen","seed_max_id","West","West, East, Global","dec43cb2-5273-8be2-968a-5703cadee75f","2016-04-05 10:23","2016-04-05 10:23","Administrator","1","Administrator","1","0","","","","","","sugar.sugar.section@example.org","0","0","dev.phone@example.biz,0,0" "B.H. Edwards Inc","f16760a4-3a52-f77d-1522-5703ca28925f","www.sectiondev.edu","(361) 765-0216","","","111 Silicon Valley Road","Persistance","CA","29709","USA","111 Silicon Valley Road","Persistance","CA","29709","USA","","Customer","Apparel","","","","","","","","","Sally Bronsen","seed_sally_id","West","West","West","2016-04-05 10:23","2016-04-05 10:23","Administrator","1","Administrator","1","0","","","","","","info.sugar@example.de","0","1","phone.sales.section@example.tv,0,0"
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You can also output the results directly to a csv file by ommiting the header data and output the results directly to a new CSV file.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														curl -s -X GET -H OAuth-Token:{access_token} -H Cache-Control:no-cache https://{site_url}/rest/v10/Accounts/export/ef963176-4845-bc55-b03e-570430b4173c > Output.csv
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Last modified: 04/15/2016 11:13am
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

@@ -1,0 +1,469 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Cluster Level Shard Allocation
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Shard allocation is the process of allocating shards to nodes. This can happen during initial recovery, replica allocation, rebalancing, or when nodes are added or removed.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Shard Allocation Settings
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following
+										Element:span
+											settings may be used to control shard allocation and recovery:
+										Element:em
+											dynamic
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.enable
+										Element:dd
+										Element:p
+											Enable or disable allocation for specific kinds of shards:
+										Element:ul
+										Element:li
+										Element:code
+											all
+											- (default) Allows shard allocation for all kinds of shards.
+										Element:li
+										Element:code
+											primaries
+											- Allows shard allocation only for primary shards.
+										Element:li
+										Element:code
+											new_primaries
+											- Allows shard allocation only for primary shards for new indices.
+										Element:li
+										Element:code
+											none
+											- No shard allocations of any kind are allowed for any indices.
+										Element:p
+											This setting does not affect the recovery of local primary shards when restarting a node. A restarted node that has a copy of an unassigned primary shard will recover that primary immediately, assuming that its allocation id matches one of the active allocation ids in the cluster state.
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.node_concurrent_incoming_recoveries
+										Element:dd
+											How many concurrent incoming shard recoveries are allowed to happen on a node. Incoming recoveries are the recoveries where the target shard (most likely the replica unless a shard is relocating) is allocated on the node. Defaults to
+										Element:code
+											2
+											.
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.node_concurrent_outgoing_recoveries
+										Element:dd
+											How many concurrent outgoing shard recoveries are allowed to happen on a node. Outgoing recoveries are the recoveries where the source shard (most likely the primary unless a shard is relocating) is allocated on the node. Defaults to
+										Element:code
+											2
+											.
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.node_concurrent_recoveries
+										Element:dd
+											A shortcut to set both
+										Element:code
+											cluster.routing.allocation.node_concurrent_incoming_recoveries
+											and
+										Element:code
+											cluster.routing.allocation.node_concurrent_outgoing_recoveries
+											.
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.node_initial_primaries_recoveries
+										Element:dd
+											While the recovery of replicas happens over the network, the recovery of an unassigned primary after node restart uses data from the local disk. These should be fast so more initial primary recoveries can happen in parallel on the same node. Defaults to
+										Element:code
+											4
+											.
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.same_shard.host
+										Element:dd
+											Allows to perform a check to prevent allocation of multiple instances of the same shard on a single host, based on host name and host address. Defaults to
+										Element:code
+											false
+											, meaning that no check is performed by default. This setting only applies if multiple nodes are started on the same machine.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Shard Rebalancing Settings
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following
+										Element:span
+											settings may be used to control the rebalancing of shards across the cluster:
+										Element:em
+											dynamic
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.rebalance.enable
+										Element:dd
+										Element:p
+											Enable or disable rebalancing for specific kinds of shards:
+										Element:ul
+										Element:li
+										Element:code
+											all
+											- (default) Allows shard balancing for all kinds of shards.
+										Element:li
+										Element:code
+											primaries
+											- Allows shard balancing only for primary shards.
+										Element:li
+										Element:code
+											replicas
+											- Allows shard balancing only for replica shards.
+										Element:li
+										Element:code
+											none
+											- No shard balancing of any kind are allowed for any indices.
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.allow_rebalance
+										Element:dd
+										Element:p
+											Specify when shard rebalancing is allowed:
+										Element:ul
+										Element:li
+										Element:code
+											always
+											- Always allow rebalancing.
+										Element:li
+										Element:code
+											indices_primaries_active
+											- Only when all primaries in the cluster are allocated.
+										Element:li
+										Element:code
+											indices_all_active
+											- (default) Only when all shards (primaries and replicas) in the cluster are allocated.
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.cluster_concurrent_rebalance
+										Element:dd
+											Allow to control how many concurrent shard rebalances are allowed cluster wide. Defaults to
+										Element:code
+											2
+											. Note that this setting only controls the number of concurrent shard relocations due to imbalances in the cluster. This setting does not limit shard relocations due to
+										Element:a
+											allocation filtering
+											or
+										Element:a
+											forced awareness
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Shard Balancing Heuristics
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following settings are used together to determine where to place each shard. The cluster is balanced when no allowed action can bring the weights of each node closer together by more then the
+										Element:code
+											balance.threshold
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.balance.shard
+										Element:dd
+											Defines the weight factor for shards allocated on a node (float). Defaults to
+										Element:code
+											0.45f
+											. Raising this raises the tendency to equalize the number of shards across all nodes in the cluster.
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.balance.index
+										Element:dd
+											Defines a factor to the number of shards per index allocated on a specific node (float). Defaults to
+										Element:code
+											0.55f
+											. Raising this raises the tendency to equalize the number of shards per index across all nodes in the cluster.
+										Element:dt
+										Element:span
+										Element:code
+											cluster.routing.allocation.balance.threshold
+										Element:dd
+											Minimal optimization value of operations that should be performed (non negative float). Defaults to
+										Element:code
+											1.0f
+											. Raising this will cause the cluster to be less aggressive about optimizing the shard balance.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Regardless of the result of the balancing algorithm, rebalancing might not be allowed due to forced awareness or allocation filtering.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Cluster
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Disk-based Shard Allocation »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

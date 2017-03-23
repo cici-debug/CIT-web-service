@@ -1,0 +1,243 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Importing Old Events
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Use the
+				Element:code
+					/import
+					endpoint to get events into your Mixpanel project older than five days that you might want to include if you’re a new customer and previously collected data elsewhere.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					You can
+				Element:a
+					download a sample PHP script
+					that you can modify with your own data, token and API key to send any event to Mixpanel.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Prerequisites
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Every event must have a time property specifying a timestamp in the past.
+							Element:li
+								You must already be using
+							Element:a
+								mixpanel.identify()
+								or in some other way setting the distinct_id to keep track of your users within Mixpanel.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you are not using
+							Element:a
+								mixpanel.identify()
+								or a distinct_id and would like to import events, you can contact
+							Element:a
+								support@mixpanel.com
+								for assistance.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Viewing old events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, Mixpanel’s Engagement report dropdown menus hide events that have not been fired within the last 30 days. So if you import data that's over 30 days old and there are no instances of that event within the last 30 days, the dropdown menus will not display that event name.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To have an imported event that’s older than 30 days show in the dropdowns, you can:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Fire a single instance of that event to bring it within the UI; OR
+							Element:li
+								Force the event to show in the dropdown by adjusting the URL to:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								https://mixpanel.com/report/YOURPROJECTNUMBER/segmentation/#action:segment,arb_event:'YOUREVENTNAME',bool_op:and,chart_analysis_type:linear,chart_type:line,from_date:-365,to_date:0,type:general,unit:month
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Be sure to replace
+							Element:code
+								YOURPROJECTNUMBER
+								and
+							Element:code
+								YOUREVENTNAME
+								with the specific values for your project.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Send your events
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you meet the prerequisites, you can write a one-off script to send your events to Mixpanel for all your users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To do this, for every event in your database you would make an HTTP GET request that looks like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								http://api.mixpanel.com/import/?data=eyJldmVudCI6IiRib3JuIiwicHJvcGVydGllcyI6eyJkaXN0aW5jdF9pZCI6IjQ4MSIsIn RpbWUiOjEzMjE0OTkzNzEsInRva2VuIjoiMTNmZTNkZGM4NmViNmY5MGM0ZWU3ZDBkNDc1NjMxNTAifX0&api_key=7a7727f7880dc39463f99475e7cefcf8
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This request is very similar to our standard
+							Element:a
+								HTTP API
+								. The data parameter is a Base64 encoded JSON array with the event you are importing ($signup) and the associated properties.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By decoding the Base64 data parameter from the above request, you can see the raw JSON:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								{
+							Element:span
+								"event"
+							Element:span
+								:
+							Element:span
+								"$signup"
+							Element:span
+								,
+							Element:span
+								"properties"
+							Element:span
+								:
+							Element:span
+								{
+							Element:span
+								"distinct_id"
+							Element:span
+								:
+							Element:span
+								"481"
+							Element:span
+								,
+							Element:span
+								"time"
+							Element:span
+								:
+							Element:span
+								1321499371
+							Element:span
+								,
+							Element:span
+								"token"
+							Element:span
+								:
+							Element:span
+								"13fe3ddc86eb6f90c4ee7d0d47563150"
+							Element:span
+								}}
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Event = You can set this to any event, but $signup is particularly useful for retention analysis.
+							Element:li
+								Distinct_id = The user ID you have been sending to Mixpanel up to this point for that user. For JavaScript Library users, this is the value you put in
+							Element:a
+								mixpanel.identify()
+								.
+							Element:li
+								Time = A unix epoch style timestamp in UTC that tells Mixpanel when the event fired. This can be any time in the last 5 years. The above example, 1321499371, represents November 17th, 2011 at 3:09 AM GMT.
+							Element:li
+								Token = The token property is your Mixpanel project token, which you can find by clicking your name in the upper righthand corner of your Mixpanel project and selecting Settings from the dropdown. Don’t confuse your API Key with your project token!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note that in this example, the ip property is missing. If you are sending a distinct_id, it is not necessary to send an ip property. However, if you do not include an ip, be aware that all Mixpanel events imported this way will be geo-located to the country of the server sending the events, not necessarily the country of the person that triggered the event.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Batching requests
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Using the
+							Element:code
+								/import
+								endpoint, you can also batch requests to Mixpanel instead of sending one event per request. The endpoint will accept up to 50 messages in a single batch.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can read more about batching requests to Mixpanel in our
+								Document Sections
+							Element:a
+								HTTP API documentation
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Introduction
+							Element:li
+							Element:a
+								Prerequisites
+							Element:li
+							Element:a
+								Viewing old events
+							Element:li
+							Element:a
+								Send your events
+							Element:li
+							Element:a
+								Batching requests

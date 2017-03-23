@@ -1,0 +1,736 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Development Methodology
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This page discusses standard practices that we recommend for improving the success rates of Sugar development projects.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Development Best Practices
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When developing Sugar® customizations as part of an on-site CRM project implementation, we recommended placing the entire Sugar application filesystem under source code management. Sugar developers know that customizations made to Sugar are placed under the
+							Element:code
+								./custom/
+								directory. But during the lifecycle of a CRM implementation, you will need to upgrade Sugar versions, which will change core files. Many projects will also need to track other related project files that may not all be Sugar platform code. For example, pre-flight SQL scripts, data migration scripts, Web server configuration settings, etc.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For Sugar On-Demand projects and ISVs, if you are building a custom module package or integration designed to be installed into many Sugar instances (including Sugar On-Demand instances), then tracking only
+							Element:code
+								./custom/
+								directory files should be enough.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Using .gitignore Files
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Today, many developers choose to use
+										Element:a
+											Git
+											as their source control management. There are certain Sugar application files that you do not want to track; most of these are generated files that are created at runtime or are Sugar instance-specific configuration files.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Below is a sample .gitignore file that you can use or adapt to the source control management system of your choice.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											*.log /cache /config.php /config_override.php /.htaccess /custom/application /custom/history /custom/modules/*/Ext /custom/blowfish
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Recommendations for Development Teams
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Code quality is important to maintain because Sugar customizations run in the same environment as the rest of the Sugar application. Here are a few best practices to help development teams uphold code quality.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Adopt an appropriate Git workflow for development. For reference, see Atlassian's tutorial on
+										Element:a
+											Git workflow options
+											.
+										Element:li
+											Develop within feature branches that are tested before being merged back into master to keep master stable.
+										Element:li
+											Avoid workflows that involve developers committing directly into the master branch to prevent code destabilization.
+										Element:li
+											Development teams should always perform code reviews before merging in new code.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Deploying Sugar Code
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Where you plan to deploy Sugar code is the biggest factor in determining how Sugar code should be deployed and how your project should be managed.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Are you working on a Sugar project for an on-premise Sugar implementation? Are you working on a custom module that you plan on distributing through SugarExchange? Are you planning a solely REST API integration? The answers to these questions guide how you should develop and deploy Sugar code.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Sugar On-Site project
+							Element:strong
+								s
+								: Develop these customizations using the exact version and flavor of Sugar that you plan to use in production.
+							Element:li
+							Element:strong
+								Sugar On-Demand project
+							Element:strong
+								s
+								: Develop these customizations on the latest available version of Sugar for the particular flavor the customer has purchased.
+							Element:li
+							Element:strong
+								Custom modules or integrations
+								: If you plan on distributing your customization to many Sugar customers via
+							Element:a
+								SugarExchange
+								or channel partners, design your customization with Sugar On-Demand in mind.
+							Element:ul
+							Element:li
+								Sugar On-Demand is more restrictive than our on-site installs regarding supported customizations.
+							Element:li
+								A customization designed for Sugar On-Demand can be supported in Sugar On-Site instances, but the inverse is not always true.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more information on on-demand restrictions, please refer to the Sugar On-Demand Policy Guide.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Packaging
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The packaging of customizations is not a concern for many Sugar projects. Many projects just use Git (or some other file version control) to manage the distribution and deployment of Sugar code customizations. However, there are situations where packaging of Sugar customizations is necessary.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you plan on distributing Sugar custom code, then you must package your customization as a
+										Element:a
+											Module Loadable Package
+											(a .zip file that includes all custom code along with a manifest file). It is easy to write a script to build a module loadable package either from custom directory content or by extracting customizations out of a development environment. See examples on Github
+										Element:a
+											here
+											and
+										Element:a
+											here
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In some Enterprise environments, changes are tightly controlled, and ownership of various Sugar application components may be spread across multiple teams, requiring a coordinated deployment. For example, a Database Administrator (DBA) may be responsible for implementing database schema (DDL) changes and a System Administrator may be responsible for implementing file system changes.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For these situations:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											File system changes can be accounted for using Git to determine the difference between current production state and the latest changes to be deployed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											DDL changes can be accounted for via deploying latest file system changes on a clone of Sugar production instance and running
+										Element:a
+											Quick Repair
+											command. Sugar will prompt you with any DDL changes that need to be made that you can then capture and share with your DBA.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											DML changes (if necessary) should be managed within SQL or PHP scripts.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Deployment
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If using the traditional Git-based deployment, then deploying new Sugar code is as easy as checking out the latest branch and then running
+										Element:a
+											Quick Repair and Rebuild
+											. Run the quick repair from the Sugar user interface, or
+										Element:a
+											script
+											it for fully automated deployment.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When deploying to a Sugar On-Demand instance, it is necessary to install the package manually using
+										Element:a
+											Module Loader
+											. It is not possible to automate the deployment of packages into Sugar On-Demand instances.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In a coordinated deployment, database changes should be deployed first, followed by filesystem changes, followed by a Quick Repair (if permitted) to clear system caches. You can clear caches manually by deleting the contents of the
+										Element:strong
+											c./cache/
+											directory and then truncating the
+										Element:em
+											metadata_cache
+											table in the Sugar database (in Sugar 7.6 and later). The Sugar application regenerates these caches as needed.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using Sugar Studio to deploy changes into new environments (especially Production) is not recommended . Manually re-creating customizations using the Studio user interface can be error prone. It also runs the risk of inadvertently overwriting other code customizations. It may be initially slower to create a custom field, etc. manually using extensions on filesystem but, in the long run, you benefit from better change management and automation.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Managing Multiple Environments
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								CRMs are business-critical applications so development should never be performed directly on your production environment. A typical Sugar project involves multiple staging environments as well as individual development environments that each Sugar developer uses for actual coding.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								SugarCRM recommends 4 different environments:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Production environment
+								: used by real users
+							Element:li
+							Element:strong
+								User Acceptance Test (UAT) environment
+								: used by business stakeholders to sign off on changes that go into production
+							Element:li
+							Element:strong
+								Quality Assurance environment
+								: used for test and validation of new features and bug fixes
+							Element:li
+							Element:strong
+								Development environments
+								: used by individual Sugar developers to create and test code (often running on a local laptop or PC)
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Code changes that flow upstream from a development environment should not be allowed into production without going through quality assurance (QA) and user acceptance testing (UAT) first. The intermediate environments serve as gates between development and production that help intercept problems before they reach production.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								User and CRM data that needs to flow downstream from production environment should pass through intermediate environments as well to ensure consistency and that it is cleaned or anonymized of any personally identifiable or sensitive information.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Consistency
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Maintaining as much consistency as possible for each of these environments is essential. Inconsistent environments can create issues where bugs are reproducible in one environment and not others (for example, a bug that only appears in production). Many times, these bugs are traced to configuration parameters that are not directly related to Sugar or the features and customizations under development.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To replicate your production environment as accurately as possible, we recommend you use VM or container technology in your development and QA environments.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your UAT environment should match the infrastructure of your production environment.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											SugarCRM uses a variety of container technologies in developing the core Sugar application and for working on Sugar projects. In particular, we use Virtual Box, VMWare, Amazon AMIs, Docker containers, Vagrant, and Packer. SugarCRM Engineering also uses Puppet to centrally manage the provisioning and configuration of all these different environments.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Testing
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								SugarCRM recommends using a variety of testing methods to ensure the quality of your Sugar project. Perform unit testing, functional testing (either manual or GUI automation), system integration testing, user acceptance testing, and performance testing.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:strong
+								Unit testing
+								should be applied to ensure that even the smallest code units within your application are behaving as expected.
+							Element:li
+							Element:strong
+								Functional testing
+								should be performed to ensure that each feature and function behaves the way it was designed.
+							Element:li
+							Element:strong
+								System Integration testing
+								should be performed to ensure that Sugar co-exists with external systems and that data flows between all these systems successfully.
+							Element:li
+							Element:strong
+								User acceptance testing
+								should be performed by key stakeholders to ensure that your project is meeting business requirements.
+							Element:li
+							Element:strong
+								Performance testing
+								should be performed to ensure that the Sugar application's responsiveness meets user expectations and that the application continues to scale.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In our experience, neglecting any of these tests can negatively impact a Sugar project in terms of maintainability, customer satisfaction, and business success.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In the next section, we introduce some tools and open-source resources that can help you start a QA practice for your project.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sugar Test Tools
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For Sugar customers and partners, SugarCRM provides
+										Element:a
+											Test Tools
+											that can be used to verify and perform quality assurance on Sugar customizations. Use of Sugar test technology requires familiarity with
+										Element:a
+											PHPUnit
+											for PHP unit testing,
+										Element:a
+											Jasmine
+											for JavaScript unit testing, and
+										Element:a
+											Apache JMeter
+											for performance load testing.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sugar Unit Tests
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Sugar 7 Unit Test suites are the automated unit tests developed and maintained by SugarCRM Engineering during the process of building and releasing each new Sugar 7 release. As part of our development process, these tests are required to run "green" (100% passing) at all times on each master release branch. Essentially, these tests form a regression test suite for an uncustomized version of Sugar 7 running in our controlled build environment.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With that understanding, here is a recommended approach to take advantage of these unit tests.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Run test suite against an uncustomized copy of Sugar in your development environment to establish a baseline. Not all tests may immediately pass; some may fail due to configuration differences between your development environment and SugarCRM Engineering's controlled build environment.
+										Element:li
+											Correct any observed failures or skip/remove the failing tests to create a base test suite that is 100% passing.
+										Element:li
+											As you develop customizations on Sugar, ensure that your base test suite continues to pass.
+										Element:li
+											Create new tests for new code customizations that you create.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sugar Performance Tests
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Instead of sanitizing data from a production environment for purposes of load testing, SugarCRM provides an open source tool called
+										Element:a
+											Tidbit
+											that can be used to generate pseudo-random data to populate a Sugar instance with representable data.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We also provide Apache JMeter scenarios to Sugar customers and partners who request access. These JMeter scenarios can be used to drive a simulated load against the Sugar REST API interface used by Sugar 7. They can validate that your customizations have not had an unexpected impact on the performance of a Sugar instance.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											DevOps
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to facilitate and streamline development processes, Sugar recommends implementing DevOps automation. Use a tool such as
+										Element:a
+											Jenkins
+											to orchestrate test automation, stage changes in any environment (dev, QA, UAT, and prod) for manual verification, and manage promotion of changes from one environment to the next.
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Perform automated tests (e.g. unit tests) on each commit.
+										Element:li
+											Stage development changes on at least a nightly basis for use by QA or demos.
+										Element:li
+											Automate the rollback of changes in any environment as needed.
+										Element:li
+											Automate notifications to affected and responsible parties whenever a test fails, or a build fails to deploy.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Co-Existing with Studio Customizations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sugar Studio and Module Builder enable administrator users to implement quick changes to a Sugar environment. But Sugar Studio lacks the rigorous change control that larger CRM projects need. Sometimes, Studio changes can even break code-level Sugar customizations. For this reason, we often discourage using Studio on heavily customized Sugar instances.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								However, if Sugar Studio is an important up-front requirement for a CRM project, then there are strategies you can adopt for your customizations to avoid conflicts.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Sugar Studio can be used to modify the layouts, fields, and relationships for the majority of modules in Sugar. Module Builder can be used to define new modules along with their layouts, fields, and relationships. In practice, this means that the fields any layouts for any module's record view, list view, mobile view, and subpanels can be customized using simple administration tools.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Studio users, therefore, could potentially break code customizations that are reliant on a particular field or having a field on a particular layout or location. Here are some practices to avoid conflicts between Studio customizations and custom code:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Avoid custom record, list, and subpanel view controllers because Studio users can change fields and layouts that affect expectations within your controller code.
+							Element:li
+								Avoid custom record validations because Studio users can change fields and layouts that affect expectations within your validation code.
+							Element:li
+								Avoid hard-coded integrations that rely on a particular field because Studio users can change fields that affect expectations within your integration.
+							Element:li
+								Avoid new field and relationship vardefs customizations because Studio users can create new fields and relationships.
+							Element:li
+								Avoid viewdefs customizations for record, list, and subpanel layouts because Studio users perform these customizations.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Many customizations have a smaller risk of side effects related to Studio customizations. Here is a list of some changes that administrator users cannot perform via Studio:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Adding custom dashlets
+							Element:li
+								Adding custom layouts or additions to footer or header
+							Element:li
+								Adding custom actions in record view action dropdown
+							Element:li
+								Adding metadata-aware integrations that discover fields and modules on the system
+							Element:li
+								Adding logic hooks
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Conversely, certain customizations can provide Studio users with additional tools:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Adding custom Sugar Logic functions
+							Element:li
+								Adding custom Sugar field types
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 10/11/2016 06:13pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

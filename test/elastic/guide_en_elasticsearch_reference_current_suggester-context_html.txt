@@ -1,0 +1,857 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Context Suggester
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The completion suggester considers all documents in the index, but it is often desirable to serve suggestions filtered and/or boosted by some criteria. For example, you want to suggest song titles filtered by certain artists or you want to boost song titles based on their genre.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To achieve suggestion filtering and/or boosting, you can add context mappings while configuring a completion field. You can define multiple context mappings for a completion field. Every context mapping has a unique name and a type. There are two types:
+							Element:code
+								category
+								and
+							Element:code
+								geo
+								. Context mappings are configured under the
+							Element:code
+								contexts
+								parameter in the field mapping.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The following defines types, each with two context mappings for a completion field:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT place { "mappings": { "shops" : { "properties" : { "suggest" : { "type" : "completion", "contexts": [ {
+							Element:a
+							Element:span
+								"name": "place_type", "type": "category", "path": "cat" }, {
+							Element:img
+							Element:a
+							Element:span
+								"name": "location", "type": "geo", "precision": 4 } ] } } } } } PUT place_path_category { "mappings": { "shops" : { "properties" : { "suggest" : { "type" : "completion", "contexts": [ {
+							Element:img
+							Element:a
+							Element:span
+								"name": "place_type", "type": "category", "path": "cat" }, {
+							Element:img
+							Element:a
+							Element:span
+								"name": "location", "type": "geo", "precision": 4, "path": "loc" } ] }, "loc": { "type": "geo_point" } } } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								Defines a
+							Element:code
+								category
+								context named
+							Element:span
+								where the categories must be sent with the suggestions.
+							Element:em
+								place_type
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								Defines a
+							Element:code
+								geo
+								context named
+							Element:span
+								where the categories must be sent with the suggestions.
+							Element:em
+								location
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								Defines a
+							Element:code
+								category
+								context named
+							Element:span
+								where the categories are read from the
+							Element:em
+								place_type
+							Element:code
+								cat
+								field.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								Defines a
+							Element:code
+								geo
+								context named
+							Element:span
+								where the categories are read from the
+							Element:em
+								location
+							Element:code
+								loc
+								field.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Adding context mappings increases the index size for completion field. The completion index is entirely heap resident, you can monitor the completion field index size using
+							Element:a
+								.
+							Element:em
+								Indices Stats
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Category Context
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														category
+														context allows you to associate one or more categories with suggestions at index time. At query time, suggestions can be filtered and boosted by their associated categories.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The mappings are set up like the
+													Element:code
+														place_type
+														fields above. If
+													Element:code
+														path
+														is defined then the categories are read from that path in the document, otherwise they must be sent in the suggest field like this:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT place/shops/1 { "suggest": { "input": ["timmy's", "starbucks", "dunkin donuts"], "contexts": { "place_type": ["cafe", "food"]
+													Element:a
+													Element:span
+														} } }
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tr
+													Element:td
+													Element:p
+													Element:a
+													Element:span
+													Element:img
+													Element:td
+													Element:p
+														These suggestions will be associated with
+													Element:span
+														and
+													Element:em
+														cafe
+													Element:span
+														category.
+													Element:em
+														food
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If the mapping had a
+													Element:code
+														path
+														then the following index request would be enough to add the categories:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT place_path_category/shops/1 { "suggest": ["timmy's", "starbucks", "dunkin donuts"], "cat": ["cafe", "food"]
+													Element:a
+													Element:span
+														}
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tr
+													Element:td
+													Element:p
+													Element:a
+													Element:span
+													Element:img
+													Element:td
+													Element:p
+														These suggestions will be associated with
+													Element:span
+														and
+													Element:em
+														cafe
+													Element:span
+														category.
+													Element:em
+														food
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If context mapping references another field and the categories are explicitly indexed, the suggestions are indexed with both set of categories.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Category Query
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Suggestions can be filtered by one or more categories. The following filters suggestions by multiple categories:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	POST place/_search?pretty { "suggest": { "place_suggestion" : { "prefix" : "tim", "completion" : { "field" : "suggest", "size": 10, "contexts": { "place_type": [ "cafe", "restaurants" ] } } } } }
+															Node:
+															(type) c
+															(layer)5
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	When no categories are provided at query-time, all indexed documents are considered. Querying with no categories on a category enabled completion field should be avoided, as it will degrade search performance.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Suggestions with certain categories can be boosted higher than others. The following filters suggestions by categories and additionally boosts suggestions associated with some categories:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	POST place/_search?pretty { "suggest": { "place_suggestion" : { "prefix" : "tim", "completion" : { "field" : "suggest", "size": 10, "contexts": { "place_type": [
+																Element:a
+																Element:span
+																	{ "context" : "cafe" }, { "context" : "restaurants", "boost": 2 } ] } } } } }
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	The context query filter suggestions associated with categories
+																Element:span
+																	and
+																Element:em
+																	cafe
+																Element:span
+																	and boosts the suggestions associated with
+																Element:em
+																	restaurants
+																Element:span
+																	by a factor of
+																Element:em
+																	restaurants
+																Element:code
+																	2
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	In addition to accepting category values, a context query can be composed of multiple category context clauses. The following parameters are supported for a
+																Element:code
+																	category
+																	context clause:
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:colgroup
+																Element:col
+																Element:col
+																Element:tbody
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	context
+																Element:td
+																Element:p
+																	The value of the category to filter/boost on. This is mandatory.
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	boost
+																Element:td
+																Element:p
+																	The factor by which the score of the suggestion should be boosted, the score is computed by multiplying the boost with the suggestion weight, defaults to
+																Element:code
+																	1
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	prefix
+																Element:td
+																Element:p
+																	Whether the category value should be treated as a prefix or not. For example, if set to
+																Element:code
+																	true
+																	, you can filter category of
+																Element:span
+																	,
+																Element:em
+																	type1
+																Element:span
+																	and so on, by specifying a category prefix of
+																Element:em
+																	type2
+																Element:span
+																	. Defaults to
+																Element:em
+																	type
+																Element:code
+																	false
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Geo location Context
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A
+													Element:code
+														geo
+														context allows you to associate one or more geo points or geohashes with suggestions at index time. At query time, suggestions can be filtered and boosted if they are within a certain distance of a specified geo location.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Internally, geo points are encoded as geohashes with the specified precision.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Geo Mapping
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	In addition to the
+																Element:code
+																	path
+																	setting,
+																Element:code
+																	geo
+																	context mapping accepts the following settings:
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:colgroup
+																Element:col
+																Element:col
+																Element:tbody
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	precision
+																Element:td
+																Element:p
+																	This defines the precision of the geohash to be indexed and can be specified as a distance value (
+																Element:code
+																	5m
+																	,
+																Element:code
+																	10km
+																	etc.), or as a raw geohash precision (
+																Element:code
+																	1
+																	..
+																Element:code
+																	12
+																	). Defaults to a raw geohash precision value of
+																Element:code
+																	6
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The index time
+																Element:code
+																	precision
+																	setting sets the maximum geohash precision that can be used at query time.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Indexing geo contexts
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:code
+																	geo
+																	contexts can be explicitly set with suggestions or be indexed from a geo point field in the document via the
+																Element:code
+																	path
+																	parameter, similar to
+																Element:code
+																	category
+																	contexts. Associating multiple geo location context with a suggestion, will index the suggestion for every geo location. The following indexes a suggestion with two geo location contexts:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	PUT place/shops/1 { "suggest": { "input": "timmy's", "contexts": { "location": [ { "lat": 43.6624803, "lon": -79.3863353 }, { "lat": 43.6624718, "lon": -79.3873227 } ] } } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Geo location Query
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Suggestions can be filtered and boosted with respect to how close they are to one or more geo points. The following filters suggestions that fall within the area represented by the encoded geohash of a geo point:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	POST place/_search { "suggest": { "place_suggestion" : { "prefix" : "tim", "completion" : { "field" : "suggest", "size": 10, "contexts": { "location": { "lat": 43.662, "lon": -79.380 } } } } } }
+															Node:
+															(type) c
+															(layer)5
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	When a location with a lower precision at query time is specified, all suggestions that fall within the area will be considered.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Suggestions that are within an area represented by a geohash can also be boosted higher than others, as shown by the following:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	POST place/_search?pretty { "suggest": { "place_suggestion" : { "prefix" : "tim", "completion" : { "field" : "suggest", "size": 10, "contexts": { "location": [
+																Element:a
+																Element:span
+																	{ "lat": 43.6624803, "lon": -79.3863353, "precision": 2 }, { "context": { "lat": 43.6624803, "lon": -79.3863353 }, "boost": 2 } ] } } } } }
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	The context query filters for suggestions that fall under the geo location represented by a geohash of
+																Element:span
+																	with a precision of
+																Element:em
+																	(43.662, -79.380)
+																Element:span
+																	and boosts suggestions that fall under the geohash representation of
+																Element:em
+																	2
+																Element:span
+																	with a default precision of
+																Element:em
+																	(43.6624803, -79.3863353)
+																Element:span
+																	by a factor of
+																Element:em
+																	6
+																Element:code
+																	2
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	In addition to accepting context values, a context query can be composed of multiple context clauses. The following parameters are supported for a
+																Element:code
+																	category
+																	context clause:
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:colgroup
+																Element:col
+																Element:col
+																Element:tbody
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	context
+																Element:td
+																Element:p
+																	A geo point object or a geo hash string to filter or boost the suggestion by. This is mandatory.
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	boost
+																Element:td
+																Element:p
+																	The factor by which the score of the suggestion should be boosted, the score is computed by multiplying the boost with the suggestion weight, defaults to
+																Element:code
+																	1
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	precision
+																Element:td
+																Element:p
+																	The precision of the geohash to encode the query geo point. This can be specified as a distance value (
+																Element:code
+																	5m
+																	,
+																Element:code
+																	10km
+																	etc.), or as a raw geohash precision (
+																Element:code
+																	1
+																	..
+																Element:code
+																	12
+																	). Defaults to index time precision level.
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	neighbours
+																Element:td
+																Element:p
+																	Accepts an array of precision values at which neighbouring geohashes should be taken into account. precision value can be a distance value (
+																Element:code
+																	5m
+																	,
+																Element:code
+																	10km
+																	etc.) or a raw geohash precision (
+																Element:code
+																	1
+																	..
+																Element:code
+																	12
+																	). Defaults to generating neighbours for index time precision level.
+															Node:
+															(type) c
+															(layer)5
+																Element:span
+																Element:a
+																	« Completion Suggester
+															Node:
+															(type) c
+															(layer)5
+																Element:span
+																Element:a
+																	Multi Search API »
+															Node:
+															(type) c
+															(layer)5
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+										Element:h5
+											Be in the know with the latest and greatest from Elastic.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Thanks for subscribing! We'll keep you updated with new releases.
+															Node:
+															(type) c
+															(layer)5
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

@@ -1,0 +1,476 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Events API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Events API lets your application learn about activity in Egnyte. This means you can find out what has happened since a given moment in time, letting your application respond or react to activity. Currently, this API is in beta and is limited to file system and notes activity. We will progressively add more event types. If you have a need for a specific event type, please email
+				Element:a
+					api-support@egnyte.com
+					to tell us about your use case.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:strong
+					Note: the event stream exposed by this Events API stores the latest 300,000 events, up to a maximum of 30 days. Older events are not accessible via this API.
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+				Element:a
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:span
+											Polling
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our Events API supports polling for changes based on a cursor which indicates a position in the sequence of events that have occurred on your domain. The cursor is a monotonically increasing number that is associated with each event recorded in our global event store. To watch for events, you should get a cursor and periodically poll for new events which have occurred after that event's cursor.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Getting a Cursor
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														To initially get a cursor, you should query the cursor endpoint.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														GET
+														/pubapi/v1/events/cursor
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Request Examples
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:a
+																	HTTP
+																Element:li
+																Element:a
+																	cURL
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /pubapi/v1/events/cursor HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	curl -v -H "Authorization: Bearer 68zc95e3xv954u6k3hbnma3q" \ https://apidemo.egnyte.com/pubapi/v1/events/cursor
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Sample Response Body
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "timestamp":"2015-03-20T20:05:54.000Z", "latest_event_id":4686, "oldest_event_id":4472 }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Response Parameters
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tbody
+																Element:tr
+																Element:th
+																	Element
+																Element:th
+																	Description
+																Element:tr
+																Element:td
+																Element:span
+																	timestamp
+																Element:td
+																	The ISO-8601 formatted timestamp associated with the latest event.
+																Element:tr
+																Element:td
+																Element:span
+																	latest_event_id
+																Element:td
+																	The latest event ID available. Most likely, you will want to update your cursor to this value for future calls.
+																Element:tr
+																Element:td
+																Element:span
+																	oldest_event_id
+																Element:td
+																	The oldest event ID available.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Listing Subsequent Events
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														You should query this endpoint to find what events have occurred after a given cursor.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														When periodically polling this endpoint, please use an interval of 5 minutes or more.
+													Element:li
+														If your cursor is less than the oldest cursor value, you will only receive the events since the oldest cursor value we have.
+													Element:li
+														If you receive a 204 response, there were no events to return after the cursor provided for this user access token.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														GET
+														/pubapi/v1/events?id={cursor_id}
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Request Examples
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:a
+																	HTTP
+																Element:li
+																Element:a
+																	cURL
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /pubapi/v1/events?id=4472 HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	curl -v -H "Authorization: Bearer 68zc95e3xv954u6k3hbnma3q" \ https://apidemo.egnyte.com/pubapi/v1/events?id=4472
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Sample Response Body
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "count":1, "events":[{ "id":4686, "timestamp":"2015-03-20T20:05:54.000Z", "actor":9967960066, "type":"file_system", "action":"delete", "data":{ "target_path":"/Shared/Documents/report.docx", "is_folder":false }, "action_source":"PublicAPI" }], "latest_id":4686 }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Request Parameters
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tbody
+																Element:tr
+																Element:th
+																	Parameter
+																Element:th
+																	Description
+																Element:th
+																	Required
+																Element:tr
+																Element:td
+																Element:span
+																	id
+																Element:td
+																	Generally, this should be the cursor related to the latest event you have seen during previous calls to the Events API. You will receive events that occurred after the event associated with this cursor.
+																Element:td
+																Element:span
+																	Yes
+																Element:tr
+																Element:td
+																Element:span
+																	folder
+																Element:td
+																	You can optionally scope requests to a given folder. When this parameter is specified, we will return events that have occurred at this path. Please note, events are not guaranteed to move with a folder, meaning you will not receive events on a folder that occurred before it was moved.
+																Element:td
+																	No
+																Element:tr
+																Element:td
+																Element:span
+																	suppress
+																Element:td
+																	This parameter is used to filter out events generated by the current application or current user. Allowed values are: app, user, or none (default).
+																Element:td
+																	No
+																Element:tr
+																Element:td
+																Element:span
+																	type
+																Element:td
+																	Limit the result set to only items of a certain type. Currently, this endpoint only supports the "file_system" and "note" types. To get multiple event types, you can use a pipe ("|") character to delimit them. For example "file_system|note" would return both file_system and note event types but no others.
+																Element:td
+																	No
+																Element:tr
+																Element:td
+																Element:span
+																	count
+																Element:td
+																	The maximum number of events to return per page (min 1, default 50, max 100)
+																Element:td
+																	No
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Response Parameters
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tbody
+																Element:tr
+																Element:th
+																	Element
+																Element:th
+																	Description
+																Element:tr
+																Element:td
+																Element:span
+																	count
+																Element:td
+																	The number of results returned.
+																Element:tr
+																Element:td
+																Element:span
+																	events
+																Element:td
+																	A JSON array of event objects.
+																Element:tr
+																Element:td
+																Element:span
+																	id
+																Element:td
+																	The ID of an individual event.
+																Element:tr
+																Element:td
+																Element:span
+																	timestamp
+																Element:td
+																	The ISO-8601 formatted timestamp for when this event was recorded.
+																Element:tr
+																Element:td
+																Element:span
+																	actor
+																Element:td
+																	The numeric ID of the user who performed that action.
+																Element:tr
+																Element:td
+																Element:span
+																	type
+																Element:td
+																	The type of event being reported. Currently, we support the following event types: file_system, note.
+																Element:tr
+																Element:td
+																Element:span
+																	action
+																Element:td
+																	The action associated with this event. Currently, this can be: create, delete, move, copy and rename.
+																Element:tr
+																Element:td
+																Element:span
+																	data
+																Element:td
+																	This field contains additional data specific to the event type and action.
+																Element:tr
+																Element:td
+																Element:span
+																	action_source
+																Element:td
+																	The source of the event. Examples include "WebUI," "SyncEngine," "Mobile," "PublicAPI", "WebEdit", "System", "VPC", "Other". "Other" encompasses the following actions:
+																Element:span
+																	FTP, AD_KIT, EGD, OUTLOOK, GDRIVE_INTEG, SALESFORCE, MALWARE_DETECTION, TRASH_CLEANUP, BULK_IMPORT, UNKNOWN.
+																Element:tr
+																Element:td
+																Element:span
+																	latest_id
+																Element:td
+																	The latest event ID returned in this event set. Most likely, you will want to update your cursor to this value for future calls.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:span
+																	version 14
+																Element:span
+																	as of
+																Element:abbr
+																	6 hours ago
+																Element:span
+																	by
+																Element:span
+																Element:a
+																	Grant Yang
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:span
+																	Previous:
+																Element:a
+																	Permissions API
+																Element:li
+																Element:span
+																	Up:
+																Element:a
+																	Overview
+																Element:li
+																Element:span
+																	Next:
+																Element:a
+																	Search API
+															Node:
+															(type) c
+															(layer)5
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Docs Navigation
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Overview
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Authentication
+							Element:li
+							Element:a
+								File System API
+							Element:li
+							Element:a
+								Permissions API
+							Element:li
+							Element:a
+								Events API
+							Element:li
+							Element:a
+								Search API
+							Element:li
+							Element:a
+								Links API
+							Element:li
+							Element:a
+								User Management API
+							Element:li
+							Element:a
+								Group Management API
+							Element:li
+							Element:a
+								Audit Reporting API
+							Element:li
+							Element:a
+								UI Integration Framework
+							Element:li
+							Element:a
+								Trash API
+							Element:li
+							Element:a
+								Comments API
+							Element:li
+							Element:a
+								Metadata API
+							Element:li
+							Element:a
+								Embedded UI API
+							Element:li
+							Element:a
+								Bookmarks API
+							Element:li
+							Element:a
+								Folder Options API
+							Element:li
+							Element:a
+								Best Practices
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Get API Key
+							Element:li
+							Element:a
+								API Docs
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Explore APIs
+							Element:li
+							Element:a
+								Explore SDKs
+						Node:
+						(type) c
+						(layer)2
+							Element:noscript
+							Element:img

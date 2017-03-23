@@ -1,0 +1,687 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Update API
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The update API allows to update a document based on a script provided. The operation gets the document (collocated with the shard) from the index, runs the script (with optional script language and parameters), and index back the result (also allows to delete, or ignore the operation). It uses versioning to make sure no updates have happened during the "get" and "reindex".
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note, this operation still means full reindex of the document, it just removes some network roundtrips and reduces chances of version conflicts between the get and the index. The
+							Element:code
+								_source
+								field needs to be enabled for this feature to work.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example, lets index a simple doc:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT test/type1/1 { "counter" : 1, "tags" : ["red"] }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Scripted updates
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now, we can execute a script that would increment the counter:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/type1/1/_update { "script" : { "inline": "ctx._source.counter += params.count", "lang": "painless", "params" : { "count" : 4 } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We can add a tag to the list of tags (note, if the tag exists, it will still add it, since its a list):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/type1/1/_update { "script" : { "inline": "ctx._source.tags.add(params.tag)", "lang": "painless", "params" : { "tag" : "blue" } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In addition to
+										Element:code
+											_source
+											, the following variables are available through the
+										Element:code
+											ctx
+											map:
+										Element:code
+											_index
+											,
+										Element:code
+											_type
+											,
+										Element:code
+											_id
+											,
+										Element:code
+											_version
+											,
+										Element:code
+											_routing
+											,
+										Element:code
+											_parent
+											, and
+										Element:code
+											_now
+											(the current timestamp).
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We can also add a new field to the document:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/type1/1/_update { "script" : "ctx._source.new_field = \"value_of_new_field\"" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Or remove a field from the document:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/type1/1/_update { "script" : "ctx._source.remove(\"new_field\")" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											And, we can even change the operation that is executed. This example deletes the doc if the
+										Element:code
+											tags
+											field contain
+										Element:code
+											green
+											, otherwise it does nothing (
+										Element:code
+											noop
+											):
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/type1/1/_update { "script" : { "inline": "if (ctx._source.tags.contains(params.tag)) { ctx.op = \"delete\" } else { ctx.op = \"none\" }", "lang": "painless", "params" : { "tag" : "green" } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Updates with a partial document
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The update API also support passing a partial document, which will be merged into the existing document (simple recursive merge, inner merging of objects, replacing core "keys/values" and arrays). For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/type1/1/_update { "doc" : { "name" : "new_name" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If both
+										Element:code
+											doc
+											and
+										Element:code
+											script
+											are specified, then
+										Element:code
+											doc
+											is ignored. Best is to put your field pairs of the partial document in the script itself.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Detecting noop updates
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If
+										Element:code
+											doc
+											is specified its value is merged with the existing
+										Element:code
+											_source
+											. By default updates that don’t change anything detect that they don’t change anything and return "result": "noop" like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/type1/1/_update { "doc" : { "name" : "new_name" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If
+										Element:code
+											name
+											was
+										Element:code
+											new_name
+											before the request was sent then the entire update request is ignored. The
+										Element:code
+											result
+											element in the response returns
+										Element:code
+											noop
+											if the request was ignored.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_shards": { "total": 0, "successful": 0, "failed": 0 }, "_index": "test", "_type": "type1", "_id": "1", "_version": 6, "result": noop }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can disable this behavior by setting "detect_noop": false like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/type1/1/_update { "doc" : { "name" : "new_name" }, "detect_noop": false }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Upserts
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the document does not already exist, the contents of the
+										Element:code
+											upsert
+											element will be inserted as a new document. If the document does exist, then the
+										Element:code
+											script
+											will be executed instead:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST test/type1/1/_update { "script" : { "inline": "ctx._source.counter += params.count", "lang": "painless", "params" : { "count" : 4 } }, "upsert" : { "counter" : 1 } }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+													Element:code
+														scripted_upsert
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you would like your script to run regardless of whether the document exists or not — i.e. the script handles initializing the document instead of the
+													Element:code
+														upsert
+														element — then set
+													Element:code
+														scripted_upsert
+														to
+													Element:code
+														true
+														:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST sessions/session/dh3sgudg8gsrgl/_update { "scripted_upsert":true, "script" : { "id": "my_web_session_summariser", "params" : { "pageViewEvent" : { "url":"foo.com/bar", "response":404, "time":"2014-01-01 12:32" } } }, "upsert" : {} }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+													Element:code
+														doc_as_upsert
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Instead of sending a partial
+													Element:code
+														doc
+														plus an
+													Element:code
+														upsert
+														doc, setting
+													Element:code
+														doc_as_upsert
+														to
+													Element:code
+														true
+														will use the contents of
+													Element:code
+														doc
+														as the
+													Element:code
+														upsert
+														value:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST test/type1/1/_update { "doc" : { "name" : "new_name" }, "doc_as_upsert" : true }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Parameters
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The update operation supports the following query-string parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											retry_on_conflict
+										Element:td
+										Element:p
+											In between the get and indexing phases of the update, it is possible that another process might have already updated the same document. By default, the update will fail with a version conflict exception. The
+										Element:code
+											retry_on_conflict
+											parameter controls how many times to retry the update before finally throwing an exception.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											routing
+										Element:td
+										Element:p
+											Routing is used to route the update request to the right shard and sets the routing for the upsert request if the document being updated doesn’t exist. Can’t be used to update the routing of an existing document.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											parent
+										Element:td
+										Element:p
+											Parent is used to route the update request to the right shard and sets the parent for the upsert request if the document being updated doesn’t exist. Can’t be used to update the
+										Element:code
+											parent
+											of an existing document. If an alias index routing is specified then it overrides the parent routing and it is used to route the request.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											timeout
+										Element:td
+										Element:p
+											Timeout waiting for a shard to become available.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											wait_for_active_shards
+										Element:td
+										Element:p
+											The number of shard copies required to be active before proceeding with the update operation. See
+										Element:a
+											here
+											for details.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											refresh
+										Element:td
+										Element:p
+											Control when the changes made by this request are visible to search. See
+										Element:a
+											.
+										Element:em
+										Element:code
+											?refresh
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											_source
+										Element:td
+										Element:p
+											Allows to control if and how the updated source should be returned in the response. By default the updated source is not returned. See
+										Element:a
+											for details.
+										Element:code
+											source filtering
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											version
+											&
+										Element:code
+											version_type
+										Element:td
+										Element:p
+											The update API uses the Elasticsearch’s versioning support internally to make sure the document doesn’t change during the update. You can use the
+										Element:code
+											version
+											parameter to specify that the document should only be updated if its version matches the one specified. By setting version type to
+										Element:code
+											force
+											you can force the new version of the document after update (use with care! with
+										Element:code
+											force
+											there is no guarantee the document didn’t change).
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											The update API does not support external versioning
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											External versioning (version types
+										Element:code
+											external
+											&
+										Element:code
+											external_gte
+											) is not supported by the update API as it would result in Elasticsearch version numbers being out of sync with the external system. Use the
+										Element:a
+											instead.
+										Element:code
+											index
+											API
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Delete By Query API
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Update By Query API »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

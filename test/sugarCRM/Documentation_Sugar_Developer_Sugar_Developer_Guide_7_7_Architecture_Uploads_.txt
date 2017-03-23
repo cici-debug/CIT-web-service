@@ -1,0 +1,512 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Uploads
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The upload directory is used to store files uploaded for imports, attachments, documents, and module loadable packages.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Uploads
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The upload directory is used to store any files uploaded to Sugar. By default, anything uploaded to Sugar is stored in the
+							Element:code
+								./upload/
+								directory. You can change this directory by updating the
+							Element:a
+								upload_dir
+								configuration variable. Once uploaded, the file will be stored in this directory with a GUID name.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should note that when uploading files to Sugar, there are three file size limits to configure. The first two limits are your PHP upload_max_filesize and post_max_size which are configured in your php.ini. The second limit is the sugar configuration setting for
+							Element:a
+								upload_maxsize
+								, which will restrict the upload limit from within Sugar. This setting can also be modified in the application via Admin > System Settings. The smallest of these three values will be honored when an oversized file has been uploaded.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You should note that the PHP-defined file size settings and the upload directory cannot be modified for instances hosted on On-Demand.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Upload Extensions
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, several extension types are restricted due to security issues. Any files uploaded with these extensions will have '.txt' appended to it. The restricted extensions are listed below:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											php
+										Element:li
+											php3
+										Element:li
+											php4
+										Element:li
+											php5
+										Element:li
+											pl
+										Element:li
+											cgi
+										Element:li
+											py
+										Element:li
+											asp
+										Element:li
+											cfm
+										Element:li
+											js
+										Element:li
+											vbs
+										Element:li
+											html
+										Element:li
+											htm
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can add or remove extensions to this list by modifying sugar configuration setting for
+										Element:a
+											upload_badext
+											. You should note that this setting cannot be modified for instances hosted on On-Demand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								How Files Are Stored
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Note Attachments
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When a file is uploaded to Sugar attached to a note, the file will be moved to the upload directory with a GUID name matching that of the notes id. The attributes of the file, such as filename and file_mime_type, will be stored in the note record.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The SQL to fetch information about a notes attachment is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														SELECT filename, file_mime_type FROM notes;
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Email Attachments
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Email attachments are stored the same way as note attachments. When an email is imported to Sugar, the file will be moved to the upload directory with a GUID file name matching that of the notes id. The attributes of the file, such as filename and file_mime_type, will be stored in the note record and the note will have a parent_type of 'Emails'. This relates the attachment to the emails content.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The SQL to fetch information about an emails attachment is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														SELECT filename, file_mime_type FROM notes INNER JOIN emails ON notes.parent_type = 'Emails' AND notes.parent_id = emails.id INNER JOIN emails_text ON emails.id = emails_text.email_id;
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Picture Fields
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Picture fields will upload the image to the upload directory with a GUID name and store the GUID in the database field on the record. An example of picture field can be found on the Contacts module.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For a contact, the id of the picture attachment can be found with the SQL below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														SELECT picture FROM contacts;
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Document Attachments
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Files uploaded to Sugar as documents will be moved to the upload directory with a GUID name matching the document revision id. The document revision ID can be found in the document_revision_id field on the documents table. This field maps to the id field on the document_revisions table. The attributes of the file, such as filename and file_mime_type, are stored in the document revision record.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The SQL to fetch information about a documents attachment is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														SELECT filename, file_mime_type, file_ext FROM document_revisions INNER JOIN documents ON documents.id = document_revisions.document_id;
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Knowledge Base Attachments
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When working with the Knowledge Base, files and images attached to the form before the record is saved are uploaded and stored in the upload directory with the name
+													Element:code
+														<GUID><File Name>
+														using the KbdocAttachments action found in
+													Element:code
+														./modules/KBDocuments/KbdocAttachments.php
+														. Once the record is saved, these files are copied and saved in the upload directory with a GUID name matching that of the document revision id.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The SQL to fetch information about a knowledge base attachment is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														SELECT document_revisions.filename, document_revisions.file_mime_type, document_revisions.file_ext FROM document_revisions INNER JOIN kbdocument_revisions ON document_revisions.id = kbdocument_revisions.document_revision_id INNER JOIN kbdocuments ON kbdocument_revisions.kbdocument_id = kbdocuments.id;
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Module Loadable Packages
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Module Loader packages are stored in the system differently than other uploads. They are uploaded to the ./upload/upgrades/module/ directory with their original file name. The details of the package, such as installation status and description, are stored in the upgrade_history table.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The SQL to fetch information about an installed package is shown below:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														SELECT * FROM upgrade_history;
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														CSV Imports
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When importing records into Sugar, the most recent uploaded CSV file is stored in the upload directory as
+													Element:code
+														IMPORT_<module>_<user id>
+														. Once the import has been run, the results of the import are stored in
+													Element:code
+														./upload/import/
+														directory using a predefined format using the current users id. The files created will be as follows:
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:strong
+														dupes_<user id>.csv
+														: The list of duplicate records found during the import
+													Element:li
+													Element:strong
+														dupesdisplay_<user_id>.csv
+														: The HTML formatted CSV for display to the user after import
+													Element:li
+													Element:strong
+														error_<user id>.csv
+														: The list of errors encountered during the import
+													Element:li
+													Element:strong
+														errorrecords_<user_id>.csv
+														: The HTML formatted CSV for display to the user after import
+													Element:li
+													Element:strong
+														errorrecordsonly_<user id>.csv
+														: The list of records that encountered an error
+													Element:li
+													Element:strong
+														status_<user id>.csv
+														: Determines the status of the users import
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Topics
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Working with File Uploads
+							Element:p
+								The UploadFile class handles the various tasks when uploading a file.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 04/04/2016 05:11pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

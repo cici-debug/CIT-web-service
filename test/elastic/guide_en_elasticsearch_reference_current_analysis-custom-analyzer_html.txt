@@ -1,0 +1,522 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Custom Analyzer
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When the built-in analyzers do not fulfill your needs, you can create a
+							Element:code
+								custom
+								analyzer which uses the appropriate combination of:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								zero or more
+							Element:a
+								character filters
+							Element:li
+								a
+							Element:a
+								tokenizer
+							Element:li
+								zero or more
+							Element:a
+								token filters
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Configuration
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											custom
+											analyzer accepts the following parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											tokenizer
+										Element:td
+										Element:p
+											A built-in or customised
+										Element:a
+											tokenizer
+											. (Required)
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											char_filter
+										Element:td
+										Element:p
+											An optional array of built-in or customised
+										Element:a
+											character filters
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											filter
+										Element:td
+										Element:p
+											An optional array of built-in or customised
+										Element:a
+											token filters
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											position_increment_gap
+										Element:td
+										Element:p
+											When indexing an array of text values, Elasticsearch inserts a fake "gap" between the last term of one value and the first term of the next value to ensure that a phrase query doesn’t match two terms from different array elements. Defaults to
+										Element:code
+											100
+											. See
+										Element:a
+											for more.
+										Element:code
+											position_increment_gap
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Example configuration
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is an example that combines the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+											Character Filter
+										Element:dd
+										Element:ul
+										Element:li
+										Element:a
+											HTML Strip Character Filter
+										Element:dt
+										Element:span
+											Tokenizer
+										Element:dd
+										Element:ul
+										Element:li
+										Element:a
+											Standard Tokenizer
+										Element:dt
+										Element:span
+											Token Filters
+										Element:dd
+										Element:ul
+										Element:li
+										Element:a
+											Lowercase Token Filter
+										Element:li
+										Element:a
+											ASCII-Folding Token Filter
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "settings": { "analysis": { "analyzer": { "my_custom_analyzer": { "type": "custom", "tokenizer": "standard", "char_filter": [ "html_strip" ], "filter": [ "lowercase", "asciifolding" ] } } } } } POST my_index/_analyze { "analyzer": "my_custom_analyzer", "text": "Is this <b>déjà vu</b>?" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above example produces the following terms:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											[ is, this, deja, vu ]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The previous example used tokenizer, token filters, and character filters with their default configurations, but it is possible to create configured versions of each and to use them in a custom analyzer.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is a more complicated example that combines the following:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+											Character Filter
+										Element:dd
+										Element:ul
+										Element:li
+										Element:a
+											Mapping Character Filter
+											, configured to replace
+										Element:code
+											:)
+											with
+										Element:code
+											_happy_
+											and
+										Element:code
+											:(
+											with
+										Element:code
+											_sad_
+										Element:dt
+										Element:span
+											Tokenizer
+										Element:dd
+										Element:ul
+										Element:li
+										Element:a
+											Pattern Tokenizer
+											, configured to split on punctuation characters
+										Element:dt
+										Element:span
+											Token Filters
+										Element:dd
+										Element:ul
+										Element:li
+										Element:a
+											Lowercase Token Filter
+										Element:li
+										Element:a
+											Stop Token Filter
+											, configured to use the pre-defined list of English stop words
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here is an example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "settings": { "analysis": { "analyzer": { "my_custom_analyzer": { "type": "custom", "char_filter": [ "emoticons"
+										Element:a
+										Element:span
+											], "tokenizer": "punctuation",
+										Element:img
+										Element:a
+										Element:span
+											"filter": [ "lowercase", "english_stop"
+										Element:img
+										Element:a
+										Element:span
+											] } }, "tokenizer": { "punctuation": {
+										Element:img
+										Element:a
+										Element:span
+											"type": "pattern", "pattern": "[ .,!?]" } }, "char_filter": { "emoticons": {
+										Element:img
+										Element:a
+										Element:span
+											"type": "mapping", "mappings": [ ":) => _happy_", ":( => _sad_" ] } }, "filter": { "english_stop": {
+										Element:img
+										Element:a
+										Element:span
+											"type": "stop", "stopwords": "_english_" } } } } } POST my_index/_analyze { "analyzer": "my_custom_analyzer", "text": "I'm a :) person, and you?" }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											emoticon
+											character filter,
+										Element:code
+											punctuation
+											tokenizer and
+										Element:code
+											english_stop
+											token filter are custom implementations which are defined in the same index settings.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above example produces the following terms:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											[ i'm, _happy_, person, you ]
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Fingerprint Analyzer
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Normalizers »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

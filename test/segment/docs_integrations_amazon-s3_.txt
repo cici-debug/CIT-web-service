@@ -1,0 +1,351 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Amazon S3 Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					Amazon S3
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to Amazon S3 in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The Amazon S3 integration puts the raw logs of the data we’re receiving into your personal S3 bucket.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								The data is copied into your bucket every hour around :40 minute mark. You may see multiple files over a period of time depending on the volume of data copied.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Required Steps
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Create a bucket with its region as
+							Element:strong
+								us-east (us-standard)
+								.
+							Element:li
+								Create a folder “segment-logs” inside the bucket.
+							Element:li
+								Edit your bucket policy to allow Segment to copy files into the bucket:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "Version": "2008-10-17", "Id": "Policy1425281770533", "Statement": [ { "Sid": "Stmt1425281765688", "Effect": "Allow", "Principal": { "AWS": "arn:aws:iam::107630771604:user/s3-copy" }, "Action": "s3:PutObject", "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/segment-logs/*" } ] }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								the
+							Element:code
+								Resource
+								property string
+							Element:strong
+								must
+								end with
+							Element:code
+								/*
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Specifically, this adds the ability to
+							Element:code
+								s3:PutObject
+								for the Segment s3-copy user for your bucket.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can edit your bucket policy in the
+							Element:a
+								AWS management console
+								by right-clicking the bucket and then selecting the “edit policy” option.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Lastly, enable the Amazon S3 integration in your Segment Integrations page and put in your bucket name in the settings. It will take about an hour to start receiving data.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Data format
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Your logs will be stored as gzipped, newline-separated JSON containing the full call information. For a list of supported properties, you’ll want to check out our
+							Element:a
+								Spec
+								docs.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The logs themselves are binned by day, and named according to the following file format:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								s3://{bucket}/segment-logs/{source-id}/{received-day}/filename.gz
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The received-day will refer to the UTC day that the files were received by our API, which makes it easy to find all calls received within a certain timeframe.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How can I download the data from my bucket?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We’ve had the most luck using the
+										Element:a
+											AWS CLI
+											and writing a short script to download particular days, one at a time. We’ve found AWS CLI to be significantly faster than
+										Element:a
+											s3cmd
+											because it downloads files in parallel.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											NOTE
+											: S3 transparently decompresses the files for most clients. However, if you would like to access the raw gzipped data for whatever reason, you can programmatically download the file using their
+										Element:a
+											SDK
+											and setting
+										Element:code
+											ResponseContentEncoding: none
+											(doesn’t work on the CLI). You can also manually remove the metadata on the file (Content-Type: text/plain and Content-Encoding: gzip) through the AWS interface, which will allow you to download the file as gzipped.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To set up AWS CLI, you’ll need to first install it. There are
+										Element:a
+											detailed instructions here
+											, or this will generally work for linux machines:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$ sudo apt-get install awscli
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Then you’ll need to configure AWS CLI with your Access Key ID and Secret Access Key. You can create or find these keys in your
+										Element:a
+											Amazon IAM user management console
+											. Then run the following command which will prompt you for the access keys:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$ aws configure
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now you’re ready to download some logs!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To see a list of the most recent log folders:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$ aws s3 ls s3://{bucket}/segment-logs/{source-id}/ | tail -10
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To download the files for a specific day:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$ aws s3 sync s3://{bucket}/segment-logs/{source-id}/{received-day} .
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Or to download
+										Element:em
+											all
+											files for a source:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											$ aws s3 sync s3://{bucket}/segment-logs/{source-id} .
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To put the files in a specific folder replace the
+										Element:code
+											.
+											at the end (“current directory”) with the desired directory like
+										Element:code
+											~/Downloads/logs
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+							Element:td
+							Element:td
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Bucket Name
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your S3 bucket name.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!

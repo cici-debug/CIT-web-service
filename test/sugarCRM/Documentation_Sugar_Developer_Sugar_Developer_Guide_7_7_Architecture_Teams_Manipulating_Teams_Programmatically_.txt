@@ -1,0 +1,362 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Manipulating Teams Programmatically
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								How to manipulate team relationships.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Fetching Teams
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To fetch teams related to a bean, you will need to retrieve an instance of a TeamSet object and use the getTeams() method to retrieve the teams using the team_set_id. An example is shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								//Create a TeamSet bean - no BeanFactory require_once('modules/Teams/TeamSet.php'); $teamSetBean = new TeamSet(); //Retrieve the bean $bean = BeanFactory::getBean($module, $record_id); //Retrieve the teams from the team_set_id $teams = $teamSetBean->getTeams($bean->team_set_id);
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Adding Teams
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To add a team to a bean, you will need to load the teams relationship and use the add() method. This method accepts an array of team ids to add. An example is shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								//Retrieve the bean $bean = BeanFactory::getBean($module, $record_id); //Load the team relationship $bean->load_relationship('teams'); //Add the teams $bean->teams->add( array( $team_id_1, $team_id_2 ) );
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Considerations
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											If adding teams in a logic hook, the recommended approach is to use an after_save hook rather than a before_save hook as the $_REQUEST may reset any changes you make.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Removing Teams
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To remove a team from a bean, you will need to load the teams relationship and use the remove() method. This method accepts an array of team ids to remove. An example is shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								//Retrieve the bean $bean = BeanFactory::getBean($module, $record_id); //Load the team relationship $bean->load_relationship('teams'); //Remove the teams $bean->teams->remove( array( $team_id_1, $team_id_2 ) );
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Considerations
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											If removing teams in a logic hook, the recommended approach is to use an after_save hook rather than a before_save hook as the $_REQUEST may reset any changes you make.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Replacing Team Sets
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To replace all of the teams related to a bean, you will need to load the teams relationship and use the replace() method. This method accepts an array of team ids. An example is shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								//Retrieve the bean $bean = BeanFactory::getBean($module, $record_id); //Load the team relationship $bean->load_relationship('teams'); //Set the primary team $bean->team_id = $team_id_1 //Replace the teams $bean->teams->replace( array( $team_id_1, $team_id_2 ) ); //Save to update primary team $bean->save()
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Considerations
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											If replacing teams in a logic hook, the recommended approach is to use an after_save hook rather than a before_save hook as the $_REQUEST or workflow may reset any changes you make.
+										Element:li
+											This method does not replace (or set) the primary team for the record. When replacing teams, you need to also make sure that the primary team, determined by the team_id field, is set appropriately and included in the replacement ids. If this is being done in a logic hook you should set the primary team in a before_save hook and replace the team set in the after_save hook.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											//before save function function before_save_hook($bean, $event, $arguments) { $bean->team_id = $team_id_1; } //after save function function after_save_hook($bean, $event, $arguments) { $bean->teams->replace( array( $team_id_1, $team_id_2 ) ); }
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Creating and Retrieving Team Set IDs
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To create or retrieve the team_set_id for a group of teams, you will need to retrieve an instance of a TeamSet object and use the addTeams() method. If a team set does not exist, this method will create it and return an id. An example is below:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								//Create a TeamSet bean - no BeanFactory require_once('modules/Teams/TeamSet.php'); $teamSetBean = new TeamSet(); //Retrieve/create the team_set_id $team_set_id = $teamSetBean->addTeams( array( $team_id_1, $team_id_2 ) );
+						Node:
+						(type) c
+						(layer)2
+							Element:br
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 10/08/2015 03:56pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

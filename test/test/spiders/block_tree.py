@@ -156,25 +156,29 @@ def construct_and_save_tree(body, url, name):
 	# print url
 	if -1 != url.find("com/"):
 		# print "here"
-		filename = url.split("com/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")
+		filename = url.split("com/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")	
 	elif -1 != url.find("io/"):
-		filename = url.split("io/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+		filename = url.split("io/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")	
 	elif -1 != url.find("net/"):
-		filename = url.split("net/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+		filename = url.split("net/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
 	elif -1 != url.find("tv/"):
-		filename = url.split("tv/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+		filename = url.split("tv/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
 	elif -1 != url.find("ly/"):
-		filename = url.split("ly/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+		filename = url.split("ly/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
 	elif -1 != url.find("co/"):
-		filename = url.split("co/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+		filename = url.split("co/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
 	elif -1 != url.find("edu/"):
-		filename = url.split("edu/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+		filename = url.split("edu/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
 	elif -1 != url.find("info/"):
-		filename = url.split("info/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+		filename = url.split("info/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
 	elif -1 != url.find("org/"):
-		filename = url.split("org/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+		filename = url.split("org/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
 	elif -1 != url.find("ch/"):
-		filename = url.split("ch/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_")	
+		filename = url.split("ch/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
+	elif -1 != url.find("ng/"):
+		filename = url.split("ng/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
+	elif -1 != url.find("info/"):
+		filename = url.split("in/")[1].replace("/", "_").replace(".", "_").replace("#", "_").replace("+", "_").replace("?", "_").replace("=", "_").replace(":", "_").replace("&", "_")
 	
 	else:
 		filename = url.replace("/", "_")

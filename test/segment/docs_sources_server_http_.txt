@@ -1,0 +1,1823 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					HTTP Tracking API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The Segment HTTP Tracking API lets you record analytics data from any website or application. The requests hit our servers, and we route your data to any integration you want!
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					We have native
+				Element:a
+					sources
+					for most use cases (Javascript, iOS, etc.) that are all built for high-performance and are open-source. But sometimes you may want to send to the HTTP API directly—that’s what this reference is for.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Headers
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Authentication
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Tracking API requests are sorted by a source’s
+										Element:strong
+											Write Key
+											, which must be sent with each request using
+										Element:a
+											HTTP Basic Auth
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Basic Auth base64 encodes a
+										Element:code
+											'username:password'
+											and prepends it with the string
+										Element:code
+											'Basic '
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The Basic Auth username should be the
+										Element:strong
+											Write Key
+											and the password should be left empty.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If a Segment source’s
+										Element:strong
+											Write Key
+											is
+										Element:code
+											'abc123'
+											, the final result of the should be
+										Element:code
+											'Basic YWJjMTIzOg=='
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This is passed in the authorization header like so
+										Element:code
+											'Authorization: Basic YWJjMTIzOg=='
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Content-Type
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to send data to our HTTP API, a content-type header must be set to
+										Element:code
+											'application/json'
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Errors
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We currently return a
+							Element:code
+								200
+								response for all API requests so debugging should be done in the Segment Debugger. The only exception is if the request is too large / json is invalid it will respond with a
+							Element:code
+								400
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We’re hard at work surfacing more errors and more helpful responses to our users. If you have any suggestions,
+							Element:a
+								let us know
+								or kick off a conversation in the
+							Element:a
+								Segment Community
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Rate Limits
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There is no hard rate limit at which point Segment will drop your data. However, to avoid processing delays we ask customers to send requests at a maximum rate of 50 requests per second. Requests include batches sent with the
+							Element:a
+								batch method
+								, which means you can send a large batch of events inside of a single request. If you need to import at a faster rate please
+							Element:a
+								contact us
+								first. This rate limit is per connection, not per write key.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								identify
+								lets you tie a user to their actions and record traits about them. It includes a unique User ID and any optional traits you know about them.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								We recommend calling
+							Element:code
+								identify
+								a single time when the user’s account is first created, and only identifying again later when their traits change.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								identify
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								POST https://api.segment.io/v1/identify
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "userId": "019mr8mf4r", "traits": { "email": "pgibbons@initech.com", "name": "Peter Gibbons", "industry": "Technology" }, "context": { "ip": "24.5.68.47" }, "timestamp": "2012-12-02T00:30:08.276Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This call is identifying the user by his unique User ID (the one you know him by in your database) and labeling him with
+							Element:code
+								email
+								,
+							Element:code
+								name
+								, and
+							Element:code
+								industry
+								traits.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymousId
+							Element:em
+								optional
+							Element:td
+								String
+							Element:td
+								A pseudo-unique substitute for a User ID, for cases when you don’t have an absolutely unique identifier
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of extra information that provides useful context about a message, but is not directly related to the API call like
+							Element:code
+								ip
+								address or
+							Element:code
+								locale
+							Element:p
+								See the
+							Element:a
+								Context field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of integrations to either enable or disable
+							Element:p
+								See the
+							Element:a
+								Integrations field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								optional
+							Element:td
+								Date
+							Element:td
+								Timestamp when the message itself took place, defaulted to the current time by the Segment Tracking API
+							Element:p
+								It is an
+							Element:a
+								ISO-8601
+								date string
+							Element:p
+								If the event just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past, make sure you to provide a
+							Element:code
+								timestamp
+								.See the
+							Element:a
+								Timestamps fields docs
+								for more detail.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Free-form dictionary of traits of the user, like
+							Element:code
+								email
+								or
+							Element:code
+								name
+								.
+							Element:p
+								See the
+							Element:a
+								Traits field docs
+								for a list of reserved trait names
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								required
+							Element:td
+								String
+							Element:td
+								Unique identifier for the user in your database
+							Element:p
+								A
+							Element:code
+								userId
+							Element:em
+								or
+							Element:code
+								anonymousId
+								is required
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								identify method payload
+								in our
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								lets you record the actions your users perform.Every action triggers what we call an “event”, which can also have associated properties.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to track events that are indicators of success for your site, like
+							Element:strong
+								Signed Up
+								,
+							Element:strong
+								Item Purchased
+								or
+							Element:strong
+								Article Bookmarked
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To get started, we recommend tracking just a few important events. You can always add more later!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								track
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								POST https://api.segment.io/v1/track
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "userId": "019mr8mf4r", "event": "Item Purchased", "properties": { "name": "Leap to Conclusions Mat", "revenue": 14.99 }, "context": { "ip": "24.5.68.47" }, "timestamp": "2012-12-02T00:30:12.984Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								track
+								event properties can be anything you want to record. In this case,
+							Element:code
+								name
+								and
+							Element:code
+								revenue
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								track
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymousId
+							Element:em
+								optional
+							Element:td
+								String
+							Element:td
+								A pseudo-unique substitute for a User ID, for cases when you don’t have an absolutely unique identifier
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of extra information that provides useful context about a message, but is not directly related to the API call like
+							Element:code
+								ip
+								address or
+							Element:code
+								locale
+							Element:p
+								See the
+							Element:a
+								Context field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								event
+							Element:em
+								required
+							Element:td
+								String
+							Element:td
+								Name of the action that a user has performed.
+							Element:p
+								See the
+							Element:a
+								Event field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of integrations to either enable or disable
+							Element:p
+								See the
+							Element:a
+								Integrations field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Free-form dictionary of properties of the event, like
+							Element:code
+								revenue
+							Element:p
+								See the
+							Element:a
+								Properties docs
+								for a list of reserved property names
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								optional
+							Element:td
+								Date
+							Element:td
+								Timestamp when the message itself took place, defaulted to the current time by the Segment Tracking API
+							Element:p
+								It is an
+							Element:a
+								ISO-8601
+								date string
+							Element:p
+								If the event just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past, make sure you to provide a
+							Element:code
+								timestamp
+								.See the
+							Element:a
+								Timestamps fields docs
+								for more detail.
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								required
+							Element:td
+								String
+							Element:td
+								Unique identifier for the user in your database
+							Element:p
+								A
+							Element:code
+								userId
+							Element:em
+								or
+							Element:code
+								anonymousId
+								is required
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on
+							Element:strong
+								best practices in event naming
+								as well as the
+							Element:strong
+								in our
+							Element:code
+								track
+								method payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								method lets you record page views on your website, along with optional extra information about the page being viewed.
+							Element:code
+								page
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								page
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								POST https://api.segment.io/v1/page
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "userId": "019mr8mf4r", "name": "Tracking HTTP API", "timestamp": "2012-12-02T00:31:29.738Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								page
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymousId
+							Element:em
+								optional
+							Element:td
+								String
+							Element:td
+								A pseudo-unique substitute for a User ID, for cases when you don’t have an absolutely unique identifier
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of extra information that provides useful context about a message, but is not directly related to the API call like
+							Element:code
+								ip
+								address or
+							Element:code
+								locale
+							Element:p
+								See the
+							Element:a
+								Context field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of integrations to either enable or disable
+							Element:p
+								See the
+							Element:a
+								Integrations field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								name
+							Element:em
+								optional
+							Element:td
+								String
+							Element:td
+								Name of the page
+							Element:p
+								For example, most sites have a “Signup” page that can be useful to tag, so you can see users as they move through your funnel.
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Free-form dictionary of properties of the page, like
+							Element:code
+								url
+								and
+							Element:code
+								referrer
+							Element:p
+								See the
+							Element:a
+								Properties field docs
+								for a list of reserved property names
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								optional
+							Element:td
+								Date
+							Element:td
+								Timestamp when the message itself took place, defaulted to the current time by the Segment Tracking API
+							Element:p
+								It is an
+							Element:a
+								ISO-8601
+								date string
+							Element:p
+								If the event just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past, make sure you to provide a
+							Element:code
+								timestamp
+								.See the
+							Element:a
+								Timestamps fields docs
+								for more detail.
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								required
+							Element:td
+								String
+							Element:td
+								Unique identifier for the user in your database
+							Element:p
+								A
+							Element:code
+								userId
+							Element:em
+								or
+							Element:code
+								anonymousId
+								is required
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								in our
+							Element:code
+								page
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Screen
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								screen
+								method let you record whenever a user sees a screen of your mobile app.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You’ll want to send the
+							Element:code
+								screen
+								message whenever a user requests a page of your app.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								screen
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								POST https://api.segment.io/v1/screen
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "userId": "019mr8mf4r", "name": "Tracking HTTP API", "timestamp": "2012-12-02T00:31:29.738Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								screen
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymousId
+							Element:em
+								optional
+							Element:td
+								String
+							Element:td
+								A pseudo-unique substitute for a User ID, for cases when you don’t have an absolutely unique identifier
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of extra information that provides useful context about a message, but is not directly related to the API call like
+							Element:code
+								ip
+								address or
+							Element:code
+								locale
+							Element:p
+								See the
+							Element:a
+								Context field docs
+								for more detail
+							Element:tr
+								_
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of integrations to either enable or disable
+							Element:p
+								See the
+							Element:a
+								Integrations field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								name
+							Element:em
+								optional
+							Element:td
+								String
+							Element:td
+								Name of the screen
+							Element:p
+								See the
+							Element:a
+								Name field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								properties
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Free-form dictionary of properties of the screen, like
+							Element:code
+								name
+							Element:p
+								See the
+							Element:a
+								Properties field docs
+								for a list of reserved property names
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								optional
+							Element:td
+								Date
+							Element:td
+								Timestamp when the message itself took place, defaulted to the current time by the Segment Tracking API
+							Element:p
+								It is an
+							Element:a
+								ISO-8601
+								date string
+							Element:p
+								If the event just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past, make sure you to provide a
+							Element:code
+								timestamp
+								.See the
+							Element:a
+								Timestamps fields docs
+								for more detail.
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								required
+							Element:td
+								String
+							Element:td
+								Unique identifier for the user in your database
+							Element:p
+								A
+							Element:code
+								userId
+							Element:em
+								or
+							Element:code
+								anonymousId
+								is required
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find details on the
+							Element:strong
+								in our
+							Element:code
+								screen
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Group
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								group
+								lets you associate an
+							Element:a
+								identified user
+								with a group. A group could be a company, organization, account, project or team! It also lets you record custom traits about the group, like industry or number of employees.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This is useful for tools like
+							Element:a
+								Intercom
+								,
+							Element:a
+								Preact
+								and
+							Element:a
+								Totango
+								, as it ties the user to a
+							Element:strong
+								group
+								of other users.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								group
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								POST https://api.segment.io/v1/group
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "userId": "019mr8mf4r", "groupId": "8e9df332ac", "traits": { "name": "Initech", "industry": "Technology", "employees": 420 }, "timestamp": "2012-12-02T00:31:38.208Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								group
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								anonymousId
+							Element:em
+								optional
+							Element:td
+								String
+							Element:td
+								A pseudo-unique substitute for a User ID, for cases when you don’t have an absolutely unique identifier
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of extra information that provides useful context about a message, but is not directly related to the API call like
+							Element:code
+								ip
+								address or
+							Element:code
+								locale
+							Element:p
+								See the
+							Element:a
+								Context field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								groupId
+							Element:em
+								required
+							Element:td
+								String
+							Element:td
+								A unique identifier for the group in your database.
+							Element:p
+								See the
+							Element:a
+								Group ID field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of integrations to either enable or disable
+							Element:p
+								See the
+							Element:a
+								Integrations field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								optional
+							Element:td
+								Date
+							Element:td
+								Timestamp when the message itself took place, defaulted to the current time by the Segment Tracking API
+							Element:p
+								It is an
+							Element:a
+								ISO-8601
+								date string
+							Element:p
+								If the event just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past, make sure you to provide a
+							Element:code
+								timestamp
+								.See the
+							Element:a
+								Timestamps fields docs
+								for more detail.
+							Element:tr
+							Element:td
+							Element:code
+								traits
+							Element:em
+								optional
+							Element:td
+								Ojbect
+							Element:td
+								Free-form dictionary of traits of the group, like
+							Element:code
+								email
+								or
+							Element:code
+								name
+							Element:p
+								See the
+							Element:a
+								Traits field docs
+								for a list of reserved trait names
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								required
+							Element:td
+								String
+							Element:td
+								Unique identifier for the user in your database
+							Element:p
+								A
+							Element:code
+								userId
+							Element:em
+								or
+							Element:code
+								anonymousId
+								is required
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Find more details about
+							Element:code
+								group
+								including the
+							Element:strong
+								in our
+							Element:code
+								group
+								payload
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Alias
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								alias
+								is how you associate one identity with another. This is an advanced method, but it is required to manage user identities successfully in
+							Element:em
+								some
+								of our integrations.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In
+							Element:a
+								Mixpanel
+								it’s used to associate an anonymous user with an identified user once they sign up. For
+							Element:a
+								KISSmetrics
+								, if your user switches IDs, you can use ‘alias’ to rename the ‘userId’.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example
+							Element:code
+								alias
+								call:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								POST https://api.segment.io/v1/alias
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "previousId": "39239-239239-239239-23923", "userId": "019mr8mf4r", "timestamp": "2012-12-02T00:31:29.738Z" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								alias
+								call has the following fields:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of extra information that provides useful context about a message, but is not directly related to the API call like
+							Element:code
+								ip
+								address or
+							Element:code
+								locale
+							Element:p
+								See the
+							Element:a
+								Context field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								optional
+							Element:td
+								Object
+							Element:td
+								Dictionary of integrations to either enable or disable
+							Element:p
+								See the
+							Element:a
+								Integrations field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								previousId
+							Element:em
+								required
+							Element:td
+								String
+							Element:td
+								Previous unique identifier for the user
+							Element:p
+								See the
+							Element:a
+								Previous ID field docs
+								for more detail
+							Element:tr
+							Element:td
+							Element:code
+								timestamp
+							Element:em
+								optional
+							Element:td
+								Date
+							Element:td
+								Timestamp when the message itself took place, defaulted to the current time by the Segment Tracking API
+							Element:p
+								It is an
+							Element:a
+								ISO-8601
+								date string
+							Element:p
+								If the event just happened, leave it out and we’ll use the server’s time. If you’re importing data from the past, make sure you to provide a
+							Element:code
+								timestamp
+								.See the
+							Element:a
+								Timestamps fields docs
+								for more detail.
+							Element:tr
+							Element:td
+							Element:code
+								userId
+							Element:em
+								required
+							Element:td
+								String
+							Element:td
+								Unique identifier for the user in your database
+							Element:p
+								A
+							Element:code
+								userId
+							Element:em
+								or
+							Element:code
+								anonymousId
+								is required
+							Element:p
+								See the
+							Element:a
+								Identities docs
+								for more detail
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more details on the
+							Element:code
+								alias
+								call and payload, check out our
+							Element:a
+								Spec
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Historical Import
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can import historical data by adding the
+							Element:code
+								timestamp
+								argument to any of your method calls. This can be helpful if you’ve just switched to Segment.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Historical imports can only be done into integrations that can accept historical timestamp’ed data. Most analytics tools like Mixpanel, Amplitude, Kissmetrics, etc. can handle that type of data just fine. One common integration that does not accept historical data is Google Analytics since their API cannot accept historical data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								If you’re tracking things that are happening right now, leave out the
+							Element:code
+								timestamp
+								and our servers will timestamp the requests for you.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Batch
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								batch
+								method lets you send a series of
+							Element:code
+								identify
+								,
+							Element:code
+								group
+								,
+							Element:code
+								track
+								,
+							Element:code
+								page
+								and
+							Element:code
+								screen
+								requests in a single batch, saving on outbound requests. Our server-side and mobile
+							Element:a
+								sources
+								make use of this method automatically for higher performance.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There is a maximum of
+							Element:code
+								500kb
+								per batch request and
+							Element:code
+								32kb
+								per call.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s the what the
+							Element:code
+								batch
+								request signature looks like:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								POST https://api.segment.io/v1/batch
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "batch": [ { "type": "identify", "userId": "019mr8mf4r", "traits": { "email": "jake@yahoo.com", "name": "Jake Peterson", "age": 26 }, "timestamp": "2012-12-02T00:30:08.276Z" }, { "type": "track", "userId": "019mr8mf4r", "event": "Song Played", "properties": { "name": "Fallin for You", "artist": "Dierks Bentley" }, "timestamp": "2012-12-02T00:30:12.984Z" }, { "type": "identify", "userId": "971mj8mk7p", "traits": { "email": "cindy@gmail.com", "name": "Cindy Gonzalez", "age": 23 }, "timestamp": "2015-2-02T00:30:08.276Z" }, { "type": "track", "userId": "971mj8mk7p", "event": "Song Played", "properties": { "name": "Get Right", "artist": "Jennifer Lopez" }, "timestamp": "2015-2-02T00:30:12.984Z" } ], "context": { "device": { "type": "phone", "name": "Apple iPhone 6" } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:code
+								batch
+							Element:em
+								Array
+							Element:td
+								An array of
+							Element:code
+								identify
+								,
+							Element:code
+								group
+								,
+							Element:code
+								track
+								,
+							Element:code
+								page
+								and
+							Element:code
+								screen
+								method calls. Each call
+							Element:strong
+								must
+								have an
+							Element:code
+								type
+								property with a valid method name.
+							Element:tr
+							Element:td
+							Element:code
+								context
+							Element:em
+								Object, optional
+							Element:td
+								The same as
+							Element:a
+								Context
+								for other calls, but it will be merged with any context inside each of the items in the batch.
+							Element:tr
+							Element:td
+							Element:code
+								integrations
+							Element:em
+								Object, optional
+							Element:td
+								The same as
+							Element:a
+								Integrations
+								for other calls, but it will be merged with any integrations inside each of the items in the batch.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Selecting Integrations
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								alias
+								,
+							Element:code
+								group
+								,
+							Element:code
+								identify
+								,
+							Element:code
+								page
+								and
+							Element:code
+								track
+								calls can all be passed an object of
+							Element:code
+								integrations
+								that lets you turn certain integrations on or off. By default all integrations are enabled.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here’s an example showing an
+							Element:code
+								identify
+								call that only goes to Mixpanel and KISSmetrics:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								POST https://api.segment.io/v1/identify
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								{ "userId": "019mr8mf4r", "traits": { "email": "pgibbons@initech.com", "name": "Peter Gibbons", "industry": "Technology" }, "context": { "ip": "24.5.68.47" }, "timestamp": "2012-12-02T00:30:08.276Z", "integrations": { "All": false, "Mixpanel": true, "KISSmetrics": true, "Google Analytics": false } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In this case, we’re specifying that we want this identify to only go to Mixpanel and KISSmetrics.
+							Element:code
+								'All': false
+								says that no integration should be enabled unless otherwise specified.
+							Element:code
+								'Mixpanel': true
+								turns on Mixpanel, etc.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Integration flags are
+							Element:strong
+								case sensitive
+								and match
+							Element:a
+								the integration’s name in the docs
+								(i.e. “AdLearn Open Platform”, “awe.sm”, “MailChimp”, etc.).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:p
+								Available at the business level, filtering track calls can be done right from the Segment UI on your source schema page. We recommend using the UI if possible since it’s a much simpler way of managing your filters and can be updated with no code changes on your side.
+							Element:li
+							Element:p
+								If you are on a grandfathered plan, events sent server-side that are filtered through the Segment dashboard will still count towards your API usage.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Collecting IP Address
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When sending a HTTP call from a user’s device, you can collect the IP address by setting
+							Element:code
+								context.direct
+								to
+							Element:code
+								true
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Troubleshooting
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you’re having trouble we have a few tips that help common problems.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my debugger
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check that you’ve followed all the steps in the
+										Element:a
+											Quickstart
+											.
+										Element:li
+										Element:p
+											Make sure that you’re calling one of our API methods once the library is successfully installed—
+										Element:a
+											,
+										Element:code
+											identify
+										Element:a
+											, etc.
+										Element:code
+											track
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											No events in my end tools
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Double check your credentials for that integration.
+										Element:li
+										Element:p
+											Make sure that the integration you are troubleshooting can accept server-side API calls. Compatibility is shown on the
+										Element:a
+											integration docs
+											pages and on the sheets on your Segment source Integrations page.
+										Element:li
+										Element:p
+											Check out the
+										Element:a
+											integration’s documentation
+											to see if there are other requirements for using the method and integration you’re trying to get working.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

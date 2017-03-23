@@ -1,0 +1,1135 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Snapshot And Restore
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The snapshot and restore module allows to create snapshots of individual indices or an entire cluster into a remote repository like shared file system, S3, or HDFS. These snapshots are great for backups because they can be restored relatively quickly but they are not archival because they can only be restored to versions of Elasticsearch that can read the index. That means that:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								A snapshot of an index created in 2.x can be restored to 5.x.
+							Element:li
+								A snapshot of an index created in 1.x can be restored to 2.x.
+							Element:li
+								A snapshot of an index created in 1.x can
+							Element:span
+								be restored to 5.x.
+							Element:strong
+								not
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To restore a snapshot of an index created in 1.x to 5.x you can restore it to a 2.x cluster and use
+							Element:a
+								reindex-from-remote
+								to rebuild the index in a 5.x cluster. This is as time consuming as restoring from archival copies of the original data.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Repositories
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Before any snapshot or restore operation can be performed, a snapshot repository should be registered in Elasticsearch. The repository settings are repository-type specific. See below for details.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT /_snapshot/my_backup { "type": "fs", "settings": { ... repository specific settings ... } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once a repository is registered, its information can be obtained using the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/my_backup
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											which returns:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "my_backup": { "type": "fs", "settings": { "compress": true, "location": "/mount/backups/my_backup" } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Information about multiple repositories can be fetched in one go by using a comma-delimited list of repository names. Star wildcards are supported as well. For example, information about repositories that start with
+										Element:code
+											repo
+											or that contain
+										Element:code
+											backup
+											can be obtained using the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/repo*,*backup*
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If a repository name is not specified, or
+										Element:code
+											_all
+											is used as repository name Elasticsearch will return information about all repositories currently registered in the cluster:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											or
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/_all
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Shared File System Repository
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The shared file system repository (
+																Element:code
+																	"type": "fs"
+																	) uses the shared file system to store snapshots. In order to register the shared file system repository it is necessary to mount the same shared filesystem to the same location on all master and data nodes. This location (or one of its parent directories) must be registered in the
+																Element:code
+																	path.repo
+																	setting on all master and data nodes.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Assuming that the shared filesystem is mounted to
+																Element:code
+																	/mount/backups/my_backup
+																	, the following setting should be added to
+																Element:code
+																	elasticsearch.yml
+																	file:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	path.repo: ["/mount/backups", "/mount/longterm_backups"]
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The
+																Element:code
+																	path.repo
+																	setting supports Microsoft Windows UNC paths as long as at least server name and share are specified as a prefix and back slashes are properly escaped:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	path.repo: ["\\\\MY_SERVER\\Snapshots"]
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	After all nodes are restarted, the following command can be used to register the shared file system repository with the name
+																Element:code
+																	my_backup
+																	:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	$ curl -XPUT 'http://localhost:9200/_snapshot/my_backup' -d '{ "type": "fs", "settings": { "location": "/mount/backups/my_backup", "compress": true } }'
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	If the repository location is specified as a relative path this path will be resolved against the first path specified in
+																Element:code
+																	path.repo
+																	:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	$ curl -XPUT 'http://localhost:9200/_snapshot/my_backup' -d '{ "type": "fs", "settings": { "location": "my_backup", "compress": true } }'
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The following settings are supported:
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:colgroup
+																Element:col
+																Element:col
+																Element:tbody
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	location
+																Element:td
+																Element:p
+																	Location of the snapshots. Mandatory.
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	compress
+																Element:td
+																Element:p
+																	Turns on compression of the snapshot files. Compression is applied only to metadata files (index mapping and settings). Data files are not compressed. Defaults to
+																Element:code
+																	true
+																	.
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	chunk_size
+																Element:td
+																Element:p
+																	Big files can be broken down into chunks during snapshotting if needed. The chunk size can be specified in bytes or by using size value notation, i.e. 1g, 10m, 5k. Defaults to
+																Element:code
+																	null
+																	(unlimited chunk size).
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	max_restore_bytes_per_sec
+																Element:td
+																Element:p
+																	Throttles per node restore rate. Defaults to
+																Element:code
+																	40mb
+																	per second.
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	max_snapshot_bytes_per_sec
+																Element:td
+																Element:p
+																	Throttles per node snapshot rate. Defaults to
+																Element:code
+																	40mb
+																	per second.
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	readonly
+																Element:td
+																Element:p
+																	Makes repository read-only. Defaults to
+																Element:code
+																	false
+																	.
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Read-only URL Repository
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The URL repository (
+																Element:code
+																	"type": "url"
+																	) can be used as an alternative read-only way to access data created by the shared file system repository. The URL specified in the
+																Element:code
+																	url
+																	parameter should point to the root of the shared filesystem repository. The following settings are supported:
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:colgroup
+																Element:col
+																Element:col
+																Element:tbody
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	url
+																Element:td
+																Element:p
+																	Location of the snapshots. Mandatory.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	URL Repository supports the following protocols: "http", "https", "ftp", "file" and "jar". URL repositories with
+																Element:code
+																	http:
+																	,
+																Element:code
+																	https:
+																	, and
+																Element:code
+																	ftp:
+																	URLs has to be whitelisted by specifying allowed URLs in the
+																Element:code
+																	repositories.url.allowed_urls
+																	setting. This setting supports wildcards in the place of host, path, query, and fragment. For example:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	repositories.url.allowed_urls: ["http://www.example.org/root/*", "https://*.mydomain.com/*?*#*"]
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	URL repositories with
+																Element:code
+																	file:
+																	URLs can only point to locations registered in the
+																Element:code
+																	path.repo
+																	setting similar to shared file system repository.
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Repository plugins
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Other repository backends are available in these official plugins:
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:a
+																	repository-s3
+																	for S3 repository support
+																Element:li
+																Element:a
+																	repository-hdfs
+																	for HDFS repository support in Hadoop environments
+																Element:li
+																Element:a
+																	repository-azure
+																	for Azure storage repositories
+																Element:li
+																Element:a
+																	repository-gcs
+																	for Google Cloud Storage repositories
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Repository Verification
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	When a repository is registered, it’s immediately verified on all master and data nodes to make sure that it is functional on all nodes currently present in the cluster. The
+																Element:code
+																	verify
+																	parameter can be used to explicitly disable the repository verification when registering or updating a repository:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	PUT /_snapshot/s3_repository?verify=false { "type": "s3", "settings": { "bucket": "my_s3_bucket", "region": "eu-west-1" } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The verification process can also be executed manually by running the following command:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	POST /_snapshot/s3_repository/_verify
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	It returns a list of nodes where repository was successfully verified or an error message if verification process failed.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Snapshot
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A repository can contain multiple snapshots of the same cluster. Snapshots are identified by unique names within the cluster. A snapshot with the name
+										Element:code
+											snapshot_1
+											in the repository
+										Element:code
+											my_backup
+											can be created by executing the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT /_snapshot/my_backup/snapshot_1?wait_for_completion=true
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											wait_for_completion
+											parameter specifies whether or not the request should return immediately after snapshot initialization (default) or wait for snapshot completion. During snapshot initialization, information about all previous snapshots is loaded into the memory, which means that in large repositories it may take several seconds (or even minutes) for this command to return even if the
+										Element:code
+											wait_for_completion
+											parameter is set to
+										Element:code
+											false
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default a snapshot of all open and started indices in the cluster is created. This behavior can be changed by specifying the list of indices in the body of the snapshot request.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT /_snapshot/my_backup/snapshot_1 { "indices": "index_1,index_2", "ignore_unavailable": true, "include_global_state": false }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The list of indices that should be included into the snapshot can be specified using the
+										Element:code
+											indices
+											parameter that supports
+										Element:a
+											multi index syntax
+											. The snapshot request also supports the
+										Element:code
+											ignore_unavailable
+											option. Setting it to
+										Element:code
+											true
+											will cause indices that do not exist to be ignored during snapshot creation. By default, when
+										Element:code
+											ignore_unavailable
+											option is not set and an index is missing the snapshot request will fail. By setting
+										Element:code
+											include_global_state
+											to false it’s possible to prevent the cluster global state to be stored as part of the snapshot. By default, the entire snapshot will fail if one or more indices participating in the snapshot don’t have all primary shards available. This behaviour can be changed by setting
+										Element:code
+											partial
+											to
+										Element:code
+											true
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The index snapshot process is incremental. In the process of making the index snapshot Elasticsearch analyses the list of the index files that are already stored in the repository and copies only files that were created or changed since the last snapshot. That allows multiple snapshots to be preserved in the repository in a compact form. Snapshotting process is executed in non-blocking fashion. All indexing and searching operation can continue to be executed against the index that is being snapshotted. However, a snapshot represents the point-in-time view of the index at the moment when snapshot was created, so no records that were added to the index after the snapshot process was started will be present in the snapshot. The snapshot process starts immediately for the primary shards that has been started and are not relocating at the moment. Before version 1.2.0, the snapshot operation fails if the cluster has any relocating or initializing primaries of indices participating in the snapshot. Starting with version 1.2.0, Elasticsearch waits for relocation or initialization of shards to complete before snapshotting them.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Besides creating a copy of each index the snapshot process can also store global cluster metadata, which includes persistent cluster settings and templates. The transient settings and registered snapshot repositories are not stored as part of the snapshot.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Only one snapshot process can be executed in the cluster at any time. While snapshot of a particular shard is being created this shard cannot be moved to another node, which can interfere with rebalancing process and allocation filtering. Elasticsearch will only be able to move a shard to another node (according to the current allocation filtering settings and rebalancing algorithm) once the snapshot is finished.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once a snapshot is created information about this snapshot can be obtained using the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/my_backup/snapshot_1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Similar as for repositories, information about multiple snapshots can be queried in one go, supporting wildcards as well:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/my_backup/snapshot_*,some_other_snapshot
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All snapshots currently stored in the repository can be listed using the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/my_backup/_all
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The command fails if some of the snapshots are unavailable. The boolean parameter
+										Element:code
+											ignore_unavailable
+											can be used to return all snapshots that are currently available.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A currently running snapshot can be retrieved using the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											$ curl -XGET "localhost:9200/_snapshot/my_backup/_current"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A snapshot can be deleted from the repository using the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE /_snapshot/my_backup/snapshot_1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a snapshot is deleted from a repository, Elasticsearch deletes all files that are associated with the deleted snapshot and not used by any other snapshots. If the deleted snapshot operation is executed while the snapshot is being created the snapshotting process will be aborted and all files created as part of the snapshotting process will be cleaned. Therefore, the delete snapshot operation can be used to cancel long running snapshot operations that were started by mistake.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A repository can be deleted using the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE /_snapshot/my_backup
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When a repository is deleted, Elasticsearch only removes the reference to the location where the repository is storing the snapshots. The snapshots themselves are left untouched and in place.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Restore
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A snapshot can be restored using the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /_snapshot/my_backup/snapshot_1/_restore
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, all indices in the snapshot are restored, and the cluster state is
+										Element:span
+											restored. It’s possible to select indices that should be restored as well as to allow the global cluster state from being restored by using
+										Element:strong
+											not
+										Element:code
+											indices
+											and
+										Element:code
+											include_global_state
+											options in the restore request body. The list of indices supports
+										Element:a
+											multi index syntax
+											. The
+										Element:code
+											rename_pattern
+											and
+										Element:code
+											rename_replacement
+											options can be also used to rename indices on restore using regular expression that supports referencing the original text as explained
+										Element:a
+											here
+											. Set
+										Element:code
+											include_aliases
+											to
+										Element:code
+											false
+											to prevent aliases from being restored together with associated indices
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /_snapshot/my_backup/snapshot_1/_restore { "indices": "index_1,index_2", "ignore_unavailable": true, "include_global_state": true, "rename_pattern": "index_(.+)", "rename_replacement": "restored_index_$1" }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The restore operation can be performed on a functioning cluster. However, an existing index can be only restored if it’s
+										Element:a
+											closed
+											and has the same number of shards as the index in the snapshot. The restore operation automatically opens restored indices if they were closed and creates new indices if they didn’t exist in the cluster. If cluster state is restored with
+										Element:code
+											include_global_state
+											(defaults to
+										Element:code
+											false
+											), the restored templates that don’t currently exist in the cluster are added and existing templates with the same name are replaced by the restored templates. The restored persistent settings are added to the existing persistent settings.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Partial restore
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														By default, the entire restore operation will fail if one or more indices participating in the operation don’t have snapshots of all shards available. It can occur if some shards failed to snapshot for example. It is still possible to restore such indices by setting
+													Element:code
+														partial
+														to
+													Element:code
+														true
+														. Please note, that only successfully snapshotted shards will be restored in this case and all missing shards will be recreated empty.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Changing index settings during restore
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Most of index settings can be overridden during the restore process. For example, the following command will restore the index
+													Element:code
+														index_1
+														without creating any replicas while switching back to default refresh interval:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /_snapshot/my_backup/snapshot_1/_restore { "indices": "index_1", "index_settings": { "index.number_of_replicas": 0 }, "ignore_index_settings": [ "index.refresh_interval" ] }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Please note, that some settings such as
+													Element:code
+														index.number_of_shards
+														cannot be changed during restore operation.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Restoring to a different cluster
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The information stored in a snapshot is not tied to a particular cluster or a cluster name. Therefore it’s possible to restore a snapshot made from one cluster into another cluster. All that is required is registering the repository containing the snapshot in the new cluster and starting the restore process. The new cluster doesn’t have to have the same size or topology. However, the version of the new cluster should be the same or newer (only 1 major version newer) than the cluster that was used to create the snapshot. For example, you can restore a 1.x snapshot to a 2.x cluster, but not a 1.x snapshot to a 5.x cluster.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If the new cluster has a smaller size additional considerations should be made. First of all it’s necessary to make sure that new cluster have enough capacity to store all indices in the snapshot. It’s possible to change indices settings during restore to reduce the number of replicas, which can help with restoring snapshots into smaller cluster. It’s also possible to select only subset of the indices using the
+													Element:code
+														indices
+														parameter. Prior to version 1.5.0 elasticsearch didn’t check restored persistent settings making it possible to accidentally restore an incompatible
+													Element:code
+														discovery.zen.minimum_master_nodes
+														setting, and as a result disable a smaller cluster until the required number of master eligible nodes is added. Starting with version 1.5.0 incompatible settings are ignored.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If indices in the original cluster were assigned to particular nodes using
+													Element:a
+														shard allocation filtering
+														, the same rules will be enforced in the new cluster. Therefore if the new cluster doesn’t contain nodes with appropriate attributes that a restored index can be allocated on, such index will not be successfully restored unless these index allocation settings are changed during restore operation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Snapshot status
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											A list of currently running snapshots with their detailed status information can be obtained using the following command:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/_status
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In this format, the command will return information about all currently running snapshots. By specifying a repository name, it’s possible to limit the results to a particular repository:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/my_backup/_status
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If both repository name and snapshot id are specified, this command will return detailed status information for the given snapshot even if it’s not currently running:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/my_backup/snapshot_1/_status
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Multiple ids are also supported:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/my_backup/snapshot_1,snapshot_2/_status
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Monitoring snapshot/restore progress
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are several ways to monitor the progress of the snapshot and restores processes while they are running. Both operations support
+										Element:code
+											wait_for_completion
+											parameter that would block client until the operation is completed. This is the simplest method that can be used to get notified about operation completion.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The snapshot operation can be also monitored by periodic calls to the snapshot info:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/my_backup/snapshot_1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please note that snapshot info operation uses the same resources and thread pool as the snapshot operation. So, executing a snapshot info operation while large shards are being snapshotted can cause the snapshot info operation to wait for available resources before returning the result. On very large shards the wait time can be significant.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To get more immediate and complete information about snapshots the snapshot status command can be used instead:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_snapshot/my_backup/snapshot_1/_status
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											While snapshot info method returns only basic information about the snapshot in progress, the snapshot status returns complete breakdown of the current state for each shard participating in the snapshot.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The restore process piggybacks on the standard recovery mechanism of the Elasticsearch. As a result, standard recovery monitoring services can be used to monitor the state of restore. When restore operation is executed the cluster typically goes into
+										Element:code
+											red
+											state. It happens because the restore operation starts with "recovering" primary shards of the restored indices. During this operation the primary shards become unavailable which manifests itself in the
+										Element:code
+											red
+											cluster state. Once recovery of primary shards is completed Elasticsearch is switching to standard replication process that creates the required number of replicas at this moment cluster switches to the
+										Element:code
+											yellow
+											state. Once all required replicas are created, the cluster switches to the
+										Element:code
+											green
+											states.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The cluster health operation provides only a high level status of the restore process. It’s possible to get more detailed insight into the current state of the recovery process by using
+										Element:a
+											indices recovery
+											and
+										Element:a
+											cat recovery
+											APIs.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Stopping currently running snapshot and restore operations
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The snapshot and restore framework allows running only one snapshot or one restore operation at a time. If a currently running snapshot was executed by mistake, or takes unusually long, it can be terminated using the snapshot delete operation. The snapshot delete operation checks if the deleted snapshot is currently running and if it does, the delete operation stops that snapshot before deleting the snapshot data from the repository.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											DELETE /_snapshot/my_backup/snapshot_1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The restore operation uses the standard shard recovery mechanism. Therefore, any currently running restore operation can be canceled by deleting indices that are being restored. Please note that data for all deleted indices will be removed from the cluster as a result of this operation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Effect of cluster blocks on snapshot and restore operations
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Many snapshot and restore operations are affected by cluster and index blocks. For example, registering and unregistering repositories require write global metadata access. The snapshot operation requires that all indices and their metadata as well as the global metadata were readable. The restore operation requires the global metadata to be writable, however the index level blocks are ignored during restore because indices are essentially recreated during restore. Please note that a repository content is not part of the cluster and therefore cluster blocks don’t affect internal repository operations such as listing or deleting snapshots from an already registered repository.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Advanced text scoring in scripts
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Thread Pool »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

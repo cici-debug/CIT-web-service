@@ -1,0 +1,600 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Pipeline Aggregations
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This functionality is experimental and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but experimental features are not subject to the support SLA of official GA features.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Pipeline aggregations work on the outputs produced from other aggregations rather than from document sets, adding information to the output tree. There are many different types of pipeline aggregation, each computing different information from other aggregations, but these types can be broken down into two families:
+						Node:
+						(type) c
+						(layer)2
+							Element:dl
+							Element:dt
+							Element:span
+							Element:span
+							Element:em
+								Parent
+							Element:dd
+								A family of pipeline aggregations that is provided with the output of its parent aggregation and is able to compute new buckets or new aggregations to add to existing buckets.
+							Element:dt
+							Element:span
+							Element:span
+							Element:em
+								Sibling
+							Element:dd
+								Pipeline aggregations that are provided with the output of a sibling aggregation and are able to compute a new aggregation which will be at the same level as the sibling aggregation.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Pipeline aggregations can reference the aggregations they need to perform their computation by using the
+							Element:code
+								buckets_path
+								parameter to indicate the paths to the required metrics. The syntax for defining these paths can be found in the
+							Element:a
+								section below.
+							Element:code
+								buckets_path
+								Syntax
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Pipeline aggregations cannot have sub-aggregations but depending on the type it can reference another pipeline in the
+							Element:code
+								buckets_path
+								allowing pipeline aggregations to be chained. For example, you can chain together two derivatives to calculate the second derivative (i.e. a derivative of a derivative).
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Because pipeline aggregations only add to the output, when chaining pipeline aggregations the output of each pipeline aggregation will be included in the final output.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											buckets_path
+											Syntax
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Most pipeline aggregations require another aggregation as their input. The input aggregation is defined via the
+										Element:code
+											buckets_path
+											parameter, which follows a specific format:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											AGG_SEPARATOR = '>' ; METRIC_SEPARATOR = '.' ; AGG_NAME = <the name of the aggregation> ; METRIC = <the name of the metric (in case of multi-value metrics aggregation)> ; PATH = <AGG_NAME> [ <AGG_SEPARATOR>, <AGG_NAME> ]* [ <METRIC_SEPARATOR>, <METRIC> ] ;
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, the path
+										Element:code
+											"my_bucket>my_stats.avg"
+											will path to the
+										Element:code
+											avg
+											value in the
+										Element:code
+											"my_stats"
+											metric, which is contained in the
+										Element:code
+											"my_bucket"
+											bucket aggregation.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Paths are relative from the position of the pipeline aggregation; they are not absolute paths, and the path cannot go back "up" the aggregation tree. For example, this moving average is embedded inside a date_histogram and refers to a "sibling" metric
+										Element:code
+											"the_sum"
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /_search { "aggs": { "my_date_histo":{ "date_histogram":{ "field":"timestamp", "interval":"day" }, "aggs":{ "the_sum":{ "sum":{ "field": "lemmings" }
+										Element:a
+										Element:span
+											}, "the_movavg":{ "moving_avg":{ "buckets_path": "the_sum" }
+										Element:img
+										Element:a
+										Element:span
+											} } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The metric is called
+										Element:code
+											"the_sum"
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											buckets_path
+											refers to the metric via a relative path
+										Element:code
+											"the_sum"
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											buckets_path
+											is also used for Sibling pipeline aggregations, where the aggregation is "next" to a series of buckets instead of embedded "inside" them. For example, the
+										Element:code
+											max_bucket
+											aggregation uses the
+										Element:code
+											buckets_path
+											to specify a metric embedded inside a sibling aggregation:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /_search { "aggs" : { "sales_per_month" : { "date_histogram" : { "field" : "date", "interval" : "month" }, "aggs": { "sales": { "sum": { "field": "price" } } } }, "max_monthly_sales": { "max_bucket": { "buckets_path": "sales_per_month>sales"
+										Element:a
+										Element:span
+											} } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+										Element:code
+											buckets_path
+											instructs this max_bucket aggregation that we want the maximum value of the
+										Element:code
+											sales
+											aggregation in the
+										Element:code
+											sales_per_month
+											date histogram.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Special Paths
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Instead of pathing to a metric,
+										Element:code
+											buckets_path
+											can use a special
+										Element:code
+											"_count"
+											path. This instructs the pipeline aggregation to use the document count as it’s input. For example, a moving average can be calculated on the document count of each bucket, instead of a specific metric:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /_search { "aggs": { "my_date_histo": { "date_histogram": { "field":"timestamp", "interval":"day" }, "aggs": { "the_movavg": { "moving_avg": { "buckets_path": "_count" }
+										Element:a
+										Element:span
+											} } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											By using
+										Element:code
+											_count
+											instead of a metric name, we can calculate the moving average of document counts in the histogram
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											buckets_path
+											can also use
+										Element:code
+											"_bucket_count"
+											and path to a multi-bucket aggregation to use the number of buckets returned by that aggregation in the pipeline aggregation instead of a metric. for example a
+										Element:code
+											bucket_selector
+											can be used here to filter out buckets which contain no buckets for an inner terms aggregation:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST /sales/_search { "size": 0, "aggs": { "histo": { "date_histogram": { "field": "date", "interval": "day" }, "aggs": { "categories": { "terms": { "field": "category" } }, "min_bucket_selector": { "bucket_selector": { "buckets_path": { "count": "categories._bucket_count"
+										Element:a
+										Element:span
+											}, "script": { "inline": "params.count != 0" } } } } } } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											By using
+										Element:code
+											_bucket_count
+											instead of a metric name, we can filter out
+										Element:code
+											histo
+											buckets where they contain no buckets for the
+										Element:code
+											categories
+											aggregation
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Dealing with dots in agg names
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An alternate syntax is supported to cope with aggregations or metrics which have dots in the name, such as the
+										Element:code
+											99.9
+											th
+										Element:a
+											percentile
+											. This metric may be referred to as:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"buckets_path": "my_percentile[99.9]"
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Dealing with gaps in the data
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Data in the real world is often noisy and sometimes contains
+										Element:span
+											— places where data simply doesn’t exist. This can occur for a variety of reasons, the most common being:
+										Element:strong
+											gaps
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											Documents falling into a bucket do not contain a required field
+										Element:li
+											There are no documents matching the query for one or more buckets
+										Element:li
+											The metric being calculated is unable to generate a value, likely because another dependent bucket is missing a value. Some pipeline aggregations have specific requirements that must be met (e.g. a derivative cannot calculate a metric for the first value because there is no previous value, HoltWinters moving average need "warmup" data to begin calculating, etc)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Gap policies are a mechanism to inform the pipeline aggregation about the desired behavior when "gappy" or missing data is encountered. All pipeline aggregations accept the
+										Element:code
+											gap_policy
+											parameter. There are currently two gap policies to choose from:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:span
+										Element:em
+											skip
+										Element:dd
+											This option treats missing data as if the bucket does not exist. It will skip the bucket and continue calculating using the next available value.
+										Element:dt
+										Element:span
+										Element:span
+										Element:em
+											insert_zeros
+										Element:dd
+											This option will replace missing values with a zero (
+										Element:code
+											0
+											) and pipeline aggregation computation will proceed as normal.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Terms Aggregation
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Avg Bucket Aggregation »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

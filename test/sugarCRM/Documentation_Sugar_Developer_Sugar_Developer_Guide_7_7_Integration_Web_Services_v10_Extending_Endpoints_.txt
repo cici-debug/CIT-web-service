@@ -1,0 +1,745 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Extending Endpoints
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								How to add your own custom endpoints to the REST API.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Custom Endpoints
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As of Sugar 7.0.0, you can easily define your own endpoint. All custom global endpoints will be located in the following directory:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								./custom/clients/<client>/api/
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								All custom endpoints specific to a module will be located in:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								./custom/modules/<module>/clients/<client>/api/
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								Note:
+								The Sugar application client type is "base". More information on the various client types can be found in the
+							Element:a
+								Clients
+								section.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Defining New Endpoints
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The endpoint class will be created in
+							Element:code
+								./custom/clients/<client>/api/
+								and will extend SugarApi. Within this class, you will need to implement a
+							Element:code
+								registerApiRest()
+								function that will define your endpoint paths.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								An example is shown below:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/clients/base/api/MyEndpointsApi.php
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); class MyEndpointsApi extends SugarApi { public function registerApiRest() { return array( //GET 'MyGetEndpoint' => array( //request type 'reqType' => 'GET', //set authentication 'noLoginRequired' => false, //endpoint path 'path' => array('MyEndpoint', 'GetExample', '?'), //endpoint variables 'pathVars' => array('', '', 'data'), //method to call 'method' => 'MyGetMethod', //short help string to be displayed in the help documentation 'shortHelp' => 'An example of a GET endpoint', //long help to be displayed in the help documentation 'longHelp' => 'custom/clients/base/api/help/MyEndPoint_MyGetEndPoint_help.html', ), ); } /** * Method to be used for my MyEndpoint/GetExample endpoint */ public function MyGetMethod($api, $args) { //custom logic return $args; } } ?>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											registerApiRest() Method
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Your extended class will contain two methods. The first method is
+										Element:code
+											registerApiRest()
+											which will return an array that defines your REST endpoints. Each endpoint will need the following properties:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+											Name
+										Element:td
+											Type
+										Element:td
+											Description
+										Element:tr
+										Element:td
+											reqType
+										Element:td
+											Array | String
+										Element:td
+											An array of one or many request types of the endpoint. Possible values are: GET, PUT, POST and DELETE.
+										Element:tr
+										Element:td
+											noLoginRequired
+										Element:td
+											Boolean
+										Element:td
+											Determines whether the endpoint is authenticated. Setting this value to true will remove the authentication requirement.
+										Element:tr
+										Element:td
+											path
+										Element:td
+											Array
+										Element:td
+										Element:p
+											The endpoint path. An endpoint path of:
+										Element:pre
+										Element:code
+											'path' => array('MyEndpoint', 'GetExample'),
+										Element:p
+											Will equate to the path of:
+										Element:pre
+											http://{site url}/rest/v10/MyEndpoint/GetExample
+											To pass in a variable string to your endpoint, you will add a path of '?'. This will allow you to pass URL data to your selected method given that it is specified in the pathVars.
+										Element:tr
+										Element:td
+											pathVars
+										Element:td
+											Array
+										Element:td
+										Element:p
+											The path variables. For each path on your endpoint, you can opt to pass its value in as a parameter to your selected method. An empty path variable will ignore the path.
+										Element:p
+											Example:
+										Element:pre
+										Element:code
+											'path' => array('MyEndpoint', 'GetExample', '?'), ​'pathVars' => array('', '', 'data'),
+										Element:p
+											The above will pass in the following to your selected method as the $args parameter when calling http://{site url}/rest/v10/MyEndpoint/GetExample/MyData
+										Element:pre
+										Element:code
+											stdClass Object ( [__sugar_url] => v10/MyEndpoint/GetExample/mydata [data] => MyData )
+										Element:tr
+										Element:td
+											method
+										Element:td
+											String
+										Element:td
+											The method to pass the pathVars to. This can be named anything you choose and will be located in your SugarApi extended class.
+										Element:tr
+										Element:td
+											shortHelp
+										Element:td
+											String
+										Element:td
+											A short help string for developers when looking at the help documentation.
+										Element:tr
+										Element:td
+											longHelp
+										Element:td
+											String
+										Element:td
+											Path to a long help file. This file will be loaded when a user clicks an endpoint from the help documentation.
+										Element:tr
+										Element:td
+											minVersion
+										Element:td
+											Integer
+										Element:td
+											The minimum API Version this endpoint can be used with. See
+										Element:a
+											Scoring
+											Section below.
+										Element:tr
+										Element:td
+											maxVersion
+										Element:td
+											Integer
+										Element:td
+											The maximum API Version this endpoint can be used with. See
+										Element:a
+											Scoring
+											Section below.
+										Element:tr
+										Element:td
+											extraScore
+										Element:td
+											Integer
+										Element:td
+											Add an extra score value to the Scoring of this endpoint, to place priority on its usage. See
+										Element:a
+											Scoring
+											Section bloew.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Endpoint Method
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The second method can be named anything you choose but it is important to note that it will need to match the name of the method you specified for your endpoint. This method will require the parameters
+										Element:code
+											$api
+											and
+										Element:code
+											$args
+											. The
+										Element:code
+											MyGetMethod()
+											in the example above will be used when the endpoint
+										Element:code
+											MyEndpoint/GetExample
+											is called. Any path variables, query string parameters or posted data will be available in the $args parameter for you to work with.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											public function $endpointMethod($api, $args) { //logic return $returnData; }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Help Documentation
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The final step once you have your endpoint working is to document it. This file can reside anywhere in the system and will be referenced in your endpoints longHelp property. An example of the help documentation can be found below:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											custom/clients/base/api/help/MyEndPoint_MyGetEndPoint_help.html
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<h2>Overview</h2> <span class="lead"> A custom GET endpoint. Returns the $args parameter that is passed to the endpoint method. </span> <h2>Path Variables</h2> <table class="table table-hover"> <thead> <tr> <th>Name</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td> :data </td> <td> Data string to pass to the endpoint. </td> </tr> </tbody> </table> <h2>Input Parameters</h2> <span class="lead"> This endpoint does not accept any input parameters. </span> <h2>Result</h2> <table class="table table-hover"> <thead> <tr> <th>Name</th> <th>Type</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td> __sugar_url </td> <td> String </td> <td> The endpoint path. </td> </tr> <tr> <td> data </td> <td> String </td> <td> The data from path variable. </td> </tr> </tbody> </table> <h3>Output Example</h3> <pre class="pre-scrollable"> { "__sugar_url":"v10\/MyEndpoint\/GetExample\/MyData", "data":"MyData" } </pre> <h2>Change Log</h2> <table class="table table-hover"> <thead> <tr> <th>Version</th> <th>Change</th> </tr> </thead> <tbody> <tr> <td> v10 </td> <td> Added <code>/MyEndpoint/GetExample/:data</code> GET endpoint. </td> </tr> </tbody> </table>
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Quick Repair and Rebuild
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once all of the files are in place, you will need to navigate to Admin > Repair > Quick Repair and Rebuild. This will rebuild the ./cache/file_map.php and
+										Element:code
+											./cache/include/
+											api
+										Element:code
+											/ServiceDictionary.rest.php
+											files to make your endpoint available.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Example
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/clients/base/api/MyEndpointsApi.php
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); class MyEndpointsApi extends SugarApi { public function registerApiRest() { return array( //GET & POST 'MyGetEndpoint' => array( //request type 'reqType' => array('GET','POST'), //set authentication 'noLoginRequired' => false, //endpoint path 'path' => array('MyEndpoint', 'GetExample', '?'), //endpoint variables 'pathVars' => array('', '', 'data'), //method to call 'method' => 'MyGetMethod', //short help string to be displayed in the help documentation 'shortHelp' => 'An example of a GET endpoint', //long help to be displayed in the help documentation 'longHelp' => 'custom/clients/base/api/help/MyEndPoint_MyGetEndPoint_help.html', ), ); } /** * Method to be used for my MyEndpoint/GetExample endpoint */ public function MyGetMethod($api, $args) { //custom logic return $args; } } ?>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Redefining Existing Endpoints
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								With endpoints, you may have a need to extend an existing endpoint to meet your needs. When doing this it is important that you do not remove anything from the return array of the endpoint. Doing so could result in unexpected behavior due to other functionality using the same endpoint.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For this example, we will extend the ping endpoint to return "Pong <timestamp>". To do this, we will need to extend the existing PingApi class and define our method overrides.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								./custom/clients/base/api/CustomPingApi.php
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); require_once("clients/base/api/PingApi.php"); class CustomPingApi extends PingApi { public function registerApiRest() { //in case we want to add additional endpoints return parent::registerApiRest(); } //override to modify the ping function of the ping endpoint public function ping($api, $args) { $result = parent::ping($api, $args); //append the current timestamp return $result . ' ' . time(); } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								As you can see, we extended registerApiRest to fetch existing endpoint definitions in case we want to add our own. We then added an override for the ping method to return our new value. Once the file is in place you will need to navigate to Admin > Repair > Quick Repair and Rebuild. Once completed, any call made to
+							Element:code
+								<url>/rest/v10/ping
+								will result in a response of "ping <timestamp>".
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Endpoint Scoring
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								When generating custom endpoints or overriding existing endpoints, the system can determine which endpoint to use based on the score placed on the registered endpoints. The scoring calculation works in the following manner for registered endpoints.
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:strong
+								Route Path
+							Element:td
+							Element:strong
+								Score
+							Element:tr
+							Element:td
+								?
+							Element:td
+								0.75
+							Element:tr
+							Element:td
+								<module>
+							Element:td
+								1.0
+							Element:tr
+							Element:td
+								Exact Match
+							Element:td
+								1.75
+							Element:tr
+							Element:td
+								Custom
+							Element:td
+								0.5
+							Element:tr
+							Element:td
+								Endpoint 'extraScore' property
+							Element:td
+								Defined Extra Score
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The defined Path and extraScore properties in the registerApiRest() method, help determine the score for any given Endpoint. The higher the score allows the API to determine which Endpoint is being used for a given request. For example, if you had extended the Accounts/:record GET API Endpoint as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								/custom/modules/Accounts/clients/base/api/CustomAccountsApi.php
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point'); require_once("clients/base/api/ModuleApi.php"); class CustomAccountsApi extends ModuleApi { public function registerApiRest() { return array( //GET & POST 'getAccount' => array( //request type 'reqType' => array('GET'), //set authentication 'noLoginRequired' => false, //endpoint path 'path' => array('Accounts', '?'), //endpoint variables 'pathVars' => array('module', 'record'), //method to call 'method' => 'retrieveRecord', //short help string to be displayed in the help documentation 'shortHelp' => 'An example of a GET endpoint', //long help to be displayed in the help documentation 'longHelp' => 'custom/clients/base/api/help/MyEndPoint_MyGetEndPoint_help.html', ), ); } /** * Method to be used for my Accounts/:record endpoint */ public function retrieveRecord($api, $args) { //custom logic return parent::retrieveRecord($api,$args); } } ?>
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This Endpoint will be used when accessing Accounts/<record_id> since the Exact Match of Accounts in the path property gives a greater score than the <module> match that comes with the standard <module>/:record Endpoint defined in ModuleApi.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Endpoint Versioning
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Part of the scoring calculation, allows for versioning of the API Endpoints to accommodate the same endpoint path in the Rest API, for other versions of the API. If you have a custom Endpoint at rest/v10/CustomEndpoint, and would like to alter the logic slightly for another use without deprecating or removing the old Endpoint, you can use the versioning techniques to have the new logic reside at rest/v11/CustomEndpoint. The following table describes how the Versioning properties on the Endpoint definition affect the score of the Endpoint to allow the API to determine which Endpoint should be used for a given request.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Property
+										Element:td
+										Element:strong
+											Score
+										Element:tr
+										Element:td
+											minVersion
+										Element:td
+											0.02 + minVersion/1000
+										Element:tr
+										Element:td
+											maxVersion
+										Element:td
+											0.02
+										Element:tr
+										Element:td
+											minVersion === maxVersion (i.e. Both minVersion and maxVersion properties are defined on Endpoint to the same value)
+										Element:td
+											0.06 + minVersion/1000
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To allow for additional Versions in the API, you will first need to customize the 'maxVersion' property in the
+										Element:code
+											$apiSettings
+											array. To do this, create the following file:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											./custom/include/api/metadata.php
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Inside the file you can set the
+										Element:code
+											$apiSettings['maxVersion']
+											property as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											<?php
+										Element:br
+										Element:br
+											$apiSettings['maxVersion'] = 11;
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have configured the Max Version property you can then set the minVersion and maxVersion properties on the Endpoint definition in the custom
+										Element:code
+											registerApiRest()
+											method. For example, the following Endpoint definitions:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											<?php ... return array( 'foo1' => array( 'reqType' => 'GET', 'path' => array('Accounts','config', 'pathVars' => array('module', 'record'), 'method' => 'foo1', ), 'foo2' => array( 'reqType' => 'GET', 'minVersion' => 11, 'path' => array('Accounts','config', 'pathVars' => array('module', 'record'), 'method' => 'foo2', ), 'foo3' => array( 'reqType' => 'GET', 'minVersion' => 11, 'maxVersion' => 11, 'path' => array('Accounts','config', 'pathVars' => array('module', 'record'), 'method' => 'foo3', ), 'foo4' => array( 'reqType' => 'GET', 'minVersion' => 11, 'maxVersion' => 12, 'path' => array('Accounts','config', 'pathVars' => array('module', 'record'), 'method' => 'foo3', ), 'foo5' => array( 'reqType' => 'GET', 'minVersion' => 14, 'path' => array('Accounts','config', 'pathVars' => array('module', 'record'), 'method' => 'foo5', ), ); ...
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											With the above definitions the following table provides the Expected Request for each Endpoint.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:strong
+											Request URI
+										Element:td
+										Element:strong
+											Best Route
+										Element:tr
+										Element:td
+											/rest/v10/Accounts/config
+										Element:td
+											foo1
+										Element:tr
+										Element:td
+											/rest/v11/Accounts/config
+										Element:td
+											foo3
+										Element:tr
+										Element:td
+											/rest/v12/Accounts/config
+										Element:td
+											foo4
+										Element:tr
+										Element:td
+											/rest/v13/Accounts/config
+										Element:td
+											foo2
+										Element:tr
+										Element:td
+											/rest/v14/Accounts/config
+										Element:td
+											foo5
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Last modified: 03/14/2017 01:29pm
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

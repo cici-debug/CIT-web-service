@@ -1,0 +1,248 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Retrieving a List of Records With Related Info
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Overview
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A PHP example demonstrating how to retrieve a list of records with info from a related entity with the get_entry_list method using cURL and the v4_1 REST API.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This example will retrieve a list of contacts and their related email addresses.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Example
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								<?php $url = "http://{site_url}/service/v4_1/rest.php"; $username = "admin"; $password = "password"; //function to make cURL request function call($method, $parameters, $url) { ob_start(); $curl_request = curl_init(); curl_setopt($curl_request, CURLOPT_URL, $url); curl_setopt($curl_request, CURLOPT_POST, 1); curl_setopt($curl_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); curl_setopt($curl_request, CURLOPT_HEADER, 1); curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0); curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1); curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0); $jsonEncodedData = json_encode($parameters); $post = array( "method" => $method, "input_type" => "JSON", "response_type" => "JSON", "rest_data" => $jsonEncodedData ); curl_setopt($curl_request, CURLOPT_POSTFIELDS, $post); $result = curl_exec($curl_request); curl_close($curl_request); $result = explode("\r\n\r\n", $result, 2); $response = json_decode($result[1]); ob_end_flush(); return $response; } //login ----------------------------------------------
+							Element:br
+								$login_parameters = array( "user_auth" => array( "user_name" => $username, "password" => md5($password), "version" => "1" ), "application_name" => "RestTest", "name_value_list" => array(), ); $login_result = call("login", $login_parameters, $url); /* echo "<pre>"; print_r($login_result); echo "</pre>"; */ //get session id $session_id = $login_result->id; //retrieve records -------------------------------------
+							Element:br
+								$get_entry_list_parameters = array( //session id 'session' => $session_id, //The name of the module from which to retrieve records 'module_name' => "Contacts", //The SQL WHERE clause without the word "where". 'query' => "", //The SQL ORDER BY clause without the phrase "order by". 'order_by' => "", //The record offset from which to start. 'offset' => "0", //Optional. The list of fields to be returned in the results 'select_fields' => array( 'id', 'first_name', 'last_name', ), //A list of link names and the fields to be returned for each link name 'link_name_to_fields_array' => array( array( 'name' => 'email_addresses', 'value' => array( 'id', 'email_address', 'opt_out', 'primary_address' ), ), ), //The maximum number of results to return. 'max_results' => '2', //To exclude deleted records 'deleted' => 0, //If only records marked as favorites should be returned. 'Favorites' => false, ); $get_entry_list_result = call("get_entry_list", $get_entry_list_parameters, $url); echo "<pre>"; print_r($get_entry_list_result); echo "</pre>"; ?>
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Result
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:code
+								stdClass Object ( [result_count] => 2 [total_count] => 200 [next_offset] => 2 [entry_list] => Array ( [0] => stdClass Object ( [id] => 116d9bc6-4a24-b826-952e-4f7cb6b25ea7 [module_name] => Contacts [name_value_list] => stdClass Object ( [id] => stdClass Object ( [name] => id [value] => 116d9bc6-4a24-b826-952e-4f7cb6b25ea7 ) [first_name] => stdClass Object ( [name] => first_name [value] => Lucinda ) [last_name] => stdClass Object ( [name] => last_name [value] => Jacoby ) ) ) [1] => stdClass Object ( [id] => 11c263ef-ff61-71ff-f090-4f7cb6fc9f68 [module_name] => Contacts [name_value_list] => stdClass Object ( [id] => stdClass Object ( [name] => id [value] => 11c263ef-ff61-71ff-f090-4f7cb6fc9f68 ) [first_name] => stdClass Object ( [name] => first_name [value] => Ike ) [last_name] => stdClass Object ( [name] => last_name [value] => Gassaway ) ) ) ) [relationship_list] => Array ( [0] => stdClass Object ( [link_list] => Array ( [0] => stdClass Object ( [name] => email_addresses [records] => Array ( [0] => stdClass Object ( [link_value] => stdClass Object ( [id] => stdClass Object ( [name] => id [value] => 13066f13-d6ea-405c-0f95-4f7cb6fa3a08 ) [email_address] => stdClass Object ( [name] => email_address [value] => support52@example.org ) [opt_out] => stdClass Object ( [name] => opt_out [value] => 0 ) [primary_address] => stdClass Object ( [name] => primary_address [value] => ) ) ) [1] => stdClass Object ( [link_value] => stdClass Object ( [id] => stdClass Object ( [name] => id [value] => 13e3d111-b226-c363-4832-4f7cb699a3a0 ) [email_address] => stdClass Object ( [name] => email_address [value] => qa.section@example.it ) [opt_out] => stdClass Object ( [name] => opt_out [value] => 1 ) [primary_address] => stdClass Object ( [name] => primary_address [value] => ) ) ) ) ) ) ) [1] => stdClass Object ( [link_list] => Array ( [0] => stdClass Object ( [name] => email_addresses [records] => Array ( [0] => stdClass Object ( [link_value] => stdClass Object ( [id] => stdClass Object ( [name] => id [value] => 16aeaf8b-b31f-943d-3844-4f7cb6ac63f2 ) [email_address] => stdClass Object ( [name] => email_address [value] => vegan.sales.im@example.cn ) [opt_out] => stdClass Object ( [name] => opt_out [value] => 0 ) [primary_address] => stdClass Object ( [name] => primary_address [value] => ) ) ) [1] => stdClass Object ( [link_value] => stdClass Object ( [id] => stdClass Object ( [name] => id [value] => 173bacf5-5ea6-3906-d91d-4f7cb6c6e883 ) [email_address] => stdClass Object ( [name] => email_address [value] => kid.the.section@example.org ) [opt_out] => stdClass Object ( [name] => opt_out [value] => 1 ) [primary_address] => stdClass Object ( [name] => primary_address [value] => ) ) ) ) ) ) ) ) )
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Last modified: 06/30/2016 03:42pm
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														How helpful is this page?
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Provide Feedback About This Page
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:footer
+													Element:ul
+													Element:li
+													Element:h4
+														CRM Products & Solutions
+													Element:li
+													Element:a
+														Products
+													Element:li
+													Element:a
+														Editions & Pricing
+													Element:li
+													Element:a
+														CRM Solutions
+													Element:li
+													Element:a
+														SugarCRM Mobile
+													Element:li
+													Element:a
+														Store
+													Element:li
+													Element:a
+														SugarExchange
+													Element:ul
+													Element:li
+													Element:h4
+														Resources
+													Element:li
+													Element:a
+														CRM Resources
+													Element:li
+													Element:a
+														Case Studies
+													Element:li
+													Element:a
+														Whitepapers
+													Element:li
+													Element:a
+														Webcasts
+													Element:li
+													Element:a
+														Demos
+													Element:ul
+													Element:li
+													Element:h4
+														Support & Community
+													Element:li
+													Element:a
+														Support
+													Element:li
+													Element:a
+														Training & Certification
+													Element:li
+													Element:a
+														Partner Directory
+													Element:li
+													Element:a
+														Developers
+													Element:li
+													Element:a
+														Community Forums
+													Element:li
+													Element:a
+														Partner Portal Login
+													Element:ul
+													Element:li
+													Element:h4
+														News
+													Element:li
+													Element:a
+														Press Releases
+													Element:li
+													Element:a
+														News
+													Element:li
+													Element:a
+														Events
+													Element:li
+													Element:a
+														Awards
+													Element:li
+													Element:a
+														CRM Blog
+													Element:li
+													Element:a
+														Partner News
+													Element:ul
+													Element:li
+													Element:h4
+														About
+													Element:li
+													Element:a
+														Company Overview
+													Element:li
+													Element:a
+														Careers
+													Element:li
+													Element:a
+														Privacy Policy
+													Element:li
+													Element:a
+														Security Policy
+													Element:li
+													Element:a
+														Terms & Conditions
+													Element:li
+													Element:a
+														Environmental Policy
+													Element:li
+													Element:a
+														Impressum
+													Element:h4
+														Sugar Worldwide:
+													Element:a
+													Element:span
+														Select Region
+													Element:ul
+													Element:li
+													Element:a
+														English (Americas)
+													Element:li
+													Element:a
+														English (ANZ)
+													Element:li
+													Element:a
+														English (UK)
+													Element:li
+													Element:a
+														Deutsch (Germany)
+													Element:li
+													Element:a
+														Français (France)
+													Element:li
+													Element:a
+														Español (Europe)
+													Element:li
+													Element:a
+														Español (Latin America)
+													Element:li
+													Element:a
+														Português (Brazil)
+													Element:li
+													Element:a
+														Italian (Italy)
+													Element:h4
+														Stay Connected:
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Back to top
+												Node:
+												(type) c
+												(layer)4
+													Element:a
+													Element:span
+														Contents

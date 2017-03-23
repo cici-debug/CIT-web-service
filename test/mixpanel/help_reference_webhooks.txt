@@ -1,0 +1,358 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Using webhooks with Mixpanel
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Introduction
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel allows you to tie data to a specific user, creating a profile. This is where you store things like their email address, where they came from, or their age. Webhooks allow you to notify yourself whenever a user first matches your campaign criteria.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The targeting criteria for webhooks are based off of the properties of your user profiles. For example, if you send a
+							Element:code
+								Last login
+								property, you can create an webhook that notifies you about users who haven't used your service for three weeks.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Creating a webhook campaign
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Each webhook campaign requires a URL to post data to. To create a new webhook campaign, navigate to the Notifications report and select "Webhook" from the "Create new notification" dropdown. This will give you the following form:
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Targeting users
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When you submit the form, it will ask you to define the targeting criteria for your notification. We're keeping it simple here and restricting the notification to a single user named "Joe Doe". You can use many combinations of profile properties when you're creating a real notification.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Scheduling your webhook campaign
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you've targeted your users, you just have to schedule the webhook campaign. There are two options for scheduling campaigns:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:strong
+											ASAP notifications:
+											These notifications are posted to your URL as soon as they match the targeting criteria. It's common for users to go from "not matching" to "matching" - many notifications include a time-based requirement such as "last login was greater than two weeks ago", or one based off of other profile properties that may change.
+										Element:li
+										Element:strong
+											Scheduled notifications:
+											These notifications can be set to go out at a specified time, day of week, and interval. For example, you could set your notification to go out at 9am PST every Wednesday. When the notification runs, it finds all the users who match the criteria you have defined (and who have not yet been reported to your endpoint for this set of criteria) and sends a post containing the associated users to your URL. The result is that you will receive a record for a given user no more than once for each scheduled notification.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Receiving webhook POSTS
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A webhook is simply a remote HTTP endpoint that Mixpanel can POST data to when a new user matches the notification criteria.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To receive a Mixpanel webhook, set up an endpoint on your web server exactly like you would for any other page that receives POST requests. We recommend you choose an endpoint that doesn't handle any other requests. Then specify this endpoint in Mixpanel during the notification setup.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Mixpanel will send a POST request to the endpoint whenever the conditions of the notification are satisfied. The POST request will be much like a standard POST request made from submitting an HTML form, with a content type of
+							Element:code
+								application/x‑www‑form‑urlencoded
+								and a single parameter named
+							Element:code
+								users
+								. The users parameter will contain a JSON list with data for up to 50 users. If there are more than 50 users that satisfy the notification conditions, Mixpanel will batch these users up into sets of 50 and make a POST request for each batch.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Here's an example of the JSON we will send you:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								[
+							Element:span
+								{
+							Element:span
+								"$distinct_id"
+							Element:span
+								:
+							Element:span
+								"13b20239a29335"
+							Element:span
+								,
+							Element:span
+								"$properties"
+							Element:span
+								:{
+							Element:span
+								"$region"
+							Element:span
+								:
+							Element:span
+								"California"
+							Element:span
+								,
+							Element:span
+								"$email"
+							Element:span
+								:
+							Element:span
+								"harry.q.bovik@andrew.cmu.edu"
+							Element:span
+								,
+							Element:span
+								"$last_name"
+							Element:span
+								:
+							Element:span
+								"Bovik"
+							Element:span
+								,
+							Element:span
+								"$created"
+							Element:span
+								:
+							Element:span
+								"2012-11-20T15:26:16"
+							Element:span
+								,
+							Element:span
+								"$country_code"
+							Element:span
+								:
+							Element:span
+								"US"
+							Element:span
+								,
+							Element:span
+								"$first_name"
+							Element:span
+								:
+							Element:span
+								"Harry"
+							Element:span
+								,
+							Element:span
+								"Referring Domain"
+							Element:span
+								:
+							Element:span
+								"news.ycombinator.com"
+							Element:span
+								,
+							Element:span
+								"$city"
+							Element:span
+								:
+							Element:span
+								"Los Angeles"
+							Element:span
+								,
+							Element:span
+								"Last Seen"
+							Element:span
+								:
+							Element:span
+								"2012-11-20T15:26:17"
+							Element:span
+								,
+							Element:span
+								"Referring URL"
+							Element:span
+								:
+							Element:span
+								"http://news.ycombinator.com/"
+							Element:span
+								,
+							Element:span
+								"$last_seen"
+							Element:span
+								:
+							Element:span
+								"2012-11-20T15:26:19"
+							Element:span
+								}
+							Element:span
+								},
+							Element:span
+								{
+							Element:span
+								"$distinct_id"
+							Element:span
+								:
+							Element:span
+								"13a00df8730412"
+							Element:span
+								,
+							Element:span
+								"$properties"
+							Element:span
+								:{
+							Element:span
+								"$region"
+							Element:span
+								:
+							Element:span
+								"California"
+							Element:span
+								,
+							Element:span
+								"$email"
+							Element:span
+								:
+							Element:span
+								"anna.lytics@mixpanel.com"
+							Element:span
+								,
+							Element:span
+								"$last_name"
+							Element:span
+								:
+							Element:span
+								"Lytics"
+							Element:span
+								,
+							Element:span
+								"$created"
+							Element:span
+								:
+							Element:span
+								"2012-11-20T15:25:38"
+							Element:span
+								,
+							Element:span
+								"$country_code"
+							Element:span
+								:
+							Element:span
+								"US"
+							Element:span
+								,
+							Element:span
+								"$first_name"
+							Element:span
+								:
+							Element:span
+								"Anna"
+							Element:span
+								,
+							Element:span
+								"Referring Domain"
+							Element:span
+								:
+							Element:span
+								"www.quora.com"
+							Element:span
+								,
+							Element:span
+								"$city"
+							Element:span
+								:
+							Element:span
+								"Mountain View"
+							Element:span
+								,
+							Element:span
+								"Last Seen"
+							Element:span
+								:
+							Element:span
+								"2012-11-20T15:25:39"
+							Element:span
+								,
+							Element:span
+								"Referring URL"
+							Element:span
+								:
+							Element:span
+								"http://www.quora.com/What-..."
+							Element:span
+								,
+							Element:span
+								"$last_seen"
+							Element:span
+								:
+							Element:span
+								"2012-11-20T15:25:42"
+							Element:span
+								}
+							Element:span
+								}
+							Element:span
+								]
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You must respond with a 200 OK HTTP response for Mixpanel to mark the users in the notification as being successfully sent to the webhook. Otherwise, we will assume the webhook for the users in that POST request failed, and we will send them again in the next notification attempt.
+								Document Sections
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Introduction
+							Element:li
+							Element:a
+								Creating a webhook campaign
+							Element:li
+							Element:a
+								Receiving webhook POSTS

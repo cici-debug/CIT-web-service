@@ -1,0 +1,317 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					JQL: API Overview
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What is JQL?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								JQL (JavaScript Query Language) allows you to write JavaScript programs that analyze your raw event data.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If you want to answer a question or do a complex analysis that you can't do with our standard reports, JQL is the answer.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								What can you do with it?
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								JQL is built for power and flexibility, and is capable of quite complex analysis. For example, with JQL you could easily re-implement the logic for any Mixpanel report from scratch. Maybe you want slightly tweaked funnel or retention logic, or you want something entirely new - the sky's the limit!
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A few more examples of things you might want to do with JQL:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Get the distinct_id for each user who created an account 3 weeks ago, invited at least one friend, and sent 4 messages in the first week
+							Element:li
+								Figure out where users go next after dropping out of the signup funnel
+							Element:li
+								Determine which users have churned in the last month, and what happened before they churned
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Target audience
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								JQL requires you to write code. The primary users are developers and data scientists, though it is possible to save queries and build reports for others to use.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								JQL vs. SQL
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The industry standard for data analysis is SQL, and many people are familiar with that language. We took a different approach and designed a JavaScript-based query language from the ground up. JQL takes some effort to learn, but we think benefits are worth the effort and encourage you to try it. Below are a few advantages of JQL over SQL.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								It is much simpler to write complex data extraction and processing workflows in JQL compared to SQL. Typical analytics queries, like funnels and retention, end up being much shorter and easier to understand.
+							Element:li
+								JQL is very flexible. Its API is functional, similar to Apache Spark, not declarative, like SQL. This paradigm allows you to express just about any set of transformations on your data you like using a handful of primitive functions. It also allows you to take advantage of the full power and flexibility of a programming language, JavaScript, directly in your queries.
+							Element:li
+								JavaScript is the world's most popular programming language. Many people in your company may be more familiar with it than with SQL.
+							Element:li
+								JQL is optimized to run efficiently on our cutting-edge events and people database called Arb. It is not compiled down to SQL.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								How it works
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are only two steps required for you to start doing custom data analysis with Mixpanel.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, you have to write a query. The system is quite flexible, so there's a lot to go over. We'll get to that in the
+							Element:a
+								next section
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For now, here's a simple example. Let's say you want to know how many people used your app more than four times in January:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+							Element:span
+								function
+							Element:span
+								main
+							Element:span
+								()
+							Element:span
+								{
+							Element:span
+								// get events from january
+							Element:span
+								return
+							Element:span
+								Events
+							Element:span
+								({
+							Element:span
+								from_date
+							Element:span
+								:
+							Element:span
+								"2016-01-01"
+							Element:span
+								,
+							Element:span
+								to_date
+							Element:span
+								:
+							Element:span
+								"2016-01-31"
+							Element:span
+								})
+							Element:span
+								// count the number of events sent by each user
+							Element:span
+								.
+							Element:span
+								groupByUser
+							Element:span
+								(
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								count
+							Element:span
+								,
+							Element:span
+								events
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								count
+							Element:span
+								=
+							Element:span
+								count
+							Element:span
+								||
+							Element:span
+								0
+							Element:span
+								;
+							Element:span
+								return
+							Element:span
+								count
+							Element:span
+								+
+							Element:span
+								events
+							Element:span
+								.
+							Element:span
+								length
+							Element:span
+								;
+							Element:span
+								})
+							Element:span
+								// filter for users who sent more than 4 events
+							Element:span
+								.
+							Element:span
+								filter
+							Element:span
+								(
+							Element:span
+								function
+							Element:span
+								(
+							Element:span
+								user
+							Element:span
+								)
+							Element:span
+								{
+							Element:span
+								return
+							Element:span
+								user
+							Element:span
+								.
+							Element:span
+								value
+							Element:span
+								>
+							Element:span
+								4
+							Element:span
+								;
+							Element:span
+								})
+							Element:span
+								// count how many users that is
+							Element:span
+								.
+							Element:span
+								reduce
+							Element:span
+								(
+							Element:span
+								mixpanel
+							Element:span
+								.
+							Element:span
+								reducer
+							Element:span
+								.
+							Element:span
+								count
+							Element:span
+								());
+							Element:span
+								}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Second, you need to run the query. There are a
+							Element:a
+								few ways to do that
+								, but at a high level, you just have to send the script to one of our API endpoints. We then take the script and execute it against your raw data, returning the output as JSON.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Behind the scenes
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Behind the scenes, this API uses V8, the JavaScript engine that powers the Chrome browser. There's no SQL involved - we actually turn your raw event data into JavaScript objects and execute your code. This gives you the full power of a real programming language, making it much easier to do complex analysis.
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Next, check out the
+								Document Sections
+							Element:a
+								getting started guide
+								for an in-depth walkthrough of writing a JQL query.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								What is JQL?
+							Element:li
+							Element:a
+								What can it do?
+							Element:li
+							Element:a
+								Target audience
+							Element:li
+							Element:a
+								JQL vs. SQL
+							Element:li
+							Element:a
+								How it works
+							Element:li
+							Element:a
+								Behind the scenes

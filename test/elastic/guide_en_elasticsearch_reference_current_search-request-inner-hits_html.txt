@@ -1,0 +1,600 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Inner hits
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:a
+								parent/child
+								and
+							Element:a
+								nested
+								features allow the return of documents that have matches in a different scope. In the parent/child case, parent documents are returned based on matches in child documents or child documents are returned based on matches in parent documents. In the nested case, documents are returned based on matches in nested inner objects.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In both cases, the actual matches in the different scopes that caused a document to be returned is hidden. In many cases, it’s very useful to know which inner nested objects (in the case of nested) or children/parent documents (in the case of parent/child) caused certain information to be returned. The inner hits feature can be used for this. This feature returns per search hit in the search response additional nested hits that caused a search hit to match in a different scope.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Inner hits can be used by defining an
+							Element:code
+								inner_hits
+								definition on a
+							Element:code
+								nested
+								,
+							Element:code
+								has_child
+								or
+							Element:code
+								has_parent
+								query and filter. The structure looks like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								"<query>" : { "inner_hits" : { <inner_hits_options> } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If
+							Element:code
+								inner_hits
+								is defined on a query that supports it then each search hit will contain an
+							Element:code
+								inner_hits
+								json object with the following structure:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								"hits": [ { "_index": ..., "_type": ..., "_id": ..., "inner_hits": { "<inner_hits_name>": { "hits": { "total": ..., "hits": [ { "_type": ..., "_id": ..., ... }, ... ] } } }, ... }, ... ]
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Options
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Inner hits support the following options:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											from
+										Element:td
+										Element:p
+											The offset from where the first hit to fetch for each
+										Element:code
+											inner_hits
+											in the returned regular search hits.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											size
+										Element:td
+										Element:p
+											The maximum number of hits to return per
+										Element:code
+											inner_hits
+											. By default the top three matching hits are returned.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											sort
+										Element:td
+										Element:p
+											How the inner hits should be sorted per
+										Element:code
+											inner_hits
+											. By default the hits are sorted by the score.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											name
+										Element:td
+										Element:p
+											The name to be used for the particular inner hit definition in the response. Useful when multiple inner hits have been defined in a single search request. The default depends in which query the inner hit is defined. For
+										Element:code
+											has_child
+											query and filter this is the child type,
+										Element:code
+											has_parent
+											query and filter this is the parent type and the nested query and filter this is the nested path.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Inner hits also supports the following per document features:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Highlighting
+										Element:li
+										Element:a
+											Explain
+										Element:li
+										Element:a
+											Source filtering
+										Element:li
+										Element:a
+											Script fields
+										Element:li
+										Element:a
+											Doc value fields
+										Element:li
+										Element:a
+											Include versions
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Nested inner hits
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The nested
+										Element:code
+											inner_hits
+											can be used to include nested inner objects as inner hits to a search hit.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The example below assumes that there is a nested object field defined with the name
+										Element:code
+											comments
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "query" : { "nested" : { "path" : "comments", "query" : { "match" : {"comments.message" : "[actual query]"} }, "inner_hits" : {}
+										Element:a
+										Element:span
+											} } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The inner hit definition in the nested query. No other options need to be defined.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An example of a response snippet that could be generated from the above search request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											... "hits": { ... "hits": [ { "_index": "my-index", "_type": "question", "_id": "1", "_source": ..., "inner_hits": { "comments": {
+										Element:a
+										Element:span
+											"hits": { "total": ..., "hits": [ { "_nested": { "field": "comments", "offset": 2 }, "_source": ... }, ... ] } } } }, ...
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The name used in the inner hit definition in the search request. A custom key can be used via the
+										Element:code
+											name
+											option.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											_nested
+											metadata is crucial in the above example, because it defines from what inner nested object this inner hit came from. The
+										Element:code
+											field
+											defines the object array field the nested hit is from and the
+										Element:code
+											offset
+											relative to its location in the
+										Element:code
+											_source
+											. Due to sorting and scoring the actual location of the hit objects in the
+										Element:code
+											inner_hits
+											is usually different than the location a nested inner object was defined.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default the
+										Element:code
+											_source
+											is returned also for the hit objects in
+										Element:code
+											inner_hits
+											, but this can be changed. Either via
+										Element:code
+											_source
+											filtering feature part of the source can be returned or be disabled. If stored fields are defined on the nested level these can also be returned via the
+										Element:code
+											fields
+											feature.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An important default is that the
+										Element:code
+											_source
+											returned in hits inside
+										Element:code
+											inner_hits
+											is relative to the
+										Element:code
+											_nested
+											metadata. So in the above example only the comment part is returned per nested hit and not the entire source of the top level document that contained the comment.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Hierarchical levels of nested object fields and inner hits.
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If a mapping has multiple levels of hierarchical nested object fields each level can be accessed via dot notated path. For example if there is a
+										Element:code
+											comments
+											nested field that contains a
+										Element:code
+											votes
+											nested field and votes should directly be returned with the root hits then the following path can be defined:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "query" : { "nested" : { "path" : "comments.votes", "query" : { ... }, "inner_hits" : {} } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This indirect referencing is only supported for nested inner hits.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Parent/child inner hits
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The parent/child
+										Element:code
+											inner_hits
+											can be used to include parent or child
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The examples below assumes that there is a
+										Element:code
+											_parent
+											field mapping in the
+										Element:code
+											comment
+											type:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "query" : { "has_child" : { "type" : "comment", "query" : { "match" : {"message" : "[actual query]"} }, "inner_hits" : {}
+										Element:a
+										Element:span
+											} } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The inner hit definition like in the nested example.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											An example of a response snippet that could be generated from the above search request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											... "hits": { ... "hits": [ { "_index": "my-index", "_type": "question", "_id": "1", "_source": ..., "inner_hits": { "comment": { "hits": { "total": ..., "hits": [ { "_type": "comment", "_id": "5", "_source": ... }, ... ] } } } }, ...
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Named Queries
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Search After »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

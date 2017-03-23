@@ -1,0 +1,1065 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Responsys Integration
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Segment makes it easy to send your data to
+				Element:a
+					Responsys
+					(and lots of other integrations). Once you've tracked your data through our open source
+				Element:a
+					libraries
+					we'll translate and route your data to Responsys in the format they understand.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Before you enable Responsys in your integrations page, there are a few things in your Segment integration settings you must set up. Once the setup is complete, you’ll be able to use
+							Element:code
+								.identify()
+								calls to add records to
+							Element:strong
+								Profile Lists
+								,
+							Element:strong
+								Profile Extension Tables
+								and
+							Element:code
+								.track()
+								calls to add records to
+							Element:strong
+								Supplemental Tables
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Pre-requisite steps
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											Choose the
+										Element:strong
+											pod
+											that hosts your Responsys account.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+											Pod
+										Element:td
+											Login Endpoint
+										Element:tr
+										Element:td
+											interact2
+										Element:td
+											interact2.responsys.net
+										Element:tr
+										Element:td
+											interact5
+										Element:td
+											interact5.responsys.net
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+											NOTE
+											: You can find your account’s endpoint by simply going to your Oracle Responsys login screen and looking at your url.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+										Element:p
+											Enter your
+										Element:strong
+											username
+											and
+										Element:strong
+											password
+											for your Responsys account. We require these credentials in order to retrieve an auth token from Oracle in order to send data to your account on your behalf.
+										Element:li
+										Element:p
+											Please enter the name of the default
+										Element:strong
+											Folder
+											you’d like to send your Segment data to. Don’t worry, you can override the default folder name on a per-call basis via integration specific options for
+										Element:a
+											.
+										Element:code
+											.identify()
+										Element:li
+										Element:p
+											Please enter the name of your default
+										Element:strong
+											Profile List
+											where you would like to store your
+										Element:code
+											.identify()
+											calls. Again, this can be overriden via integraiton specific options on a per-call basis as seen
+										Element:a
+											here
+											.
+										Element:li
+										Element:p
+											Choose whether you’d like to set your
+										Element:strong
+											Default Permission Status
+											to be
+										Element:code
+											OPTIN
+											or
+										Element:code
+											OPTOUT
+											. Unless configured otherwise, the default will be
+										Element:code
+											OPTOUT
+											. If you are unsure the implications of this settings, you can read more about it
+										Element:a
+											here
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Once you have entered these required settings, you are ready to integrate your Oracle Responsys account through the Segment platform!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Identify
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								There are two things you can do with Segment’s
+							Element:code
+								.identify()
+								calls in regards to Responsys:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Upsert records to a
+							Element:strong
+								Profile List
+								.
+							Element:li
+								Extend that record by upserting a corresponding record in a
+							Element:strong
+								Profile Extension Table
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Merging Records to a Profile List
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Take a sample
+										Element:code
+											.identify()
+											call:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											// analytics.js analytics.identify('rick', { email: 'wubba-lubba-dub-dub@morty.com', seasonTwo: true, phone: '4012221738', address: { street: '19 Forest Lane', city: 'East Greenwich', state: 'RI', postalCode: '02818', country: 'USA' } });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											IMPORTANT
+											: In order to merge records properly, our integration requires that all
+										Element:code
+											.identify()
+											contain at least a
+										Element:code
+											userId
+											or a
+										Element:code
+											traits.email
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above call will try to first find an existing record in the provided Profile List with a matching
+										Element:code
+											userId
+											of
+										Element:code
+											'rick'
+											and or
+										Element:code
+											email
+											of
+										Element:code
+											'wubba-lubba-dub-dub@morty.com'
+											. If a record is found, we will update the rest of the columns so long as you pass the information using our
+										Element:a
+											identify spec
+											. The below is how we map our spec’d Segment traits to Responsys’ semantic Profile List columns:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+											Segment Trait Name
+										Element:td
+											Responsys Profile List Column Names
+										Element:tr
+										Element:td
+											userId
+										Element:td
+										Element:code
+											CUSTOMER_ID_
+										Element:tr
+										Element:td
+											email
+										Element:td
+										Element:code
+											EMAIL_ADDRESS_
+										Element:tr
+										Element:td
+											phone
+										Element:td
+										Element:code
+											MOBILE_NUMBER_
+										Element:tr
+										Element:td
+											address.street
+										Element:td
+										Element:code
+											POSTAL_ADDRESS_1_
+										Element:tr
+										Element:td
+											address.city
+										Element:td
+										Element:code
+											CITY_
+										Element:tr
+										Element:td
+											address.state
+										Element:td
+										Element:code
+											STATE_
+										Element:tr
+										Element:td
+											address.postalCode
+										Element:td
+										Element:code
+											POSTAL_CODE_
+										Element:tr
+										Element:td
+											address.country
+										Element:td
+										Element:code
+											COUNTRY_
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:em
+											Responsys does not have an API to create Profile Lists so you must create one manually inside their UI
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Merging Records to a Profile Extension Table
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you would like to send records to a
+										Element:strong
+											Profile Extension Table (PET)
+											, this integration can either create the PET for you or you can simply enter the name of any of your existing PETs. The match column name will be the
+										Element:code
+											userId
+											and
+										Element:code
+											email
+											(must send at least one). So be sure to include the
+										Element:code
+											userId
+											or
+										Element:code
+											traits.email
+											in your
+										Element:code
+											.identify()
+											calls!
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Creating a Profile Extension Table through Segment:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														All you have to do is enter the desired name of your PET in your Segment integration settings.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Say that the following is your first
+													Element:code
+														.identify()
+														call after you’ve entered the PET name that does not exist yet in your Responsy account:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+													Element:code
+														// analytics.js analytics.identify('rick', { email: 'wubba-lubba-dub-dub@morty.com', name: 'rick', age: 60, genius: true });
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This would create a PET where its columns would be
+													Element:code
+														NAME
+														,
+													Element:code
+														AGE
+														and
+													Element:code
+														GENIUS
+														. Since
+													Element:code
+														email
+														is mapped already in your Profile List, we will not create a duplicate column in your PET. We will also automatically set the column type according to the value of the trait you’ve sent. We will run a quick validation such as checking the length of any
+													Element:code
+														string
+														values to make sure we set the appropriate
+													Element:code
+														STR###
+														as well as checking any
+													Element:code
+														number
+														values should be an
+													Element:code
+														INTEGER
+														or
+													Element:code
+														NUMBER
+														in Responsys.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following is how we map the column types as well as what the default type will be in the event more than one valid column type can be set (i.e. A string value that had 24 chars will still default to
+													Element:code
+														STR500
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tr
+													Element:td
+														Segment Trait Value Type
+													Element:td
+														Possible Responsys Column Types
+													Element:td
+														Default
+													Element:tr
+													Element:td
+													Element:code
+														timestamp
+													Element:td
+														TIMESTAMP
+													Element:td
+														TIMESTAMP
+													Element:tr
+													Element:td
+													Element:code
+														number
+													Element:td
+														INTEGER, NUMBER
+													Element:td
+														NUMBER
+													Element:tr
+													Element:td
+													Element:code
+														string
+													Element:td
+														CHAR, STR25, STR100, STR255, STR500, STR4000
+													Element:td
+														STR500
+													Element:tr
+													Element:td
+													Element:code
+														boolean
+														*
+													Element:td
+														STR25, STR100, STR255, STR500, STR4000
+													Element:td
+														STR25
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														NOTE:
+													Element:em
+														Responsys does not have a boolean column type, so we will just stringify to
+														.
+													Element:code
+														'true'
+														or
+													Element:code
+														'false'
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														IMPORTANT
+														: Since Responsys will reject any messages that try to merge columns that do not exist in a given Profile Extension Table, we will make sure to
+													Element:em
+														only
+														send accepted column names. So it is very important to keep your tracking code, the integration settings, and your table schema in Responsys in sync!
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Merging Records to Existing Profile Extension Table
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If you already have a Profile Extension Table you’d like to use, simply enter the name of the list in your settings. Note that we will
+													Element:em
+														only
+														send traits with matching column names in your schema, meaning that we will drop any traits that are not pre-defined in your PET before sending the request.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Overriding Default Folder and List Names
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you need more flexibility or need to add different users to various Folders or Profile Lists/Extension Tables, you can use our
+										Element:strong
+											integration specific options
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											// analytics.js analytics.identify('rick', { vip: true }, { Responsys: { listName: 'segment_vip_emails', // Profile List Name folderName: 'segment_vips', // Folder Name petName: 'segment_vip_users' // Profile Extension Table Name } });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above call will override all your default names in your Segment integration settings. It is a great way to implement programmatic bucketing of your users into specific folders and lists!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Track
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You can send Segment’s
+							Element:code
+								.track()
+								events to add (
+							Element:strong
+								NOT
+								merge) records to any
+							Element:strong
+								Supplemental Table
+								. However, it is currently not possible to pull all the valid columns for a given Supplemental Table as you would with Profile Lists, meaning that you
+							Element:strong
+								must
+								explicitly map your the names of your track events and properties and provide their corresponding Reponsys table names and column names and types.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Creating a Supplemental Table through Segment:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Similar to how our
+													Element:code
+														.identify()
+														call works, you can opt to let Segment create the Supplemental tables by providing all the necessary mappings in your settings. We will try to upsert records to that table name first and if it doesn’t exist, we will create the table for you using the exact column mappings you have provided in the Segment integration settings. You do not need to map every column to Segment properties if you do not wish to do so, as Responsys allows you to update records partially, with the exception of
+													Element:a
+														.
+													Element:strong
+														Primary Keys
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:strong
+														IMPORTANT
+														: If you make any updates to your Segment
+													Element:code
+														.track()
+														or Supplemental Table schema without updating the changes in your integration settings, you can risk records not being added correctly to simply having the messages rejected entirely. Especially if the changes relate to
+													Element:a
+														.
+													Element:strong
+														Primary Keys
+														configuration
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Merging Records to Existing Supplemental Tables
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As long as you provide the exact mappings that reflects the existing schema of your Supplemental Table, we can add records. You do not need to map every column to Segment properties if you do not wish to do so, as Responsys allows you to update records partially, with the exception of
+													Element:a
+														.
+													Element:strong
+														Primary Keys
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Primary Keys
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											All Supplemental Tables must have at least one
+										Element:strong
+											Primary Key
+											. Responsys supports up to four per table. It’s very important that whichever properties you choose to set as one of the Primary Keys always have unique values. Otherwise, you will risk overwriting historical records in your Supplemental Tables.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that if you are using more than one primary key for a given table, only one of those need to send a unique value in order to successfuly add a new record.
+									Node:
+									(type) c
+									(layer)3
+										Element:h4
+											Using Segment’s messageId as a Primary Key
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The easiest way to ensure you choose a unique Primary Key is to enable
+										Element:strong
+											Use Segment Message ID
+											. This feature will send
+										Element:code
+											SEGMENT_MESSAGE_ID
+											as a primary key column with the value being Segment’s
+										Element:code
+											messageId
+											field. Since this property is uniquely generated by Segment, you can ensure that you do not overwrite any historical records in your tables.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that this does count against your limit of four Primary Keys per table.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’d like to use this feature for an existing Supplemental Table, you can modify your schema and add the column
+										Element:code
+											SEGMENT_MESSAGE_ID
+											. If you do not do this but enable this option, all your track events will be rejected by Responsys.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Furthermore, if you do not provide Segment with
+										Element:strong
+											all
+											of the primary key column names, the message will be rejected by Responsys API.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Map UserId
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In order to attribute the event record in your Supplemental Tables with the matching records in your Profile Lists or Profile Extension Tables, we recommend enabling the
+										Element:strong
+											Map Segment UserId
+											option. If enabled, we will send the
+										Element:code
+											userId
+											attached to the
+										Element:code
+											.track()
+											payload as a Responsys field.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											IMPORTANT
+											: Make sure if you are mapping an existing Supplemental Table, you have created a field in your table called
+										Element:code
+											CUSTOMER_ID_
+											! Otherwise if you have not created the table and is relying on Segment to do so, we will create the field
+										Element:code
+											CUSTOMER_ID_
+											and set the field type as
+										Element:code
+											STR500
+											.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Map Email
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Since we still accept
+										Element:code
+											.identify()
+											calls without
+										Element:code
+											userId
+											s so long as it has
+										Element:code
+											traits.email
+											, you can also enable this for your
+										Element:code
+											.track()
+											events if you want to attribute event records via
+										Element:code
+											email
+											. We will lookup
+										Element:code
+											context.traits.email
+											(which is automatically cached if you are using a mobile library),
+										Element:code
+											properties.email
+											, and fallback on the
+										Element:code
+											userId
+											field if it is a valid email address.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											IMPORTANT
+											: Make sure if you mapping an existing Supplemental Table, you have created a field in your table called
+										Element:code
+											EMAIL_ADDRESS_
+											! Otherwise, if you have not created the table and is relying on Segment to do so, we will create the field
+										Element:code
+											EMAIL_ADDRESS_
+											and set the field type as
+										Element:code
+											STR500
+											.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								FAQ
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											How do you handle nested objects?
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We will flatten any traits or properties that are nested objects of arrays and objects with the delimiter of an underscore.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Take the following
+										Element:code
+											.track()
+											call with some nested properties:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											// analytics.js analytics.track('Watched Rick and Morty', { show: { title: 'Rick and Morty', episode: { season: 1, categories: ['comedy'] } } });
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											We would send column names as:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:code
+											show_title
+											:
+										Element:code
+											'Rick and Morty'
+										Element:li
+										Element:code
+											show_episode_season
+											:
+										Element:code
+											'1'
+											(
+										Element:em
+											note
+											: Responsys accepts strings for column types NUMBER and INTEGER so we always stringify
+										Element:code
+											number
+											s)
+										Element:li
+										Element:code
+											show_episode_categories_0
+											:
+										Element:code
+											'comedy'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:strong
+											IMPORTANT
+											: When mapping your Segment Properties for those that you know you will be sending as nested objects, be sure to type the flattened version. So for example, if you are sending:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+										Element:code
+											// properties { address: { street: '100 California Street' } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You should enter
+										Element:code
+											address_street
+											as your Segment Property Name.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											I’m seeing a ‘Merge cannot be done on one field’ in the Segment debugger!
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This error occurs when you try to upsert a record to a Profile Extension Table but you did not provide any additional traits other than what we used to match the columns. For PETs, we use your
+										Element:code
+											userId
+											or
+										Element:code
+											traits.email
+											from your
+										Element:code
+											.identify()
+											calls to upsert the record. You need to send at least one other trait that would map to a field in your PET.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Supported Sources and Connection Modes
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:th
+							Element:th
+								Web
+							Element:th
+								Mobile
+							Element:th
+								Server
+							Element:tr
+							Element:td
+								📱 Device-based
+							Element:td
+							Element:td
+							Element:td
+							Element:tr
+							Element:td
+								☁️ Cloud-based
+							Element:td
+								✅
+							Element:td
+								✅
+							Element:td
+								✅
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To learn more about about Connection Modes and what dictates which we support,
+							Element:a
+								see here
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Settings
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Segment lets you change these integration settings via your Segment dashboard without having to touch any code.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Events
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use these fields to map your Segment event names to Responsys Supplemental Tables. We’ll only send events and properties that you specify.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Folder Name
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please enter the default Folder Name that holds the provided Profile List and Profile Extension Table.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Profile List Name
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please enter the default Profile List. Make sure that the Profile List is inside the provided Folder Name.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Set Default Permission Setting to OPTIN
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Choose whether records added to Profile Lists should be
+										Element:code
+											'OPTIN'
+											rather than the default
+										Element:code
+											'OPTOUT'
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Password
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please enter your account’s password.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Profile Extension Table
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please enter the name of your default Profile Extension Table.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Pod
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The pod that hosts your Responsys account. Simply check your url during your login screen. This is required to any requests to your account. The default is
+										Element:code
+											interact2
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Username
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Please enter your account’s username.
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+											Check out the code!
+									Node:
+									(type) c
+									(layer)3
+										Element:a
+											server

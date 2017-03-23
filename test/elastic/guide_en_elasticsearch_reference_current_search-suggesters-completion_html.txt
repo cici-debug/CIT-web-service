@@ -1,0 +1,782 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Completion Suggester
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order to understand the format of suggestions, please read the
+							Element:a
+								page first.
+							Element:em
+								Suggesters
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								completion
+								suggester provides auto-complete/search-as-you-type functionality. This is a navigational feature to guide users to relevant results as they are typing, improving search precision. It is not meant for spell correction or did-you-mean functionality like the
+							Element:code
+								term
+								or
+							Element:code
+								phrase
+								suggesters.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Ideally, auto-complete functionality should be as fast as a user types to provide instant feedback relevant to what a user has already typed in. Hence,
+							Element:code
+								completion
+								suggester is optimized for speed. The suggester uses data structures that enable fast lookups, but are costly to build and are stored in-memory.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Mapping
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To use this feature, specify a special mapping for this field, which indexes the field values for fast completions.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT music { "mappings": { "song" : { "properties" : { "suggest" : { "type" : "completion" }, "title" : { "type": "keyword" } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Mapping supports the following parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											analyzer
+										Element:dd
+											The index analyzer to use, defaults to
+										Element:code
+											simple
+											. In case you are wondering why we did not opt for the
+										Element:code
+											standard
+											analyzer: We try to have easy to understand behaviour here, and if you index the field content
+										Element:code
+											At the Drive-in
+											, you will not get any suggestions for
+										Element:code
+											a
+											, nor for
+										Element:code
+											d
+											(the first non stopword).
+										Element:dt
+										Element:span
+										Element:code
+											search_analyzer
+										Element:dd
+											The search analyzer to use, defaults to value of
+										Element:code
+											analyzer
+											.
+										Element:dt
+										Element:span
+										Element:code
+											preserve_separators
+										Element:dd
+											Preserves the separators, defaults to
+										Element:code
+											true
+											. If disabled, you could find a field starting with
+										Element:code
+											Foo Fighters
+											, if you suggest for
+										Element:code
+											foof
+											.
+										Element:dt
+										Element:span
+										Element:code
+											preserve_position_increments
+										Element:dd
+											Enables position increments, defaults to
+										Element:code
+											true
+											. If disabled and using stopwords analyzer, you could get a field starting with
+										Element:code
+											The Beatles
+											, if you suggest for
+										Element:code
+											b
+											.
+										Element:span
+											: You could also achieve this by indexing two inputs,
+										Element:strong
+											Note
+										Element:code
+											Beatles
+											and
+										Element:code
+											The Beatles
+											, no need to change a simple analyzer, if you are able to enrich your data.
+										Element:dt
+										Element:span
+										Element:code
+											max_input_length
+										Element:dd
+											Limits the length of a single input, defaults to
+										Element:code
+											50
+											UTF-16 code points. This limit is only used at index time to reduce the total number of characters per input string in order to prevent massive inputs from bloating the underlying datastructure. Most usecases won’t be influenced by the default value since prefix completions seldom grow beyond prefixes longer than a handful of characters.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Indexing
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You index suggestions like any other field. A suggestion is made of an
+										Element:code
+											input
+											and an optional
+										Element:code
+											weight
+											attribute. An
+										Element:code
+											input
+											is the expected text to be matched by a suggestion query and the
+										Element:code
+											weight
+											determines how the suggestions will be scored. Indexing a suggestion is as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT music/song/1?refresh { "suggest" : { "input": [ "Nevermind", "Nirvana" ], "weight" : 34 } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following parameters are supported:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											input
+										Element:dd
+											The input to store, this can be an array of strings or just a string. This field is mandatory.
+										Element:dt
+										Element:span
+										Element:code
+											weight
+										Element:dd
+											A positive integer or a string containing a positive integer, which defines a weight and allows you to rank your suggestions. This field is optional.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can index multiple suggestions for a document as follows:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT music/song/1?refresh { "suggest" : [ { "input": "Nevermind", "weight" : 10 }, { "input": "Nirvana", "weight" : 3 } ] }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can use the following shorthand form. Note that you can not specify a weight with suggestion(s).
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT music/song/1?refresh { "suggest" : [ "Nevermind", "Nirvana" ] }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Querying
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Suggesting works as usual, except that you have to specify the suggest type as
+										Element:code
+											completion
+											. Suggestions are near real-time, which means new suggestions can be made visible by
+										Element:a
+											refresh
+											and documents once deleted are never shown. This request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST music/_search?pretty { "suggest": { "song-suggest" : { "prefix" : "nir", "completion" : { "field" : "suggest" } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											returns this response:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_shards" : { "total" : 5, "successful" : 5, "failed" : 0 }, "hits": ... "took": 2, "timed_out": false, "suggest": { "song-suggest" : [ { "text" : "nir", "offset" : 0, "length" : 3, "options" : [ { "text" : "Nirvana", "_index": "music", "_type": "song", "_id": "1", "_score": 1.0, "_source": { "suggest": ["Nevermind", "Nirvana"] } } ] } ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											_source
+											meta-field must be enabled, which is the default behavior, to enable returning
+										Element:code
+											_source
+											with suggestions.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The configured weight for a suggestion is returned as
+										Element:code
+											_score
+											. The
+										Element:code
+											text
+											field uses the
+										Element:code
+											input
+											of your indexed suggestion. Suggestions return the full document
+										Element:code
+											_source
+											by default. The size of the
+										Element:code
+											_source
+											can impact performance due to disk fetch and network transport overhead. To save some network overhead, filter out unnecessary fields from the
+										Element:code
+											_source
+											using
+										Element:a
+											source filtering
+											to minimize
+										Element:code
+											_source
+											size. Note that the _suggest endpoint doesn’t support source filtering but using suggest on the
+										Element:code
+											_search
+											endpoint does:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST music/_search?size=0 { "_source": "suggest", "suggest": { "song-suggest" : { "prefix" : "nir", "completion" : { "field" : "suggest" } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which should look like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "took": 6, "timed_out": false, "_shards" : { "total" : 5, "successful" : 5, "failed" : 0 }, "hits": { "total" : 0, "max_score" : 0.0, "hits" : [] }, "suggest": { "song-suggest" : [ { "text" : "nir", "offset" : 0, "length" : 3, "options" : [ { "text" : "Nirvana", "_index": "music", "_type": "song", "_id": "1", "_score": 1.0, "_source": { "suggest": ["Nevermind", "Nirvana"] } } ] } ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The basic completion suggester query supports the following parameters:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											field
+										Element:dd
+											The name of the field on which to run the query (required).
+										Element:dt
+										Element:span
+										Element:code
+											size
+										Element:dd
+											The number of suggestions to return (defaults to
+										Element:code
+											5
+											).
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The completion suggester considers all documents in the index. See
+										Element:a
+											Context Suggester
+											for an explanation of how to query a subset of documents instead.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In case of completion queries spanning more than one shard, the suggest is executed in two phases, where the last phase fetches the relevant documents from shards, implying executing completion requests against a single shard is more performant due to the document fetch overhead when the suggest spans multiple shards. To get best performance for completions, it is recommended to index completions into a single shard index. In case of high heap usage due to shard size, it is still recommended to break index into multiple shards instead of optimizing for completion performance.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Fuzzy queries
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The completion suggester also supports fuzzy queries - this means, you can have a typo in your search and still get results back.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST music/_search?pretty { "suggest": { "song-suggest" : { "prefix" : "nor", "completion" : { "field" : "suggest", "fuzzy" : { "fuzziness" : 2 } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Suggestions that share the longest prefix to the query
+										Element:code
+											prefix
+											will be scored higher.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The fuzzy query can take specific fuzzy parameters. The following parameters are supported:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											fuzziness
+										Element:td
+										Element:p
+											The fuzziness factor, defaults to
+										Element:code
+											AUTO
+											. See
+										Element:a
+											the section called “Fuzziness
+										Element:a
+											edit
+											” for allowed settings.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											transpositions
+										Element:td
+										Element:p
+											if set to
+										Element:code
+											true
+											, transpositions are counted as one change instead of two, defaults to
+										Element:code
+											true
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											min_length
+										Element:td
+										Element:p
+											Minimum length of the input before fuzzy suggestions are returned, defaults
+										Element:code
+											3
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											prefix_length
+										Element:td
+										Element:p
+											Minimum length of the input, which is not checked for fuzzy alternatives, defaults to
+										Element:code
+											1
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											unicode_aware
+										Element:td
+										Element:p
+											If
+										Element:code
+											true
+											, all measurements (like fuzzy edit distance, transpositions, and lengths) are measured in Unicode code points instead of in bytes. This is slightly slower than raw bytes, so it is set to
+										Element:code
+											false
+											by default.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you want to stick with the default values, but still use fuzzy, you can either use
+										Element:code
+											fuzzy: {}
+											or
+										Element:code
+											fuzzy: true
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Regex queries
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The completion suggester also supports regex queries meaning you can express a prefix as a regular expression
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											POST music/_search?pretty { "suggest": { "song-suggest" : { "regex" : "n[ever|i]r", "completion" : { "field" : "suggest" } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The regex query can take specific regex parameters. The following parameters are supported:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											flags
+										Element:td
+										Element:p
+											Possible flags are
+										Element:code
+											ALL
+											(default),
+										Element:code
+											ANYSTRING
+											,
+										Element:code
+											COMPLEMENT
+											,
+										Element:code
+											EMPTY
+											,
+										Element:code
+											INTERSECTION
+											,
+										Element:code
+											INTERVAL
+											, or
+										Element:code
+											NONE
+											. See
+										Element:a
+											regexp-syntax
+											for their meaning
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											max_determinized_states
+										Element:td
+										Element:p
+											Regular expressions are dangerous because it’s easy to accidentally create an innocuous looking one that requires an exponential number of internal determinized automaton states (and corresponding RAM and CPU) for Lucene to execute. Lucene prevents these using the
+										Element:code
+											max_determinized_states
+											setting (defaults to 10000). You can raise this limit to allow more complex regular expressions to execute.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Phrase Suggester
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Context Suggester »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

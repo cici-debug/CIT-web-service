@@ -1,0 +1,1670 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Function Score Query
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								function_score
+								allows you to modify the score of documents that are retrieved by a query. This can be useful if, for example, a score function is computationally expensive and it is sufficient to compute the score on a filtered set of documents.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								To use
+							Element:code
+								function_score
+								, the user has to define a query and one or more functions, that compute a new score for each document returned by the query.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								function_score
+								can be used with only one function like this:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /_search { "query": { "function_score": { "query": { "match_all": {} }, "boost": "5", "random_score": {},
+							Element:a
+							Element:span
+								"boost_mode":"multiply" } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								See
+							Element:a
+								Function Score Query
+								for a list of supported functions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Furthermore, several functions can be combined. In this case one can optionally choose to apply the function only if a document matches a given filtering query
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /_search { "query": { "function_score": { "query": { "match_all": {} }, "boost": "5",
+							Element:a
+							Element:span
+								"functions": [ { "filter": { "match": { "test": "bar" } }, "random_score": {},
+							Element:img
+							Element:a
+							Element:span
+								"weight": 23 }, { "filter": { "match": { "test": "cat" } }, "weight": 42 } ], "max_boost": 42, "score_mode": "max", "boost_mode": "multiply", "min_score" : 42 } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								Boost for the whole query.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								See
+							Element:a
+								Function Score Query
+								for a list of supported functions.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The scores produced by the filtering query of each function do not matter.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								If no filter is given with a function this is equivalent to specifying
+							Element:code
+								"match_all": {}
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								First, each document is scored by the defined functions. The parameter
+							Element:code
+								score_mode
+								specifies how the computed scores are combined:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:colgroup
+							Element:col
+							Element:col
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								multiply
+							Element:td
+							Element:p
+								scores are multiplied (default)
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								sum
+							Element:td
+							Element:p
+								scores are summed
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								avg
+							Element:td
+							Element:p
+								scores are averaged
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								first
+							Element:td
+							Element:p
+								the first function that has a matching filter is applied
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								max
+							Element:td
+							Element:p
+								maximum score is used
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								min
+							Element:td
+							Element:p
+								minimum score is used
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Because scores can be on different scales (for example, between 0 and 1 for decay functions but arbitrary for
+							Element:code
+								field_value_factor
+								) and also because sometimes a different impact of functions on the score is desirable, the score of each function can be adjusted with a user defined
+							Element:code
+								weight
+								. The
+							Element:code
+								weight
+								can be defined per function in the
+							Element:code
+								functions
+								array (example above) and is multiplied with the score computed by the respective function. If weight is given without any other function declaration,
+							Element:code
+								weight
+								acts as a function that simply returns the
+							Element:code
+								weight
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In case
+							Element:code
+								score_mode
+								is set to
+							Element:code
+								avg
+								the individual scores will be combined by a
+							Element:span
+								average. For example, if two functions return score 1 and 2 and their respective weights are 3 and 4, then their scores will be combined as
+							Element:strong
+								weighted
+							Element:code
+								(1*3+2*4)/(3+4)
+								and
+							Element:span
+							Element:strong
+								not
+							Element:code
+								(1*3+2*4)/2
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The new score can be restricted to not exceed a certain limit by setting the
+							Element:code
+								max_boost
+								parameter. The default for
+							Element:code
+								max_boost
+								is FLT_MAX.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The newly computed score is combined with the score of the query. The parameter
+							Element:code
+								boost_mode
+								defines how:
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:colgroup
+							Element:col
+							Element:col
+							Element:tbody
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								multiply
+							Element:td
+							Element:p
+								query score and function score is multiplied (default)
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								replace
+							Element:td
+							Element:p
+								only function score is used, the query score is ignored
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								sum
+							Element:td
+							Element:p
+								query score and function score are added
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								avg
+							Element:td
+							Element:p
+								average
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								max
+							Element:td
+							Element:p
+								max of query score and function score
+							Element:tr
+							Element:td
+							Element:p
+							Element:code
+								min
+							Element:td
+							Element:p
+								min of query score and function score
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								By default, modifying the score does not change which documents match. To exclude documents that do not meet a certain score threshold the
+							Element:code
+								min_score
+								parameter can be set to the desired score threshold.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For
+							Element:code
+								min_score
+								to work,
+							Element:span
+								documents returned by the query need to be scored and then filtered out one by one.
+							Element:strong
+								all
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:a
+								The
+							Element:code
+								function_score
+								query provides several types of score functions.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+							Element:code
+								script_score
+							Element:li
+							Element:a
+							Element:code
+								weight
+							Element:li
+							Element:a
+							Element:code
+								random_score
+							Element:li
+							Element:a
+							Element:code
+								field_value_factor
+							Element:li
+							Element:a
+								decay functions
+								:
+							Element:code
+								gauss
+								,
+							Element:code
+								linear
+								,
+							Element:code
+								exp
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Script score
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											script_score
+											function allows you to wrap another query and customize the scoring of it optionally with a computation derived from other numeric field values in the doc using a script expression. Here is a simple sample:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"script_score" : { "script" : { "lang": "painless", "inline": "_score * doc['my_numeric_field'].value" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											On top of the different scripting field values and expression, the
+										Element:code
+											_score
+											script parameter can be used to retrieve the score based on the wrapped query.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Scripts are cached for faster execution. If the script has parameters that it needs to take into account, it is preferable to reuse the same script, and provide parameters to it:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"script_score": { "script": { "lang": "painless", "params": { "param1": value1, "param2": value2 }, "inline": "_score * doc['my_numeric_field'].value / Math.pow(params.param1, params.param2)" } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that unlike the
+										Element:code
+											custom_score
+											query, the score of the query is multiplied with the result of the script scoring. If you wish to inhibit this, set
+										Element:code
+											"boost_mode": "replace"
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Weight
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											weight
+											score allows you to multiply the score by the provided
+										Element:code
+											weight
+											. This can sometimes be desired since boost value set on specific queries gets normalized, while for this score function it does not. The number value is of type float.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"weight" : number
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Random
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											random_score
+											generates scores using a hash of the
+										Element:code
+											_uid
+											field, with a
+										Element:code
+											seed
+											for variation. If
+										Element:code
+											seed
+											is not specified, the current time is used.
+									Node:
+									(type) c
+									(layer)3
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Using this feature will load field data for
+										Element:code
+											_uid
+											, which can be a memory intensive operation since the values are unique.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"random_score": { "seed" : number }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Field Value factor
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											field_value_factor
+											function allows you to use a field from a document to influence the score. It’s similar to using the
+										Element:code
+											script_score
+											function, however, it avoids the overhead of scripting. If used on a multi-valued field, only the first value of the field is used in calculations.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											As an example, imagine you have a document indexed with a numeric
+										Element:code
+											popularity
+											field and wish to influence the score of a document with this field, an example doing so would look like:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"field_value_factor": { "field": "popularity", "factor": 1.2, "modifier": "sqrt", "missing": 1 }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which will translate into the following formula for scoring:
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+										Element:code
+											sqrt(1.2 * doc['popularity'].value)
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											There are a number of options for the
+										Element:code
+											field_value_factor
+											function:
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											field
+										Element:td
+										Element:p
+											Field to be extracted from the document.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											factor
+										Element:td
+										Element:p
+											Optional factor to multiply the field value with, defaults to
+										Element:code
+											1
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											modifier
+										Element:td
+										Element:p
+											Modifier to apply to the field value, can be one of:
+										Element:code
+											none
+											,
+										Element:code
+											log
+											,
+										Element:code
+											log1p
+											,
+										Element:code
+											log2p
+											,
+										Element:code
+											ln
+											,
+										Element:code
+											ln1p
+											,
+										Element:code
+											ln2p
+											,
+										Element:code
+											square
+											,
+										Element:code
+											sqrt
+											, or
+										Element:code
+											reciprocal
+											. Defaults to
+										Element:code
+											none
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:thead
+										Element:tr
+										Element:th
+											Modifier
+										Element:th
+											Meaning
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											none
+										Element:td
+										Element:p
+											Do not apply any multiplier to the field value
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											log
+										Element:td
+										Element:p
+											Take the
+										Element:a
+											logarithm
+											of the field value
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											log1p
+										Element:td
+										Element:p
+											Add 1 to the field value and take the logarithm
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											log2p
+										Element:td
+										Element:p
+											Add 2 to the field value and take the logarithm
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											ln
+										Element:td
+										Element:p
+											Take the
+										Element:a
+											natural logarithm
+											of the field value
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											ln1p
+										Element:td
+										Element:p
+											Add 1 to the field value and take the natural logarithm
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											ln2p
+										Element:td
+										Element:p
+											Add 2 to the field value and take the natural logarithm
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											square
+										Element:td
+										Element:p
+											Square the field value (multiply it by itself)
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											sqrt
+										Element:td
+										Element:p
+											Take the
+										Element:a
+											square root
+											of the field value
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											reciprocal
+										Element:td
+										Element:p
+										Element:a
+											Reciprocate
+											the field value, same as
+										Element:code
+											1/x
+											where
+										Element:code
+											x
+											is the field’s value
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											missing
+										Element:dd
+										Element:p
+											Value used if the document doesn’t have that field. The modifier and factor are still applied to it as though it were read from the document.
+										Element:pre
+											Keep in mind that taking the log() of 0, or the square root of a negative number is an illegal operation, and an exception will be thrown. Be sure to limit the values of the field with a range filter to avoid this, or use `log1p` and `ln1p`.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Decay functions
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Decay functions score a document with a function that decays depending on the distance of a numeric field value of the document from a user given origin. This is similar to a range query, but with smooth edges instead of boxes.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											To use distance scoring on a query that has numerical fields, the user has to define an
+										Element:code
+											origin
+											and a
+										Element:code
+											scale
+											for each field. The
+										Element:code
+											origin
+											is needed to define the “central point” from which the distance is calculated, and the
+										Element:code
+											scale
+											to define the rate of decay. The decay function is specified as
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"DECAY_FUNCTION": {
+										Element:a
+										Element:span
+											"FIELD_NAME": {
+										Element:img
+										Element:a
+										Element:span
+											"origin": "11, 12", "scale": "2km", "offset": "0km", "decay": 0.33 } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											DECAY_FUNCTION
+											should be one of
+										Element:code
+											linear
+											,
+										Element:code
+											exp
+											, or
+										Element:code
+											gauss
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The specified field must be a numeric, date, or geo-point field.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the above example, the field is a
+										Element:a
+											and origin can be provided in geo format.
+										Element:code
+											geo_point
+										Element:code
+											scale
+											and
+										Element:code
+											offset
+											must be given with a unit in this case. If your field is a date field, you can set
+										Element:code
+											scale
+											and
+										Element:code
+											offset
+											as days, weeks, and so on. Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"gauss": { "date": { "origin": "2013-09-17",
+										Element:a
+										Element:span
+											"scale": "10d", "offset": "5d",
+										Element:img
+										Element:a
+										Element:span
+											"decay" : 0.5
+										Element:img
+										Element:a
+										Element:span
+											} }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The date format of the origin depends on the
+										Element:a
+											defined in your mapping. If you do not define the origin, the current time is used.
+										Element:code
+											format
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											offset
+											and
+										Element:code
+											decay
+											parameters are optional.
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											origin
+										Element:td
+										Element:p
+											The point of origin used for calculating distance. Must be given as a number for numeric field, date for date fields and geo point for geo fields. Required for geo and numeric field. For date fields the default is
+										Element:code
+											now
+											. Date math (for example
+										Element:code
+											now-1h
+											) is supported for origin.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											scale
+										Element:td
+										Element:p
+											Required for all types. Defines the distance from origin + offset at which the computed score will equal
+										Element:code
+											decay
+											parameter. For geo fields: Can be defined as number+unit (1km, 12m,…). Default unit is meters. For date fields: Can to be defined as a number+unit ("1h", "10d",…). Default unit is milliseconds. For numeric field: Any number.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											offset
+										Element:td
+										Element:p
+											If an
+										Element:code
+											offset
+											is defined, the decay function will only compute the decay function for documents with a distance greater that the defined
+										Element:code
+											offset
+											. The default is 0.
+										Element:tr
+										Element:td
+										Element:p
+										Element:code
+											decay
+										Element:td
+										Element:p
+											The
+										Element:code
+											decay
+											parameter defines how documents are scored at the distance given at
+										Element:code
+											scale
+											. If no
+										Element:code
+											decay
+											is defined, documents at the distance
+										Element:code
+											scale
+											will be scored 0.5.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the first example, your documents might represents hotels and contain a geo location field. You want to compute a decay function depending on how far the hotel is from a given location. You might not immediately see what scale to choose for the gauss function, but you can say something like: "At a distance of 2km from the desired location, the score should be reduced to one third." The parameter "scale" will then be adjusted automatically to assure that the score function computes a score of 0.33 for hotels that are 2km away from the desired location.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In the second example, documents with a field value between 2013-09-12 and 2013-09-22 would get a weight of 1.0 and documents which are 15 days from that date a weight of 0.5.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Supported decay functions
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														DECAY_FUNCTION
+														determines the shape of the decay:
+												Node:
+												(type) c
+												(layer)4
+													Element:dl
+													Element:dt
+													Element:span
+													Element:code
+														gauss
+													Element:dd
+													Element:p
+														Normal decay, computed as:
+													Element:p
+													Element:span
+													Element:img
+													Element:p
+														where
+													Element:span
+														is computed to assure that the score takes the value
+													Element:img
+													Element:code
+														decay
+														at distance
+													Element:code
+														scale
+														from
+													Element:code
+														origin
+														+-
+													Element:code
+														offset
+													Element:p
+													Element:span
+													Element:img
+													Element:p
+														See
+													Element:a
+														Normal decay, keyword
+														for graphs demonstrating the curve generated by the
+													Element:code
+														gauss
+													Element:code
+														gauss
+														function.
+													Element:dt
+													Element:span
+													Element:code
+														exp
+													Element:dd
+													Element:p
+														Exponential decay, computed as:
+													Element:p
+													Element:span
+													Element:img
+													Element:p
+														where again the parameter
+													Element:span
+														is computed to assure that the score takes the value
+													Element:img
+													Element:code
+														decay
+														at distance
+													Element:code
+														scale
+														from
+													Element:code
+														origin
+														+-
+													Element:code
+														offset
+													Element:p
+													Element:span
+													Element:img
+													Element:p
+														See
+													Element:a
+														Exponential decay, keyword
+														for graphs demonstrating the curve generated by the
+													Element:code
+														exp
+													Element:code
+														exp
+														function.
+													Element:dt
+													Element:span
+													Element:code
+														linear
+													Element:dd
+													Element:p
+														Linear decay, computed as:
+													Element:p
+													Element:span
+														.
+													Element:img
+													Element:p
+														where again the parameter
+													Element:code
+														s
+														is computed to assure that the score takes the value
+													Element:code
+														decay
+														at distance
+													Element:code
+														scale
+														from
+													Element:code
+														origin
+														+-
+													Element:code
+														offset
+													Element:p
+													Element:span
+													Element:img
+													Element:p
+														In contrast to the normal and exponential decay, this function actually sets the score to 0 if the field value exceeds twice the user given scale value.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For single functions the three decay functions together with their parameters can be visualized like this (the field in this example called "age"):
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:span
+													Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Multi-values fields
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If a field used for computing the decay contains multiple values, per default the value closest to the origin is chosen for determining the distance. This can be changed by setting
+													Element:code
+														multi_value_mode
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:colgroup
+													Element:col
+													Element:col
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														min
+													Element:td
+													Element:p
+														Distance is the minimum distance
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														max
+													Element:td
+													Element:p
+														Distance is the maximum distance
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														avg
+													Element:td
+													Element:p
+														Distance is the average distance
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														sum
+													Element:td
+													Element:p
+														Distance is the sum of all distances
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Example:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														"DECAY_FUNCTION": { "FIELD_NAME": { "origin": ..., "scale": ... }, "multi_value_mode": "avg" }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Detailed example
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Suppose you are searching for a hotel in a certain town. Your budget is limited. Also, you would like the hotel to be close to the town center, so the farther the hotel is from the desired location the less likely you are to check in.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You would like the query results that match your criterion (for example, "hotel, Nancy, non-smoker") to be scored with respect to distance to the town center and also the price.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Intuitively, you would like to define the town center as the origin and maybe you are willing to walk 2km to the town center from the hotel. In this case your
+										Element:span
+											for the location field is the town center and the
+										Element:strong
+											origin
+										Element:span
+											is ~2km.
+										Element:strong
+											scale
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If your budget is low, you would probably prefer something cheap above something expensive. For the price field, the
+										Element:span
+											would be 0 Euros and the
+										Element:strong
+											origin
+										Element:span
+											depends on how much you are willing to pay, for example 20 Euros.
+										Element:strong
+											scale
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											In this example, the fields might be called "price" for the price of the hotel and "location" for the coordinates of this hotel.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The function for
+										Element:code
+											price
+											in this case would be
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"gauss": {
+										Element:a
+										Element:span
+											"price": { "origin": "0", "scale": "20" } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											This decay function could also be
+										Element:code
+											linear
+											or
+										Element:code
+											exp
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											and for
+										Element:code
+											location
+											:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"gauss": {
+										Element:a
+										Element:span
+											"location": { "origin": "11, 12", "scale": "2km" } }
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											This decay function could also be
+										Element:code
+											linear
+											or
+										Element:code
+											exp
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Suppose you want to multiply these two functions on the original score, the request would look like this:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /_search { "query": { "function_score": { "functions": [ { "gauss": { "price": { "origin": "0", "scale": "20" } } }, { "gauss": { "location": { "origin": "11, 12", "scale": "2km" } } } ], "query": { "match": { "properties": "balcony" } }, "score_mode": "multiply" } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Next, we show how the computed score looks like for each of the three possible decay functions.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Normal decay, keyword
+													Element:code
+														gauss
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When choosing
+													Element:code
+														gauss
+														as the decay function in the above example, the contour and surface plot of the multiplier looks like this:
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Suppose your original search results matches three hotels :
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														"Backback Nap"
+													Element:li
+														"Drink n Drive"
+													Element:li
+														"BnB Bellevue".
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														"Drink n Drive" is pretty far from your defined location (nearly 2 km) and is not too cheap (about 13 Euros) so it gets a low factor a factor of 0.56. "BnB Bellevue" and "Backback Nap" are both pretty close to the defined location but "BnB Bellevue" is cheaper, so it gets a multiplier of 0.86 whereas "Backpack Nap" gets a value of 0.66.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Exponential decay, keyword
+													Element:code
+														exp
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When choosing
+													Element:code
+														exp
+														as the decay function in the above example, the contour and surface plot of the multiplier looks like this:
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Linear decay, keyword
+													Element:code
+														linear
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When choosing
+													Element:code
+														linear
+														as the decay function in the above example, the contour and surface plot of the multiplier looks like this:
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:img
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Supported fields for decay functions
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Only numeric, date, and geo-point fields are supported.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											What if a field is missing?
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If the numeric field is missing in the document, the function will return 1.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Dis Max Query
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Boosting Query »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

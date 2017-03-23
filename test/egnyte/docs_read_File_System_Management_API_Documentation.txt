@@ -1,0 +1,2028 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					File System API
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					The File System API allows you to perform the normal file system actions: create, update, move, copy, delete, download, and list information about files and folders. Since most use cases involve some basic file system operation, this is one of our core APIs.
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											URL Encoding
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note that the Path parameter in the API endpoints described below must be
+										Element:a
+											URL encoded
+											in a special way. Each element of the path needs to be separately encoded. I.e. the forward slashes ('/') in the path must not be encoded, but the text in between must be. This is required because filesystem paths on Egnyte can contain characters which are not permitted in the path portion of a URL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, this path:
+										Element:span
+											Shared/example?path/$file.txt
+											should be encoded as
+										Element:span
+											Shared/example%3Fpath/%24file.txt
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											ID Based References
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The URLs for each endpoint below uses paths to reference files and folders. You may also reference files and folders using persistent IDs.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Files
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														For file details, the endpoint path would be
+													Element:span
+														/pubapi/v1/fs/ids/file/GROUP_ID
+													Element:li
+														To download a file, the endpoint path would be
+													Element:span
+														/pubapi/v1/fs-content/ids/file/GROUP_ID
+													Element:li
+														To download a specific version, the endpoint path would be
+													Element:span
+														/pubapi/v1/fs-content/ids/file/GROUP_ID?entry_id=ENTRY_ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														Note that in the Event API response, the
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														entry_id
+														is called the
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														target_id
+														and the
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														group_id
+														is called the
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														target_group_id
+														.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Folders
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														For folder details, the endpoint path would be
+													Element:span
+														/pubapi/v1/fs/ids/folder/FOLDER_ID
+			Node:
+			(type) c
+			(layer)1
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Common Response Codes
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tbody
+										Element:tr
+										Element:th
+											Error
+										Element:th
+											Description
+										Element:tr
+										Element:td
+											200 or 201
+										Element:td
+											Successful operation
+										Element:tr
+										Element:td
+											401
+										Element:td
+											Authentication failure
+										Element:tr
+										Element:td
+											403
+										Element:td
+											User not authorized (not enough permissions)
+										Element:tr
+										Element:td
+											404
+										Element:td
+											File or folder resource not found
+										Element:tr
+										Element:td
+											409
+										Element:td
+											Forbidden file or folder upload location (e.g. /, /Shared, /Private, etc)
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+							Element:span
+								API Methods
+						Node:
+						(type) c
+						(layer)2
+							Element:h3
+							Element:span
+								Create a Folder
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+								POST
+								/pubapi/v1/fs/{Full Path to Folder}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:span
+														Parameters:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														action
+													Element:td
+														Defines the action to be taken
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Must be
+													Element:span
+														add_folder
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Codes
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Error Code
+													Element:th
+														Error Message
+													Element:th
+														HTTP Code
+													Element:th
+														Troubleshooting
+													Element:tr
+													Element:td
+													Element:span
+														Conflict
+													Element:td
+														The request could not be completed due to a conflict with the current state of the resource.
+													Element:td
+														403
+													Element:td
+														A file or folder with the same name already exists.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Examples
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														HTTP
+													Element:li
+													Element:a
+														cURL
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /pubapi/v1/fs/Shared/test HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q Content-Type: application/json { "action": "add_folder" }
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -v -X POST -H "Authorization: Bearer 68zc95e3xv954u6k3hbnma3q" -H "Content-Type: application/json" --data '{"action":"add_folder"}' https://apidemo.egnyte.com/pubapi/v1/fs/Shared/test
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Upload a File
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Creates or updates a file.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+													Element:em
+														When uploading files larger than 100 MB, consider using the
+													Element:a
+														Chunked Upload
+														flow.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														By Path
+													Element:li
+													Element:a
+														By ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs-content/{Full Path to File}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs-content/ids/file/{ID} (Update File only)
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Headers
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+														X-Sha512-Checksum
+													Element:td
+														SHA512 hash of entire file that can be used for validating upload integrity.
+													Element:td
+														No
+													Element:td
+														6cb2785692b05c5eff397109457031bde7ab236982364cc7b51e319c67c463d7721c82c024ef3f74b9dff d388be6dc8120edc214e7d0eadaaf2c5e0eb44845a3
+													Element:tr
+													Element:td
+														Last-Modified
+													Element:td
+														Indicates last modified date for file. If omitted, the current time will be used as the last modified date.
+													Element:td
+														No
+													Element:td
+														Timestamp e.g. Sun, 26 Aug 2012 03:55:29 GMT
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Codes
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Error Code
+													Element:th
+														Error Message
+													Element:th
+														HTTP Code
+													Element:th
+														Troubleshooting
+													Element:tr
+													Element:td
+													Element:span
+														Bad Request
+													Element:td
+														This request is invalid.
+													Element:td
+														400
+													Element:td
+														Missing parameters, file filtered out (e.g. .tmp file), or file is too large (larger than plan limit)
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Examples
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														HTTP
+													Element:li
+													Element:a
+														cURL
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /pubapi/v1/fs-content/Shared/Documents/test.txt HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q Content-Disposition: form-data; name="file"; filename="~/Desktop/test.txt" Content-Type: text/plain
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -v -X POST -H "Authorization: Bearer 2v8q2bc6uvxtgghwmwvnvcp4" --upload-file ~/Desktop/test.txt https://acme.egnyte.com/pubapi/v1/fs-content/Shared/Documents/test.txt
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Move File or Folder
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Moves a file or folder.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														By Path
+													Element:li
+													Element:a
+														By ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs/{Full Path to File/Folder}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs/ids/{file or folder}/{ID}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														action
+													Element:td
+														Defines the action to be taken
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Must be
+													Element:span
+														move
+													Element:tr
+													Element:td
+													Element:span
+														destination
+													Element:td
+														Determines where the file/folder will be moved
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Full absolute destination path of file or folder
+													Element:tr
+													Element:td
+													Element:span
+														permissions
+													Element:td
+														Determines how permissions of moved file or folder are derived
+													Element:td
+													Element:span
+														No
+													Element:td
+														keep_original, inherit_from_parent
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Examples
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														HTTP
+													Element:li
+													Element:a
+														cURL
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /pubapi/v1/fs/Shared/fromFolder HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q Content-Type: application/json { "action": "move", "destination": "/Shared/toFolder" }
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -v -X POST -H "Authorization: Bearer 2v8q2bc6uvxtgghwmwvnvcp4" -H "Content-Type: application/json" --data '{"action":"move", "destination":"/Shared/toFolder"}' https://acme.egnyte.com/pubapi/v1/fs/Shared/fromFolder
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Delete a File or Folder
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Deletes a file or folder.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														By Path
+													Element:li
+													Element:a
+														By ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														DELETE
+														/pubapi/v1/fs/{Full Path to File/Folder}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														DELETE
+														/pubapi/v1/fs/ids/{file or folder}/{ID}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Examples
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Please select a format and resource type to get the corresponding sample requests.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														HTTP
+													Element:li
+													Element:a
+														cURL
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														File
+													Element:li
+													Element:a
+														Folder
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														DELETE /pubapi/v1/fs/Shared/test/mydocument.docx HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														DELETE /pubapi/v1/fs/Shared/test HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														File
+													Element:li
+													Element:a
+														Folder
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -v -X DELETE -H "Authorization: Bearer 68zc95e3xv954u6k3hbnma3q" http://apidemo.egnyte.com/pubapi/v1/fs/Shared/test/mydocument.docx
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -v -X DELETE -H "Authorization: Bearer 68zc95e3xv954u6k3hbnma3q" http://apidemo.egnyte.com/pubapi/v1/fs/Shared/test
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Expected Response
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The response is a HTTP 200 OK Code that confirms the file or folder has been moved to the trash.
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Copy File or Folder
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Copies a file or folder.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														By Path
+													Element:li
+													Element:a
+														By ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs/{Full Path to File/Folder}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs/ids/{file or folder}/{ID}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														action
+													Element:td
+														Defines the action to be taken
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Must be
+													Element:span
+														copy
+													Element:tr
+													Element:td
+													Element:span
+														destination
+													Element:td
+														Determines where the file/folder will be copied
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Full absolute destination path of file or folder
+													Element:tr
+													Element:td
+													Element:span
+														permissions
+													Element:td
+														Determines how permissions of copied file or folder are derived
+													Element:td
+													Element:span
+														No
+													Element:td
+														keep_original, inherit_from_parent
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Codes
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Error
+													Element:th
+														Description
+													Element:tr
+													Element:td
+														413
+													Element:td
+														File size exceeds limit or account storage quota exceeded
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Examples
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Please select a format and resource type to get the corresponding sample requests.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														HTTP
+													Element:li
+													Element:a
+														cURL
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														File
+													Element:li
+													Element:a
+														Folder
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /pubapi/v1/fs/Shared/fromFolder/test.txt HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q Content-Type: application/json { "action": "move", "destination": "/Shared/toFolder/test.txt" }
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														POST /pubapi/v1/fs/Shared/fromFolder HTTP/1.1 Host: apidemo.egnyte.com Authorization: Bearer 68zc95e3xv954u6k3hbnma3q Content-Type: application/json { "action": "copy", "destination": "/Shared/toFolder" }
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														File
+													Element:li
+													Element:a
+														Folder
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -v -X POST -H "Authorization: Bearer 68zc95e3xv954u6k3hbnma3q" -H "Content-Type: application/json" -d '{"action":"copy", "destination":"/Shared/toFolder/test.txt"}' https://acme.egnyte.com/pubapi/v1/fs/Shared/fromFolder/test.txt
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														curl -v -X POST -H "Authorization: Bearer 68zc95e3xv954u6k3hbnma3q" -H "Content-Type: application/json" -d '{"action":"copy", "destination":"/Shared/toFolder"}' https://acme.egnyte.com/pubapi/v1/fs/Shared/fromFolder
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Download File
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Downloads a file. This method also supports range downloads, which we recommend implementing as a best practice.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														By Path
+													Element:li
+													Element:a
+														By ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														GET
+														/pubapi/v1/fs-content/{Full Path to File}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														GET
+														/pubapi/v1/fs-content/ids/file/{ID}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Request Header
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+														Range
+													Element:td
+														The range of bytes to download. Best practice for downloading files, especially for large files (over 1GB), unstable internet connections, and faster download speeds since sections of the file are downloaded in parallel.
+													Element:td
+														No
+													Element:td
+														bytes={byte range} e.g. 0-999 will download first thousand bytes. For more information about byte ranges see section 14.36.1 of
+													Element:a
+														RFC 2068
+														.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Request Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+														entry_id
+													Element:td
+														Specifies the entry ID of the file version to download. Entry IDs are shown in the detail listing for a file.
+													Element:td
+														No
+													Element:td
+														Entry id for a specific version of the desired file
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Headers
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Sample Value
+													Element:tr
+													Element:td
+														X-Sha512-Checksum
+													Element:td
+														SHA512 hash of entire file that can be used for validating upload integrity.
+													Element:td
+														6cb2785692b05c5eff397109457031bde7ab236982364cc7b51e319c67c463d7721c82c024ef3f74b9dff d388be6dc8120edc214e7d0eadaaf2c5e0eb44845a3
+													Element:tr
+													Element:td
+														Last-Modified
+													Element:td
+														Indicates last modified date for file.
+													Element:td
+														Sun, 26 Aug 2012 03:55:29 GMT
+													Element:tr
+													Element:td
+														ETag
+													Element:td
+														Current value of the entity tag that can be used to compare whether two versions of a resource are the same.
+													Element:td
+														9c4c2443-5dbc-4afa-8d04-5620a778093c
+													Element:tr
+													Element:td
+														Content-Type
+													Element:td
+														Specifies format of response body
+													Element:td
+														text/plain;charset=UTF-8
+													Element:tr
+													Element:td
+														Content-Length
+													Element:td
+														Specifies length of response body
+													Element:td
+														126
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Method-specific Response Codes
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Error Code
+													Element:th
+														Error Message
+													Element:th
+														HTTP Code
+													Element:th
+														Troubleshooting
+													Element:tr
+													Element:td
+													Element:span
+														Bad Request
+													Element:td
+														This request is invalid.
+													Element:td
+														400
+													Element:td
+														File is larger than what is allowed for this account
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														List File or Folder
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														List information about a file or folder (including folder contents).
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														By Path
+													Element:li
+													Element:a
+														By ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														GET
+														/pubapi/v1/fs/{Full Path to File/Folder}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														GET
+														/pubapi/v1/fs/ids/{file or folder}/{ID}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:span
+														Query String Parameters
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														These parameters can be used to paginate a folder list, sort by intrinsic and custom metadata fields, and fetch metadata values for each item in the folder. For more information on custom metadata, please refer to the
+													Element:a
+														Metadata API
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														list_content
+													Element:td
+														For folders, this option determines whether the contents of the folder (files and subfolders) are included in the response. For files, when
+													Element:span
+														true
+														, this will return a list of all of the versions of the file.
+													Element:td
+														No
+													Element:td
+													Element:span
+														true
+														or
+													Element:span
+														false
+													Element:tr
+													Element:td
+													Element:span
+														allowed_link_types
+													Element:td
+														If true, then show allowed_file_link_types, allowed_folder_link_types fields, and
+													Element:span
+														allow_upload_links fields
+														.
+													Element:td
+														No
+													Element:td
+													Element:span
+													Element:span
+														true
+														or
+													Element:span
+														false
+													Element:tr
+													Element:td
+													Element:span
+														count
+													Element:td
+														The maximum number of items to return
+													Element:td
+														No
+													Element:td
+														Any possible integer
+													Element:tr
+													Element:td
+													Element:span
+														offset
+													Element:td
+														The zero-based index from which to start returning items. This is used for paginating the folder listing.
+													Element:td
+														No
+													Element:td
+														Zero or any positive integer
+													Element:tr
+													Element:td
+													Element:span
+														sort_by
+													Element:td
+														The field that should be used for sorting
+													Element:td
+														No
+													Element:td
+													Element:span
+														name
+														or
+													Element:span
+														last_modified
+														or
+													Element:span
+														uploaded_by
+														or
+													Element:span
+														custom_metadata
+													Element:tr
+													Element:td
+													Element:span
+														key
+													Element:td
+														The custom metadata field to sort by
+													Element:td
+														Only when sort_by is set to custom_metadata
+													Element:td
+														The metadata field in the format: namespace.key
+													Element:tr
+													Element:td
+													Element:span
+														sort_direction
+													Element:td
+														The direction of the sort
+													Element:td
+														No
+													Element:td
+													Element:span
+														ascending
+														or
+													Element:span
+														descending
+													Element:tr
+													Element:td
+													Element:span
+														perms
+													Element:td
+														If true, the response includes a permissions key for the folder that lists the different users and groups who have permissions along with their permission level
+													Element:td
+														No
+													Element:td
+													Element:span
+														true
+														or
+													Element:span
+														false
+													Element:tr
+													Element:td
+													Element:span
+														include_perm
+													Element:td
+														If true, the response returns the current user's permission level on the folder and subfolders
+													Element:td
+														No
+													Element:td
+													Element:span
+														true
+														or
+													Element:span
+														false
+													Element:tr
+													Element:td
+													Element:span
+														list_custom_metadata
+													Element:td
+														Whether custom metadata for each item should be returned
+													Element:td
+														No
+													Element:td
+													Element:span
+														true
+														or
+													Element:span
+														false
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														Sample Request and Response for a Folder
+													Element:li
+													Element:a
+														Sample Request and Response for a File
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample cURL Call (For a Folder)
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														curl -v -H "Authorization: Bearer 2v8q2bc6uvxtgghwmwvnvcp4" \
+													Element:br
+														https://apidemo.egnyte.com/pubapi/v1/fs/Shared/MyDocuments/MyFolder
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Response Body (For a Folder)
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "name": "MyFolder", "lastModified": 1467908109000, "count": 0, "offset": 0, "path": "/Shared/MyDocuments/MyFolder", "folder_id": "d7d56ebc-ce31-4ba8-a6b3-292ffb43f215", "total_count": 2, "is_folder": true, "public_links": "files_folders", "restrict_move_delete": false, "folders": [ { "name": "subfolder1", "lastModified": 1467908111000, "path": "/Shared/MyDocuments/MyFolder/subfolder1", "folder_id": "fc8cf940-1097-491e-bb9d-b55b5797331c", "is_folder": true, "folder_id": "5652844d-dd48-45a9-b8be-3d06c06c819a" } ], "files": [ { "checksum": "244b99790dcc91ebc5862eb547c8179515b2369bb6db5aaa1ddd46bf0035e7ba3849ba1494b294b20b7c2a055a52d3a65ccab8a090f06cf40106528f6e23a91e", "size" :238428, "path": "/Shared/MyDocuments/MyFolder/info.pdf", "name": "info.pdf", "locked": false, "is_folder": false, "entry_id": "b563a343-184b-4bce-8331-25d2dfb8125a", "group_id": "01dd4abd-983b-4104-bff6-e2ad44bff357", "last_modified": "Mon, 04 Apr 2016 22:33:57 GMT", "uploaded_by": "jsmith", "num_versions": 1 } ] }
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample cURL Call (For a File)
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														curl -v -H "Authorization: Bearer 2v8q2bc6uvxtgghwmwvnvcp4" \
+													Element:br
+														https://apidemo.egnyte.com/pubapi/v1/fs/Shared/MyDocuments/example.txt
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Response Body (For a File)
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "checksum": "32d919f9f96d6f8e92889e68eb2c9eb8079b2327d80a70e247a9c426f9fc5049a7a7978eb6f0ab6d129720b871637d8175e047199bcf77fe36d23d15e81886a8", "size": 1023, "path": "/Shared/MyDocuments/example.txt" "name": "example.txt", "locked": false "is_folder": false, "entry_id": "a4e2857e-9cf4-492f-9087-0a8cee324e4c", "last_modified": "Sun, 02 Sep 2012 08:03:12 GMT", "uploaded_by": "jsmith", "num_versions": 3, "versions": [ { "is_folder": false, "entry_id": "0ee550e4-854a-4ebc-a2d1-0de17714957f", "checksum": "2aca968ceb5452f797810a67ff283eb0b72dc334868c11f16e8cb9b8ab713e30f49a30245d16a9f187293b4971fd8a1d6c588d981799283ec1fbcc84c9fe44cb", "last_modified": "Sun, 02 Sep 2012 07:37:34 GMT", "uploaded_by": "mjohnson", "size": 1378 }, { "is_folder": false, "entry_id": "1eb75cc1-af4f-4331-8e56-b2f7d1ebebe5", "checksum": "0a6a7ba5048971d4718da58ec0f9ba51a4bfc5691f11da4c0afa38244f474f7076bb6edf48d8bfb55bbbcf128c55918fbe96485ac1178e78ac2686a6fb4a0785", "last_modified": "Sun, 02 Sep 2012 08:02:20 GMT", "uploaded_by": "jsmith", "size": 1108 } ] }
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Lock a File
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														By Path
+													Element:li
+													Element:a
+														By ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs/{Full Path to File}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs/ids/file/{ID}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:span
+														Parameters:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														action
+													Element:td
+														Defines the action to be taken
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Must be
+													Element:span
+														lock
+													Element:tr
+													Element:td
+													Element:span
+														lock_token
+													Element:td
+														The token that must be used to unlock the file. If not provided when locking a file, a random token will be generated and returned in the response.
+													Element:td
+														No
+													Element:td
+													Element:span
+														my lock token
+													Element:tr
+													Element:td
+													Element:span
+														lock_timeout
+													Element:td
+														The time in seconds that the file should be locked for. If omitted, a time of one hour will be used by default.
+													Element:td
+														No
+													Element:td
+													Element:span
+														2592000
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Request Body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "action": "lock", "lock_token": "my lock token", "lock_timeout": 2592000 }
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Unlock a File
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														By Path
+													Element:li
+													Element:a
+														By ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs/{Full Path to File}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs/ids/file/{ID}
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:span
+														Parameters:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Parameter
+													Element:th
+														Description
+													Element:th
+														Required
+													Element:th
+														Possible Values
+													Element:tr
+													Element:td
+													Element:span
+														action
+													Element:td
+														Defines the action to be taken
+													Element:td
+													Element:span
+														Yes
+													Element:td
+														Must be
+													Element:span
+														unlock
+													Element:tr
+													Element:td
+													Element:span
+														lock_token
+													Element:td
+														The lock_token used when locking the file must be presented to unlock the file.
+													Element:td
+													Element:span
+														Yes
+													Element:td
+													Element:span
+														my lock token
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Request Body
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "action": "lock", "lock_token": "my lock token" }
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:span
+														Chunked Upload
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The chunked upload flow provides a mechanism to upload large files. Though not a firmly enforced requirement, we recommend using this flow for files larger than 100 MB. To upload files of smaller sizes, you can use the
+													Element:a
+														simpler upload flow
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+													Element:a
+														By Path
+													Element:li
+													Element:a
+														By ID
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs-content/{Full Path to File}
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs-content/ids/file/{ID}
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Chunked Upload process:
+												Node:
+												(type) c
+												(layer)4
+													Element:ol
+													Element:li
+														Split file into chunks—recommended size is 104857600 bytes (100 MB) each. The minimum chunk size is 10485760 (10 MB). The maximum chunk size is 1073741824 bytes (1GB). All chunks should be the same size, except for the last chunk which can be any size.
+													Element:li
+														Start the process by uploading the first chunk. Save the
+													Element:span
+														X-Egnyte-Upload-Id
+														header received in the response. Use the
+													Element:span
+														X-Egnyte-Chunk-Sha512-Checksum
+														SHA512 hash in the response to confirm that each chunk was uploaded cleanly.
+													Element:li
+														Upload the rest of the chunks except the final one in any order. Use the
+													Element:span
+														X-Egnyte-Upload-Id
+														identifier and
+													Element:span
+														X-Egnyte-Chunk-Num
+														sequence numbers to uniquely identify each chunk. Upload chunks in parallel to get maximum throughput.
+													Element:li
+														When uploading the final chunk, indicate this by including the header “
+													Element:span
+														X-Egnyte-Last-Chunk: true
+														”
+													Element:li
+														Chunks remain available for a period of 24 hours after the first chunk is uploaded.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample API Calls:
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														POST
+														/pubapi/v1/fs-content-chunked/Shared/Documents/movie.mpeg
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+														Common HTTP Headers:
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														HTTP Request Header:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Sample Value
+													Element:tr
+													Element:td
+													Element:span
+														X-Egnyte-Chunk-Num
+													Element:td
+														Chunk number being uploaded. The first chunk should have the number 1.
+													Element:td
+													Element:span
+														1
+													Element:tr
+													Element:td
+													Element:span
+														X-Egnyte-Chunk-Sha512-Checksum
+													Element:td
+														SHA512 hash of the chunk being uploaded
+													Element:td
+														6cb2785692b05c5eff397109457031bde7ab236982364cc7b51e319c67c463d7721c82c024ef3f74b9dff d388be6dc8120edc214e7d0eadaaf2c5e0eb44845a3
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														HTTP Response Headers:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Sample Value
+													Element:tr
+													Element:td
+													Element:span
+														X-Egnyte-Upload-Id
+													Element:td
+														Upload identifier returned after uploading first chunk. To be used as a reference when uploading subsequent chunks.
+													Element:td
+														b2adfaf5-9f7d-49e5-a1ab-32389e1d1da6
+													Element:tr
+													Element:td
+													Element:span
+														X-Egnyte-Chunk-Num
+													Element:td
+														Chunk number being uploaded.
+													Element:td
+														1
+													Element:tr
+													Element:td
+													Element:span
+														X-Egnyte-Chunk-Sha512-Checksum
+													Element:td
+														SHA512 hash of chunk data to be used for validating integrity of upload.
+													Element:td
+														cb2785692b05c5eff397109457031bde7ab236982364cc7b51e319c67c463d7721c82c024ef3f74b9dffd
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+														Upload the first chunk
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Request Body
+														<body containing binary data for first chunk only>
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+														Upload all but the last chunk:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Use the same
+													Element:span
+														X-Egnyte-Upload-Id
+														as the first chunk.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Optionally, you can upload a specific chunk again by repeating that chunk request. This might be useful if data if the
+													Element:span
+														X-Egnyte-Chunk-Sha512-Checksum
+														returned indicates that the chunk has not been uploaded properly.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Step-specific Request Headers:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Sample Value
+													Element:tr
+													Element:td
+														X-Egnyte-Upload-Id
+													Element:td
+														Upload identifier returned after uploading first chunk. To be used as a reference when uploading subsequent chunks.
+													Element:td
+													Element:span
+														b2adfaf5-9f7d-49e5-a1ab-32389e1d1da6
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Request Body
+														<body containing binary chunk data for chunk specified by
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+														X-Egnyte-Chunk-Num
+														only>
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+														Upload last chunk and commit file
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Client must indicate that it is uploading the last chunk by passing header “
+													Element:span
+														X-Egnyte-Last-Chunk: true
+														”. Server will respond with HTTP Status 200 and ETag plus SHA512 hash for the entire completed file. Client should check hash for entire file to validate uploaded content. Details on how to compute checksums are provided
+													Element:a
+														below
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Optionally, you can send a final 0-byte chunk to close the chunked upload flow. This allows you to verify the final chunk succeeded before committing the file.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Step-specific Request Header:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tbody
+													Element:tr
+													Element:th
+														Header
+													Element:th
+														Description
+													Element:th
+														Value
+													Element:tr
+													Element:td
+														X-Egnyte-Upload-Id
+													Element:td
+														Upload identifier returned after uploading first chunk. To be used as a reference when uploading subsequent chunks.
+													Element:td
+													Element:span
+														b2adfaf5-9f7d-49e5-a1ab-32389e1d1da6
+													Element:tr
+													Element:td
+														X-Egnyte-Last-Chunk
+													Element:td
+														Indicates that chunk being uploaded is the last chunk.
+													Element:td
+														Must be
+													Element:span
+														true
+													Element:tr
+													Element:td
+														X-Sha512-Checksum
+													Element:td
+														SHA512 hash of entire file that can be used for validating upload integrity.
+													Element:td
+														6cb2785692b05c5eff397109457031bde7ab236982364cc7b51e319c67c463d7721c82c024ef3f74b9dff d388be6dc8120edc214e7d0eadaaf2c5e0eb44845a3
+													Element:tr
+													Element:td
+														Last-Modified
+													Element:td
+														Indicates last modified date for file.
+													Element:td
+														Sun, 26 Aug 2012 03:55:29 GMT
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Sample Request Body
+														<body containing binary chunk data for last chunk only>
+												Node:
+												(type) c
+												(layer)4
+													Element:h3
+													Element:a
+														Calculating the Checksums:
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Calculating Checksums for Individual Chunks:
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														So let's say I have a file that is split into three chunks with checksums computed as follows.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														$ openssl dgst -sha512 chunk1 SHA512(chunk1)= 886a81ec5f9e4f66aaa77d95ccb58dc6ca4000bfb12d13351adf8cd6fb09933e0e16d057983eb8a81fffc71d71f6fc5c1649d08b20b0dc30d64ea449850b4f41 $ openssl dgst -sha512 chunk2 SHA512(chunk2)= 8ae7b487d9ad803e0ad85dee9320a1c3203f021e2fffe07573588e2869f097589eaa97923d75ada6f84a5eaeb7ad63f7f0a0ddc1e78053f570b8a6363abcd9f3 $ openssl dgst -sha512 chunk3 SHA512(chunk3)= eef77c3e9fef9277e0a3bbc8a4faaf2727481296b3d6e0143c5c661d2cd1441eeccc54d4bc086c29ea3ee918a79dcba122bd077fe3232f30f54afc7ed452cc8d
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														After you upload each chunk, Egnyte will compute a SHA512 checksum for that chunk and return it in the X-Egnyte-Chunk-Sha512-Checksum header. If the checksum does not match the checksum you compute locally, the chunk was corrupted and should be sent again.
+														When you have sent the last chunk, we will return another checksum in the response body that looks like:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														2-3-10485761-41e3a616682407fd721ef2843ac5f3966c73ae2ef0bc00fc3d8c27d69327fc3d326ce64b13163cbc7664be3e1bc1a9f8bf4c1d257fdfdab20919edbc6813f30f
+														This follows the form:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{Version#}-{#Chunks}-{Chunk Size}-{SHA512(SHA512 of Chunk Checksums)}
+														The final checksum comes in three parts which are separated by dashes ("-"):
+												Node:
+												(type) c
+												(layer)4
+													Element:ul
+													Element:li
+														Version #: This is the version of the checksum response. This guide is written for version 2.
+													Element:li
+														# Chunks: This is the total number of chunks provided.
+													Element:li
+														Chunk Size: This is the size of each chunk uploaded (except for the last chunk).
+													Element:li
+														SHA512(SHA512 of Chunk Checksums): This is the checksum of checksums computed for the full file.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+														Calculating the Checksum of Checksums
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														In addition to checking that each chunk committed properly, you can also check to see if the entire file was properly transferred.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Request Examples
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:a
+																	Bash
+																Element:li
+																Element:a
+																	Python
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	$ CHECKSUM1="886a81ec5f9e4f66aaa77d95ccb58dc6ca4000bfb12d13351adf8cd6fb09933e0e16d057983eb8a81fffc71d71f6fc5c1649d08b20b0dc30d64ea449850b4f41" $ CHECKSUM2="8ae7b487d9ad803e0ad85dee9320a1c3203f021e2fffe07573588e2869f097589eaa97923d75ada6f84a5eaeb7ad63f7f0a0ddc1e78053f570b8a6363abcd9f3" $ CHECKSUM3="eef77c3e9fef9277e0a3bbc8a4faaf2727481296b3d6e0143c5c661d2cd1441eeccc54d4bc086c29ea3ee918a79dcba122bd077fe3232f30f54afc7ed452cc8d" $ echo -n $CHECKSUM1$CHECKSUM2$CHECKSUM3 | openssl dgst -sha512
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	import hashlib m = hashlib.sha512() m.update("886a81ec5f9e4f66aaa77d95ccb58dc6ca4000bfb12d13351adf8cd6fb09933e0e16d057983eb8a81fffc71d71f6fc5c1649d08b20b0dc30d64ea449850b4f41") m.update("8ae7b487d9ad803e0ad85dee9320a1c3203f021e2fffe07573588e2869f097589eaa97923d75ada6f84a5eaeb7ad63f7f0a0ddc1e78053f570b8a6363abcd9f3") m.update("eef77c3e9fef9277e0a3bbc8a4faaf2727481296b3d6e0143c5c661d2cd1441eeccc54d4bc086c29ea3ee918a79dcba122bd077fe3232f30f54afc7ed452cc8d") m.hexdigest()
+																	These samples should all evaluate to the final section of the checksum we return after the last chunk:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	41e3a616682407fd721ef2843ac5f3966c73ae2ef0bc00fc3d8c27d69327fc3d326ce64b13163cbc7664be3e1bc1a9f8bf4c1d257fdfdab20919edbc6813f30f
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																Element:span
+																	version 112
+																Element:span
+																	as of
+																Element:abbr
+																	2 months ago
+																Element:span
+																	by
+																Element:span
+																Element:a
+																	Greg Neustaetter
+															Node:
+															(type) c
+															(layer)5
+																Element:ul
+																Element:li
+																Element:span
+																	Previous:
+																Element:a
+																	Authentication
+																Element:li
+																Element:span
+																	Up:
+																Element:a
+																	Overview
+																Element:li
+																Element:span
+																	Next:
+																Element:a
+																	Permissions API
+									Node:
+									(type) c
+									(layer)3
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Docs Navigation
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Overview
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Authentication
+							Element:li
+							Element:a
+								File System API
+							Element:li
+							Element:a
+								Permissions API
+							Element:li
+							Element:a
+								Events API
+							Element:li
+							Element:a
+								Search API
+							Element:li
+							Element:a
+								Links API
+							Element:li
+							Element:a
+								User Management API
+							Element:li
+							Element:a
+								Group Management API
+							Element:li
+							Element:a
+								Audit Reporting API
+							Element:li
+							Element:a
+								UI Integration Framework
+							Element:li
+							Element:a
+								Trash API
+							Element:li
+							Element:a
+								Comments API
+							Element:li
+							Element:a
+								Metadata API
+							Element:li
+							Element:a
+								Embedded UI API
+							Element:li
+							Element:a
+								Bookmarks API
+							Element:li
+							Element:a
+								Folder Options API
+							Element:li
+							Element:a
+								Best Practices
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+							Element:a
+								Get API Key
+							Element:li
+							Element:a
+								API Docs
+							Element:li
+							Element:a
+								Getting Started
+							Element:li
+							Element:a
+								Explore APIs
+							Element:li
+							Element:a
+								Explore SDKs
+						Node:
+						(type) c
+						(layer)2
+							Element:noscript
+							Element:img

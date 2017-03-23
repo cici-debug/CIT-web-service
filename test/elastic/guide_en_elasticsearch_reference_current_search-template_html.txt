@@ -1,0 +1,1003 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Search Template
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								/_search/template
+								endpoint allows to use the mustache language to pre render search requests, before they are executed and fill existing templates with template parameters.
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /_search/template { "inline" : { "query": { "match" : { "{{my_field}}" : "{{my_value}}" } }, "size" : "{{my_size}}" }, "params" : { "my_field" : "foo", "my_value" : "bar", "my_size" : 5 } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more information on how Mustache templating and what kind of templating you can do with it check out the
+							Element:a
+								online documentation of the mustache project
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The mustache language is implemented in elasticsearch as a sandboxed scripting language, hence it obeys settings that may be used to enable or disable scripts per language, source and operation as described in
+							Element:a
+								scripting docs
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														More template examples
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Filling in a query string with a single value
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search/template { "inline": { "query": { "match": { "title": "{{query_string}}" } } }, "params": { "query_string": "search for these words" } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Converting parameters to JSON
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The
+																Element:code
+																	{{#toJson}}parameter{{/toJson}}
+																	function can be used to convert parameters like maps and array to their JSON representation:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search/template { "inline": "{ \"query\": { \"terms\": { \"status\": {{#toJson}}status{{/toJson}} }}}", "params": { "status": [ "pending", "published" ] } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	which is rendered as:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "query": { "terms": { "status": [ "pending", "published" ] } } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	A more complex example substitutes an array of JSON objects:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "inline": "{\"query\":{\"bool\":{\"must\": {{#toJson}}clauses{{/toJson}} }}}", "params": { "clauses": [ { "term": "foo" }, { "term": "bar" } ] } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	which is rendered as:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "query" : { "bool" : { "must" : [ { "term" : "foo" }, { "term" : "bar" } ] } } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Concatenating array of values
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The
+																Element:code
+																	{{#join}}array{{/join}}
+																	function can be used to concatenate the values of an array as a comma delimited string:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search/template { "inline": { "query": { "match": { "emails": "{{#join}}emails{{/join}}" } } }, "params": { "emails": [ "username@email.com", "lastname@email.com" ] } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	which is rendered as:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "query" : { "match" : { "emails" : "username@email.com,lastname@email.com" } } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The function also accepts a custom delimiter:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search/template { "inline": { "query": { "range": { "born": { "gte" : "{{date.min}}", "lte" : "{{date.max}}", "format": "{{#join delimiter='||'}}date.formats{{/join delimiter='||'}}" } } } }, "params": { "date": { "min": "2016", "max": "31/12/2017", "formats": ["dd/MM/yyyy", "yyyy"] } } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	which is rendered as:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "query" : { "range" : { "born" : { "gte" : "2016", "lte" : "31/12/2017", "format" : "dd/MM/yyyy||yyyy" } } } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Default values
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	A default value is written as
+																Element:code
+																	{{var}}{{^var}}default{{/var}}
+																	for instance:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "inline": { "query": { "range": { "line_no": { "gte": "{{start}}", "lte": "{{end}}{{^end}}20{{/end}}" } } } }, "params": { ... } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	When
+																Element:code
+																	params
+																	is
+																Element:code
+																	{ "start": 10, "end": 15 }
+																	this query would be rendered as:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "range": { "line_no": { "gte": "10", "lte": "15" } } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	But when
+																Element:code
+																	params
+																	is
+																Element:code
+																	{ "start": 10 }
+																	this query would use the default value for
+																Element:code
+																	end
+																	:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "range": { "line_no": { "gte": "10", "lte": "20" } } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Conditional clauses
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Conditional clauses cannot be expressed using the JSON form of the template. Instead, the template
+																Element:span
+																	be passed as a string. For instance, let’s say we wanted to run a
+																Element:strong
+																	must
+																Element:code
+																	match
+																	query on the
+																Element:code
+																	line
+																	field, and optionally wanted to filter by line numbers, where
+																Element:code
+																	start
+																	and
+																Element:code
+																	end
+																	are optional.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The
+																Element:code
+																	params
+																	would look like:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "params": { "text": "words to search for", "line_no": {
+																Element:a
+																Element:span
+																	"start": 10,
+																Element:img
+																Element:a
+																Element:span
+																	"end": 20
+																Element:img
+																Element:a
+																Element:span
+																	} } }
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:a
+																Element:span
+																Element:img
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	All three of these elements are optional.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	We could write the query as:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "query": { "bool": { "must": { "match": { "line": "{{text}}"
+																Element:a
+																Element:span
+																	} }, "filter": { {{#line_no}}
+																Element:img
+																Element:a
+																Element:span
+																	"range": { "line_no": { {{#start}}
+																Element:img
+																Element:a
+																Element:span
+																	"gte": "{{start}}"
+																Element:img
+																Element:a
+																Element:span
+																	{{#end}},{{/end}}
+																Element:img
+																Element:a
+																Element:span
+																	{{/start}}
+																Element:img
+																Element:a
+																Element:span
+																	{{#end}}
+																Element:img
+																Element:a
+																Element:span
+																	"lte": "{{end}}"
+																Element:img
+																Element:a
+																Element:span
+																	{{/end}}
+																Element:img
+																Element:a
+																Element:span
+																	} } {{/line_no}}
+																Element:img
+																Element:a
+																Element:span
+																	} } } }
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	Fill in the value of param
+																Element:code
+																	text
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	Include the
+																Element:code
+																	range
+																	filter only if
+																Element:code
+																	line_no
+																	is specified
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	Include the
+																Element:code
+																	gte
+																	clause only if
+																Element:code
+																	line_no.start
+																	is specified
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	Fill in the value of param
+																Element:code
+																	line_no.start
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	Add a comma after the
+																Element:code
+																	gte
+																	clause only if
+																Element:code
+																	line_no.start
+																	AND
+																Element:code
+																	line_no.end
+																	are specified
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	Include the
+																Element:code
+																	lte
+																	clause only if
+																Element:code
+																	line_no.end
+																	is specified
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	Fill in the value of param
+																Element:code
+																	line_no.end
+															Node:
+															(type) c
+															(layer)5
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	As written above, this template is not valid JSON because it includes the
+																Element:span
+																	markers like
+																Element:em
+																	section
+																Element:code
+																	{{#line_no}}
+																	. For this reason, the template should either be stored in a file (see
+																Element:a
+																	the section called “Pre-registered template
+																Element:a
+																	edit
+																	”) or, when used via the REST API, should be written as a string:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	"inline": "{\"query\":{\"bool\":{\"must\":{\"match\":{\"line\":\"{{text}}\"}},\"filter\":{{{#line_no}}\"range\":{\"line_no\":{{{#start}}\"gte\":\"{{start}}\"{{#end}},{{/end}}{{/start}}{{#end}}\"lte\":\"{{end}}\"{{/end}}}}{{/line_no}}}}}}"
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Encoding URLs
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The
+																Element:code
+																	{{#url}}value{{/url}}
+																	function can be used to encode a string value in a HTML encoding form as defined in by the
+																Element:a
+																	HTML specification
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	As an example, it is useful to encode a URL:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_render/template { "inline" : { "query" : { "term": { "http_access_log": "{{#url}}{{host}}/{{page}}{{/url}}" } } }, "params": { "host": "https://www.elastic.co/", "page": "learn" } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The previous query will be rendered as:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "template_output" : { "query" : { "term" : { "http_access_log" : "https%3A%2F%2Fwww.elastic.co%2F%2Flearn" } } } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Pre-registered template
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	You can register search templates by storing it in the
+																Element:code
+																	config/scripts
+																	directory, in a file using the
+																Element:code
+																	.mustache
+																	extension. In order to execute the stored template, reference it by it’s name under the
+																Element:code
+																	template
+																	key:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search/template { "file": "storedTemplate",
+																Element:a
+																Element:span
+																	"params": { "query_string": "search for these words" } }
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	Name of the query template in
+																Element:code
+																	config/scripts/
+																	, i.e.,
+																Element:code
+																	storedTemplate.mustache
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	You can also register search templates by storing it in the cluster state. There are REST APIs to manage these indexed templates.
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	POST /_search/template/<templatename> { "template": { "query": { "match": { "title": "{{query_string}}" } } } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	This template can be retrieved by
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search/template/<templatename>
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	which is rendered as:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	{ "template": { "query": { "match": { "title": "{{query_string}}" } } } }
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	This template can be deleted by
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	DELETE /_search/template/<templatename>
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	To use an indexed template at search time use:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search/template { "id": "templateName",
+																Element:a
+																Element:span
+																	"params": { "query_string": "search for these words" } }
+																Element:img
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:tr
+																Element:td
+																Element:p
+																Element:a
+																Element:span
+																Element:img
+																Element:td
+																Element:p
+																	Name of the query template stored in the
+																Element:code
+																	.scripts
+																	index.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Validating templates
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														A template can be rendered in a response with given parameters using
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_render/template { "inline": { "query": { "terms": { "status": [ "{{#status}}", "{{.}}", "{{/status}}" ] } } }, "params": { "status": [ "pending", "published" ] } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This call will return the rendered template:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ "template_output": { "query": { "terms": { "status": [
+													Element:a
+													Element:span
+														"pending", "published" ] } } } }
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tr
+													Element:td
+													Element:p
+													Element:a
+													Element:span
+													Element:img
+													Element:td
+													Element:p
+													Element:code
+														status
+														array has been populated with values from the
+													Element:code
+														params
+														object.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														File and indexed templates can also be rendered by replacing
+													Element:code
+														inline
+														with
+													Element:code
+														file
+														or
+													Element:code
+														id
+														respectively. For example, to render a file template
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_render/template { "file": "my_template", "params": { "status": [ "pending", "published" ] } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Pre-registered templates can also be rendered using
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														GET /_render/template/<template_name> { "params": { "..." } }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Explain
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	You can use
+																Element:code
+																	explain
+																	parameter when running a template:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search/template { "file": "my_template", "params": { "status": [ "pending", "published" ] }, "explain": true }
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Profiling
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	You can use
+																Element:code
+																	profile
+																	parameter when running a template:
+															Node:
+															(type) c
+															(layer)5
+																Element:pre
+																	GET /_search/template { "file": "my_template", "params": { "status": [ "pending", "published" ] }, "profile": true }
+															Node:
+															(type) c
+															(layer)5
+																Element:span
+																Element:a
+																	« Search After
+															Node:
+															(type) c
+															(layer)5
+																Element:span
+																Element:a
+																	Multi Search Template »
+															Node:
+															(type) c
+															(layer)5
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+										Element:h5
+											Be in the know with the latest and greatest from Elastic.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Thanks for subscribing! We'll keep you updated with new releases.
+															Node:
+															(type) c
+															(layer)5
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

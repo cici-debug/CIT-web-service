@@ -1,0 +1,898 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Salesforce Source
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Salesforce is a leader in on-demand customer relationship management.
+				Element:a
+					Visit Website
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					Take your company’s analysis to the next level by
+				Element:strong
+					adding Salesforce as a Source to Segment.
+					We’ll automatically collect objects like
+				Element:code
+					Accounts
+					,
+				Element:code
+					Campaigns
+					, and
+				Element:code
+					Tasks
+					and load them into your data warehouse.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Getting Started
+						Node:
+						(type) c
+						(layer)2
+							Element:ol
+							Element:li
+							Element:p
+								From your workspace’s
+							Element:code
+								/sources
+								page, click
+							Element:code
+								add source
+								.
+							Element:li
+							Element:p
+								Choose Salesforce.
+							Element:li
+							Element:p
+								Give the source a nickname and a schema name. The nickname will be used to designate the source in the Segment interface, and the schema name is the namespace you’ll be querying against in your warehouse. Both can be whatever you like, but we recommend sticking to something that reflects the source itself, like
+							Element:code
+								Salesforce
+								for nickname and
+							Element:code
+								sfdc
+								,
+							Element:code
+								salesforce
+								, or
+							Element:code
+								sfdc_prod
+								for the schema name.
+							Element:p
+							Element:strong
+								Note
+								that you can add multiple instances if you have multiple SalesForce accounts. That’s why we allow you to customize the source’s nickname and schema name!
+							Element:p
+							Element:img
+							Element:li
+							Element:p
+								Finally, just click
+							Element:strong
+								Connect
+								on the next page to OAuth into Salesforce.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								That’s it!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								API Access
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								In order for Segment to collect and sync your Salesforce data, you must enable API access for the user that you are connecting to Segment with. For more information on how to confirm or change API access for a Salesforce user, please follow Salesforce’s
+							Element:a
+								recommended documentation
+								.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Components
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Sync
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Salesforce has a sync component, which means we’ll make requests to their API on your behalf on a 3 hour interval to pull the latest data into Segment. In the initial sync, we’ll grab all the Salesforce objects (and their corresponding properties) according to the Collections table below. The objects will be written into a separate schema, corresponding to the source instance’s schema name you designated upon creation. For example, if you went with
+										Element:code
+											sfdc_prod
+											, the
+										Element:code
+											leads
+											collection will be accessible at
+										Element:code
+											sfdc_prod.leads
+											in SQL.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Our sync component uses an upsert API, so the data in your warehouse loaded via sync will reflect the latest state of the corresponding resource in Salesforce. For example, if
+										Element:code
+											lead_status
+											from
+										Element:code
+											active
+											to
+										Element:code
+											inactive
+											between syncs, on its next sync that tickets status will be
+										Element:code
+											inactive
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The source syncs and warehouse syncs are independent processes. Source runs pull your data into the Segment Hub, and warehouse runs flush that data to your warehouse. Sources will sync with Segment every 3 hours. Depending on your Warehouses plan, we will push the Source data to your warehouse on the interval associated with your billing plan.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At the moment, we don’t support filtering which objects or properties get synced. If you’re interested in this feature, please let us know!
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Collections
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Collections are the groupings of resources we pull from your source. In your warehouse, each collection gets its own table.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:strong
+								For a complete visual breakdown of the Salesforce collections, all their properties, and ID linkages between objects,
+							Element:a
+								view the visual schema here
+							Element:strong
+								or
+							Element:a
+								download it in PDF form here
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Custom Objects
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’d like to sync any SFDC custom objects, just
+										Element:a
+											contact us
+											and we’ll get it set up. Please include the
+										Element:a
+											API names
+											of the custom objects. We’ll add support for this to the UI soon!
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Custom Fields
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you’ve added custom fields to an existing collection,
+										Element:a
+											contact us
+											and we’ll get those set up to sync. You do not need to include the field names.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Deleting Records
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Segment supports the use of soft deletes in Salesforce. If you perform a soft delete on a record in Salesforce, your next one to two warehouses syncs will change the value of
+										Element:code
+											is_deleted
+											for the assoicated record to
+										Element:code
+											True
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											At this time, we do not support hard deletes in Salesforce. Use of hard deletes will result in the data remaining in the warehouse with
+										Element:code
+											is_deleted
+											set to
+										Element:code
+											False
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:thead
+										Element:tr
+										Element:th
+											Collection
+										Element:th
+											Type
+										Element:th
+											Description
+										Element:tbody
+										Element:tr
+										Element:td
+											accounts
+										Element:td
+											object
+										Element:td
+											An individual account, which is an organization involved with your business (such as customers, competitors, and partners). Corresponds to
+										Element:a
+											Account
+											resource in Salesforce
+										Element:tr
+										Element:td
+											account_contact_roles
+										Element:td
+											object
+										Element:td
+											The role that a given Contact plays on an Account. Corresponds to
+										Element:a
+											AccountContactRole
+											resource in Salesforce
+										Element:tr
+										Element:td
+											account_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with an Account. Corresponds to
+										Element:a
+											AccountTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											campaigns
+										Element:td
+											object
+										Element:td
+											A marketing campaign, such as a direct mail promotion, webinar, or trade show. Corresponds to
+										Element:a
+											Campaign
+											resource in Salesforce
+										Element:tr
+										Element:td
+											campaign_members
+										Element:td
+											object
+										Element:td
+											The association between a Campaign and either a Lead or Contact. Corresponds to
+										Element:a
+											CampaignMember
+											resource in Salesforce
+										Element:tr
+										Element:td
+											campaign_shares
+										Element:td
+											object
+										Element:td
+											Represents a list of access levels to a Campaign along with an explanation of the access level. For example, if you have access to a record because you own it, the Access Level value is Full and Reason for Access value is Owner. Corresponds to
+										Element:a
+											CampaignShare
+											resource in Salesforce
+										Element:tr
+										Element:td
+											campaign_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Campaign. Corresponds to
+										Element:a
+											CampaignTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											cases
+										Element:td
+											object
+										Element:td
+											A customer issue such as a customer’s feedback, problem, or question. Corresponds to
+										Element:a
+											Case
+											resource in Salesforce
+										Element:tr
+										Element:td
+											case_comments
+										Element:td
+											object
+										Element:td
+											A comment that provides additional information about the associated Case. Corresponds to
+										Element:a
+											CaseComment
+											resource in Salesforce
+										Element:tr
+										Element:td
+											case_contact_role
+										Element:td
+											object
+										Element:td
+											The role that a given Contact plays on a Case. Corresponds to
+										Element:a
+											CaseContactRole
+											resource in Salesforce
+										Element:tr
+										Element:td
+											case_solution
+										Element:td
+											object
+										Element:td
+											The association between a particular Case and a particular Solution. Corresponds to
+										Element:a
+											CaseSolution
+											resource in Salesforce
+										Element:tr
+										Element:td
+											case_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Case Corresponds to
+										Element:a
+											CaseTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											contacts
+										Element:td
+											object
+										Element:td
+											A contact, which is an individual associated with an Account. Corresponds to
+										Element:a
+											Contact
+											resource in Salesforce
+										Element:tr
+										Element:td
+											contact_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Contact. Corresponds to
+										Element:a
+											ContactTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											contracts
+										Element:td
+											object
+										Element:td
+											A contract (a business agreement) associated with an Account. Corresponds to
+										Element:a
+											Contract
+											resource in Salesforce
+										Element:tr
+										Element:td
+											contract_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Contract. Corresponds to
+										Element:a
+											ContractTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											dashboards
+										Element:td
+											object
+										Element:td
+											Represents a dashboard, which shows data from custom reports as visual components. Access is read-only. This object is available in API version 20.0 and later. Corresponds to
+										Element:a
+											Dashboard
+											resource in Salesforce
+										Element:tr
+										Element:td
+											dashboard_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Dashboard. This object is available inAPI version 20.0 and later. Corresponds to
+										Element:a
+											DashboardTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											documents
+										Element:td
+											object
+										Element:td
+											A file that a user has uploaded. Unlike Attachment objects, Documents are not attached to a parent object. Corresponds to
+										Element:a
+											Document
+											resource in Salesforce
+										Element:tr
+										Element:td
+											document_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Document. Corresponds to
+										Element:a
+											DocumentTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											events
+										Element:td
+											object
+										Element:td
+											A calendar appointment event. Corresponds to
+										Element:a
+											Event
+											resource in Salesforce
+										Element:tr
+										Element:td
+											event_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with an Event. Corresponds to
+										Element:a
+											EventTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											_group
+										Element:td
+											object
+										Element:td
+											A set of User records. Corresponds to
+										Element:a
+											Group
+											resource in Salesforce
+										Element:tr
+										Element:td
+											leads
+										Element:td
+											object
+										Element:td
+											A lead, which is a prospect or potential Opportunity. Corresponds to
+										Element:a
+											Lead
+											resource in Salesforce
+										Element:tr
+										Element:td
+											lead_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Lead. Corresponds to
+										Element:a
+											LeadTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											names
+										Element:td
+											object
+										Element:td
+											Non-queryable object that provides information about foreign key traversals when the foreign key has more than one parent. Corresponds to
+										Element:a
+											Name
+											resource in Salesforce
+										Element:tr
+										Element:td
+											notes
+										Element:td
+											object
+										Element:td
+											A note, which is text associated with an Attachment, Contact, Contract,Opportunity, or custom object. Corresponds to
+										Element:a
+											Note
+											resource in Salesforce
+										Element:tr
+										Element:td
+											note_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Note. Corresponds to
+										Element:a
+											NoteTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											opportunities
+										Element:td
+											object
+										Element:td
+											An opportunity, which is a sale or pending deal. Corresponds to
+										Element:a
+											Opportunity
+											resource in Salesforce
+										Element:tr
+										Element:td
+											opportunity_competitor
+										Element:td
+											object
+										Element:td
+											A competitor on an Opportunity. Corresponds to
+										Element:a
+											OpportunityCompetitor
+											resource in Salesforce
+										Element:tr
+										Element:td
+											opportunity_contact_role
+										Element:td
+											object
+										Element:td
+											The role that a Contact plays on an Opportunity. Corresponds to
+										Element:a
+											OpportunityContactRole
+											resource in Salesforce
+										Element:tr
+										Element:td
+											opportunity_field_history
+										Element:td
+											object
+										Element:td
+											Represents the history of changes to the values in the fields of an opportunity. Corresponds to
+										Element:a
+											OpportunityFieldHistory
+											resource in Salesforce
+										Element:tr
+										Element:td
+											opportunity_product
+										Element:td
+											object
+										Element:td
+											An opportunity line item, which is a member of the list of Product2 records associated with an Opportunity, along with other information about those products on that opportunity. Corresponds to
+										Element:a
+											OpportunityLineItem
+											resource in Salesforce
+										Element:tr
+										Element:td
+											opportunity_line_item_schedules
+										Element:td
+											object
+										Element:td
+											Information about the quantity, revenue distribution, and delivery dates for a particular OpportunityLineItem. Corresponds to
+										Element:a
+											OpportunityLineItemSchedule
+											resource in Salesforce
+										Element:tr
+										Element:td
+											opportunity_stage
+										Element:td
+											object
+										Element:td
+											The stage of an Opportunity in the sales pipeline, such as New Lead, Negotiating, Pending, Closed, and so on. Corresponds to
+										Element:a
+											OpportunityStage
+											resource in Salesforce
+										Element:tr
+										Element:td
+											opportunity_tag
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with an Opportunity. Corresponds to
+										Element:a
+											OpportunityTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											period
+										Element:td
+											object
+										Element:td
+											A fiscal period. Corresponds to
+										Element:a
+											Period
+											resource in Salesforce
+										Element:tr
+										Element:td
+											price_books
+										Element:td
+											object
+										Element:td
+											A price book that contains the list of products (Product2 records) that your organization sells. Corresponds to
+										Element:a
+											Pricebook2
+											resource in Salesforce
+										Element:tr
+										Element:td
+											price_book_entries
+										Element:td
+											object
+										Element:td
+											A product entry (an association between a Pricebook2 and Product2) in a price book. Corresponds to
+										Element:a
+											PricebookEntry
+											resource in Salesforce
+										Element:tr
+										Element:td
+											products
+										Element:td
+											object
+										Element:td
+											A product that your organization sells. A product is member of the list of items in a Pricebook2. Corresponds to
+										Element:a
+											Product2
+											resource in Salesforce
+										Element:tr
+										Element:td
+											profile
+										Element:td
+											object
+										Element:td
+											A profile, which defines a set of user permissions for performing different operations, such as querying, adding, updating, or deleting information. Corresponds to
+										Element:a
+											Profile
+											resource in Salesforce
+										Element:tr
+										Element:td
+											solutions
+										Element:td
+											object
+										Element:td
+											A detailed description of a customer issue and the resolution of that issue. Corresponds to
+										Element:a
+											Solution
+											resource in Salesforce
+										Element:tr
+										Element:td
+											solution_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Solution. Corresponds to
+										Element:a
+											SolutionTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											tasks
+										Element:td
+											object
+										Element:td
+											An activity or to-do item to perform or that has been performed. Corresponds to
+										Element:a
+											Task
+											resource in Salesforce
+										Element:tr
+										Element:td
+											task_tags
+										Element:td
+											object
+										Element:td
+											Associates a word or short phrase with a Task. Corresponds to
+										Element:a
+											TaskTag
+											resource in Salesforce
+										Element:tr
+										Element:td
+											users
+										Element:td
+											object
+										Element:td
+											A user in your organization. Corresponds to
+										Element:a
+											User
+											resource in Salesforce
+										Element:tr
+										Element:td
+											user_login
+										Element:td
+											object
+										Element:td
+											Represents the settings that affect a user’s ability to log into an organization. This object is available in API version 29.0 and later. Corresponds to
+										Element:a
+											UserLogin
+											resource in Salesforce
+										Element:tr
+										Element:td
+											role
+										Element:td
+											object
+										Element:td
+											A role in your organization. Corresponds to
+										Element:a
+											UserRole
+											resource in Salesforce
+									Node:
+									(type) c
+									(layer)3
+										Element:hr
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you have any questions or see anywhere we can improve our documentation, please
+										Element:a
+											let us know
+											or kick off a conversation in the
+										Element:a
+											Segment Community
+											!
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:span
+										Element:span
+											Was this document helpful?
+										Element:span
+										Element:label
+										Element:span
+											Yes
+										Element:label
+										Element:span
+											No
+									Node:
+									(type) c
+									(layer)3
+										Element:i
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+			Node:
+			(type) c
+			(layer)1
+				Element:ul
+				Element:li
+				Element:a
+					Overview
+				Element:li
+				Element:a
+					ActiveCampaign
+				Element:li
+				Element:a
+					AMP
+				Element:li
+				Element:a
+					analytics.js
+				Element:li
+				Element:a
+					Android
+				Element:li
+				Element:a
+					Android Wear
+				Element:li
+				Element:a
+					Clojure
+				Element:li
+				Element:a
+					Customer.io
+				Element:li
+				Element:a
+					Drip
+				Element:li
+				Element:a
+					Facebook Ads
+				Element:li
+				Element:a
+					Facebook Lead Ads
+				Element:li
+				Element:a
+					Go
+				Element:li
+				Element:a
+					Google AdWords
+				Element:li
+				Element:a
+					HTTP
+				Element:li
+				Element:a
+					HubSpot
+				Element:li
+				Element:a
+					Intercom
+				Element:li
+				Element:a
+					iOS
+				Element:li
+				Element:a
+					Iterable
+				Element:li
+				Element:a
+					Java
+				Element:li
+				Element:a
+					Klaviyo
+				Element:li
+				Element:a
+					Mailchimp
+				Element:li
+				Element:a
+					Mailjet
+				Element:li
+				Element:a
+					Marketo
+				Element:li
+				Element:a
+					Node
+				Element:li
+				Element:a
+					Nudgespot
+				Element:li
+				Element:a
+					PHP
+				Element:li
+				Element:a
+					Python
+				Element:li
+				Element:a
+					Ruby
+				Element:li
+				Element:a
+					Salesforce
+				Element:li
+				Element:a
+					Selligent
+				Element:li
+				Element:a
+					SendGrid
+				Element:li
+				Element:a
+					Stripe
+				Element:li
+				Element:a
+					Twilio
+				Element:li
+				Element:a
+					Vero
+				Element:li
+				Element:a
+					Xamarin
+				Element:li
+				Element:a
+					Zendesk
+				Element:li
+				Element:a
+					.NET

@@ -1,0 +1,436 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Post filter
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The
+							Element:code
+								post_filter
+								is applied to the search
+							Element:code
+								hits
+								at the very end of a search request, after aggregations have already been calculated. Its purpose is best explained by example:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Imagine that you are selling shirts that have the following properties:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								PUT /shirts { "mappings": { "item": { "properties": { "brand": { "type": "keyword"}, "color": { "type": "keyword"}, "model": { "type": "keyword"} } } } } PUT /shirts/item/1?refresh { "brand": "gucci", "color": "red", "model": "slim" }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Imagine a user has specified two filters:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+								color:red
+								and
+							Element:code
+								brand:gucci
+								. You only want to show them red shirts made by Gucci in the search results. Normally you would do this with a
+							Element:a
+								:
+							Element:code
+								bool
+								query
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /shirts/_search { "query": { "bool": { "filter": [ { "term": { "color": "red" }}, { "term": { "brand": "gucci" }} ] } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								However, you would also like to use
+							Element:span
+								to display a list of other options that the user could click on. Perhaps you have a
+							Element:em
+								faceted navigation
+							Element:code
+								model
+								field that would allow the user to limit their search results to red Gucci
+							Element:code
+								t-shirts
+								or
+							Element:code
+								dress-shirts
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This can be done with a
+							Element:a
+								:
+							Element:code
+								terms
+								aggregation
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /shirts/_search { "query": { "bool": { "filter": [ { "term": { "color": "red" }}, { "term": { "brand": "gucci" }} ] } }, "aggs": { "models": { "terms": { "field": "model" }
+							Element:a
+							Element:span
+								} } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								Returns the most popular models of red shirts by Gucci.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								But perhaps you would also like to tell the user how many Gucci shirts are available in
+							Element:span
+								. If you just add a
+							Element:strong
+								other colors
+							Element:code
+								terms
+								aggregation on the
+							Element:code
+								color
+								field, you will only get back the color
+							Element:code
+								red
+								, because your query returns only red shirts by Gucci.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Instead, you want to include shirts of all colors during aggregation, then apply the
+							Element:code
+								colors
+								filter only to the search results. This is the purpose of the
+							Element:code
+								post_filter
+								:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET /shirts/_search { "query": { "bool": { "filter": { "term": { "brand": "gucci" }
+							Element:a
+							Element:span
+								} } }, "aggs": { "colors": { "terms": { "field": "color" }
+							Element:img
+							Element:a
+							Element:span
+								}, "color_red": { "filter": { "term": { "color": "red" }
+							Element:img
+							Element:a
+							Element:span
+								}, "aggs": { "models": { "terms": { "field": "model" }
+							Element:img
+							Element:a
+							Element:span
+								} } } }, "post_filter": {
+							Element:img
+							Element:a
+							Element:span
+								"term": { "color": "red" } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The main query now finds all shirts by Gucci, regardless of color.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								colors
+								agg returns popular colors for shirts by Gucci.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The
+							Element:code
+								color_red
+								agg limits the
+							Element:code
+								models
+								sub-aggregation to
+							Element:span
+								Gucci shirts.
+							Element:strong
+								red
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								Finally, the
+							Element:code
+								post_filter
+								removes colors other than red from the search
+							Element:code
+								hits
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								« Doc value Fields
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:a
+								Highlighting »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

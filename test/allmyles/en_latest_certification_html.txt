@@ -1,0 +1,276 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+			Node:
+			(type) h1
+			(layer)1
+				Element:h1
+					Certification Requirements
+				Element:a
+					¶
+			Node:
+			(type) c
+			(layer)1
+				Element:p
+					This document details the list of things to check on client’s website before allowing them to use our API in production.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								General
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The site must send all required HTTP headers with correct values:
+						Node:
+						(type) c
+						(layer)2
+							Element:blockquote
+							Element:ul
+							Element:li
+								Content-Type should accurately reflect the sent data’s format.
+							Element:li
+								Cookie should be unique for all booking sessions, but persistent in each. There must be one cookie per user, and all of a user’s search requests must be sent using that cookie. The cookie must be the same in all tabs of one browser.
+							Element:li
+								User-Agent should contain an identifier for the client’s software. This would preferably be unique to a specific version of what the backend is using to communicate with the Allmyles API, so that the server side can block requests from user agents that are known to misbehave in case of an emergency. (Bad: Java - Good: allmyles-api.py v0.7.2-dev)
+							Element:li
+								X-Auth-Token should always contain the client’s API token. While there’s no way for us to check for this via just clicking through a site, we expect this token to be easily configurable even by someone with little technical experience, to be able to react as quickly as possible if this token is compromised.
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								All requests must be relayed through the site’s servers, so that the API token doesn’t get exposed in the browser, as it would if calls were made with AJAX request right in the passenger’s browser.
+							Element:li
+								Requests should not be made to a nonexistent endpoint (HTTP 404 or HTTP 405), and requests with malformed bodies should be avoided as much as possible. If the request fails to validate on the Allmyles API, the error’s description should be shown to the passenger.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Flights
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								The asynchronous flight search calls should be handled properly as described in the documentation; infinite loops must never happen.
+							Element:li
+								There should be a reasonable amount of time spent sleeping between each flight search call for one search.
+							Element:li
+								The flight search request must contain the user data as it is explained in the documentation.
+							Element:li
+								Within one client session only one flight search should be going on at a time. Parallel periodic requests must not be sent for different flight searches. When the processing of a flight search call is in progress (Allmyles API is responding with 202) and a new search request is submitted with different parameters in the same client session, a HTTP 412 error will be returned.
+							Element:li
+								After the Allmyles API returned a status other than 202 with a content body in response to a search request, and a new search request with different parameters is submitted in the same client session, periodic requesting of the result of the previous search should stop.
+							Element:li
+								Once the flight result is retrieved once, it shouldn’t be requested again later in the same workflow.
+							Element:li
+								Flight details calls must only be made once the passenger has explicitly selected one of the results, no prefetching is allowed. (However, making multiple details calls in one workflow is allowed.)
+							Element:li
+								When the retrieved flight details are shown, the flight’s updated price should be displayed to the passenger. This updated price must be clearly visible.
+							Element:li
+								When the passenger is sent to pay, the amount should match the sum of the total price given in the flight details call, and any extra fees that the passenger selected, such as for baggages.
+							Element:li
+								Ticket requests must be made only after payment has been confirmed to have been successful. (This is unrelated to the payment call, we are referring to the payment from the passenger to the travel site.)
+							Element:li
+								The passenger’s transaction must not be refunded unless the Allmyles API explicitly says that it is okay to do so.
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Displaying Errors to Users
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Error messages on the frontend must not be the same as the message received from our API.
+							Element:li
+								Error messages must be meaningful for the end-user.
+							Element:li
+								Error messages must include an identifier for debugging purposes, which must be the same as the session cookie.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Note
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For example, an error during the search must return a message like this on the frontend, regardless of the error you have received from our API:
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+							Element:code
+							Element:span
+								An
+							Element:span
+								error
+							Element:span
+								has
+							Element:span
+								occured
+							Element:span
+								during
+							Element:span
+								the
+							Element:span
+								processing
+							Element:span
+								of
+							Element:span
+								your
+							Element:span
+								search.
+							Element:span
+								Session
+							Element:span
+								id:
+							Element:span
+								12345
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Attachments of the Certification
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								You must include screenshots of the following on order to certify successfully:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								Your booking page which includes fields for the first, middle and last names of each passenger.
+							Element:li
+								Message displayed to users when booking has timed out.
+							Element:li
+								Message displayed to users when the external gateway has timed out (http error code 504).
+							Element:li
+								Message displayed to users when the flight is already booked (http error code 412).
+							Element:li
+								Message displayed to users when you receive an undefined error from the provider (http error code 500).
+			Node:
+			(type) c
+			(layer)1
+						Node:
+						(type) c
+						(layer)2
+							Element:h2
+								Masterdata
+							Element:a
+								¶
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								The number of results retrieved and the number of locales searched for a search keyword must be reasonable.
+							Element:li
+								Masterdata repos should not be retrieved more than once a day.
+						Node:
+						(type) c
+						(layer)2
+							Element:footer
+							Element:a
+							Element:span
+								Previous
+							Element:hr
+							Element:p
+								© Copyright 2014, Allmyles Ltd.
+								Built with
+							Element:span
+								Revision
+							Element:code
+								a31bef5d
+								.
+							Element:a
+								Sphinx
+								using a
+							Element:a
+								theme
+								provided by
+							Element:a
+								Read the Docs
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:span
+							Element:span
+								Read the Docs
+								v: latest
+							Element:span
+						Node:
+						(type) c
+						(layer)2
+							Element:dl
+							Element:dt
+								Versions
+							Element:dd
+							Element:a
+								latest
+						Node:
+						(type) c
+						(layer)2
+							Element:dl
+							Element:dt
+								Downloads
+							Element:dd
+							Element:a
+								pdf
+							Element:dd
+							Element:a
+								htmlzip
+							Element:dd
+							Element:a
+								epub
+						Node:
+						(type) c
+						(layer)2
+							Element:dl
+							Element:dt
+								On Read the Docs
+							Element:dd
+							Element:a
+								Project Home
+							Element:dd
+							Element:a
+								Builds
+						Node:
+						(type) c
+						(layer)2
+							Element:hr
+								Free document hosting provided by
+						Node:
+						(type) c
+						(layer)2
+							Element:a
+								Read the Docs
+								.

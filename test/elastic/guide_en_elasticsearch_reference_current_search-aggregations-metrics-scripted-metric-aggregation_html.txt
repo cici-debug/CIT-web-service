@@ -1,0 +1,684 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Scripted Metric Aggregation
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								This functionality is experimental and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but experimental features are not subject to the support SLA of official GA features.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								A metric aggregation that executes using scripts to provide a metric output.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST ledger/_search?size=0 { "query" : { "match_all" : {} }, "aggs": { "profit": { "scripted_metric": { "init_script" : "params._agg.transactions = []", "map_script" : "params._agg.transactions.add(doc.type.value == 'sale' ? doc.amount.value : -1 * doc.amount.value)",
+							Element:a
+							Element:span
+								"combine_script" : "double profit = 0; for (t in params._agg.transactions) { profit += t } return profit", "reduce_script" : "double profit = 0; for (a in params._aggs) { profit += a } return profit" } } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+							Element:code
+								map_script
+								is the only required parameter
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The above aggregation demonstrates how one would use the script aggregation compute the total profit from sale and cost transactions.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The response for the above aggregation:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "took": 218, ... "aggregations": { "profit": { "value": 240.0 } } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The above example can also be specified using file scripts as follows:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								POST ledger/_search?size=0 { "aggs": { "profit": { "scripted_metric": { "init_script" : { "file": "my_init_script" }, "map_script" : { "file": "my_map_script" }, "combine_script" : { "file": "my_combine_script" }, "params": { "field": "amount",
+							Element:a
+							Element:span
+								"_agg": {}
+							Element:img
+							Element:a
+							Element:span
+								}, "reduce_script" : { "file": "my_reduce_script" } } } } }
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								script parameters for
+							Element:code
+								init
+								,
+							Element:code
+								map
+								and
+							Element:code
+								combine
+								scripts must be specified in a global
+							Element:code
+								params
+								object so that it can be share between the scripts.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								if you specify script parameters then you must specify
+							Element:code
+								"_agg": {}
+								.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								For more details on specifying scripts see
+							Element:a
+								script documentation
+								.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Allowed return types
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Whilst any valid script object can be used within a single script, the scripts must return or store in the
+										Element:code
+											_agg
+											object only the following types:
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+											primitive types
+										Element:li
+											String
+										Element:li
+											Map (containing only keys and values of the types listed here)
+										Element:li
+											Array (containing elements of only the types listed here)
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Scope of scripts
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The scripted metric aggregation uses scripts at 4 stages of its execution:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+											init_script
+										Element:dd
+										Element:p
+											Executed prior to any collection of documents. Allows the aggregation to set up any initial state.
+										Element:p
+											In the above example, the
+										Element:code
+											init_script
+											creates an array
+										Element:code
+											transactions
+											in the
+										Element:code
+											_agg
+											object.
+										Element:dt
+										Element:span
+											map_script
+										Element:dd
+										Element:p
+											Executed once per document collected. This is the only required script. If no combine_script is specified, the resulting state needs to be stored in an object named
+										Element:code
+											_agg
+											.
+										Element:p
+											In the above example, the
+										Element:code
+											map_script
+											checks the value of the type field. If the value is
+										Element:span
+											the value of the amount field is added to the transactions array. If the value of the type field is not
+										Element:em
+											sale
+										Element:span
+											the negated value of the amount field is added to transactions.
+										Element:em
+											sale
+										Element:dt
+										Element:span
+											combine_script
+										Element:dd
+										Element:p
+											Executed once on each shard after document collection is complete. Allows the aggregation to consolidate the state returned from each shard. If a combine_script is not provided the combine phase will return the aggregation variable.
+										Element:p
+											In the above example, the
+										Element:code
+											combine_script
+											iterates through all the stored transactions, summing the values in the
+										Element:code
+											profit
+											variable and finally returns
+										Element:code
+											profit
+											.
+										Element:dt
+										Element:span
+											reduce_script
+										Element:dd
+										Element:p
+											Executed once on the coordinating node after all shards have returned their results. The script is provided with access to a variable
+										Element:code
+											_aggs
+											which is an array of the result of the combine_script on each shard. If a reduce_script is not provided the reduce phase will return the
+										Element:code
+											_aggs
+											variable.
+										Element:p
+											In the above example, the
+										Element:code
+											reduce_script
+											iterates through the
+										Element:code
+											profit
+											returned by each shard summing the values before returning the final combined profit which will be returned in the response of the aggregation.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Worked Example
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Imagine a situation where you index the following documents into an index with 2 shards:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT /transactions/stock/_bulk?refresh {"index":{"_id":1}} {"type": "sale","amount": 80} {"index":{"_id":2}} {"type": "cost","amount": 10} {"index":{"_id":3}} {"type": "cost","amount": 30} {"index":{"_id":4}} {"type": "sale","amount": 130}
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Lets say that documents 1 and 3 end up on shard A and documents 2 and 4 end up on shard B. The following is a breakdown of what the aggregation result is at each stage of the example above.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Before init_script
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														No params object was specified so the default params object is used:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														"params" : { "_agg" : {} }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														After init_script
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This is run once on each shard before any document collection is performed, and so we will have a copy on each shard:
+												Node:
+												(type) c
+												(layer)4
+													Element:dl
+													Element:dt
+													Element:span
+														Shard A
+													Element:dd
+													Element:pre
+														"params" : { "_agg" : { "transactions" : [] } }
+													Element:dt
+													Element:span
+														Shard B
+													Element:dd
+													Element:pre
+														"params" : { "_agg" : { "transactions" : [] } }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														After map_script
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Each shard collects its documents and runs the map_script on each document that is collected:
+												Node:
+												(type) c
+												(layer)4
+													Element:dl
+													Element:dt
+													Element:span
+														Shard A
+													Element:dd
+													Element:pre
+														"params" : { "_agg" : { "transactions" : [ 80, -30 ] } }
+													Element:dt
+													Element:span
+														Shard B
+													Element:dd
+													Element:pre
+														"params" : { "_agg" : { "transactions" : [ -10, 130 ] } }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														After combine_script
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The combine_script is executed on each shard after document collection is complete and reduces all the transactions down to a single profit figure for each shard (by summing the values in the transactions array) which is passed back to the coordinating node:
+												Node:
+												(type) c
+												(layer)4
+													Element:dl
+													Element:dt
+													Element:span
+														Shard A
+													Element:dd
+														50
+													Element:dt
+													Element:span
+														Shard B
+													Element:dd
+														120
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														After reduce_script
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The reduce_script receives an
+													Element:code
+														_aggs
+														array containing the result of the combine script for each shard:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														"_aggs" : [ 50, 120 ]
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														It reduces the responses for the shards down to a final overall profit figure (by summing the values) and returns this as the result of the aggregation to produce the response:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														{ ... "aggregations": { "profit": { "value": 170 } } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Other Parameters
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:colgroup
+										Element:col
+										Element:col
+										Element:tbody
+										Element:tr
+										Element:td
+										Element:p
+											params
+										Element:td
+										Element:p
+											Optional. An object whose contents will be passed as variables to the
+										Element:code
+											init_script
+											,
+										Element:code
+											map_script
+											and
+										Element:code
+											combine_script
+											. This can be useful to allow the user to control the behavior of the aggregation and for storing state between the scripts. If this is not specified, the default is the equivalent of providing:
+										Element:pre
+											"params" : { "_agg" : {} }
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Percentile Ranks Aggregation
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Stats Aggregation »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

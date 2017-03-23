@@ -1,0 +1,889 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Dynamic templates
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Dynamic templates allow you to define custom mappings that can be applied to dynamically added fields based on:
+						Node:
+						(type) c
+						(layer)2
+							Element:ul
+							Element:li
+								the
+							Element:a
+								datatype
+								detected by Elasticsearch, with
+							Element:a
+								.
+							Element:code
+								match_mapping_type
+							Element:li
+								the name of the field, with
+							Element:a
+								or
+							Element:code
+								match
+								and
+							Element:code
+								unmatch
+							Element:a
+								.
+							Element:code
+								match_pattern
+							Element:li
+								the full dotted path to the field, with
+							Element:a
+								.
+							Element:code
+								path_match
+								and
+							Element:code
+								path_unmatch
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The original field name
+							Element:code
+								{name}
+								and the detected datatype
+							Element:code
+								{dynamic_type
+								}
+							Element:a
+								template variables
+								can be used in the mapping specification as placeholders.
+						Node:
+						(type) c
+						(layer)2
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Dynamic field mappings are only added when a field contains a concrete value — not
+							Element:code
+								null
+								or an empty array. This means that if the
+							Element:code
+								null_value
+								option is used in a
+							Element:code
+								dynamic_template
+								, it will only be applied after the first document with a concrete value for the field has been indexed.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Dynamic templates are specified as an array of named objects:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								"dynamic_templates": [ { "my_template_name": {
+							Element:a
+							Element:span
+								... match conditions ...
+							Element:img
+							Element:a
+							Element:span
+								"mapping": { ... }
+							Element:img
+							Element:a
+							Element:span
+								} }, ... ]
+							Element:img
+						Node:
+						(type) c
+						(layer)2
+							Element:table
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The template name can be any string value.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The match conditions can include any of :
+							Element:code
+								match_mapping_type
+								,
+							Element:code
+								match
+								,
+							Element:code
+								match_pattern
+								,
+							Element:code
+								unmatch
+								,
+							Element:code
+								path_match
+								,
+							Element:code
+								path_unmatch
+								.
+							Element:tr
+							Element:td
+							Element:p
+							Element:a
+							Element:span
+							Element:img
+							Element:td
+							Element:p
+								The mapping that the matched field should use.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								Templates are processed in order — the first matching template wins. New templates can be appended to the end of the list with the
+							Element:a
+								PUT mapping
+								API. If a new template has the same name as an existing template, it will replace the old version.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											match_mapping_type
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											match_mapping_type
+											matches on the datatype detected by
+										Element:a
+											dynamic field mapping
+											, in other words, the datatype that Elasticsearch thinks the field should have. Only the following datatypes can be automatically detected:
+										Element:code
+											boolean
+											,
+										Element:code
+											date
+											,
+										Element:code
+											double
+											,
+										Element:code
+											long
+											,
+										Element:code
+											object
+											,
+										Element:code
+											string
+											. It also accepts
+										Element:code
+											*
+											to match all datatypes.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											For example, if we wanted to map all integer fields as
+										Element:code
+											integer
+											instead of
+										Element:code
+											long
+											, and all
+										Element:code
+											string
+											fields as both
+										Element:code
+											text
+											and
+										Element:code
+											keyword
+											, we could use the following template:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "mappings": { "my_type": { "dynamic_templates": [ { "integers": { "match_mapping_type": "long", "mapping": { "type": "integer" } } }, { "strings": { "match_mapping_type": "string", "mapping": { "type": "text", "fields": { "raw": { "type": "keyword", "ignore_above": 256 } } } } } ] } } } PUT my_index/my_type/1 { "my_integer": 5,
+										Element:a
+										Element:span
+											"my_string": "Some string"
+										Element:img
+										Element:a
+										Element:span
+											}
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											my_integer
+											field is mapped as an
+										Element:code
+											integer
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											my_string
+											field is mapped as a
+										Element:code
+											text
+											, with a
+										Element:code
+											keyword
+										Element:a
+											multi field
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											match
+											and
+										Element:code
+											unmatch
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											match
+											parameter uses a pattern to match on the fieldname, while
+										Element:code
+											unmatch
+											uses a pattern to exclude fields matched by
+										Element:code
+											match
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The following example matches all
+										Element:code
+											string
+											fields whose name starts with
+										Element:code
+											long_
+											(except for those which end with
+										Element:code
+											_text
+											) and maps them as
+										Element:code
+											long
+											fields:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "mappings": { "my_type": { "dynamic_templates": [ { "longs_as_strings": { "match_mapping_type": "string", "match": "long_*", "unmatch": "*_text", "mapping": { "type": "long" } } } ] } } } PUT my_index/my_type/1 { "long_num": "5",
+										Element:a
+										Element:span
+											"long_text": "foo"
+										Element:img
+										Element:a
+										Element:span
+											}
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											long_num
+											field is mapped as a
+										Element:code
+											long
+											.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											long_text
+											field uses the default
+										Element:code
+											string
+											mapping.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											match_pattern
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											match_pattern
+											parameter adjusts the behavior of the
+										Element:code
+											match
+											parameter such that it supports full Java regular expression matching on the field name instead of simple wildcards, for instance:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"match_pattern": "regex", "match": "^profit_\d+$"
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											path_match
+											and
+										Element:code
+											path_unmatch
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											path_match
+											and
+										Element:code
+											path_unmatch
+											parameters work in the same way as
+										Element:code
+											match
+											and
+										Element:code
+											unmatch
+											, but operate on the full dotted path to the field, not just the final name, e.g.
+										Element:code
+											some_object.*.some_field
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											This example copies the values of any fields in the
+										Element:code
+											name
+											object to the top-level
+										Element:code
+											full_name
+											field, except for the
+										Element:code
+											middle
+											field:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "mappings": { "my_type": { "dynamic_templates": [ { "full_name": { "path_match": "name.*", "path_unmatch": "*.middle", "mapping": { "type": "text", "copy_to": "full_name" } } } ] } } } PUT my_index/my_type/1 { "name": { "first": "Alice", "middle": "Mary", "last": "White" } }
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											{name}
+											and
+										Element:code
+											{dynamic_type}
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											{name}
+											and
+										Element:code
+											{dynamic_type}
+											placeholders are replaced in the
+										Element:code
+											mapping
+											with the field name and detected dynamic type. The following example sets all string fields to use an
+										Element:a
+											with the same name as the field, and disables
+										Element:code
+											analyzer
+										Element:a
+											for all non-string fields:
+										Element:code
+											doc_values
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT my_index { "mappings": { "my_type": { "dynamic_templates": [ { "named_analyzers": { "match_mapping_type": "string", "match": "*", "mapping": { "type": "text", "analyzer": "{name}" } } }, { "no_doc_values": { "match_mapping_type":"*", "mapping": { "type": "{dynamic_type}", "doc_values": false } } } ] } } } PUT my_index/my_type/1 { "english": "Some English text",
+										Element:a
+										Element:span
+											"count": 5
+										Element:img
+										Element:a
+										Element:span
+											}
+										Element:img
+									Node:
+									(type) c
+									(layer)3
+										Element:table
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											english
+											field is mapped as a
+										Element:code
+											string
+											field with the
+										Element:code
+											english
+											analyzer.
+										Element:tr
+										Element:td
+										Element:p
+										Element:a
+										Element:span
+										Element:img
+										Element:td
+										Element:p
+											The
+										Element:code
+											count
+											field is mapped as a
+										Element:code
+											long
+											field with
+										Element:code
+											doc_values
+											disabled
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Template examples
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Here are some examples of potentially useful dynamic templates:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Structured search
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														By default elasticsearch will map string fields as a
+													Element:code
+														text
+														field with a sub
+													Element:code
+														keyword
+														field. However if you are only indexing structured content and not interested in full text search, you can make elasticsearch map your fields only as `keyword`s. Note that this means that in order to search those fields, you will have to search on the exact same value that was indexed.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT my_index { "mappings": { "my_type": { "dynamic_templates": [ { "strings_as_keywords": { "match_mapping_type": "string", "mapping": { "type": "keyword" } } } ] } } }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+													Element:code
+														text
+														-only mappings for strings
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														On the contrary to the previous example, if the only thing that you care about on your string fields is full-text search, and if you don’t plan on running aggregations, sorting or exact search on your string fields, you could tell elasticsearch to map it only as a text field (which was the default behaviour before 5.0):
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT my_index { "mappings": { "my_type": { "dynamic_templates": [ { "strings_as_text": { "match_mapping_type": "string", "mapping": { "type": "text" } } } ] } } }
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Disabled norms
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Norms are index-time scoring factors. If you do not care about scoring, which would be the case for instance if you never sort documents by score, you could disable the storage of these scoring factors in the index and save some space.
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT my_index { "mappings": { "my_type": { "dynamic_templates": [ { "strings_as_keywords": { "match_mapping_type": "string", "mapping": { "type": "text", "norms": false, "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } } } } } ] } } }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The sub
+													Element:code
+														keyword
+														field appears in this template to be consistent with the default rules of dynamic mappings. Of course if you do not need them because you don’t need to perform exact search or aggregate on this field, you could remove it as described in the previous section.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Time-series
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When doing time series analysis with elasticsearch, it is common to have many numeric fields that you will often aggregate on but never filter on. In such a case, you could disable indexing on those fields to save disk space and also maybe gain some indexing speed:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														PUT my_index { "mappings": { "my_type": { "dynamic_templates": [ { "unindexed_longs": { "match_mapping_type": "long", "mapping": { "type": "long", "index": false } } }, { "unindexed_doubles": { "match_mapping_type": "double", "mapping": { "type": "float",
+													Element:a
+													Element:span
+														"index": false } } } ] } } }
+													Element:img
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:tr
+													Element:td
+													Element:p
+													Element:a
+													Element:span
+													Element:img
+													Element:td
+													Element:p
+														Like the default dynamic mapping rules, doubles are mapped as floats, which are usually accurate enough, yet require half the disk space.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Dynamic field mapping
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Override default template »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

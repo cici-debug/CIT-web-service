@@ -1,0 +1,597 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Zen Discovery
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The zen discovery is the built in discovery module for elasticsearch and the default. It provides unicast discovery, but can be extended to support cloud environments and other forms of discovery.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The zen discovery is integrated with other modules, for example, all communication between nodes is done using the
+							Element:a
+								transport
+								module.
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								It is separated into several sub modules, which are explained below:
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Ping
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This is the process where a node uses the discovery mechanisms to find other nodes.
+												Node:
+												(type) c
+												(layer)4
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																Element:a
+																	Unicast
+																Element:a
+																	edit
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Unicast discovery requires a list of hosts to use that will act as gossip routers. These hosts can be specified as hostnames or IP addresses; hosts specified as hostnames are resolved to IP addresses during each round of pinging. Note that with the Java security manager in place, the JVM defaults to caching positive hostname resolutions indefinitely. This can be modified by adding
+																Element:a
+																	to your
+																Element:code
+																	networkaddress.cache.ttl=<timeout>
+																Element:a
+																	Java security policy
+																	. Any hosts that fail to resolve will be logged. Note also that with the Java security manager in place, the JVM defaults to caching negative hostname resolutions for ten seconds. This can be modified by adding
+																Element:a
+																	to your
+																Element:code
+																	networkaddress.cache.negative.ttl=<timeout>
+																Element:a
+																	Java security policy
+																	.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Unicast discovery provides the following settings with the
+																Element:code
+																	discovery.zen.ping.unicast
+																	prefix:
+															Node:
+															(type) c
+															(layer)5
+																Element:table
+																Element:colgroup
+																Element:col
+																Element:col
+																Element:thead
+																Element:tr
+																Element:th
+																	Setting
+																Element:th
+																	Description
+																Element:tbody
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	hosts
+																Element:td
+																Element:p
+																	Either an array setting or a comma delimited setting. Each value should be in the form of
+																Element:code
+																	host:port
+																	or
+																Element:code
+																	host
+																	(where
+																Element:code
+																	port
+																	defaults to the setting
+																Element:code
+																	transport.profiles.default.port
+																	falling back to
+																Element:code
+																	transport.tcp.port
+																	if not set). Note that IPv6 hosts must be bracketed. Defaults to
+																Element:code
+																	127.0.0.1, [::1]
+																Element:tr
+																Element:td
+																Element:p
+																Element:code
+																	hosts.resolve_timeout
+																Element:td
+																Element:p
+																	The amount of time to wait for DNS lookups on each round of pinging. Specified as
+																Element:a
+																	time units
+																	. Defaults to 5s.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	The unicast discovery uses the
+																Element:a
+																	transport
+																	module to perform the discovery.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Master Election
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														As part of the ping process a master of the cluster is either elected or joined to. This is done automatically. The
+													Element:code
+														discovery.zen.ping_timeout
+														(which defaults to
+													Element:code
+														3s
+														) allows for the tweaking of election time to handle cases of slow or congested networks (higher values assure less chance of failure). Once a node joins, it will send a join request to the master (
+													Element:code
+														discovery.zen.join_timeout
+														) with a timeout defaulting at 20 times the ping timeout.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														When the master node stops or has encountered a problem, the cluster nodes start pinging again and will elect a new master. This pinging round also serves as a protection against (partial) network failures where a node may unjustly think that the master has failed. In this case the node will simply hear from other nodes about the currently active master.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														If
+													Element:code
+														discovery.zen.master_election.ignore_non_master_pings
+														is
+													Element:code
+														true
+														, pings from nodes that are not master eligible (nodes where
+													Element:code
+														node.master
+														is
+													Element:code
+														false
+														) are ignored during master election; the default value is
+													Element:code
+														false
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Nodes can be excluded from becoming a master by setting
+													Element:code
+														node.master
+														to
+													Element:code
+														false
+														.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														discovery.zen.minimum_master_nodes
+														sets the minimum number of master eligible nodes that need to join a newly elected master in order for an election to complete and for the elected node to accept its mastership. The same setting controls the minimum number of active master eligible nodes that should be a part of any active cluster. If this requirement is not met the active master node will step down and a new master election will be begin.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														This setting must be set to a quorum of your master eligible nodes. It is recommended to avoid having only two master eligible nodes, since a quorum of two is two. Therefore, a loss of either master eligible node will result in an inoperable cluster.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Fault Detection
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														There are two fault detection processes running. The first is by the master, to ping all the other nodes in the cluster and verify that they are alive. And on the other end, each node pings to master to verify if its still alive or an election process needs to be initiated.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The following settings control the fault detection process using the
+													Element:code
+														discovery.zen.fd
+														prefix:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:colgroup
+													Element:col
+													Element:col
+													Element:thead
+													Element:tr
+													Element:th
+														Setting
+													Element:th
+														Description
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														ping_interval
+													Element:td
+													Element:p
+														How often a node gets pinged. Defaults to
+													Element:code
+														1s
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														ping_timeout
+													Element:td
+													Element:p
+														How long to wait for a ping response, defaults to
+													Element:code
+														30s
+														.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														ping_retries
+													Element:td
+													Element:p
+														How many ping failures / timeouts cause a node to be considered failed. Defaults to
+													Element:code
+														3
+														.
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Cluster state updates
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The master node is the only node in a cluster that can make changes to the cluster state. The master node processes one cluster state update at a time, applies the required changes and publishes the updated cluster state to all the other nodes in the cluster. Each node receives the publish message, acknowledges it, but does
+													Element:span
+														yet apply it. If the master does not receive acknowledgement from at least
+													Element:strong
+														not
+													Element:code
+														discovery.zen.minimum_master_nodes
+														nodes within a certain time (controlled by the
+													Element:code
+														discovery.zen.commit_timeout
+														setting and defaults to 30 seconds) the cluster state change is rejected.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Once enough nodes have responded, the cluster state is committed and a message will be sent to all the nodes. The nodes then proceed to apply the new cluster state to their internal state. The master node waits for all nodes to respond, up to a timeout, before going ahead processing the next updates in the queue. The
+													Element:code
+														discovery.zen.publish_timeout
+														is set by default to 30 seconds and is measured from the moment the publishing started. Both timeout settings can be changed dynamically through the
+													Element:a
+														cluster update settings api
+						Node:
+						(type) c
+						(layer)2
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														No master block
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														For the cluster to be fully operational, it must have an active master and the number of running master eligible nodes must satisfy the
+													Element:code
+														discovery.zen.minimum_master_nodes
+														setting if set. The
+													Element:code
+														discovery.zen.no_master_block
+														settings controls what operations should be rejected when there is no active master.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														discovery.zen.no_master_block
+														setting has two valid options:
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:colgroup
+													Element:col
+													Element:col
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														all
+													Element:td
+													Element:p
+														All operations on the node—i.e. both read & writes—will be rejected. This also applies for api cluster state read or write operations, like the get index settings, put mapping and cluster state api.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														write
+													Element:td
+													Element:p
+														(default) Write operations will be rejected. Read operations will succeed, based on the last known cluster configuration. This may result in partial reads of stale data as this node may be isolated from the rest of the cluster.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														discovery.zen.no_master_block
+														setting doesn’t apply to nodes-based apis (for example cluster stats, node info and node stats apis). Requests to these apis will not be blocked and can run on any available node.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Google Compute Engine Discovery
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Local Gateway »
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+												Node:
+												(type) c
+												(layer)4
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

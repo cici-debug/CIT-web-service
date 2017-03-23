@@ -1,0 +1,416 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Profiling Aggregations
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+										Element:code
+											aggregations
+											Section
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											aggregations
+											section contains detailed timing of the aggregation tree executed by a particular shard. The overall structure of this aggregation tree will resemble your original Elasticsearch request. Let’s consider the following example aggregations request:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET /house-prices/_search { "profile": true, "size": 0, "aggs": { "property_type": { "terms": { "field": "propertyType" }, "aggs": { "avg_price": { "avg": { "field": "price" } } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Which yields the following aggregation profile output
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											"aggregations": [ { "type": "org.elasticsearch.search.aggregations.bucket.terms.GlobalOrdinalsStringTermsAggregator", "description": "property_type", "time": "4280.456978ms", "breakdown": { "reduce": 0, "reduce_count": 0, "build_aggregation": 49765, "build_aggregation_count": 300, "initialise": 52785, "initialize_count": 300, "collect": 3155490036, "collect_count": 1800 }, "children": [ { "type": "org.elasticsearch.search.aggregations.metrics.avg.AvgAggregator", "description": "avg_price", "time": "1124.864392ms", "breakdown": { "reduce": 0, "reduce_count": 0, "build_aggregation": 1394, "build_aggregation_count": 150, "initialise": 2883, "initialize_count": 150, "collect": 1124860115, "collect_count": 900 } } ] } ]
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											From the profile structure we can see our
+										Element:code
+											property_type
+											terms aggregation which is internally represented by the
+										Element:code
+											GlobalOrdinalsStringTermsAggregator
+											class and the sub aggregator
+										Element:code
+											avg_price
+											which is internally represented by the
+										Element:code
+											AvgAggregator
+											class. The
+										Element:code
+											type
+											field displays the class used internally to represent the aggregation. The
+										Element:code
+											description
+											field displays the name of the aggregation.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											"time"
+											field shows that it took ~4 seconds for the entire aggregation to execute. The recorded time is inclusive of all children.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											"breakdown"
+											field will give detailed stats about how the time was spent, we’ll look at that in a moment. Finally, the
+										Element:code
+											"children"
+											array lists any sub-aggregations that may be present. Because we have an
+										Element:code
+											avg_price
+											aggregation as a sub-aggregation to the
+										Element:code
+											property_type
+											aggregation we see it listed as a child of the
+										Element:code
+											property_type
+											aggregation. the two aggregation outputs have identical information (type, time, breakdown, etc). Children are allowed to have their own children.
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														Timing Breakdown
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The
+													Element:code
+														"breakdown"
+														component lists detailed timing statistics about low-level Lucene execution:
+												Node:
+												(type) c
+												(layer)4
+													Element:pre
+														"breakdown": { "reduce": 0, "reduce_count": 0, "build_aggregation": 49765, "build_aggregation_count": 300, "initialise": 52785, "initialize_count": 300, "collect": 3155490036, "collect_count": 1800 }
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														Timings are listed in wall-clock nanoseconds and are not normalized at all. All caveats about the overall
+													Element:code
+														time
+														apply here. The intention of the breakdown is to give you a feel for A) what machinery in Elasticsearch is actually eating time, and B) the magnitude of differences in times between the various components. Like the overall time, the breakdown is inclusive of all children times.
+												Node:
+												(type) c
+												(layer)4
+													Element:p
+														The meaning of the stats are as follows:
+									Node:
+									(type) c
+									(layer)3
+												Node:
+												(type) c
+												(layer)4
+													Element:h4
+													Element:a
+														All parameters:
+													Element:a
+														edit
+												Node:
+												(type) c
+												(layer)4
+													Element:table
+													Element:colgroup
+													Element:col
+													Element:col
+													Element:tbody
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														initialise
+													Element:td
+													Element:p
+														This times how long it takes to create and initialise the aggregation before starting to collect documents.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														collect
+													Element:td
+													Element:p
+														This represents the cumulative time spent in the collect phase of the aggregation. This is where matching documents are passed to the aggregation and the state of the aggregator is updated based on the information contained in the documents.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														build_aggregation
+													Element:td
+													Element:p
+														This represents the time spent creating the shard level results of the aggregation ready to pass back to the reducing node after the collection of documents is finished.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														reduce
+													Element:td
+													Element:p
+														This is not currently used and will always report
+													Element:code
+														0
+														. Currently aggregation profiling only times the shard level parts of the aggregation execution. Timing of the reduce phase will be added later.
+													Element:tr
+													Element:td
+													Element:p
+													Element:code
+														*_count
+													Element:td
+													Element:p
+														Records the number of invocations of the particular method. For example,
+													Element:code
+														"collect_count": 2,
+														means the
+													Element:code
+														collect()
+														method was called on two different documents.
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														« Profiling Queries
+												Node:
+												(type) c
+												(layer)4
+													Element:span
+													Element:a
+														Profiling Considerations »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.

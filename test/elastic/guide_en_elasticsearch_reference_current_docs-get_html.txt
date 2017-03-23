@@ -1,0 +1,710 @@
+Node:
+(type) c
+(layer)0
+	Element:body
+						Node:
+						(type) h2
+						(layer)2
+							Element:h2
+							Element:a
+								Get API
+							Element:a
+								edit
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The get API allows to get a typed JSON document from the index based on its id. The following example gets a JSON document from an index called twitter, under a type called tweet, with id valued 0:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								GET twitter/tweet/0
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The result of the above get operation is:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								{ "_index" : "twitter", "_type" : "tweet", "_id" : "0", "_version" : 1, "found": true, "_source" : { "user" : "kimchy", "date" : "2009-11-15T14:12:12", "likes": 0, "message" : "trying out Elasticsearch" } }
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The above result includes the
+							Element:code
+								_index
+								,
+							Element:code
+								_type
+								,
+							Element:code
+								_id
+								and
+							Element:code
+								_version
+								of the document we wish to retrieve, including the actual
+							Element:code
+								_source
+								of the document if it could be found (as indicated by the
+							Element:code
+								found
+								field in the response).
+						Node:
+						(type) c
+						(layer)2
+							Element:p
+								The API also allows to check for the existence of a document using
+							Element:code
+								HEAD
+								, for example:
+						Node:
+						(type) c
+						(layer)2
+							Element:pre
+								HEAD twitter/tweet/0
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Realtime
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, the get API is realtime, and is not affected by the refresh rate of the index (when data will become visible for search). If a document has been updated but is not yet refreshed, the get API will issue a refresh call in-place to make the document visible. This will also make other documents changed since the last refresh visible. In order to disable realtime GET, one can set the
+										Element:code
+											realtime
+											parameter to
+										Element:code
+											false
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Optional Type
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The get API allows for
+										Element:code
+											_type
+											to be optional. Set it to
+										Element:code
+											_all
+											in order to fetch the first document matching the id across all types.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Source filtering
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											By default, the get operation returns the contents of the
+										Element:code
+											_source
+											field unless you have used the
+										Element:code
+											stored_fields
+											parameter or if the
+										Element:code
+											_source
+											field is disabled. You can turn off
+										Element:code
+											_source
+											retrieval by using the
+										Element:code
+											_source
+											parameter:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET twitter/tweet/0?_source=false
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you only need one or two fields from the complete
+										Element:code
+											_source
+											, you can use the
+										Element:code
+											_source_include
+											&
+										Element:code
+											_source_exclude
+											parameters to include or filter out that parts you need. This can be especially helpful with large documents where partial retrieval can save on network overhead. Both parameters take a comma separated list of fields or wildcard expressions. Example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET twitter/tweet/0?_source_include=*.id&_source_exclude=entities
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If you only want to specify includes, you can use a shorter notation:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET twitter/tweet/0?_source=*.id,retweeted
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Stored Fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The get operation allows specifying a set of stored fields that will be returned by passing the
+										Element:code
+											stored_fields
+											parameter. If the requested fields are not stored, they will be ignored. Consider for instance the following mapping:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT twitter { "mappings": { "tweet": { "properties": { "counter": { "type": "integer", "store": false }, "tags": { "type": "keyword", "store": true } } } } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Now we can add a document:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT twitter/tweet/1 { "counter" : 1, "tags" : ["red"] }
+									Node:
+									(type) c
+									(layer)3
+										Element:ol
+										Element:li
+											and try to retrieve it:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET twitter/tweet/1?stored_fields=tags,counter
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The result of the above get operation is:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_index": "twitter", "_type": "tweet", "_id": "1", "_version": 1, "found": true, "fields": { "tags": [ "red" ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Field values fetched from the document it self are always returned as an array. Since the
+										Element:code
+											counter
+											field is not stored the get request simply ignores it when trying to get the
+										Element:code
+											stored_fields.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											It is also possible to retrieve metadata fields like
+										Element:code
+											_routing
+											and
+										Element:code
+											_parent
+											fields:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											PUT twitter/tweet/2?routing=user1 { "counter" : 1, "tags" : ["white"] }
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET twitter/tweet/2?routing=user1&stored_fields=tags,counter
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The result of the above get operation is:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											{ "_index": "twitter", "_type": "tweet", "_id": "2", "_version": 1, "_routing": "user1", "found": true, "fields": { "tags": [ "white" ] } }
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Also only leaf fields can be returned via the
+										Element:code
+											stored_field
+											option. So object fields can’t be returned and such requests will fail.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Generated fields
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											If no refresh occurred between indexing and refresh, GET will access the transaction log to fetch the document. However, some fields are generated only when indexing. If you try to access a field that is only generated when indexing, you will get an exception (default). You can choose to ignore field that are generated if the transaction log is accessed by setting
+										Element:code
+											ignore_errors_on_generated_fields=true
+											.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Getting the _source directly
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Use the
+										Element:code
+											/{index}/{type}/{id}/_source
+											endpoint to get just the
+										Element:code
+											_source
+											field of the document, without any additional content around it. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET twitter/tweet/1/_source
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can also use the same source filtering parameters to control which parts of the
+										Element:code
+											_source
+											will be returned:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET twitter/tweet/1/_source?_source_include=*.id&_source_exclude=entities'
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Note, there is also a HEAD variant for the _source endpoint to efficiently test for document _source existence. An existing document will not have a _source if it is disabled in the
+										Element:a
+											mapping
+											.
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											HEAD twitter/tweet/1/_source
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Routing
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											When indexing using the ability to control the routing, in order to get a document, the routing value should also be provided. For example:
+									Node:
+									(type) c
+									(layer)3
+										Element:pre
+											GET twitter/tweet/2?routing=user1
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The above will get a tweet with id 2, but will be routed based on the user. Note, issuing a get without the correct routing, will cause the document not to be fetched.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Preference
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Controls a
+										Element:code
+											preference
+											of which shard replicas to execute the get request on. By default, the operation is randomized between the shard replicas.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											preference
+											can be set to:
+									Node:
+									(type) c
+									(layer)3
+										Element:dl
+										Element:dt
+										Element:span
+										Element:code
+											_primary
+										Element:dd
+											The operation will go and be executed only on the primary shards.
+										Element:dt
+										Element:span
+										Element:code
+											_local
+										Element:dd
+											The operation will prefer to be executed on a local allocated shard if possible.
+										Element:dt
+										Element:span
+											Custom (string) value
+										Element:dd
+											A custom value will be used to guarantee that the same shards will be used for the same custom value. This can help with "jumping values" when hitting different shards in different refresh states. A sample value can be something like the web session id, or the user name.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Refresh
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The
+										Element:code
+											refresh
+											parameter can be set to
+										Element:code
+											true
+											in order to refresh the relevant shard before the get operation and make it searchable. Setting it to
+										Element:code
+											true
+											should be done after careful thought and verification that this does not cause a heavy load on the system (and slows down indexing).
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Distributed
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											The get operation gets hashed into a specific shard id. It then gets redirected to one of the replicas within that shard id and returns the result. The replicas are the primary shard and its replicas within that shard id group. This means that the more replicas we will have, the better GET scaling we will have.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+										Element:a
+											Versioning support
+										Element:a
+											edit
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											You can use the
+										Element:code
+											version
+											parameter to retrieve the document only if its current version is equal to the specified one. This behavior is the same for all version types with the exception of version type
+										Element:code
+											FORCE
+											which always retrieves the document. Note that
+										Element:code
+											FORCE
+											version type is deprecated.
+									Node:
+									(type) c
+									(layer)3
+										Element:p
+											Internally, Elasticsearch has marked the old document as deleted and added an entirely new document. The old version of the document doesn’t disappear immediately, although you won’t be able to access it. Elasticsearch cleans up deleted documents in the background as you continue to index more data.
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											« Index API
+									Node:
+									(type) c
+									(layer)3
+										Element:span
+										Element:a
+											Delete API »
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:h3
+											Top Videos
+									Node:
+									(type) c
+									(layer)3
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch Demo
+										Element:li
+										Element:a
+											Kibana 101
+										Element:li
+										Element:a
+											Logstash Primer
+									Node:
+									(type) c
+									(layer)3
+															Node:
+															(type) c
+															(layer)5
+																Element:h5
+																	Be in the know with the latest and greatest from Elastic.
+															Node:
+															(type) c
+															(layer)5
+																Element:p
+																	Thanks for subscribing! We'll keep you updated with new releases.
+						Node:
+						(type) c
+						(layer)2
+									Node:
+									(type) c
+									(layer)3
+										Element:footer
+										Element:h3
+										Element:a
+											Products >
+										Element:ul
+										Element:li
+										Element:a
+											Elasticsearch
+										Element:li
+										Element:a
+											Kibana
+										Element:li
+										Element:a
+											Beats
+										Element:li
+										Element:a
+											Logstash
+										Element:li
+										Element:a
+											X-Pack
+										Element:li
+										Element:a
+											Elastic Cloud
+										Element:li
+										Element:a
+											Security (formerly Shield)
+										Element:li
+										Element:a
+											Alerting (via Watcher)
+										Element:li
+										Element:a
+											Monitoring (formerly Marvel)
+										Element:li
+										Element:a
+											Graph
+										Element:li
+										Element:a
+											Reporting
+										Element:li
+										Element:a
+											Machine Learning
+										Element:li
+										Element:a
+											ES-Hadoop
+										Element:h3
+											Resources
+										Element:ul
+										Element:li
+										Element:a
+											Blog
+										Element:li
+										Element:a
+											Cloud Status
+										Element:li
+										Element:a
+											Community
+										Element:li
+										Element:a
+											Customers & Use Cases
+										Element:li
+										Element:a
+											Documentation
+										Element:li
+										Element:a
+											Elastic{ON} Events
+										Element:li
+										Element:a
+											Forums
+										Element:li
+										Element:a
+											Meetups
+										Element:li
+										Element:a
+											Subscriptions
+										Element:li
+										Element:a
+											Support Portal
+										Element:li
+										Element:a
+											Videos & Webinars
+										Element:li
+										Element:a
+											Training
+										Element:h3
+										Element:a
+											About >
+										Element:ul
+										Element:li
+										Element:a
+											Careers/Jobs
+										Element:li
+										Element:a
+											Contact
+										Element:li
+										Element:a
+											Leadership
+										Element:li
+										Element:a
+											Partners
+										Element:li
+										Element:a
+											Press
+										Element:h3
+											Language
+										Element:ul
+										Element:li
+										Element:a
+											English
+										Element:li
+										Element:a
+											Français
+										Element:li
+										Element:a
+											Deutsch
+										Element:li
+										Element:a
+											日本語
+										Element:li
+										Element:a
+											한국어
+										Element:p
+											FOLLOW US
+										Element:ul
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:li
+										Element:a
+										Element:ul
+										Element:li
+										Element:a
+											Trademarks
+										Element:li
+										Element:a
+											Terms of Use
+										Element:li
+										Element:a
+											Privacy
+										Element:li
+										Element:a
+											Cookie Policy
+										Element:li
+										Element:a
+											Brand
+										Element:a
+										Element:img
+										Element:p
+											© 2017. All Rights Reserved - Elasticsearch
+										Element:p
+											Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in other countries
+										Element:p
+											Apache, Apache Lucene, Apache Hadoop, Hadoop, HDFS and the yellow elephant logo are trademarks of the
+										Element:a
+											Apache Software Foundation
+											in the United States and/or other countries.
